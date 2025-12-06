@@ -1,0 +1,23 @@
+# Build outputs
+/build/
+*.hprof
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Flutter generated
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+
+# Android build
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Misc
+.DS_Store
+*.log
