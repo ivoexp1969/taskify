@@ -13,15 +13,15 @@ Future<void> main() async {
   
   // FIREBASE ИНИЦИАЛИЗАЦИЯ ЗА ВСИЧКИ ПЛАТФОРМИ
   if (kIsWeb) {
-    // КОНФИГУРАЦИЯ ЗА WEB (ТВОИТЕ КЛЮЧОВЕ)
+    // КОНФИГУРАЦИЯ ЗА WEB (ТОЧНИТЕ КЛЮЧОВЕ)
     await Firebase.initializeApp(
       options: const FirebaseOptions(
-        apiKey: "AIzaSyPublica.cnXjwJlMtNtvWkcc0iPhYzIJSmeE",
-        authDomain: "taskify-1969.firebaseapp.com",
+        apiKey: "AIzaSyDAwis_cnXVpWIMrNzvWAcaOhPVrIJSewE",
+        authDomain: "taskify-1969.firebasestorage.app",
         projectId: "taskify-1969",
         storageBucket: "taskify-1969.firebasestorage.app",
-        messagingSenderId: "92996434969",
-        appId: "1:92996434969:web:1967D6eac4ef5c69687444",
+        messagingSenderId: "929046134968",
+        appId: "1:929046134968:web:5f2754f3d7efee5bc8744d",
       ),
     );
   } else {
