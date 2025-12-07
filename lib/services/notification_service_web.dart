@@ -59,7 +59,9 @@ Future<bool> requestPermission() async {
       provisional: false,
     );
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    final status = settings.authorizationStatus;
+    
+    if (status == AuthorizationStatus.authorized) {
       print('User granted permission');
       
       // Вземи FCM token
@@ -71,7 +73,7 @@ Future<bool> requestPermission() async {
       }
       
       return true;
-    } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+    } else if (status == AuthorizationStatus.provisional) {
       print('User granted provisional permission');
       return true;
     } else {
