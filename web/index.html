@@ -18,21 +18,74 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Taskify - Task Manager App">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="task_manager">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Taskify">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Viewport for mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>task_manager</title>
+  <title>Taskify</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* Loading indicator styles */
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #0175C2;
+    }
+    .loading::after {
+      content: "";
+      width: 50px;
+      height: 50px;
+      border: 5px solid #fff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
+  <div class="loading" id="loading"></div>
+
+  <script>
+    // Register Service Worker for Push Notifications
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        // Register Firebase Messaging Service Worker
+        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+          .then(function(registration) {
+            console.log('Firebase SW registered: ', registration.scope);
+          })
+          .catch(function(error) {
+            console.log('Firebase SW registration failed: ', error);
+          });
+      });
+    }
+
+    // Hide loading indicator when Flutter is ready
+    window.addEventListener('flutter-first-frame', function() {
+      var loading = document.getElementById('loading');
+      if (loading) {
+        loading.style.display = 'none';
+      }
+    });
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

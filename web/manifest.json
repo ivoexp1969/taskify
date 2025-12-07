@@ -1,13 +1,14 @@
 {
-    "name": "task_manager",
-    "short_name": "task_manager",
+    "name": "Taskify",
+    "short_name": "Taskify",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Task Manager App with Reminders",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "categories": ["productivity", "utilities"],
     "icons": [
         {
             "src": "icons/Icon-192.png",
@@ -31,5 +32,9 @@
             "type": "image/png",
             "purpose": "maskable"
         }
+    ],
+    "screenshots": [],
+    "permissions": [
+        "notifications"
     ]
 }

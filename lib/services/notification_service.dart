@@ -1,43 +1,13 @@
 import 'dart:math';
-
-import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/task.dart';
 
-// Top-level функция за alarm callback
-@pragma('vm:entry-point')
-Future<void> _alarmCallback(int id) async {
-  final plugin = FlutterLocalNotificationsPlugin();
-
-  const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-  const initSettings = InitializationSettings(android: androidInit);
-  await plugin.initialize(initSettings);
-
-  final prefs = await SharedPreferences.getInstance();
-  final title = prefs.getString('alarm_${id}_title') ?? 'Напомняне';
-  final body = prefs.getString('alarm_${id}_body') ?? 'Имаш задача за изпълнение';
-
-  const androidDetails = AndroidNotificationDetails(
-    'task_reminders',
-    'Task reminders',
-    channelDescription: 'Reminders for your tasks',
-    importance: Importance.max,
-    priority: Priority.max,
-    visibility: NotificationVisibility.public,
-    enableVibration: true,
-    playSound: true,
-    category: AndroidNotificationCategory.reminder,
-  );
-
-  const platformDetails = NotificationDetails(android: androidDetails);
-
-  await plugin.show(id, title, body, platformDetails);
-
-  await prefs.remove('alarm_${id}_title');
-  await prefs.remove('alarm_${id}_body');
-}
+// Условни импорти
+import 'notification_service_stub.dart'
+    if (dart.library.html) 'notification_service_web.dart'
+    if (dart.library.io) 'notification_service_native.dart' as platform;
 
 class NotificationService {
   NotificationService._internal();
@@ -46,37 +16,12 @@ class NotificationService {
 
   factory NotificationService() => _instance;
 
-  final FlutterLocalNotificationsPlugin _plugin =
-      FlutterLocalNotificationsPlugin();
-
   bool _initialized = false;
 
+  /// Инициализация на notification service
   Future<void> _initIfNeeded() async {
     if (_initialized) return;
-
-    await AndroidAlarmManager.initialize();
-
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosInit = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
-
-    const initSettings = InitializationSettings(
-      android: androidInit,
-      iOS: iosInit,
-    );
-
-    await _plugin.initialize(initSettings);
-
-    final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-
-    if (androidPlugin != null) {
-      await androidPlugin.requestNotificationsPermission();
-    }
-
+    await platform.initializeNotifications();
     _initialized = true;
   }
 
@@ -150,24 +95,22 @@ class NotificationService {
     try {
       await _initIfNeeded();
 
-      // Отменяме новите нотификации (списък)
       if (task.notificationIds != null) {
         for (final id in task.notificationIds!) {
-          await AndroidAlarmManager.cancel(id);
-          await _plugin.cancel(id);
+          await platform.cancelNotification(id);
         }
         task.notificationIds = null;
       }
 
-      // Отменяме старата нотификация (за съвместимост)
       if (task.notificationId != null) {
-        await AndroidAlarmManager.cancel(task.notificationId!);
-        await _plugin.cancel(task.notificationId!);
+        await platform.cancelNotification(task.notificationId!);
         task.notificationId = null;
       }
 
       await task.save();
-    } catch (_) {}
+    } catch (e) {
+      print('Error canceling notification: $e');
+    }
   }
 
   /// Планира всички напомняния за задача
@@ -191,18 +134,18 @@ class NotificationService {
         if (scheduled == null) continue;
 
         final id = Random().nextInt(0x7FFFFFFF);
-        final label = _reminderLabel(reminderType, true); // TODO: detect language
+        final label = _reminderLabel(reminderType, true);
 
+        // Запазваме данните за нотификацията
         await prefs.setString('alarm_${id}_title', task.title);
         await prefs.setString('alarm_${id}_body', label);
+        await prefs.setString('alarm_${id}_scheduled', scheduled.toIso8601String());
 
-        final success = await AndroidAlarmManager.oneShotAt(
-          scheduled,
-          id,
-          _alarmCallback,
-          exact: true,
-          wakeup: true,
-          rescheduleOnReboot: true,
+        final success = await platform.scheduleNotification(
+          id: id,
+          title: task.title,
+          body: label,
+          scheduledTime: scheduled,
         );
 
         if (success) {
@@ -214,6 +157,20 @@ class NotificationService {
         task.notificationIds = newIds;
         await task.save();
       }
-    } catch (_) {}
+    } catch (e) {
+      print('Error scheduling notification: $e');
+    }
+  }
+
+  /// Проверка дали нотификациите са разрешени
+  Future<bool> areNotificationsEnabled() async {
+    await _initIfNeeded();
+    return platform.areNotificationsEnabled();
+  }
+
+  /// Заявка за разрешение за нотификации
+  Future<bool> requestPermission() async {
+    await _initIfNeeded();
+    return platform.requestPermission();
   }
 }

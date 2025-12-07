@@ -2,32 +2,21 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'models/task.dart';
 import 'models/category.dart';
 import 'screens/home/home_screen.dart';
 import 'utils/localization.dart';
 import 'services/widget_service.dart';
+import 'services/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // FIREBASE ИНИЦИАЛИЗАЦИЯ ЗА ВСИЧКИ ПЛАТФОРМИ
-  if (kIsWeb) {
-    // КОНФИГУРАЦИЯ ЗА WEB (ТОЧНИТЕ КЛЮЧОВЕ)
-    await Firebase.initializeApp(
-      options: const FirebaseOptions(
-        apiKey: "AIzaSyDAwis_cnXVpWIMrNzvWAcaOhPVrIJSewE",
-        authDomain: "taskify-1969.firebasestorage.app",
-        projectId: "taskify-1969",
-        storageBucket: "taskify-1969.firebasestorage.app",
-        messagingSenderId: "929046134968",
-        appId: "1:929046134968:web:5f2754f3d7efee5bc8744d",
-      ),
-    );
-  } else {
-    // СТАНДАРТНА ИНИЦИАЛИЗАЦИЯ ЗА ANDROID/IOS
-    await Firebase.initializeApp();
-  }
+  // FIREBASE ИНИЦИАЛИЗАЦИЯ - ИЗПОЛЗВА firebase_options.dart
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   
   // HIVE (РАБОТИ НА ВСИЧКИ ПЛАТФОРМИ)
   await Hive.initFlutter();
@@ -47,6 +36,7 @@ Future<void> main() async {
   await languageController.loadSavedLocale();
   
   final themeController = ThemeController(ThemeMode.system);
+  
   runApp(
     MyApp(
       languageController: languageController,
@@ -55,7 +45,7 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final LanguageController languageController;
   final ThemeController themeController;
 
@@ -66,19 +56,44 @@ class MyApp extends StatelessWidget {
   });
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    _initNotifications();
+  }
+
+  Future<void> _initNotifications() async {
+    // Заявка за разрешение при първо стартиране
+    final notificationService = NotificationService();
+    final enabled = await notificationService.areNotificationsEnabled();
+    
+    if (!enabled && kIsWeb) {
+      // На Web показваме prompt само след user interaction
+      // Това ще стане при първо създаване на задача с reminder
+      print('Notifications not yet enabled - will prompt on first reminder');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LanguageScope(
-      controller: languageController,
+      controller: widget.languageController,
       child: ThemeScope(
-        controller: themeController,
+        controller: widget.themeController,
         child: AnimatedBuilder(
-          animation:
-              Listenable.merge([languageController, themeController]),
+          animation: Listenable.merge([
+            widget.languageController,
+            widget.themeController
+          ]),
           builder: (context, _) {
             return MaterialApp(
               debugShowCheckedModeBanner: false,
               title: 'Taskify',
-              themeMode: themeController.mode,
+              themeMode: widget.themeController.mode,
               theme: _buildLightTheme(),
               darkTheme: _buildDarkTheme(),
               home: const HomeScreen(),
