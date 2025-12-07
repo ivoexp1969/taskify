@@ -7,6 +7,8 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout code
@@ -20,7 +22,7 @@ jobs:
     - name: Install dependencies and build
       run: |
         flutter pub get
-        flutter build web --release --base-href /task_manager/
+        flutter build web --release --base-href /taskify/
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
