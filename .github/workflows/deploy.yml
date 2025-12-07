@@ -19,6 +19,11 @@ jobs:
       with:
         channel: 'stable'
 
+    - name: Replace pubspec for web build
+      run: |
+        cp pubspec_web.yaml pubspec.yaml
+        cat pubspec.yaml
+
     - name: Install dependencies and build
       run: |
         flutter pub get
