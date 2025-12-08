@@ -1,18 +1,16 @@
 import 'dart:async';
 import 'dart:html' as html;
 import 'dart:convert';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 bool _initialized = false;
-String? _fcmToken;
 final Map<int, Timer> _scheduledTimers = {};
 
 Future<void> initializeNotifications() async {
   if (_initialized) return;
 
   try {
-    // Регистрирай Service Worker
+    // Регистрирай Service Worker за background notifications
     if (html.window.navigator.serviceWorker != null) {
       try {
         await html.window.navigator.serviceWorker!
@@ -23,17 +21,8 @@ Future<void> initializeNotifications() async {
       }
     }
 
-    // Инициализирай Firebase Messaging
-    final messaging = FirebaseMessaging.instance;
-
-    // Слушай foreground съобщения
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Received foreground message: ${message.notification?.title}');
-      _showWebNotification(
-        message.notification?.title ?? 'Напомняне',
-        message.notification?.body ?? 'Имаш задача',
-      );
-    });
+    // Възстанови scheduled notifications
+    await restoreScheduledNotifications();
 
     _initialized = true;
     print('Web notifications initialized');
@@ -44,53 +33,17 @@ Future<void> initializeNotifications() async {
 
 Future<bool> requestPermission() async {
   try {
-    // Провери дали браузърът поддържа нотификации
     if (!_isNotificationSupported()) {
       print('Notifications not supported in this browser');
       return false;
     }
 
-    // Заявка за разрешение чрез Firebase Messaging
-    final messaging = FirebaseMessaging.instance;
-    final settings = await messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-      provisional: false,
-    );
-
-    final status = settings.authorizationStatus;
-    
-    if (status == AuthorizationStatus.authorized) {
-      print('User granted permission');
-      
-      // Вземи FCM token
-      try {
-        _fcmToken = await messaging.getToken();
-        print('FCM Token: $_fcmToken');
-      } catch (e) {
-        print('Could not get FCM token: $e');
-      }
-      
-      return true;
-    } else if (status == AuthorizationStatus.provisional) {
-      print('User granted provisional permission');
-      return true;
-    } else {
-      print('User denied permission');
-      return false;
-    }
+    final permission = await html.Notification.requestPermission();
+    print('Permission result: $permission');
+    return permission == 'granted';
   } catch (e) {
     print('Error requesting permission: $e');
-    
-    // Fallback: използвай директно Web Notification API
-    try {
-      final permission = await html.Notification.requestPermission();
-      return permission == 'granted';
-    } catch (e2) {
-      print('Fallback permission request failed: $e2');
-      return false;
-    }
+    return false;
   }
 }
 
