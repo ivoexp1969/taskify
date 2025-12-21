@@ -1,0 +1,6 @@
+@'
+storePassword=Gluhpetel1!
+keyPassword=Gluhpetel1!
+keyAlias=upload
+storeFile=upload-keystore.jks
+'@ | Out-File -FilePath "android/key.properties" -Encoding UTF8
