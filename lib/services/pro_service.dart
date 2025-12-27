@@ -27,10 +27,10 @@ const int trialPeriodDays = 14;
 /// Entitlement идентификатор в RevenueCat
 const String entitlementId = 'pro';
 
-/// Продуктови идентификатори
-const String productIdLifetime = 'taskify_pro_lifetime';
-const String productIdMonthly = 'taskify_pro_monthly';
-const String productIdYearly = 'taskify_pro_yearly';
+/// Продуктови идентификатори (от Google Play Console)
+const String productIdMonthly = 'premium_monthly:monthly';
+const String productIdYearly = 'premium_yearly:yearly';
+const String productIdLifetime = 'premium_lifetime'; // Трябва да се създаде в Play Console като еднократен продукт
 
 class ProService extends ChangeNotifier {
   ProService._internal();
@@ -67,9 +67,9 @@ class ProService extends ChangeNotifier {
     if (_isInitialized) return;
 
     try {
-      // Конфигурация на RevenueCat
+      // Конфигурация на RevenueCat с production API key
       await Purchases.configure(
-        PurchasesConfiguration('test_BtyVZjVRjvrMDICrXNTixKfaGae'),
+        PurchasesConfiguration('goog_OgZMwPkNQbGIxgAGLLDTUmaLTqT'),
       );
 
       Purchases.addCustomerInfoUpdateListener((customerInfo) {
@@ -285,9 +285,9 @@ class ProService extends ChangeNotifier {
   Future<List<StoreProduct>> getProducts() async {
     try {
       final products = await Purchases.getProducts([
-        productIdLifetime,
         productIdMonthly,
         productIdYearly,
+        productIdLifetime,
       ]);
       return products;
     } catch (e) {

@@ -276,51 +276,141 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     return (total, completed, overdue, upcoming, archived);
   }
 
+  static const List<Color> _categoryColors = [
+    Colors.red,
+    Colors.pink,
+    Colors.purple,
+    Colors.deepPurple,
+    Colors.indigo,
+    Colors.blue,
+    Colors.lightBlue,
+    Colors.cyan,
+    Colors.teal,
+    Colors.green,
+    Colors.lightGreen,
+    Colors.lime,
+    Colors.yellow,
+    Colors.amber,
+    Colors.orange,
+    Colors.deepOrange,
+    Colors.brown,
+    Colors.grey,
+    Colors.blueGrey,
+  ];
+
   void _showAddCategoryDialog(StateSetter setDialogState) {
     final t = AppText.of(context);
+    final theme = Theme.of(context);
     final TextEditingController controller = TextEditingController();
+    Color selectedColor = Colors.blue;
 
     showDialog(
       context: context,
-      builder: (_) {
-        return AlertDialog(
-          title: Text('${t.add} ${t.category.toLowerCase()}'),
-          content: TextField(
-            controller: controller,
-            decoration: InputDecoration(labelText: t.category),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(t.cancel),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final name = controller.text.trim();
-                if (name.isNotEmpty) {
-                  final id =
-                      DateTime.now().millisecondsSinceEpoch.toString();
-                  final color = Colors
-                      .primaries[Random().nextInt(Colors.primaries.length)]
-                      .value;
-                  final newCat = Category(
-                    id: id,
-                    name: name,
-                    colorValue: color,
-                    isDefault: false,
-                  );
-                  categoryBox.put(id, newCat);
-                  setState(() {});
-                  setDialogState(() {
-                    _selectedCategoryId = id;
-                    _categoryFilterId = null;
-                  });
-                }
-                Navigator.of(context).pop();
-              },
-              child: Text(t.add),
-            ),
-          ],
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (dialogContext, setColorState) {
+            return AlertDialog(
+              title: Text(t.newCategory),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        controller: controller,
+                        decoration: InputDecoration(
+                          labelText: t.name,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        t.color,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _categoryColors.map((color) {
+                          final isSelected = selectedColor.value == color.value;
+                          return GestureDetector(
+                            onTap: () {
+                              setColorState(() {
+                                selectedColor = color;
+                              });
+                            },
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                                border: isSelected
+                                    ? Border.all(color: Colors.white, width: 3)
+                                    : null,
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: color.withOpacity(0.5),
+                                          blurRadius: 8,
+                                          spreadRadius: 2,
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: isSelected
+                                  ? const Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 20,
+                                    )
+                                  : null,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(t.cancel),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final name = controller.text.trim();
+                    if (name.isNotEmpty) {
+                      final id = DateTime.now().millisecondsSinceEpoch.toString();
+                      final newCat = Category(
+                        id: id,
+                        name: name,
+                        colorValue: selectedColor.value,
+                        isDefault: false,
+                      );
+                      categoryBox.put(id, newCat);
+                      setState(() {});
+                      setDialogState(() {
+                        _selectedCategoryId = id;
+                        _categoryFilterId = null;
+                      });
+                      Navigator.pop(ctx);
+                    }
+                  },
+                  child: Text(t.add),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -330,50 +420,45 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
       BuildContext context, DateTime initialDate) async {
     final languageController = LanguageScope.of(context);
     final langCode = languageController.locale.languageCode;
-    final isBg = langCode == 'bg';
 
     DateTime focusedDay =
         DateTime(initialDate.year, initialDate.month, initialDate.day);
     DateTime selectedDay = focusedDay;
 
     String monthLabel(DateTime day) {
-      const bgMonths = [
-        'януари',
-        'февруари',
-        'март',
-        'април',
-        'май',
-        'юни',
-        'юли',
-        'август',
-        'септември',
-        'октомври',
-        'ноември',
-        'декември',
-      ];
-      const enMonths = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-      ];
-      final name = isBg ? bgMonths[day.month - 1] : enMonths[day.month - 1];
+      const months = {
+        'en': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        'bg': ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'],
+        'de': ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+        'fr': ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
+        'it': ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'],
+        'el': ['Ιανουάριος', 'Φεβρουάριος', 'Μάρτιος', 'Απρίλιος', 'Μάιος', 'Ιούνιος', 'Ιούλιος', 'Αύγουστος', 'Σεπτέμβριος', 'Οκτώβριος', 'Νοέμβριος', 'Δεκέμβριος'],
+        'es': ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
+        'pt': ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'],
+        'ru': ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'],
+        'tr': ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+      };
+      final monthList = months[langCode] ?? months['en']!;
+      final name = monthList[day.month - 1];
       return '$name ${day.year}';
     }
 
     String weekdayLabel(int weekday) {
-      const bg = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
-      const en = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const weekdays = {
+        'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        'bg': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
+        'de': ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
+        'fr': ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+        'it': ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'],
+        'el': ['Δευ', 'Τρί', 'Τετ', 'Πέμ', 'Παρ', 'Σάβ', 'Κυρ'],
+        'es': ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+        'pt': ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+        'ru': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+        'tr': ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
+      };
+      final dayList = weekdays[langCode] ?? weekdays['en']!;
       final idx = weekday - 1;
-      return (isBg ? bg : en)[idx];
+      return dayList[idx];
     }
 
     final t = AppText.of(context);
@@ -498,6 +583,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     final t = AppText.of(context);
     final theme = Theme.of(context);
     final bool isEditing = existing != null;
+    final refreshParent = () => setState(() {});  // Запазваме референция към главния setState
 
     DateTime tempDueDate = existing?.dueDate ?? DateTime.now();
     TimeOfDay? tempTime;
@@ -525,8 +611,16 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
           builder: (innerContext, setSheetState) {
             final categories = categoryBox.values.toList();
             final languageController = LanguageScope.of(innerContext);
-            final isBg = languageController.locale.languageCode == 'bg';
+            final langCode = languageController.locale.languageCode;
             final bottomPadding = MediaQuery.of(innerContext).viewInsets.bottom;
+            
+            // Локали за гласово въвеждане
+            const voiceLocales = {
+              'en': 'en-US', 'bg': 'bg-BG', 'de': 'de-DE', 'fr': 'fr-FR', 
+              'it': 'it-IT', 'el': 'el-GR', 'es': 'es-ES', 'pt': 'pt-PT',
+              'ru': 'ru-RU', 'tr': 'tr-TR',
+            };
+            final voiceLocale = voiceLocales[langCode] ?? 'en-US';
 
             // Взимаме цвета на избраната категория
             final selectedCat = categories.firstWhere(
@@ -582,7 +676,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                         const SizedBox(width: 16),
                         Text(
                           isEditing 
-                              ? (isBg ? 'Редактиране' : 'Edit Task')
+                              ? (t.editTask)
                               : t.newTask,
                           style: TextStyle(
                             fontSize: 22,
@@ -620,7 +714,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                               fontWeight: FontWeight.w500,
                             ),
                             decoration: InputDecoration(
-                              hintText: isBg ? 'Какво трябва да направиш?' : 'What needs to be done?',
+                              hintText: t.whatNeedsToBeDone,
                               hintStyle: TextStyle(
                                 color: theme.colorScheme.onSurface.withOpacity(0.4),
                                 fontWeight: FontWeight.normal,
@@ -648,11 +742,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                     if (innerContext.mounted) {
                                       ScaffoldMessenger.of(innerContext).showSnackBar(
                                         SnackBar(
-                                          content: Text(
-                                            isBg 
-                                                ? 'Гласовото разпознаване не е налично'
-                                                : 'Speech recognition not available',
-                                          ),
+                                          content: Text(t.speechNotAvailable),
                                           backgroundColor: Colors.redAccent,
                                         ),
                                       );
@@ -677,7 +767,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                             setSheetState(() {});
                                           }
                                         },
-                                        localeId: isBg ? 'bg-BG' : 'en-US',
+                                        localeId: voiceLocale,
                                         listenFor: const Duration(seconds: 10),
                                         pauseFor: const Duration(seconds: 3),
                                       );
@@ -703,7 +793,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                                 ),
                                                 const SizedBox(height: 16),
                                                 Text(
-                                                  isBg ? 'Слушам...' : 'Listening...',
+                                                  t.listening,
                                                   style: TextStyle(
                                                     fontSize: 18,
                                                     fontWeight: FontWeight.w600,
@@ -712,7 +802,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                                 ),
                                                 const SizedBox(height: 8),
                                                 Text(
-                                                  isBg ? 'Говори сега' : 'Speak now',
+                                                  t.speakNow,
                                                   style: TextStyle(
                                                     color: theme.colorScheme.onSurface.withOpacity(0.6),
                                                   ),
@@ -725,7 +815,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                                   _speech.stop();
                                                   Navigator.pop(dialogContext);
                                                 },
-                                                child: Text(isBg ? 'Отказ' : 'Cancel'),
+                                                child: Text(t.cancel),
                                               ),
                                             ],
                                           );
@@ -744,7 +834,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                           const SizedBox(height: 24),
 
                           // Секция: Категория
-                          _buildSectionLabel(isBg ? 'Категория' : 'Category', Icons.folder_outlined, theme),
+                          _buildSectionLabel(t.category, Icons.folder_outlined, theme),
                           const SizedBox(height: 12),
                           Wrap(
                             spacing: 8,
@@ -827,7 +917,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        isBg ? 'Нова' : 'New',
+                                        t.newCat,
                                         style: TextStyle(
                                           color: theme.colorScheme.primary,
                                           fontWeight: FontWeight.w500,
@@ -883,7 +973,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                           const SizedBox(height: 24),
 
                           // Секция: Дата и час
-                          _buildSectionLabel(isBg ? 'Дата и час' : 'Date & Time', Icons.calendar_today_outlined, theme),
+                          _buildSectionLabel(t.dateAndTime, Icons.calendar_today_outlined, theme),
                           const SizedBox(height: 12),
                           Row(
                             children: [
@@ -977,7 +1067,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                           child: Text(
                                             tempTime != null 
                                                 ? _formatTime(tempTime)
-                                                : (isBg ? 'Час' : 'Time'),
+                                                : (t.time),
                                             style: TextStyle(
                                               fontSize: 15,
                                               fontWeight: FontWeight.w500,
@@ -1019,7 +1109,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
 
                           // Секция: Напомняне
                           _buildSectionLabel(
-                            isBg ? 'Напомняния' : 'Reminders',
+                            t.reminders,
                             Icons.notifications_outlined,
                             theme,
                           ),
@@ -1029,14 +1119,14 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                             onChanged: (list) => setSheetState(() {
                               tempReminders = list;
                             }),
-                            isBg: isBg,
+                            langCode: langCode,
                             theme: theme,
                           ),
                           const SizedBox(height: 24),
 
                           // Секция: Подзадачи
                           _buildSectionLabel(
-                            isBg ? 'Подзадачи' : 'Subtasks',
+                            t.subtasks,
                             Icons.checklist_rounded,
                             theme,
                           ),
@@ -1118,12 +1208,12 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                               final result = await showDialog<String>(
                                 context: innerContext,
                                 builder: (ctx) => AlertDialog(
-                                  title: Text(isBg ? 'Нова подзадача' : 'New Subtask'),
+                                  title: Text(t.newSubtask),
                                   content: TextField(
                                     controller: controller,
                                     autofocus: true,
                                     decoration: InputDecoration(
-                                      hintText: isBg ? 'Въведи подзадача...' : 'Enter subtask...',
+                                      hintText: t.enterSubtask,
                                     ),
                                     onSubmitted: (val) => Navigator.pop(ctx, val),
                                   ),
@@ -1166,7 +1256,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    isBg ? 'Добави подзадача' : 'Add subtask',
+                                    t.addSubtask,
                                     style: TextStyle(
                                       color: categoryColor,
                                       fontWeight: FontWeight.w500,
@@ -1180,7 +1270,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
 
                           // Секция: Бележки
                           Text(
-                            isBg ? 'Бележки' : 'Notes',
+                            t.notes,
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -1193,13 +1283,13 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                               final result = await showDialog<String>(
                                 context: innerContext,
                                 builder: (ctx) => AlertDialog(
-                                  title: Text(isBg ? 'Бележки' : 'Notes'),
+                                  title: Text(t.notes),
                                   content: TextField(
                                     controller: controller,
                                     maxLines: 6,
                                     autofocus: true,
                                     decoration: InputDecoration(
-                                      hintText: isBg ? 'Допълнителна информация...' : 'Additional information...',
+                                      hintText: t.additionalInfo,
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                       ),
@@ -1212,7 +1302,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                     ),
                                     ElevatedButton(
                                       onPressed: () => Navigator.pop(ctx, controller.text),
-                                      child: Text(isBg ? 'Запази' : 'Save'),
+                                      child: Text(t.save),
                                     ),
                                   ],
                                 ),
@@ -1247,7 +1337,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                     child: Text(
                                       tempNotes.trim().isNotEmpty
                                           ? tempNotes.trim()
-                                          : (isBg ? 'Добави бележка...' : 'Add note...'),
+                                          : (t.addNote),
                                       style: TextStyle(
                                         color: tempNotes.trim().isNotEmpty
                                             ? theme.colorScheme.onSurface
@@ -1333,7 +1423,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
 
                           await WidgetService.updateWidget();
                           _titleController.clear();
-                          setState(() {});
+                          refreshParent();  // Обновяваме главния екран
                           Navigator.pop(innerContext);
                         },
                         style: ElevatedButton.styleFrom(
@@ -1346,8 +1436,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                         ),
                         child: Text(
                           isEditing
-                              ? (isBg ? 'Запази промените' : 'Save Changes')
-                              : (isBg ? 'Добави задача' : 'Add Task'),
+                              ? (t.saveChanges)
+                              : (t.addTask),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -1362,7 +1452,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
           },
         );
       },
-    );
+    ).then((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   Widget _buildSectionLabel(String label, IconData icon, ThemeData theme) {
@@ -1540,7 +1632,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     final t = AppText.of(context);
     final theme = Theme.of(context);
     final languageController = LanguageScope.of(context);
-    final isBg = languageController.locale.languageCode == 'bg';
+    final langCode = languageController.locale.languageCode;
 
     final tasks = _filteredTasks();
     final categoriesMap = {
@@ -1641,9 +1733,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                     flex: 3,
                     child: TextField(
                       decoration: InputDecoration(
-                        hintText: isBg
-                            ? 'Търсене в задачите'
-                            : 'Search tasks',
+                        hintText: t.searchTasks,
                         prefixIcon: const Icon(Icons.search, size: 20),
                         isDense: true,
                         filled: true,
@@ -1687,7 +1777,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                           DropdownMenuItem(
                             value: 'all',
                             child: Text(
-                              isBg ? 'Всички' : 'All',
+                              t.all,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -1852,8 +1942,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                 const SizedBox(width: 8),
                                 Text(
                                   isCompleted 
-                                      ? (isBg ? 'Възстанови' : 'Restore')
-                                      : (isBg ? 'Готово' : 'Done'),
+                                      ? (t.restore)
+                                      : (t.done),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
@@ -1876,7 +1966,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Text(
-                                  isBg ? 'Изтрий' : 'Delete',
+                                  t.delete,
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
@@ -1928,12 +2018,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                               final confirm = await showDialog<bool>(
                                 context: context,
                                 builder: (ctx) => AlertDialog(
-                                  title: Text(isBg ? 'Изтриване' : 'Delete'),
-                                  content: Text(
-                                    isBg
-                                        ? 'Сигурен ли си, че искаш да изтриеш "${task.title}"?'
-                                        : 'Are you sure you want to delete "${task.title}"?',
-                                  ),
+                                  title: Text(t.deletion),
+                                  content: Text(t.deleteTaskMessage(task.title)),
                                   actions: [
                                     TextButton(
                                       onPressed: () => Navigator.pop(ctx, false),
@@ -1944,7 +2030,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                       style: TextButton.styleFrom(
                                         foregroundColor: Colors.redAccent,
                                       ),
-                                      child: Text(isBg ? 'Изтрий' : 'Delete'),
+                                      child: Text(t.delete),
                                     ),
                                   ],
                                 ),
@@ -1969,7 +2055,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                   children: [
                                     ListTile(
                                       leading: const Icon(Icons.edit_outlined),
-                                      title: Text(isBg ? 'Редактирай' : 'Edit'),
+                                      title: Text(t.edit),
                                       onTap: () {
                                         Navigator.pop(ctx);
                                         _openTaskDialog(existing: task);
@@ -1978,7 +2064,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                     if (!task.isArchived)
                                       ListTile(
                                         leading: const Icon(Icons.archive_outlined),
-                                        title: Text(isBg ? 'Архивирай' : 'Archive'),
+                                        title: Text(t.archive),
                                         onTap: () async {
                                           Navigator.pop(ctx);
                                           task.isArchived = true;
@@ -1991,7 +2077,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                     if (task.isArchived)
                                       ListTile(
                                         leading: const Icon(Icons.unarchive_outlined),
-                                        title: Text(isBg ? 'Възстанови' : 'Unarchive'),
+                                        title: Text(t.unarchive),
                                         onTap: () async {
                                           Navigator.pop(ctx);
                                           task.isArchived = false;
@@ -2004,7 +2090,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                     ListTile(
                                       leading: const Icon(Icons.delete_outline, color: Colors.red),
                                       title: Text(
-                                        isBg ? 'Изтрий' : 'Delete',
+                                        t.delete,
                                         style: const TextStyle(color: Colors.red),
                                       ),
                                       onTap: () async {
@@ -2250,7 +2336,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                                             ),
                                                             const SizedBox(width: 3),
                                                             Text(
-                                                              isBg ? 'напомняне' : 'reminder',
+                                                              t.reminder,
                                                               style: const TextStyle(
                                                                 fontSize: 11,
                                                                 color: Colors.amber,

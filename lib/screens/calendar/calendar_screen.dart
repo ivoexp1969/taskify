@@ -225,50 +225,140 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
+  static const List<Color> _categoryColors = [
+    Colors.red,
+    Colors.pink,
+    Colors.purple,
+    Colors.deepPurple,
+    Colors.indigo,
+    Colors.blue,
+    Colors.lightBlue,
+    Colors.cyan,
+    Colors.teal,
+    Colors.green,
+    Colors.lightGreen,
+    Colors.lime,
+    Colors.yellow,
+    Colors.amber,
+    Colors.orange,
+    Colors.deepOrange,
+    Colors.brown,
+    Colors.grey,
+    Colors.blueGrey,
+  ];
+
   void _showAddCategoryDialog(StateSetter setDialogState) {
     final t = AppText.of(context);
+    final theme = Theme.of(context);
     final TextEditingController controller = TextEditingController();
+    Color selectedColor = Colors.blue;
 
     showDialog(
       context: context,
-      builder: (_) {
-        return AlertDialog(
-          title: Text('${t.add} ${t.category.toLowerCase()}'),
-          content: TextField(
-            controller: controller,
-            decoration: InputDecoration(labelText: t.category),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(t.cancel),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final name = controller.text.trim();
-                if (name.isNotEmpty) {
-                  final id =
-                      DateTime.now().millisecondsSinceEpoch.toString();
-                  final color = Colors
-                      .primaries[Random().nextInt(Colors.primaries.length)]
-                      .value;
-                  final newCat = Category(
-                    id: id,
-                    name: name,
-                    colorValue: color,
-                    isDefault: false,
-                  );
-                  categoryBox.put(id, newCat);
-                  setState(() {});
-                  setDialogState(() {
-                    _selectedCategoryId = id;
-                  });
-                }
-                Navigator.of(context).pop();
-              },
-              child: Text(t.add),
-            ),
-          ],
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (dialogContext, setColorState) {
+            return AlertDialog(
+              title: Text(t.newCategory),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        controller: controller,
+                        decoration: InputDecoration(
+                          labelText: t.name,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        t.color,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _categoryColors.map((color) {
+                          final isSelected = selectedColor.value == color.value;
+                          return GestureDetector(
+                            onTap: () {
+                              setColorState(() {
+                                selectedColor = color;
+                              });
+                            },
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                                border: isSelected
+                                    ? Border.all(color: Colors.white, width: 3)
+                                    : null,
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: color.withOpacity(0.5),
+                                          blurRadius: 8,
+                                          spreadRadius: 2,
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: isSelected
+                                  ? const Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 20,
+                                    )
+                                  : null,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(t.cancel),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final name = controller.text.trim();
+                    if (name.isNotEmpty) {
+                      final id = DateTime.now().millisecondsSinceEpoch.toString();
+                      final newCat = Category(
+                        id: id,
+                        name: name,
+                        colorValue: selectedColor.value,
+                        isDefault: false,
+                      );
+                      categoryBox.put(id, newCat);
+                      setState(() {});
+                      setDialogState(() {
+                        _selectedCategoryId = id;
+                      });
+                      Navigator.pop(ctx);
+                    }
+                  },
+                  child: Text(t.add),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -277,50 +367,45 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Future<DateTime?> _pickDate(BuildContext context, DateTime initialDate) async {
     final languageController = LanguageScope.of(context);
     final langCode = languageController.locale.languageCode;
-    final isBg = langCode == 'bg';
 
     DateTime focusedDay =
         DateTime(initialDate.year, initialDate.month, initialDate.day);
     DateTime selectedDay = focusedDay;
 
     String monthLabel(DateTime day) {
-      const bgMonths = [
-        'януари',
-        'февруари',
-        'март',
-        'април',
-        'май',
-        'юни',
-        'юли',
-        'август',
-        'септември',
-        'октомври',
-        'ноември',
-        'декември',
-      ];
-      const enMonths = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-      ];
-      final name = isBg ? bgMonths[day.month - 1] : enMonths[day.month - 1];
+      const months = {
+        'en': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        'bg': ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'],
+        'de': ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+        'fr': ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
+        'it': ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'],
+        'el': ['Ιανουάριος', 'Φεβρουάριος', 'Μάρτιος', 'Απρίλιος', 'Μάιος', 'Ιούνιος', 'Ιούλιος', 'Αύγουστος', 'Σεπτέμβριος', 'Οκτώβριος', 'Νοέμβριος', 'Δεκέμβριος'],
+        'es': ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
+        'pt': ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'],
+        'ru': ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'],
+        'tr': ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+      };
+      final monthList = months[langCode] ?? months['en']!;
+      final name = monthList[day.month - 1];
       return '$name ${day.year}';
     }
 
     String weekdayLabel(int weekday) {
-      const bg = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
-      const en = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const weekdays = {
+        'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        'bg': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
+        'de': ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
+        'fr': ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+        'it': ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'],
+        'el': ['Δευ', 'Τρί', 'Τετ', 'Πέμ', 'Παρ', 'Σάβ', 'Κυρ'],
+        'es': ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+        'pt': ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+        'ru': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+        'tr': ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
+      };
+      final dayList = weekdays[langCode] ?? weekdays['en']!;
       final idx = weekday - 1;
-      return (isBg ? bg : en)[idx];
+      return dayList[idx];
     }
 
     final t = AppText.of(context);
@@ -445,6 +530,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final t = AppText.of(context);
     final theme = Theme.of(context);
     final bool isEditing = existing != null;
+    final refreshParent = () => setState(() {});  // Запазваме референция към главния setState
 
     DateTime tempDueDate =
         existing?.dueDate ?? _normalizeDate(_selectedDay);
@@ -472,7 +558,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           builder: (innerContext, setSheetState) {
             final categories = categoryBox.values.toList();
             final languageController = LanguageScope.of(innerContext);
-            final isBg = languageController.locale.languageCode == 'bg';
+            final langCode = languageController.locale.languageCode;
             final bottomPadding = MediaQuery.of(innerContext).viewInsets.bottom;
 
             final selectedCat = categories.firstWhere(
@@ -528,7 +614,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         const SizedBox(width: 16),
                         Text(
                           isEditing 
-                              ? (isBg ? 'Редактиране' : 'Edit Task')
+                              ? (t.editTask)
                               : t.newTask,
                           style: TextStyle(
                             fontSize: 22,
@@ -566,7 +652,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               fontWeight: FontWeight.w500,
                             ),
                             decoration: InputDecoration(
-                              hintText: isBg ? 'Какво трябва да направиш?' : 'What needs to be done?',
+                              hintText: t.whatNeedsToBeDone,
                               hintStyle: TextStyle(
                                 color: theme.colorScheme.onSurface.withOpacity(0.4),
                                 fontWeight: FontWeight.normal,
@@ -590,7 +676,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           const SizedBox(height: 24),
 
                           // Секция: Категория
-                          _buildSectionLabel(isBg ? 'Категория' : 'Category', Icons.folder_outlined, theme),
+                          _buildSectionLabel(t.category, Icons.folder_outlined, theme),
                           const SizedBox(height: 12),
                           Wrap(
                             spacing: 8,
@@ -671,7 +757,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        isBg ? 'Нова' : 'New',
+                                        t.newCat,
                                         style: TextStyle(
                                           color: theme.colorScheme.primary,
                                           fontWeight: FontWeight.w500,
@@ -724,7 +810,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           const SizedBox(height: 24),
 
                           // Секция: Дата и час
-                          _buildSectionLabel(isBg ? 'Дата и час' : 'Date & Time', Icons.calendar_today_outlined, theme),
+                          _buildSectionLabel(t.dateAndTime, Icons.calendar_today_outlined, theme),
                           const SizedBox(height: 12),
                           Row(
                             children: [
@@ -814,7 +900,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         Text(
                                           tempTime != null 
                                               ? _formatTime(tempTime)
-                                              : (isBg ? 'Час' : 'Time'),
+                                              : (t.time),
                                           style: TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.w500,
@@ -854,7 +940,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
                           // Секция: Напомняне
                           _buildSectionLabel(
-                            isBg ? 'Напомняния' : 'Reminders',
+                            t.reminders,
                             Icons.notifications_outlined,
                             theme,
                           ),
@@ -864,14 +950,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             onChanged: (list) => setSheetState(() {
                               tempReminders = list;
                             }),
-                            isBg: isBg,
+                            langCode: langCode,
                             theme: theme,
                           ),
                           const SizedBox(height: 32),
 
                           // Секция: Бележки
                           Text(
-                            isBg ? 'Бележки' : 'Notes',
+                            t.notes,
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -884,13 +970,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               final result = await showDialog<String>(
                                 context: innerContext,
                                 builder: (ctx) => AlertDialog(
-                                  title: Text(isBg ? 'Бележки' : 'Notes'),
+                                  title: Text(t.notes),
                                   content: TextField(
                                     controller: controller,
                                     maxLines: 6,
                                     autofocus: true,
                                     decoration: InputDecoration(
-                                      hintText: isBg ? 'Допълнителна информация...' : 'Additional information...',
+                                      hintText: t.additionalInfo,
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                       ),
@@ -903,7 +989,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     ),
                                     ElevatedButton(
                                       onPressed: () => Navigator.pop(ctx, controller.text),
-                                      child: Text(isBg ? 'Запази' : 'Save'),
+                                      child: Text(t.save),
                                     ),
                                   ],
                                 ),
@@ -938,7 +1024,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     child: Text(
                                       tempNotes.trim().isNotEmpty
                                           ? tempNotes.trim()
-                                          : (isBg ? 'Добави бележка...' : 'Add note...'),
+                                          : (t.addNote),
                                       style: TextStyle(
                                         color: tempNotes.trim().isNotEmpty
                                             ? theme.colorScheme.onSurface
@@ -1022,7 +1108,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
                           await WidgetService.updateWidget();
                           _titleController.clear();
-                          setState(() {});
+                          refreshParent();  // Обновяваме главния екран
                           Navigator.pop(innerContext);
                         },
                         style: ElevatedButton.styleFrom(
@@ -1035,8 +1121,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         ),
                         child: Text(
                           isEditing
-                              ? (isBg ? 'Запази промените' : 'Save Changes')
-                              : (isBg ? 'Добави задача' : 'Add Task'),
+                              ? (t.saveChanges)
+                              : (t.addTask),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -1051,7 +1137,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
           },
         );
       },
-    );
+    ).then((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   Widget _buildSectionLabel(String label, IconData icon, ThemeData theme) {
@@ -1204,7 +1292,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     final languageController = LanguageScope.of(context);
     final langCode = languageController.locale.languageCode;
-    final isBg = langCode == 'bg';
 
     final events = _buildEventMap();
     final tasks = _tasksForView();
@@ -1213,49 +1300,44 @@ class _CalendarScreenState extends State<CalendarScreen> {
     };
 
     String monthYearLabel(DateTime day) {
-      const bgMonths = [
-        'януари',
-        'февруари',
-        'март',
-        'април',
-        'май',
-        'юни',
-        'юли',
-        'август',
-        'септември',
-        'октомври',
-        'ноември',
-        'декември',
-      ];
-      const enMonths = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-      ];
-      final name =
-          isBg ? bgMonths[day.month - 1] : enMonths[day.month - 1];
+      const months = {
+        'en': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        'bg': ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'],
+        'de': ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+        'fr': ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
+        'it': ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'],
+        'el': ['Ιανουάριος', 'Φεβρουάριος', 'Μάρτιος', 'Απρίλιος', 'Μάιος', 'Ιούνιος', 'Ιούλιος', 'Αύγουστος', 'Σεπτέμβριος', 'Οκτώβριος', 'Νοέμβριος', 'Δεκέμβριος'],
+        'es': ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
+        'pt': ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'],
+        'ru': ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'],
+        'tr': ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+      };
+      final monthList = months[langCode] ?? months['en']!;
+      final name = monthList[day.month - 1];
       return '$name ${day.year}';
     }
 
     String weekdayLabel(int weekday) {
-      const bg = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
-      const en = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const weekdays = {
+        'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        'bg': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
+        'de': ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
+        'fr': ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+        'it': ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'],
+        'el': ['Δευ', 'Τρί', 'Τετ', 'Πέμ', 'Παρ', 'Σάβ', 'Κυρ'],
+        'es': ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+        'pt': ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+        'ru': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+        'tr': ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
+      };
+      final dayList = weekdays[langCode] ?? weekdays['en']!;
       final idx = weekday - 1;
-      return (isBg ? bg : en)[idx];
+      return dayList[idx];
     }
 
-    final dayLabel = isBg ? 'Ден' : 'Day';
-    final weekLabel = isBg ? 'Седмица' : 'Week';
-    final monthLabelStr = isBg ? 'Месец' : 'Month';
+    final dayLabel = t.day;
+    final weekLabel = t.week;
+    final monthLabelStr = t.month;
 
     return Scaffold(
       appBar: AppBar(

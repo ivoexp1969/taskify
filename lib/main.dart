@@ -27,8 +27,10 @@ Future<void> main() async {
   await ProService().initialize();
   await AdService().initialize();
 
-  final languageController = LanguageController(const Locale('bg'));
-  await languageController.loadSavedLocale();
+  final languageController = LanguageController(const Locale('en'));
+  // Зареждаме системния език при първо стартиране
+  final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
+  await languageController.loadSavedLocale(systemLocale);
   
   final themeController = ThemeController(ThemeMode.system);
   runApp(

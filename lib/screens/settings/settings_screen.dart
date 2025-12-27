@@ -54,7 +54,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   /// Показва диалог за управление на категориите
   void _showCategoryManagementDialog() {
     final languageController = LanguageScope.of(context);
-    final isBg = languageController.locale.languageCode == 'bg';
+    final langCode = languageController.locale.languageCode;
     final t = AppText.of(context);
     final theme = Theme.of(context);
     final categoryBox = Hive.box<Category>('categories');
@@ -107,7 +107,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         const SizedBox(width: 16),
                         Text(
-                          isBg ? 'Категории' : 'Categories',
+                          t.categories,
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -136,9 +136,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         final catColor = Color(cat.colorValue);
                         final localizedName = cat.isDefault
                             ? {
-                                'work': isBg ? 'Работа' : 'Work',
-                                'personal': isBg ? 'Лични' : 'Personal',
-                                'shopping': isBg ? 'Пазаруване' : 'Shopping',
+                                'work': t.work,
+                                'personal': t.personal,
+                                'shopping': t.shopping,
                               }[cat.id] ?? cat.name
                             : cat.name;
 
@@ -163,7 +163,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                             subtitle: cat.isDefault
                                 ? Text(
-                                    isBg ? 'Стандартна категория' : 'Default category',
+                                    t.defaultCategory,
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: theme.colorScheme.onSurface.withOpacity(0.5),
@@ -182,7 +182,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   onPressed: () {
                                     _showEditCategoryDialog(
                                       cat,
-                                      isBg,
                                       t,
                                       theme,
                                       () {
@@ -203,12 +202,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       final confirm = await showDialog<bool>(
                                         context: innerContext,
                                         builder: (ctx) => AlertDialog(
-                                          title: Text(isBg ? 'Изтриване' : 'Delete'),
-                                          content: Text(
-                                            isBg
-                                                ? 'Сигурен ли си, че искаш да изтриеш "${cat.name}"?'
-                                                : 'Are you sure you want to delete "${cat.name}"?',
-                                          ),
+                                          title: Text(t.deletion),
+                                          content: Text(t.deleteCategoryMessage(cat.name)),
                                           actions: [
                                             TextButton(
                                               onPressed: () => Navigator.pop(ctx, false),
@@ -219,7 +214,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                               style: TextButton.styleFrom(
                                                 foregroundColor: Colors.redAccent,
                                               ),
-                                              child: Text(isBg ? 'Изтрий' : 'Delete'),
+                                              child: Text(t.delete),
                                             ),
                                           ],
                                         ),
@@ -245,13 +240,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          _showAddCategoryDialog(isBg, t, theme, () {
+                          _showAddCategoryDialog(t, theme, () {
                             setSheetState(() {});
                             setState(() {});
                           });
                         },
                         icon: const Icon(Icons.add_rounded),
-                        label: Text(isBg ? 'Добави категория' : 'Add Category'),
+                        label: Text(t.addCategory),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
@@ -268,7 +263,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   /// Показва диалог за добавяне на нова категория
-  void _showAddCategoryDialog(bool isBg, AppText t, ThemeData theme, VoidCallback onComplete) {
+  void _showAddCategoryDialog( AppText t, ThemeData theme, VoidCallback onComplete) {
     final controller = TextEditingController();
     Color selectedColor = Colors.blue;
     final categoryBox = Hive.box<Category>('categories');
@@ -279,7 +274,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return StatefulBuilder(
           builder: (dialogContext, setDialogState) {
             return AlertDialog(
-              title: Text(isBg ? 'Нова категория' : 'New Category'),
+              title: Text(t.newCategory),
               content: SizedBox(
                 width: double.maxFinite,
                 child: SingleChildScrollView(
@@ -290,7 +285,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       TextField(
                         controller: controller,
                         decoration: InputDecoration(
-                          labelText: isBg ? 'Име' : 'Name',
+                          labelText: t.name,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -298,7 +293,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        isBg ? 'Цвят' : 'Color',
+                        t.color,
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -382,7 +377,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   /// Показва диалог за редактиране на категория
-  void _showEditCategoryDialog(Category cat, bool isBg, AppText t, ThemeData theme, VoidCallback onComplete) {
+  void _showEditCategoryDialog(Category cat, AppText t, ThemeData theme, VoidCallback onComplete) {
     final controller = TextEditingController(text: cat.name);
     Color selectedColor = Color(cat.colorValue);
     final categoryBox = Hive.box<Category>('categories');
@@ -393,7 +388,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return StatefulBuilder(
           builder: (dialogContext, setDialogState) {
             return AlertDialog(
-              title: Text(isBg ? 'Редактирай категория' : 'Edit Category'),
+              title: Text(t.editCategory),
               content: SizedBox(
                 width: double.maxFinite,
                 child: SingleChildScrollView(
@@ -405,19 +400,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         controller: controller,
                         enabled: !cat.isDefault, // Default категориите не могат да се преименуват
                         decoration: InputDecoration(
-                          labelText: isBg ? 'Име' : 'Name',
+                          labelText: t.name,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           helperText: cat.isDefault
-                              ? (isBg ? 'Името на стандартните категории не може да се променя' : 'Default category names cannot be changed')
+                              ? (t.defaultCategoryNameCannotChange)
                               : null,
                           helperMaxLines: 2,
                         ),
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        isBg ? 'Цвят' : 'Color',
+                        t.color,
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -490,7 +485,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onComplete();
                     }
                   },
-                  child: Text(isBg ? 'Запази' : 'Save'),
+                  child: Text(t.save),
                 ),
               ],
             );
@@ -500,9 +495,103 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  /// Показва диалог за избор на език
+  void _showLanguageDialog(BuildContext context, LanguageController languageController, Locale currentLocale) {
+    final theme = Theme.of(context);
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return Container(
+          height: MediaQuery.of(ctx).size.height * 0.7,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(28),
+            ),
+          ),
+          child: Column(
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.outline.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              // Header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.indigo.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.language_rounded,
+                        color: Colors.indigo,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      AppText.of(context).language,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(),
+              // Списък с езици - SCROLLABLE
+              Expanded(
+                child: ListView.builder(
+                  itemCount: SupportedLocales.all.length,
+                  itemBuilder: (context, index) {
+                    final locale = SupportedLocales.all[index];
+                    final isSelected = currentLocale.languageCode == locale.languageCode;
+                    return ListTile(
+                      leading: Text(
+                        SupportedLocales.flags[locale.languageCode] ?? '🌐',
+                        style: const TextStyle(fontSize: 24),
+                      ),
+                      title: Text(
+                        SupportedLocales.names[locale.languageCode] ?? locale.languageCode,
+                        style: TextStyle(
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                      trailing: isSelected
+                          ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
+                          : null,
+                      onTap: () {
+                        languageController.setLocale(locale);
+                        Navigator.pop(ctx);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _exportData(BuildContext context) async {
+    final t = AppText.of(context);
     final languageController = LanguageScope.of(context);
-    final isBg = languageController.locale.languageCode == 'bg';
+    final langCode = languageController.locale.languageCode;
 
     try {
       final taskBox = Hive.box<Task>('tasks');
@@ -542,7 +631,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await Share.shareXFiles(
         [XFile(file.path)],
         subject: 'Task Manager Backup',
-        text: isBg ? 'Backup на задачите' : 'Tasks backup',
+        text: t.tasksBackup,
       );
 
     } catch (e) {
@@ -550,7 +639,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              isBg ? 'Грешка при експорт: $e' : 'Export error: $e',
+              '${t.exportError}: $e',
             ),
             backgroundColor: Colors.redAccent,
           ),
@@ -562,7 +651,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _importData(BuildContext context) async {
     final t = AppText.of(context);
     final languageController = LanguageScope.of(context);
-    final isBg = languageController.locale.languageCode == 'bg';
+    final langCode = languageController.locale.languageCode;
 
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -589,12 +678,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         final confirm = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: Text(isBg ? 'Потвърждение' : 'Confirm'),
-            content: Text(
-              isBg
-                  ? 'Ще бъдат импортирани $tasksCount задачи и $categoriesCount категории.\n\nТова ще замени всички текущи данни. Продължи?'
-                  : 'Will import $tasksCount tasks and $categoriesCount categories.\n\nThis will replace all current data. Continue?',
-            ),
+            title: Text(t.confirmation),
+            content: Text(t.importConfirmMessage(tasksCount, categoriesCount)),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
@@ -605,7 +690,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.redAccent,
                 ),
-                child: Text(isBg ? 'Замени' : 'Replace'),
+                child: Text(t.replace),
               ),
             ],
           ),
@@ -650,11 +735,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              isBg
-                  ? 'Импортирани ${tasks.length} задачи и ${categories.length} категории'
-                  : 'Imported ${tasks.length} tasks and ${categories.length} categories',
-            ),
+            content: Text(t.importSuccessMessage(tasks.length, categories.length)),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 3),
           ),
@@ -665,7 +746,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              isBg ? 'Грешка при импорт: $e' : 'Import error: $e',
+              '${t.importError}: $e',
             ),
             backgroundColor: Colors.redAccent,
           ),
@@ -684,27 +765,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _logout() async {
-    final languageController = LanguageScope.of(context);
-    final isBg = languageController.locale.languageCode == 'bg';
+    final t = AppText.of(context);
 
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(isBg ? 'Изход' : 'Logout'),
+        title: Text(t.logout),
         content: Text(
-          isBg ? 'Сигурен ли си, че искаш да излезеш?' : 'Are you sure you want to logout?',
+          t.logoutConfirm,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(isBg ? 'Отказ' : 'Cancel'),
+            child: Text(t.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
             ),
-            child: Text(isBg ? 'Изход' : 'Logout'),
+            child: Text(t.logout),
           ),
         ],
       ),
@@ -719,8 +799,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _uploadToCloud() async {
-    final languageController = LanguageScope.of(context);
-    final isBg = languageController.locale.languageCode == 'bg';
+    final t = AppText.of(context);
 
     final taskBox = Hive.box<Task>('tasks');
     final categoryBox = Hive.box<Category>('categories');
@@ -728,20 +807,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(isBg ? 'Качване в облака' : 'Upload to Cloud'),
-        content: Text(
-          isBg
-              ? 'Ще бъдат качени ${taskBox.length} задачи и ${categoryBox.length} категории.\n\nТова ще замени данните в облака. Продължи?'
-              : 'Will upload ${taskBox.length} tasks and ${categoryBox.length} categories.\n\nThis will replace cloud data. Continue?',
-        ),
+        title: Text(t.uploadToCloud),
+        content: Text(t.uploadConfirmMessage(taskBox.length, categoryBox.length)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(isBg ? 'Отказ' : 'Cancel'),
+            child: Text(t.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(isBg ? 'Качи' : 'Upload'),
+            child: Text(t.upload),
           ),
         ],
       ),
@@ -760,10 +835,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         SnackBar(
           content: Text(
             result.success
-                ? (isBg
-                    ? 'Качени ${result.tasksCount} задачи и ${result.categoriesCount} категории'
-                    : 'Uploaded ${result.tasksCount} tasks and ${result.categoriesCount} categories')
-                : (isBg ? 'Грешка: ${result.error}' : 'Error: ${result.error}'),
+                ? t.uploadSuccessMessage(result.tasksCount, result.categoriesCount)
+                : '${t.error}: ${result.error}',
           ),
           backgroundColor: result.success ? Colors.green : Colors.redAccent,
         ),
@@ -772,9 +845,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _downloadFromCloud() async {
-    final languageController = LanguageScope.of(context);
-    final isBg = languageController.locale.languageCode == 'bg';
-
+    final t = AppText.of(context);
     final cloudData = await _firestoreService.getCloudDataCount();
 
     if (!mounted) return;
@@ -782,23 +853,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(isBg ? 'Сваляне от облака' : 'Download from Cloud'),
-        content: Text(
-          isBg
-              ? 'В облака има ${cloudData.tasks} задачи и ${cloudData.categories} категории.\n\nТова ще замени локалните данни. Продължи?'
-              : 'Cloud has ${cloudData.tasks} tasks and ${cloudData.categories} categories.\n\nThis will replace local data. Continue?',
-        ),
+        title: Text(t.downloadFromCloud),
+        content: Text(t.downloadConfirmMessage(cloudData.tasks, cloudData.categories)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(isBg ? 'Отказ' : 'Cancel'),
+            child: Text(t.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange,
             ),
-            child: Text(isBg ? 'Свали' : 'Download'),
+            child: Text(t.download),
           ),
         ],
       ),
@@ -817,10 +884,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         SnackBar(
           content: Text(
             result.success
-                ? (isBg
-                    ? 'Свалени ${result.tasksCount} задачи и ${result.categoriesCount} категории'
-                    : 'Downloaded ${result.tasksCount} tasks and ${result.categoriesCount} categories')
-                : (isBg ? 'Грешка: ${result.error}' : 'Error: ${result.error}'),
+                ? t.downloadSuccessMessage(result.tasksCount, result.categoriesCount)
+                : '${t.error}: ${result.error}',
           ),
           backgroundColor: result.success ? Colors.green : Colors.redAccent,
         ),
@@ -834,7 +899,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final theme = Theme.of(context);
     final languageController = LanguageScope.of(context);
     final themeController = ThemeScope.of(context);
-    final isBg = languageController.locale.languageCode == 'bg';
+    final langCode = languageController.locale.languageCode;
 
     final currentLocale = languageController.locale;
     final currentMode = themeController.mode;
@@ -847,9 +912,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // Език - НАЙ-ОТГОРЕ
+          Text(
+            t.language,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.indigo.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  SupportedLocales.flags[currentLocale.languageCode] ?? '🌐',
+                  style: const TextStyle(fontSize: 20),
+                ),
+              ),
+              title: Text(SupportedLocales.names[currentLocale.languageCode] ?? 'English'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _showLanguageDialog(context, languageController, currentLocale),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
           // Статистики секция
           Text(
-            isBg ? 'Активност' : 'Activity',
+            t.activity,
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -869,11 +964,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: Colors.purple,
                 ),
               ),
-              title: Text(isBg ? 'Статистики' : 'Statistics'),
+              title: Text(t.statistics),
               subtitle: Text(
-                isBg
-                    ? 'Преглед на твоя прогрес'
-                    : 'View your progress',
+                t.viewProgress,
                 style: TextStyle(
                   fontSize: 12,
                   color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -892,7 +985,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // Категории секция
           Text(
-            isBg ? 'Категории' : 'Categories',
+            t.categories,
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -912,11 +1005,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: Colors.teal,
                 ),
               ),
-              title: Text(isBg ? 'Управление на категории' : 'Manage Categories'),
+              title: Text(t.manageCategories),
               subtitle: Text(
-                isBg
-                    ? 'Редактирай, добави или изтрий категории'
-                    : 'Edit, add or delete categories',
+                t.editAddDeleteCategories,
                 style: TextStyle(
                   fontSize: 12,
                   color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -931,7 +1022,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // Акаунт секция
           Text(
-            isBg ? 'Акаунт' : 'Account',
+            t.account,
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -953,7 +1044,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     title: Text(user.email ?? ''),
                     subtitle: Text(
-                      isBg ? 'Влязъл си в акаунта' : 'Signed in',
+                      t.signedIn,
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -962,7 +1053,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     trailing: TextButton(
                       onPressed: _logout,
                       child: Text(
-                        isBg ? 'Изход' : 'Logout',
+                        t.logout,
                         style: const TextStyle(color: Colors.redAccent),
                       ),
                     ),
@@ -979,11 +1070,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         color: theme.colorScheme.primary,
                       ),
                     ),
-                    title: Text(isBg ? 'Вход / Регистрация' : 'Login / Register'),
+                    title: Text(t.login),
                     subtitle: Text(
-                      isBg
-                          ? 'Влез за синхронизация в облака'
-                          : 'Sign in to sync to cloud',
+                      t.signInToSync,
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -998,7 +1087,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           if (user != null) ...[
             const SizedBox(height: 24),
             Text(
-              isBg ? 'Синхронизация' : 'Sync',
+              t.cloudSync,
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -1026,11 +1115,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               color: Colors.blue,
                             ),
                     ),
-                    title: Text(isBg ? 'Качи в облака' : 'Upload to Cloud'),
+                    title: Text(t.uploadToCloud),
                     subtitle: Text(
-                      isBg
-                          ? 'Запази задачите в облака'
-                          : 'Save tasks to cloud',
+                      t.saveToCloud,
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -1058,11 +1145,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               color: Colors.orange,
                             ),
                     ),
-                    title: Text(isBg ? 'Свали от облака' : 'Download from Cloud'),
+                    title: Text(t.downloadFromCloud),
                     subtitle: Text(
-                      isBg
-                          ? 'Възстанови задачите от облака'
-                          : 'Restore tasks from cloud',
+                      t.restoreFromCloud,
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -1075,43 +1160,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ],
-
-          const SizedBox(height: 24),
-
-          // Език
-          Text(
-            t.language,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: Column(
-              children: [
-                RadioListTile<String>(
-                  value: 'bg',
-                  groupValue: currentLocale.languageCode,
-                  title: Text(t.bulgarian),
-                  onChanged: (value) {
-                    if (value == null) return;
-                    languageController.setLocale(const Locale('bg'));
-                  },
-                ),
-                const Divider(height: 0),
-                RadioListTile<String>(
-                  value: 'en',
-                  groupValue: currentLocale.languageCode,
-                  title: Text(t.english),
-                  onChanged: (value) {
-                    if (value == null) return;
-                    languageController.setLocale(const Locale('en'));
-                  },
-                ),
-              ],
-            ),
-          ),
 
           const SizedBox(height: 24),
 
@@ -1164,7 +1212,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // Backup / Restore
           Text(
-            isBg ? 'Локални данни' : 'Local Data',
+            t.localData,
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -1186,11 +1234,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       color: Colors.green,
                     ),
                   ),
-                  title: Text(isBg ? 'Експорт (JSON)' : 'Export (JSON)'),
+                  title: Text(t.exportData),
                   subtitle: Text(
-                    isBg
-                        ? 'Сподели backup файл'
-                        : 'Share backup file',
+                    t.shareBackup,
                     style: TextStyle(
                       fontSize: 12,
                       color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -1212,11 +1258,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       color: Colors.teal,
                     ),
                   ),
-                  title: Text(isBg ? 'Импорт (JSON)' : 'Import (JSON)'),
+                  title: Text(t.importData),
                   subtitle: Text(
-                    isBg
-                        ? 'Възстанови от JSON файл'
-                        : 'Restore from JSON file',
+                    t.restoreFromJson,
                     style: TextStyle(
                       fontSize: 12,
                       color: theme.colorScheme.onSurface.withOpacity(0.6),

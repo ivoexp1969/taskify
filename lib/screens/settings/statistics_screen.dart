@@ -122,21 +122,78 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
     return result;
   }
 
-  String _dayName(int index, bool isBg) {
-    final bgDays = ['Понеделник', 'Вторник', 'Сряда', 'Четвъртък', 'Петък', 'Събота', 'Неделя'];
-    final enDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    return isBg ? bgDays[index] : enDays[index];
+  String _dayName(int index, String lang) {
+    const days = {
+      'en': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+      'bg': ['Понеделник', 'Вторник', 'Сряда', 'Четвъртък', 'Петък', 'Събота', 'Неделя'],
+      'de': ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'],
+      'fr': ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
+      'it': ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'],
+      'el': ['Δευτέρα', 'Τρίτη', 'Τετάρτη', 'Πέμπτη', 'Παρασκευή', 'Σάββατο', 'Κυριακή'],
+      'es': ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+      'pt': ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
+      'ru': ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
+      'tr': ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'],
+    };
+    return (days[lang] ?? days['en']!)[index];
   }
 
   /// Връща локализирано име за категория
-  String _localizedCategoryName(Category? c, bool isBg) {
-    if (c == null) return isBg ? 'Друго' : 'Other';
-    if (c.isDefault) {
+  String _localizedCategoryName(Category? c, String lang) {
+    if (c == null) {
       return {
-        'work': isBg ? 'Работа' : 'Work',
-        'personal': isBg ? 'Лични' : 'Personal',
-        'shopping': isBg ? 'Пазаруване' : 'Shopping',
-      }[c.id] ?? c.name;
+        'en': 'Other',
+        'bg': 'Друго',
+        'de': 'Andere',
+        'fr': 'Autre',
+        'it': 'Altro',
+        'el': 'Άλλο',
+        'es': 'Otro',
+        'pt': 'Outro',
+        'ru': 'Другое',
+        'tr': 'Diğer',
+      }[lang] ?? 'Other';
+    }
+    if (c.isDefault) {
+      final translations = {
+        'work': {
+          'en': 'Work',
+          'bg': 'Работа',
+          'de': 'Arbeit',
+          'fr': 'Travail',
+          'it': 'Lavoro',
+          'el': 'Εργασία',
+          'es': 'Trabajo',
+          'pt': 'Trabalho',
+          'ru': 'Работа',
+          'tr': 'İş',
+        },
+        'personal': {
+          'en': 'Personal',
+          'bg': 'Лични',
+          'de': 'Persönlich',
+          'fr': 'Personnel',
+          'it': 'Personale',
+          'el': 'Προσωπικά',
+          'es': 'Personal',
+          'pt': 'Pessoal',
+          'ru': 'Личное',
+          'tr': 'Kişisel',
+        },
+        'shopping': {
+          'en': 'Shopping',
+          'bg': 'Пазаруване',
+          'de': 'Einkaufen',
+          'fr': 'Courses',
+          'it': 'Spesa',
+          'el': 'Αγορές',
+          'es': 'Compras',
+          'pt': 'Compras',
+          'ru': 'Покупки',
+          'tr': 'Alışveriş',
+        },
+      };
+      return translations[c.id]?[lang] ?? translations[c.id]?['en'] ?? c.name;
     }
     return c.name;
   }
@@ -144,8 +201,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final t = AppText.of(context);
     final languageController = LanguageScope.of(context);
-    final isBg = languageController.locale.languageCode == 'bg';
+    final lang = languageController.locale.languageCode;
 
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
@@ -169,14 +227,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isBg ? 'Статистики' : 'Statistics'),
+        title: Text(t.statistics),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // Обобщение
           Text(
-            isBg ? 'Обобщение' : 'Summary',
+            t.summary,
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -190,7 +248,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                   icon: Icons.today_rounded,
                   iconColor: Colors.blue,
                   value: '$completedToday',
-                  label: isBg ? 'Днес' : 'Today',
+                  label: t.today,
                 ),
               ),
               const SizedBox(width: 12),
@@ -199,7 +257,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                   icon: Icons.date_range_rounded,
                   iconColor: Colors.green,
                   value: '$completedWeek',
-                  label: isBg ? 'Седмица' : 'Week',
+                  label: t.week,
                 ),
               ),
               const SizedBox(width: 12),
@@ -208,7 +266,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                   icon: Icons.calendar_month_rounded,
                   iconColor: Colors.orange,
                   value: '$completedMonth',
-                  label: isBg ? 'Месец' : 'Month',
+                  label: t.month,
                 ),
               ),
             ],
@@ -218,7 +276,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
 
           // Прогрес
           Text(
-            isBg ? 'Прогрес' : 'Progress',
+            t.progress,
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -265,7 +323,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isBg ? 'Изпълнение' : 'Completion rate',
+                          t.completionRate,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -274,9 +332,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          isBg
-                              ? '$completedTotal от $totalTasks задачи'
-                              : '$completedTotal of $totalTasks tasks',
+                          t.tasksOfTotal(completedTotal, totalTasks),
                           style: TextStyle(
                             fontSize: 14,
                             color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -315,7 +371,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                           ),
                         ),
                         Text(
-                          isBg ? 'дни streak' : 'day streak',
+                          t.dayStreak,
                           style: TextStyle(
                             fontSize: 12,
                             color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -340,7 +396,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          _dayName(productiveDay, isBg),
+                          _dayName(productiveDay, lang),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -348,7 +404,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                           textAlign: TextAlign.center,
                         ),
                         Text(
-                          isBg ? 'най-продуктивен' : 'most productive',
+                          t.mostProductive,
                           style: TextStyle(
                             fontSize: 12,
                             color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -367,7 +423,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
           // По категории
           if (byCategory.isNotEmpty) ...[
             Text(
-              isBg ? 'По категории' : 'By category',
+              t.byCategory,
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -390,7 +446,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                               (c) => c.id == entry.key,
                               orElse: () => Category(
                                 id: '',
-                                name: isBg ? 'Друго' : 'Other',
+                                name: t.other,
                                 colorValue: Colors.grey.value,
                               ),
                             );
@@ -418,7 +474,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                           (c) => c.id == entry.key,
                           orElse: () => Category(
                             id: '',
-                            name: isBg ? 'Друго' : 'Other',
+                            name: t.other,
                             colorValue: Colors.grey.value,
                           ),
                         );
@@ -435,7 +491,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              _localizedCategoryName(cat, isBg),
+                              _localizedCategoryName(cat, lang),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: theme.colorScheme.onSurface.withOpacity(0.7),
@@ -455,7 +511,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
 
           // Седмична активност
           Text(
-            isBg ? 'Последните 7 дни' : 'Last 7 days',
+            t.last7Days,
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -480,11 +536,21 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                             final day = DateTime.now().subtract(
                               Duration(days: 6 - value.toInt()),
                             );
-                            final labels = isBg
-                                ? ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']
-                                : ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+                            const labels = {
+                              'en': ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+                              'bg': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
+                              'de': ['M', 'D', 'M', 'D', 'F', 'S', 'S'],
+                              'fr': ['L', 'M', 'M', 'J', 'V', 'S', 'D'],
+                              'it': ['L', 'M', 'M', 'G', 'V', 'S', 'D'],
+                              'el': ['Δ', 'Τ', 'Τ', 'Π', 'Π', 'Σ', 'Κ'],
+                              'es': ['L', 'M', 'M', 'J', 'V', 'S', 'D'],
+                              'pt': ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'],
+                              'ru': ['П', 'В', 'С', 'Ч', 'П', 'С', 'В'],
+                              'tr': ['P', 'S', 'Ç', 'P', 'C', 'C', 'P'],
+                            };
+                            final dayLabels = labels[lang] ?? labels['en']!;
                             return Text(
-                              labels[day.weekday - 1],
+                              dayLabels[day.weekday - 1],
                               style: TextStyle(
                                 fontSize: 10,
                                 color: theme.colorScheme.onSurface.withOpacity(0.5),
