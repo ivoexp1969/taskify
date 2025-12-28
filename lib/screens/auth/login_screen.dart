@@ -41,26 +41,116 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    final result = _isLogin
-        ? await _authService.login(email: email, password: password)
-        : await _authService.register(email: email, password: password);
+    if (_isLogin) {
+      // Вход
+      final result = await _authService.login(email: email, password: password);
+      
+      if (!mounted) return;
+      setState(() => _isLoading = false);
 
-    if (!mounted) return;
-
-    setState(() => _isLoading = false);
-
-    if (result.success) {
-      Navigator.of(context).pop(true);
+      if (result.success) {
+        Navigator.of(context).pop(true);
+      } else if (result.needsVerification) {
+        _showVerificationDialog();
+      } else {
+        setState(() => _errorMessage = result.error);
+      }
     } else {
-      setState(() => _errorMessage = result.error);
+      // Регистрация
+      final result = await _authService.register(email: email, password: password);
+      
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      if (result.success) {
+        _showRegistrationSuccessDialog();
+      } else {
+        setState(() => _errorMessage = result.error);
+      }
     }
   }
 
+  void _showVerificationDialog() {
+    final languageController = LanguageScope.of(context);
+    final isBg = languageController.locale.languageCode == 'bg';
+    
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(isBg ? 'Потвърдете имейла' : 'Verify Your Email'),
+        content: Text(
+          isBg 
+              ? 'Моля, проверете пощата си и кликнете на линка за потвърждение, преди да влезете.\n\n⚠️ Проверете и папка "Спам"!'
+              : 'Please check your inbox and click the verification link before logging in.\n\n⚠️ Check your Spam folder too!',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              final result = await _authService.resendVerificationEmail();
+              if (!mounted) return;
+              Navigator.pop(ctx);
+              
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    result.success
+                        ? (isBg ? 'Имейлът е изпратен отново' : 'Verification email sent')
+                        : (result.error ?? (isBg ? 'Грешка' : 'Error')),
+                  ),
+                  backgroundColor: result.success ? Colors.green : Colors.red,
+                ),
+              );
+            },
+            child: Text(isBg ? 'Изпрати отново' : 'Resend Email'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(isBg ? 'Добре' : 'OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRegistrationSuccessDialog() {
+    final languageController = LanguageScope.of(context);
+    final isBg = languageController.locale.languageCode == 'bg';
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.mark_email_read, size: 48, color: Colors.green),
+        title: Text(isBg ? 'Проверете пощата си' : 'Check Your Email'),
+        content: Text(
+          isBg 
+              ? 'Изпратихме линк за потвърждение на ${_emailController.text.trim()}.\n\nМоля, кликнете на линка, за да активирате акаунта си.\n\n⚠️ Проверете и папка "Спам" ако не виждате имейла!'
+              : 'We sent a verification link to ${_emailController.text.trim()}.\n\nPlease click the link to activate your account.\n\n⚠️ Check your Spam folder if you don\'t see the email!',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              setState(() {
+                _isLogin = true;
+                _errorMessage = null;
+              });
+            },
+            child: Text(isBg ? 'Към вход' : 'Go to Login'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _resetPassword() async {
+    final languageController = LanguageScope.of(context);
+    final isBg = languageController.locale.languageCode == 'bg';
+    
     final email = _emailController.text.trim();
     
     if (email.isEmpty) {
-      setState(() => _errorMessage = 'Въведи имейл адрес');
+      setState(() => _errorMessage = isBg ? 'Въведи имейл адрес' : 'Enter email address');
       return;
     }
 
@@ -77,8 +167,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (result.success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Изпратен е имейл за възстановяване на паролата'),
+        SnackBar(
+          content: Text(isBg 
+              ? 'Изпратен е имейл за възстановяване на паролата' 
+              : 'Password reset email sent'),
           backgroundColor: Colors.green,
         ),
       );
@@ -182,7 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   if (value == null || value.trim().isEmpty) {
                     return isBg ? 'Въведи имейл' : 'Enter email';
                   }
-                  if (!value.contains('@')) {
+                  if (!value.contains('@') || !value.contains('.')) {
                     return isBg ? 'Невалиден имейл' : 'Invalid email';
                   }
                   return null;
