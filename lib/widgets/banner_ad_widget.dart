@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../services/ad_service.dart';
@@ -18,14 +18,22 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   @override
   void initState() {
     super.initState();
-    _loadAd();
+    _adService.addListener(_onAdServiceChanged);
     _proService.addListener(_onProStatusChanged);
+    _loadAd();
   }
 
   @override
   void dispose() {
+    _adService.removeListener(_onAdServiceChanged);
     _proService.removeListener(_onProStatusChanged);
     super.dispose();
+  }
+
+  void _onAdServiceChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _onProStatusChanged() {
@@ -36,13 +44,11 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   Future<void> _loadAd() async {
     await _adService.loadBannerAd();
-    if (mounted) {
-      setState(() {});
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+   
     if (_proService.isPro) {
       return const SizedBox.shrink();
     }

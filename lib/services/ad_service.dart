@@ -1,9 +1,9 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'pro_service.dart';
 
-class AdService {
+class AdService extends ChangeNotifier {
   AdService._internal();
 
   static final AdService _instance = AdService._internal();
@@ -32,6 +32,7 @@ class AdService {
   }
 
   Future<void> loadBannerAd() async {
+   
     if (ProService().isPro) {
       debugPrint('AdService: Pro user, skipping ads');
       return;
@@ -53,12 +54,14 @@ class AdService {
         onAdLoaded: (ad) {
           debugPrint('Banner ad loaded');
           _isBannerAdLoaded = true;
+          notifyListeners(); // Уведомява widget-ите
         },
         onAdFailedToLoad: (ad, error) {
           debugPrint('Banner ad failed to load: $error');
           ad.dispose();
           _bannerAd = null;
           _isBannerAdLoaded = false;
+          notifyListeners();
         },
         onAdOpened: (ad) {
           debugPrint('Banner ad opened');
@@ -76,6 +79,7 @@ class AdService {
     _bannerAd?.dispose();
     _bannerAd = null;
     _isBannerAdLoaded = false;
+    notifyListeners();
   }
 
   Future<void> reloadBannerAd() async {
