@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taskify - Smart To-Do List & Task Manager</title>
+    <meta name="description" content="Taskify is a comprehensive task management app with Google Calendar sync, smart reminders, recurring tasks, and widgets. Available on Google Play Store.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+        }
+        
+        .section {
+            background: white;
+            margin: 30px auto;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        
+        h3 {
+            color: #764ba2;
+            font-size: 1.4em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .feature-card {
+            padding: 25px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .feature-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 20px 10px;
+            transition: transform 0.2s;
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.05);
+        }
+        
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 50px;
+        }
+        
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .contact-info {
+            margin-top: 15px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📋 Taskify</h1>
+        <p>Smart To-Do List & Task Manager with Google Calendar Sync</p>
+    </header>
+
+    <div class="container">
+        <div class="section">
+            <h2>About Taskify</h2>
+            <p>Taskify is a comprehensive task management application designed to help you organize your daily tasks, manage your schedule, and boost your productivity. With seamless Google Calendar synchronization, smart reminders, and intuitive design, Taskify makes task management effortless.</p>
+            
+            <p style="margin-top: 15px;">Whether you're managing personal tasks, work projects, or recurring activities, Taskify provides all the tools you need to stay organized and on track.</p>
+        </div>
+
+        <div class="section">
+            <h2>Key Features</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Google Calendar Sync</h3>
+                    <p>Seamlessly sync your tasks with Google Calendar. When you create a task with a due date, it automatically creates a corresponding event in your calendar.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⏰</div>
+                    <h3>Smart Reminders</h3>
+                    <p>Never miss a deadline with customizable notifications and reminders. Get timely alerts for your important tasks.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔁</div>
+                    <h3>Recurring Tasks</h3>
+                    <p>Set up recurring tasks for daily, weekly, or monthly activities. Perfect for routine activities and habits.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Home Screen Widgets</h3>
+                    <p>Quick access to your tasks directly from your home screen with customizable widgets.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎤</div>
+                    <h3>Voice Input</h3>
+                    <p>Create tasks quickly using voice input. Just speak your task and let Taskify handle the rest.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Multi-Language Support</h3>
+                    <p>Available in 10 languages including English, Bulgarian, German, French, Italian, Greek, Spanish, Portuguese, Russian, and Turkish.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">☀️</div>
+                    <h3>Morning Briefing</h3>
+                    <p>Start your day right with daily morning briefings that prioritize your top tasks.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">💎</div>
+                    <h3>Free & Premium</h3>
+                    <p>Core features available for free. Upgrade to Pro for advanced features and ad-free experience.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>How Taskify Uses Your Google Calendar Data</h2>
+            <p><strong>Taskify syncs user's tasks with their Google Calendar.</strong> When a user creates a task with a due date, it automatically creates a corresponding event in their Google Calendar for better time management.</p>
+            
+            <h3>What We Access:</h3>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>View and edit events on all your calendars (calendar.events scope)</li>
+            </ul>
+            
+            <h3>Why We Need This Access:</h3>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li><strong>Task-to-Calendar Sync:</strong> When you create a task in Taskify, we create a matching event in your Google Calendar</li>
+                <li><strong>Bi-directional Updates:</strong> Changes to tasks in Taskify update the calendar events, and vice versa</li>
+                <li><strong>Better Organization:</strong> See your tasks alongside your other calendar events for complete schedule visibility</li>
+            </ul>
+            
+            <p style="margin-top: 15px;"><strong>Your Privacy Matters:</strong> We only access calendar data that you explicitly authorize. Your data is used solely for syncing tasks with your calendar and is never shared with third parties.</p>
+        </div>
+
+        <div class="section" style="text-align: center;">
+            <h2>Download Taskify</h2>
+            <p>Get started with Taskify today and transform the way you manage your tasks!</p>
+            <a href="https://play.google.com/store/apps/details?id=com.ivoexp.taskify" class="cta-button" target="_blank">
+                Download on Google Play
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p><strong>Taskify - Smart To-Do List</strong></p>
+            <p>Developed by Ivo</p>
+            <div class="contact-info">
+                <p>Support Email: <a href="mailto:ivoexp@gmail.com">ivoexp@gmail.com</a></p>
+                <p><a href="privacy-policy.html">Privacy Policy</a></p>
+            </div>
+            <p style="margin-top: 20px; opacity: 0.7;">© 2026 Taskify. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
