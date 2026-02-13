@@ -15,6 +15,11 @@ import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../auth/login_screen.dart';
 import 'statistics_screen.dart';
+import '../../services/task_view_preference.dart';
+import '../home/home_screen.dart';
+import '../../services/google_calendar_service.dart';
+import '../../services/morning_briefing_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -26,7 +31,41 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final _authService = AuthService();
   final _firestoreService = FirestoreService();
+  final _viewPreference = TaskViewPreference();
   bool _isSyncing = false;
+  bool _isCalendarConnected = false;
+  final _calendarService = GoogleCalendarService();
+  final _morningBriefingService = MorningBriefingService();
+  bool _isMorningBriefingEnabled = false;
+  int _briefingHour = 8;
+  int _briefingMinute = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBriefingTime();
+    _loadMorningBriefingSetting();
+    _checkCalendarConnection();
+  }
+
+  Future<void> _loadMorningBriefingSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isMorningBriefingEnabled = prefs.getBool('morning_briefing_enabled') ?? false;
+    });
+  }
+
+  Future<void> _saveMorningBriefingSetting(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('morning_briefing_enabled', value);
+  }
+
+  Future<void> _checkCalendarConnection() async {
+    final isConnected = _calendarService.isConnected;
+    setState(() {
+      _isCalendarConnected = isConnected;
+    });
+  }
 
   // Списък с предефинирани цветове за color picker
   static const List<Color> _categoryColors = [
@@ -588,6 +627,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  // Load saved briefing time
+  Future<void> _loadBriefingTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _briefingHour = prefs.getInt('briefing_hour') ?? 8;
+      _briefingMinute = prefs.getInt('briefing_minute') ?? 0;
+    });
+  }
+
+  // Format time for display
+  String _formatTime(int hour, int minute) {
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    final minuteStr = minute.toString().padLeft(2, '0');
+    return '$displayHour:$minuteStr $period';
+  }
+
+  // Select briefing time
+  Future<void> _selectBriefingTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: _briefingHour, minute: _briefingMinute),
+    );
+    
+    if (picked != null) {
+      setState(() {
+        _briefingHour = picked.hour;
+        _briefingMinute = picked.minute;
+      });
+      
+      // Save to preferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('briefing_hour', _briefingHour);
+      await prefs.setInt('briefing_minute', _briefingMinute);
+      
+      // Reschedule briefing
+      await _morningBriefingService.scheduleDailyBriefing(
+        hour: _briefingHour,
+        minute: _briefingMinute,
+      );
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppText.of(context).briefingTimeSetTo(_formatTime(_briefingHour, _briefingMinute))),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _exportData(BuildContext context) async {
     final t = AppText.of(context);
     final languageController = LanguageScope.of(context);
@@ -980,6 +1071,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
           ),
+          // Time Picker (only show if briefing enabled)
+          if (_isMorningBriefingEnabled) ...[
+            const SizedBox(height: 8),
+            Card(
+              child: ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.access_time, color: Colors.blue),
+                ),
+                title: Text(t.briefingTime),
+                subtitle: Text(_formatTime(_briefingHour, _briefingMinute)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _selectBriefingTime,
+              ),
+            ),
+          ],
 
           const SizedBox(height: 24),
 
@@ -1162,7 +1273,464 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
 
           const SizedBox(height: 24),
-
+          // Google Calendar
+          // Google Calendar
+          Text(
+            t.googleCalendar,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: _isCalendarConnected ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      _isCalendarConnected ? Icons.event_available : Icons.event_busy,
+                      color: _isCalendarConnected ? Colors.green : Colors.grey,
+                    ),
+                  ),
+                  title: Text(_isCalendarConnected ? t.calendarConnected : t.calendarNotConnected),
+                  subtitle: Text(
+                    _isCalendarConnected ? t.calendarSyncEnabled : t.connectForSync,
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                  trailing: TextButton(
+                    onPressed: () async {
+                      if (_isCalendarConnected) {
+                        await _calendarService.disconnect();
+                        setState(() => _isCalendarConnected = false);
+                      } else {
+                        final success = await _calendarService.connect();
+                        setState(() => _isCalendarConnected = success);
+                        if (!success && mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(t.connectionFailed)),
+                          );
+                        }
+                      }
+                    },
+                    child: Text(_isCalendarConnected ? t.disconnect : t.connect),
+                  ),
+                ),
+                if (_isCalendarConnected) ...[
+                  const Divider(height: 0),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.sync, color: Colors.blue),
+                    ),
+                    title: Text(t.syncNow),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () async {
+                      final taskBox = Hive.box<Task>('tasks');
+                      int synced = 0;
+                      for (final task in taskBox.values) {
+                        final now = DateTime.now();
+                        final today = DateTime(now.year, now.month, now.day);
+                        if (!task.isCompleted && !task.isArchived && task.dueDate.isAfter(today.subtract(const Duration(days: 1)))) {
+                          // Ресетваме старото ID ако има
+                          if (task.googleCalendarEventId != null) {
+                            await _calendarService.deleteCalendarEvent(task.googleCalendarEventId!);
+                            task.googleCalendarEventId = null;
+                          }
+                          final eventId = await _calendarService.addTaskToCalendar(task);
+                          if (eventId != null) {
+                            task.googleCalendarEventId = eventId;
+                            await task.save();
+                            synced++;
+                          }
+                        }
+                      }
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(t.tasksSynced(synced))),
+                        );
+                                            }
+                    },
+                  ),
+                  const Divider(height: 0),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.cloud_download, color: Colors.orange),
+                    ),
+                    title: Text(t.syncFromCalendar),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () async {
+                      final taskBox = Hive.box<Task>('tasks');
+                      int updated = 0;
+                      for (final task in taskBox.values) {
+                        if (task.googleCalendarEventId != null) {
+                          final event = await _calendarService.getCalendarEvent(task.googleCalendarEventId!);
+                          if (event != null) {
+                            if (event['deleted'] == true) {
+                              // Събитието е изтрито - питаме потребителя
+                              // Засега само маркираме
+                              task.googleCalendarEventId = null;
+                              await task.save();
+                              updated++;
+                            } else {
+                              // Обновяваме задачата ако има промени
+                              bool changed = false;
+                              if (event['summary'] != null && event['summary'] != task.title) {
+                                task.title = event['summary'];
+                                changed = true;
+                              }
+                              if (event['description'] != null && event['description'] != (task.notes ?? '')) {
+                                task.notes = event['description'].isEmpty ? null : event['description'];
+                                changed = true;
+                              }
+                              if (event['startDateTime'] != null) {
+                                try {
+                                  final newDate = DateTime.parse(event['startDateTime']);
+                                  if (newDate != task.dueDate) {
+                                    task.dueDate = newDate;
+                                    changed = true;
+                                  }
+                                } catch (_) {}
+                              }
+                              if (changed) {
+                                await task.save();
+                                updated++;
+                              }
+                            }
+                          }
+                        }
+                      }
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(t.tasksUpdated(updated))),
+                        );
+                      }
+                                        },
+                  ),
+                  const Divider(height: 0),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.download, color: Colors.purple),
+                    ),
+                    title: Text(t.importFromCalendar),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () async {
+                      final taskBox = Hive.box<Task>('tasks');
+                      final categoryBox = Hive.box<Category>('categories');
+                      
+                      // Helper функция за getOrCreate категория
+                      Future<String> getOrCreateCat(String id, String name, int color) async {
+                        var cat = categoryBox.get(id);
+                        if (cat == null) {
+                          cat = Category(id: id, name: name, colorValue: color);
+                          await categoryBox.put(id, cat);
+                        }
+                        return cat.id;
+                      }
+                      
+                      // Категория ID константи
+                      const catIdCalendar = 'cal_events';
+                      const catIdBirthdays = 'cal_birthdays';
+                      const catIdOoo = 'cal_ooo';
+                      const catIdFocus = 'cal_focus';
+                      const catIdLocation = 'cal_location';
+                      const catIdGoogleTasks = 'google_tasks'; // НОВО!
+                      
+                      // Вземаме съществуващите IDs (за duplicate check)
+                      final existingIds = taskBox.values
+                          .where((t) => t.googleCalendarEventId != null)
+                          .map((t) => t.googleCalendarEventId!)
+                          .toSet();
+                      
+                      // Title+Date set за duplicate detection
+                      final existingTitleDates = <String>{};
+                      for (final task in taskBox.values.where((t) => t.googleCalendarEventId != null)) {
+                        if (task.dueDate != null) {
+                          final dateKey = '${task.title}_${task.dueDate!.year}-${task.dueDate!.month}-${task.dueDate!.day}';
+                          existingTitleDates.add(dateKey);
+                        }
+                      }
+                      
+                      int imported = 0;
+                      int skipped = 0;
+                      
+                      print('=== IMPORT DEBUG ===');
+                      
+                      // === 1. IMPORT CALENDAR EVENTS ===
+                      final events = await _calendarService.getUpcomingEvents(days: 60);
+                      print('Total events: ${events.length}');
+                      print('Existing IDs count: ${existingIds.length}');
+                      
+                      // Debug първите 10 birthdays
+                      final birthdays = events.where((e) => e['eventType'] == 'birthday').take(10);
+                      for (final bd in birthdays) {
+                        print('---');
+                        print('RAW ID: ${bd['id']}');
+                        print('Summary: ${bd['summary']}');
+                        print('Type: ${bd['eventType']}');
+                      }
+                      print('=== END DEBUG ===');
+                      
+                      // 30-day threshold
+                      final now = DateTime.now();
+                      final thresholdDate = now.subtract(const Duration(days: 30));
+                      
+                      for (final event in events) {
+                        final eventId = event['id'] as String?;
+                        if (eventId == null) continue;
+                        
+                        // ID strip logic (за recurring events)
+                        String baseId = eventId;
+                        if (eventId.contains('_')) {
+                          baseId = eventId.split('_').first;
+                        }
+                        
+                        // Check existing ID
+                        final idExists = existingIds.any((id) => 
+                          id == eventId || id == baseId || id.split('_').first == baseId
+                        );
+                        
+                        if (idExists) {
+                          print('SKIP duplicate: ${event['summary']} - ID: $eventId');
+                          skipped++;
+                          continue;
+                        }
+                        
+                        // Debug non-birthday events
+                        final eventType = event['eventType'] as String? ?? 'default';
+                        if (eventType != 'birthday') {
+                          print('Non-birthday: ${event['summary']} - Type: $eventType - Date: ${event['startDateTime']}');
+                        }
+                        
+                        // Parse date
+                        DateTime dueDate;
+                        try {
+                          final startDateTime = event['startDateTime'] as String?;
+                          if (startDateTime == null) {
+                            print('SKIP no date: ${event['summary']}');
+                            skipped++;
+                            continue;
+                          }
+                          
+                          dueDate = DateTime.parse(startDateTime).toLocal();
+                          
+                          // Apply threshold
+                          if (dueDate.isBefore(thresholdDate)) {
+                            print('SKIP old event: ${event['summary']} - Date: $dueDate');
+                            skipped++;
+                            continue;
+                          }
+                        } catch (e) {
+                          print('SKIP parse error: ${event['summary']} - Error: $e');
+                          skipped++;
+                          continue;
+                        }
+                        
+                        // Title+Date duplicate check
+                        final dateKey = '${event['summary']}_${dueDate.year}-${dueDate.month}-${dueDate.day}';
+                        if (existingTitleDates.contains(dateKey)) {
+                          print('SKIP duplicate title+date: ${event['summary']} - Date: ${dueDate.year}-${dueDate.month}-${dueDate.day}');
+                          skipped++;
+                          continue;
+                        }
+                        existingTitleDates.add(dateKey);
+                        
+                        // Category assignment
+                        String categoryId;
+                        switch (eventType) {
+                          case 'birthday':
+                            categoryId = await getOrCreateCat(catIdBirthdays, 'Birthdays', 0xFFE91E63);
+                            break;
+                          case 'outOfOffice':
+                            categoryId = await getOrCreateCat(catIdOoo, 'Out of Office', 0xFFFF9800);
+                            break;
+                          case 'focusTime':
+                            categoryId = await getOrCreateCat(catIdFocus, 'Focus Time', 0xFF9C27B0);
+                            break;
+                          case 'workingLocation':
+                            categoryId = await getOrCreateCat(catIdLocation, 'Work Location', 0xFF4CAF50);
+                            break;
+                          default:
+                            categoryId = await getOrCreateCat(catIdCalendar, 'Calendar Events', 0xFF2196F3);
+                        }
+                        
+                        final newTask = Task(
+                          title: event['summary'] ?? 'Untitled Event',
+                          dueDate: dueDate,
+                          categoryId: categoryId,
+                          priority: eventType == 'birthday' ? 2 : 1,
+                          notes: event['description'],
+                          googleCalendarEventId: eventId,
+                        );
+                        await taskBox.add(newTask);
+                        imported++;
+                      }
+                      
+                      // === 2. IMPORT GOOGLE TASKS ===
+                      print('=== IMPORTING GOOGLE TASKS ===');
+                      final googleTasks = await _calendarService.getAllGoogleTasks();
+                      print('Total Google Tasks: ${googleTasks.length}');
+                      
+                      for (final gTask in googleTasks) {
+                        final taskId = gTask['id'] as String?;
+                        if (taskId == null) continue;
+                        
+                        // Prefix с gtask_ за да отличаваме от calendar events
+                        final prefixedId = 'gtask_$taskId';
+                        
+                        // Check existing
+                        if (existingIds.contains(prefixedId)) {
+                          print('SKIP duplicate Google Task: ${gTask['title']}');
+                          skipped++;
+                          continue;
+                        }
+                        
+                        // Status check - skip completed
+                        final status = gTask['status'] as String?;
+                        if (status == 'completed') {
+                          print('SKIP completed task: ${gTask['title']}');
+                          skipped++;
+                          continue;
+                        }
+                        
+                        // Due date check - skip if no due date
+                        final dueStr = gTask['due'] as String?;
+                        if (dueStr == null) {
+                          print('SKIP task without due date: ${gTask['title']}');
+                          skipped++;
+                          continue;
+                        }
+                        
+                        // Parse due date
+                        DateTime dueDate;
+                        try {
+                          dueDate = DateTime.parse(dueStr).toLocal();
+                          
+                          // Apply threshold
+                          if (dueDate.isBefore(thresholdDate)) {
+                            print('SKIP old Google Task: ${gTask['title']} - Date: $dueDate');
+                            skipped++;
+                            continue;
+                          }
+                        } catch (e) {
+                          print('SKIP Google Task parse error: ${gTask['title']} - Error: $e');
+                          skipped++;
+                          continue;
+                        }
+                        
+                        // Title+Date duplicate check
+                        final dateKey = '${gTask['title']}_${dueDate.year}-${dueDate.month}-${dueDate.day}';
+                        if (existingTitleDates.contains(dateKey)) {
+                          print('SKIP duplicate Google Task title+date: ${gTask['title']}');
+                          skipped++;
+                          continue;
+                        }
+                        existingTitleDates.add(dateKey);
+                        
+                        // Create task
+                        final categoryId = await getOrCreateCat(
+                          catIdGoogleTasks, 
+                          'Google Tasks', 
+                          0xFF4CAF50, // Green color
+                        );
+                        
+                        final newTask = Task(
+                          title: gTask['title'] ?? 'Untitled Task',
+                          dueDate: dueDate,
+                          categoryId: categoryId,
+                          priority: 1,
+                          notes: gTask['notes'],
+                          googleCalendarEventId: prefixedId,
+                        );
+                        await taskBox.add(newTask);
+                        imported++;
+                        print('IMPORTED Google Task: ${gTask['title']}');
+                      }
+                      
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Imported: $imported, Skipped: $skipped')),
+                        );
+                      }
+                    },
+                  ),
+                  const Divider(height: 0),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.delete_forever, color: Colors.red),
+                    ),
+                    title: Text(t.deleteAllCalendarTasks),
+                    subtitle: const Text('Remove all imported events', style: TextStyle(fontSize: 12)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () async {
+                      // Confirm dialog
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('${t.deleteAllCalendarTasks}?'),
+                          content: Text(t.deleteCalendarTasksConfirm),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        ),
+                      );
+                      
+                      if (confirm == true) {
+                        final taskBox = Hive.box<Task>('tasks');
+                        final tasksToDelete = taskBox.values
+                            .where((t) => t.googleCalendarEventId != null)
+                            .toList();
+                        
+                        for (final task in tasksToDelete) {
+                          await task.delete();
+                        }
+                        
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Deleted ${tasksToDelete.length} calendar tasks'),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                ],
+              ],
+            ),
+          ),
           // Тема
           Text(
             t.theme,
@@ -1175,41 +1743,115 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Card(
             child: Column(
               children: [
-                RadioListTile<ThemeMode>(
-                  value: ThemeMode.system,
-                  groupValue: currentMode,
+                RadioListTile<int>(
+                  value: 0,
+                  groupValue: themeController.isAmoled ? 3 : (currentMode == ThemeMode.system ? 0 : (currentMode == ThemeMode.light ? 1 : 2)),
                   title: Text(t.systemTheme),
-                  onChanged: (mode) {
-                    if (mode == null) return;
-                    themeController.setMode(mode);
+                  onChanged: (value) {
+                    themeController.setMode(ThemeMode.system);
                   },
                 ),
                 const Divider(height: 0),
-                RadioListTile<ThemeMode>(
-                  value: ThemeMode.light,
-                  groupValue: currentMode,
+                RadioListTile<int>(
+                  value: 1,
+                  groupValue: themeController.isAmoled ? 3 : (currentMode == ThemeMode.system ? 0 : (currentMode == ThemeMode.light ? 1 : 2)),
                   title: Text(t.lightTheme),
-                  onChanged: (mode) {
-                    if (mode == null) return;
-                    themeController.setMode(mode);
+                  onChanged: (value) {
+                    themeController.setMode(ThemeMode.light);
                   },
                 ),
                 const Divider(height: 0),
-                RadioListTile<ThemeMode>(
-                  value: ThemeMode.dark,
-                  groupValue: currentMode,
+                RadioListTile<int>(
+                  value: 2,
+                  groupValue: themeController.isAmoled ? 3 : (currentMode == ThemeMode.system ? 0 : (currentMode == ThemeMode.light ? 1 : 2)),
                   title: Text(t.darkTheme),
-                  onChanged: (mode) {
-                    if (mode == null) return;
-                    themeController.setMode(mode);
+                  onChanged: (value) {
+                    themeController.setMode(ThemeMode.dark);
+                  },
+                ),
+                const Divider(height: 0),
+                RadioListTile<int>(
+                  value: 3,
+                  groupValue: themeController.isAmoled ? 3 : (currentMode == ThemeMode.system ? 0 : (currentMode == ThemeMode.light ? 1 : 2)),
+                  title: Text(t.amoledTheme),
+                  subtitle: Text(
+                    'OLED',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    themeController.setAmoled(true);
                   },
                 ),
               ],
             ),
           ),
 
+          
+
           const SizedBox(height: 24),
 
+
+          // Morning Briefing
+          Text(
+            t.morningBriefing,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: SwitchListTile(
+              secondary: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.wb_sunny_rounded, color: Colors.orange),
+              ),
+              title: Text(t.morningBriefing),
+              subtitle: Text(t.dailyTaskSummaryAt(_formatTime(_briefingHour, _briefingMinute))),
+              value: _isMorningBriefingEnabled,
+              onChanged: (value) async {
+                setState(() => _isMorningBriefingEnabled = value);
+                await _saveMorningBriefingSetting(value);
+                if (value) {
+                  await _morningBriefingService.scheduleDailyBriefing(
+                    hour: _briefingHour,
+                    minute: _briefingMinute,
+                  );
+                } else {
+                  await _morningBriefingService.cancelDailyBriefing();
+                }
+              },
+            ),
+          ),
+          // Time Picker (only show if briefing enabled)
+          if (_isMorningBriefingEnabled) ...[
+            const SizedBox(height: 8),
+            Card(
+              child: ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.access_time, color: Colors.blue),
+                ),
+                title: Text(t.briefingTime),
+                subtitle: Text(_formatTime(_briefingHour, _briefingMinute)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _selectBriefingTime,
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 24),
           // Backup / Restore
           Text(
             t.localData,
@@ -1290,3 +1932,5 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 }
+
+

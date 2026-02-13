@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../task/task_screen.dart';
 import '../calendar/calendar_screen.dart';
@@ -18,6 +20,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   final ProService _proService = ProService();
+  bool _welcomeChecked = false;
 
   late final List<Widget> _screens = const [
     TaskScreen(),
@@ -29,7 +32,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _proService.addListener(_onProStatusChanged);
-    _showTrialWelcome();
+    if (!kIsWeb) {
+      _initAndShowWelcome();
+    }
   }
 
   @override
@@ -41,17 +46,51 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onProStatusChanged() {
     if (mounted) {
       setState(() {});
+      // Ако ProService е инициализиран и още не сме проверили welcome
+      if (!_welcomeChecked && _proService.isInitialized) {
+        _showTrialWelcome();
+      }
     }
   }
 
-  void _showTrialWelcome() {
+  /// Чака ProService да се инициализира, после показва welcome
+  Future<void> _initAndShowWelcome() async {
+    // Чакаме ProService да се инициализира (ако не е)
+    if (!_proService.isInitialized) {
+      await _proService.initialize();
+    }
+    _showTrialWelcome();
+  }
+
+  void _showTrialWelcome() async {
+    if (_welcomeChecked) return;
+    _welcomeChecked = true;
+    
+    // Проверяваме SharedPreferences ПЪРВО
+    final prefs = await SharedPreferences.getInstance();
+    final alreadyShown = prefs.getBool('taskify_welcome_shown_v2') ?? false;
+    
+    debugPrint('Welcome check: alreadyShown=$alreadyShown, isTrial=${_proService.isTrial}, daysLeft=${_proService.trialDaysLeft}');
+    
+    if (alreadyShown) {
+      debugPrint('Welcome dialog already shown, skipping');
+      return;
+    }
+    
+    // Показваме само ако е в trial и има поне 13 дни
     if (_proService.isTrial && _proService.trialDaysLeft >= 13) {
+      // Маркираме като показан ПРЕДИ да покажем диалога
+      await prefs.setBool('taskify_welcome_shown_v2', true);
+      debugPrint('Welcome dialog will be shown, marked as shown');
+      
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
         final languageController = LanguageScope.of(context);
         final isBg = languageController.locale.languageCode == 'bg';
         
         showDialog(
           context: context,
+          barrierDismissible: false,
           builder: (ctx) => AlertDialog(
             icon: const Icon(Icons.celebration_rounded, size: 48, color: Colors.amber),
             title: Text(isBg ? 'Добре дошъл!' : 'Welcome!'),
@@ -73,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onDestinationSelected(int index) async {
-    if (index == 1 && !_proService.canUseCalendar) {
+    if (!kIsWeb && index == 1 && !_proService.canUseCalendar) {
       final languageController = LanguageScope.of(context);
       final isBg = languageController.locale.languageCode == 'bg';
       
@@ -102,11 +141,9 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Trial/Promo банер
-            if (!_proService.isPaid && !_proService.isPromoCode && _proService.isTrial)
+            if (!kIsWeb && !_proService.isPaid && !_proService.isPromoCode && _proService.isTrial)
               _buildProBanner(context),
             
-            // Основно съдържание
             Expanded(
               child: IndexedStack(
                 index: _currentIndex,
@@ -114,7 +151,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             
-            // Банер реклама (само за Free потребители)
             const BannerAdWidget(),
           ],
         ),
@@ -153,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Stack(
                     children: [
                       const Icon(Icons.calendar_today_outlined),
-                      if (!_proService.canUseCalendar)
+                      if (!kIsWeb && !_proService.canUseCalendar)
                         Positioned(
                           right: -2,
                           top: -2,
@@ -213,8 +249,8 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: Text(
               _proService.isTrial
-                  ? (isBg ? 'Пробен период: $daysLeft дни' : 'Trial: $daysLeft days left')
-                  : (isBg ? 'Промо код: $daysLeft дни' : 'Promo: $daysLeft days left'),
+                  ? AppText.of(context).trialDaysLeft(daysLeft)
+                  : AppText.of(context).promoDaysLeft(daysLeft),
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w500,
@@ -234,7 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
               minimumSize: Size.zero,
             ),
             child: Text(
-              isBg ? 'Надгради' : 'Upgrade',
+              AppText.of(context).upgrade,
               style: const TextStyle(color: Colors.white, fontSize: 12),
             ),
           ),
@@ -243,5 +279,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+
 
 

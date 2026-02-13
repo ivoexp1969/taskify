@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-
 import '../services/ad_service.dart';
 import '../services/pro_service.dart';
+
+// Условен import
+import '../services/ads_stub.dart' if (dart.library.io) 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class BannerAdWidget extends StatefulWidget {
   const BannerAdWidget({super.key});
@@ -18,15 +20,19 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   @override
   void initState() {
     super.initState();
-    _adService.addListener(_onAdServiceChanged);
-    _proService.addListener(_onProStatusChanged);
-    _loadAd();
+    if (!kIsWeb) {
+      _adService.addListener(_onAdServiceChanged);
+      _proService.addListener(_onProStatusChanged);
+      _loadAd();
+    }
   }
 
   @override
   void dispose() {
-    _adService.removeListener(_onAdServiceChanged);
-    _proService.removeListener(_onProStatusChanged);
+    if (!kIsWeb) {
+      _adService.removeListener(_onAdServiceChanged);
+      _proService.removeListener(_onProStatusChanged);
+    }
     super.dispose();
   }
 
@@ -48,13 +54,17 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-   
+    // На web не показваме реклами
+    if (kIsWeb) {
+      return const SizedBox.shrink();
+    }
+
     if (_proService.isPro) {
       return const SizedBox.shrink();
     }
 
     final bannerAd = _adService.bannerAd;
-    
+
     if (!_adService.isBannerAdLoaded || bannerAd == null) {
       return const SizedBox(height: 50);
     }

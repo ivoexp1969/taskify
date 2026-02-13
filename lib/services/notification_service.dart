@@ -1,10 +1,12 @@
 import 'dart:math';
+import 'package:flutter/material.dart';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/task.dart';
+import '../main.dart';
 
 // Top-level функция за alarm callback
 @pragma('vm:entry-point')
@@ -18,6 +20,7 @@ Future<void> _alarmCallback(int id) async {
   final prefs = await SharedPreferences.getInstance();
   final title = prefs.getString('alarm_${id}_title') ?? 'Напомняне';
   final body = prefs.getString('alarm_${id}_body') ?? 'Имаш задача за изпълнение';
+  final payload = prefs.getString('alarm_${id}_payload');
 
   const androidDetails = AndroidNotificationDetails(
     'task_reminders',
@@ -33,10 +36,18 @@ Future<void> _alarmCallback(int id) async {
 
   const platformDetails = NotificationDetails(android: androidDetails);
 
-  await plugin.show(id, title, body, platformDetails);
+  await plugin.show(id, title, body, platformDetails, payload: payload);
 
-  await prefs.remove('alarm_${id}_title');
-  await prefs.remove('alarm_${id}_body');
+  // If this is morning briefing, set flag so app shows dialog on launch
+  if (payload == 'morning_briefing') {
+    await prefs.setBool('show_morning_briefing', true);
+  }
+
+  if (payload != 'morning_briefing') {
+    await prefs.remove('alarm_${id}_title');
+    await prefs.remove('alarm_${id}_body');
+    await prefs.remove('alarm_${id}_payload');
+  }
 }
 
 class NotificationService {
@@ -50,6 +61,19 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
+
+  /// Call from main() to register notification tap handler
+  Future<void> init() async {
+    await _initIfNeeded();
+    final launchDetails = await _plugin.getNotificationAppLaunchDetails();
+    if (launchDetails?.didNotificationLaunchApp == true) {
+      final payload = launchDetails!.notificationResponse?.payload;
+      if (payload == 'morning_briefing') {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('show_morning_briefing', true);
+      }
+    }
+  }
 
   Future<void> _initIfNeeded() async {
     if (_initialized) return;
@@ -68,7 +92,14 @@ class NotificationService {
       iOS: iosInit,
     );
 
-    await _plugin.initialize(initSettings);
+    await _plugin.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: (details) {
+        if (details.payload == 'morning_briefing') {
+          _handleMorningBriefingTap();
+        }
+      },
+    );
 
     final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
@@ -214,6 +245,77 @@ class NotificationService {
         task.notificationIds = newIds;
         await task.save();
       }
+    } catch (_) {}
+  }
+
+  /// Generic method to schedule a notification
+  Future<void> scheduleNotification({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime scheduledDate,
+    bool isDaily = false,
+    String? payload,
+  }) async {
+    try {
+      await _initIfNeeded();
+      final prefs = await SharedPreferences.getInstance();
+      
+      await prefs.setString('alarm_${id}_title', title);
+      await prefs.setString('alarm_${id}_body', body);
+      if (payload != null) {
+        await prefs.setString('alarm_${id}_payload', payload);
+      }
+
+      if (isDaily) {
+        await AndroidAlarmManager.periodic(
+          const Duration(days: 1),
+          id,
+          _alarmCallback,
+          exact: true,
+          wakeup: true,
+          rescheduleOnReboot: true,
+          startAt: scheduledDate,
+        );
+      } else {
+        await AndroidAlarmManager.oneShotAt(
+          scheduledDate,
+          id,
+          _alarmCallback,
+          exact: true,
+          wakeup: true,
+          rescheduleOnReboot: true,
+        );
+      }
+    } catch (_) {}
+  }
+
+  void _handleMorningBriefingTap() {
+    // Import is needed in main.dart
+    final context = MyApp.navigatorKey.currentContext;
+    if (context != null) {
+      // We'll import and call the dialog from main.dart
+      _showBriefingCallback?.call(context);
+    }
+  }
+  
+  static Function(BuildContext)? _showBriefingCallback;
+  
+  static void setMorningBriefingCallback(Function(BuildContext) callback) {
+    _showBriefingCallback = callback;
+  }
+  
+  /// Generic method to cancel a notification
+  Future<void> cancelNotification(int id) async {
+    try {
+      await _initIfNeeded();
+      await AndroidAlarmManager.cancel(id);
+      await _plugin.cancel(id);
+      
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('alarm_${id}_title');
+      await prefs.remove('alarm_${id}_body');
+      await prefs.remove('alarm_${id}_payload');
     } catch (_) {}
   }
 }

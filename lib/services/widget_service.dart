@@ -1,61 +1,80 @@
-import 'dart:convert';
+﻿import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/task.dart';
 
 class WidgetService {
-  static const platform = MethodChannel('com.example.task_manager/widget');
+  static const _channel = MethodChannel('com.ivoexp.taskify/widget');
 
-  /// Синхронизира задачите за днес към widget-а
   static Future<void> updateWidget() async {
+    if (kIsWeb) return;
     try {
+      await _syncTasksToPrefs();
+      await _channel.invokeMethod('updateWidget');
+    } catch (e) {
+      debugPrint('Widget update error: $e');
+    }
+  }
+
+  static Future<void> _syncTasksToPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
       final taskBox = Hive.box<Task>('tasks');
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       final tomorrow = today.add(const Duration(days: 1));
 
-      // Филтрираме задачите за днес
-      final todayTasks = taskBox.values.where((task) {
-        final taskDate = DateTime(
-          task.dueDate.year,
-          task.dueDate.month,
-          task.dueDate.day,
-        );
-        return !task.isCompleted &&
-            !taskDate.isBefore(today) &&
-            taskDate.isBefore(tomorrow);
+      final todayTasks = taskBox.values.where((t) {
+        if (t.isCompleted) return false;
+        final taskDate = DateTime(t.dueDate.year, t.dueDate.month, t.dueDate.day);
+        return taskDate.isBefore(tomorrow);
       }).toList();
 
-      // Сортираме по приоритет (високият първи)
-      todayTasks.sort((a, b) => b.priority.compareTo(a.priority));
+      todayTasks.sort((a, b) {
+        final aOverdue = a.dueDate.isBefore(now);
+        final bOverdue = b.dueDate.isBefore(now);
+        if (aOverdue && !bOverdue) return -1;
+        if (!aOverdue && bOverdue) return 1;
+        final priorityCompare = b.priority.compareTo(a.priority);
+        if (priorityCompare != 0) return priorityCompare;
+        return a.dueDate.compareTo(b.dueDate);
+      });
 
-      // Конвертираме в JSON
-      final tasksJson = todayTasks.map((task) => {
-        'key': task.key,
-        'title': task.title,
-        'priority': task.priority,
-        'isCompleted': task.isCompleted,
-        'dueDate': task.dueDate.toIso8601String(),
+      final tasksJson = todayTasks.map((t) => {
+        'key': t.key,
+        'title': t.title,
+        'isCompleted': t.isCompleted,
+        'priority': t.priority,
+        'dueDate': t.dueDate.toIso8601String(),
       }).toList();
 
-      // Записваме в SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
       await prefs.setString('widget_tasks', jsonEncode(tasksJson));
-
-      // Извикваме native метод за обновяване на widget-а
-      try {
-        await platform.invokeMethod('updateWidget');
-      } catch (e) {
-        // Widget методът може да не е наличен
-      }
     } catch (e) {
-      print('WidgetService error: $e');
+      debugPrint('Sync tasks error: $e');
     }
   }
 
-  /// Синхронизира промените от widget-а обратно към Hive
+  static Future<void> requestPinWidget() async {
+    if (kIsWeb) return;
+    try {
+      await _channel.invokeMethod('requestPinWidget');
+    } catch (e) {
+      debugPrint('Request pin widget error: $e');
+    }
+  }
+
+  static void setupWidgetListener() {
+    if (kIsWeb) return;
+    final taskBox = Hive.box<Task>('tasks');
+    taskBox.watch().listen((_) {
+      updateWidget();
+    });
+  }
+
   static Future<void> syncFromWidget() async {
+    if (kIsWeb) return;
     try {
       final prefs = await SharedPreferences.getInstance();
       final tasksJson = prefs.getString('widget_tasks');
@@ -65,49 +84,19 @@ class WidgetService {
       final List<dynamic> tasks = jsonDecode(tasksJson);
 
       for (final taskData in tasks) {
-        if (taskData['completedFromWidget'] == true) {
-          final taskKey = taskData['key'] as int?;
-          if (taskKey != null) {
-            final task = taskBox.get(taskKey);
-            if (task != null && !task.isCompleted) {
-              task.isCompleted = true;
-              await task.save();
-            }
+        final key = taskData['key'];
+        final isCompleted = taskData['isCompleted'] ?? false;
+        if (key != null && taskBox.containsKey(key)) {
+          final task = taskBox.get(key);
+          if (task != null && task.isCompleted != isCompleted) {
+            task.isCompleted = isCompleted;
+            if (isCompleted) task.completedAt = DateTime.now();
+            await task.save();
           }
         }
       }
-
-      // Обновяваме widget-а след синхронизация
-      await updateWidget();
     } catch (e) {
-      print('WidgetService syncFromWidget error: $e');
+      debugPrint('Sync from widget error: $e');
     }
-  }
-
-  /// Маркира задача като завършена (извиква се от widget)
-  static Future<void> completeTask(int taskKey) async {
-    try {
-      final taskBox = Hive.box<Task>('tasks');
-      final task = taskBox.get(taskKey);
-      if (task != null && !task.isCompleted) {
-        task.isCompleted = true;
-        await task.save();
-        await updateWidget();
-      }
-    } catch (e) {
-      print('WidgetService completeTask error: $e');
-    }
-  }
-
-  /// Слуша за промени от widget-а
-  static void setupWidgetListener() {
-    platform.setMethodCallHandler((call) async {
-      if (call.method == 'taskCompleted') {
-        final taskKey = call.arguments as int?;
-        if (taskKey != null) {
-          await completeTask(taskKey);
-        }
-      }
-    });
   }
 }

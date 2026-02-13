@@ -1,7 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import '../../services/google_calendar_service.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../models/task.dart';
@@ -10,6 +12,9 @@ import '../../utils/localization.dart';
 import '../../services/notification_service.dart';
 import '../../widgets/reminder_selector.dart';
 import '../../services/widget_service.dart';
+import '../../services/task_view_preference.dart';
+import '../../widgets/celebration_overlay.dart';
+import '../../widgets/task_card_styles.dart';
 
 enum CalendarView { day, week, month }
 
@@ -33,12 +38,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
   String _selectedCategoryId = '';
   int _selectedPriority = 1;
   String _selectedRecurrence = 'none';
+  final Set<int> _expandedCards = {};
 
   @override
   void initState() {
     super.initState();
     taskBox = Hive.box<Task>('tasks');
     categoryBox = Hive.box<Category>('categories');
+    
+    // Слушаме за промени в задачите
+    taskBox.listenable().addListener(_onTasksChanged);
 
     if (categoryBox.isEmpty) {
       final defaults = [
@@ -69,6 +78,29 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     final now = DateTime.now();
     _selectedDay = DateTime(now.year, now.month, now.day);
+  }
+
+  @override
+  void dispose() {
+    taskBox.listenable().removeListener(_onTasksChanged);
+    super.dispose();
+  }
+
+  void _onTasksChanged() {
+    if (mounted) setState(() {});
+  }
+
+  void _checkAndShowCelebration() {
+    final dayTasks = taskBox.values.where((task) {
+      final taskDate = _normalizeDate(task.dueDate);
+      return taskDate == _selectedDay && !task.isArchived;
+    }).toList();
+    
+    if (dayTasks.isNotEmpty && dayTasks.every((t) => t.isCompleted)) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) showCelebration(context);
+      });
+    }
   }
 
   DateTime _normalizeDate(DateTime d) => DateTime(d.year, d.month, d.day);
@@ -1103,6 +1135,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               notes: tempNotes.trim().isEmpty ? null : tempNotes.trim(),
                             );
                             await taskBox.add(newTask);
+                            // Google Calendar sync
+                            if (GoogleCalendarService().isConnected) {
+                              final eventId = await GoogleCalendarService().addTaskToCalendar(newTask);
+                              if (eventId != null) {
+                                newTask.googleCalendarEventId = eventId;
+                                await newTask.save();
+                              }
+                            }
+
                             await NotificationService().scheduleForTask(newTask);
                           }
 
@@ -1599,250 +1640,79 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           _formatDateTime(task.dueDate);
 
                       final now = DateTime.now();
-                      final isOverdue =
-                          !task.isCompleted && task.dueDate.isBefore(now);
+                      final hasTime = task.dueDate.hour != 0 || task.dueDate.minute != 0;
+                      final overdueDate = hasTime ? task.dueDate : DateTime(task.dueDate.year, task.dueDate.month, task.dueDate.day, 23, 59, 59);
+                      final isOverdue = !task.isCompleted && overdueDate.isBefore(now);
                       final isCompleted = task.isCompleted;
 
                       final accentColor = isOverdue
                           ? Colors.redAccent
                           : categoryColor;
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        child: Opacity(
-                          opacity: isCompleted ? 0.6 : 1.0,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: accentColor.withOpacity(0.12),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(14),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.surface,
-                                  border: Border.all(
-                                    color: theme.colorScheme.outline.withOpacity(0.1),
-                                    width: 1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: IntrinsicHeight(
-                                  child: Row(
-                                    children: [
-                                      // Цветна лента
-                                      Container(
-                                        width: 4,
-                                        decoration: BoxDecoration(
-                                          color: accentColor,
-                                          borderRadius: const BorderRadius.only(
-                                            topLeft: Radius.circular(14),
-                                            bottomLeft: Radius.circular(14),
-                                          ),
-                                        ),
-                                      ),
-                                      // Checkbox
-                                      Checkbox(
-                                        value: task.isCompleted,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(5),
-                                        ),
-                                        activeColor: accentColor,
-                                        onChanged: (bool? value) async {
-                                          final wasCompleted = task.isCompleted;
-                                          task.isCompleted =
-                                              value ?? !task.isCompleted;
-                                          task.completedAt = task.isCompleted ? DateTime.now() : null;
-                                          await task.save();
+                      return ExpandableTaskCard(
+                        task: task,
+                        category: cat,
+                        isOverdue: isOverdue,
+                        isCompleted: isCompleted,
+                        isExpanded: _expandedCards.contains(task.key),
+                        onToggleExpand: () {
+                          setState(() {
+                            if (_expandedCards.contains(task.key)) {
+                              _expandedCards.remove(task.key);
+                            } else {
+                              _expandedCards.add(task.key);
+                            }
+                          });
+                        },
+                        onToggleComplete: () async {
+                          final wasCompleted = task.isCompleted;
+                          task.isCompleted = !task.isCompleted;
+                          task.completedAt = task.isCompleted ? DateTime.now() : null;
+                          await task.save();
+                          if (!wasCompleted && task.isCompleted && task.recurrence != null) {
+                            final nextDate = _nextDueDate(task.dueDate, task.recurrence!);
+                            final newTask = Task(
+                              title: task.title,
+                              dueDate: nextDate,
+                              categoryId: task.categoryId,
+                              priority: task.priority,
+                              recurrence: task.recurrence,
+                              reminders: task.reminders,
+                            );
+                            await taskBox.add(newTask);
+                            // Google Calendar sync
+                            if (GoogleCalendarService().isConnected) {
+                              final eventId = await GoogleCalendarService().addTaskToCalendar(newTask);
+                              if (eventId != null) {
+                                newTask.googleCalendarEventId = eventId;
+                                await newTask.save();
+                              }
+                            }
 
-                                          if (!wasCompleted &&
-                                              task.isCompleted &&
-                                              task.recurrence != null) {
-                                            final nextDate = _nextDueDate(
-                                              task.dueDate,
-                                              task.recurrence!,
-                                            );
-                                            final newTask = Task(
-                                              title: task.title,
-                                              dueDate: nextDate,
-                                              categoryId: task.categoryId,
-                                              priority: task.priority,
-                                              recurrence: task.recurrence,
-                                              reminders: task.reminders,
-                                            );
-                                            await taskBox.add(newTask);
-                                            await NotificationService().scheduleForTask(newTask);
-                                          }
-
-                                          // Отменяме или планираме нотификации
-                                          if (task.isCompleted) {
-                                            await NotificationService().cancelForTask(task);
-                                          } else if (task.hasReminders) {
-                                            await NotificationService().scheduleForTask(task);
-                                          }
-                                          
-                                          await WidgetService.updateWidget();
-                                          setState(() {});
-                                        },
-                                      ),
-                                      // Съдържание
-                                      Expanded(
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 10),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                task.title,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w600,
-                                                  decoration: isCompleted
-                                                      ? TextDecoration.lineThrough
-                                                      : TextDecoration.none,
-                                                  color: isCompleted
-                                                      ? Colors.grey.shade500
-                                                      : theme.colorScheme.onSurface,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 6),
-                                              Wrap(
-                                                spacing: 6,
-                                                runSpacing: 4,
-                                                children: [
-                                                  if (categoryName.isNotEmpty)
-                                                    Container(
-                                                      padding: const EdgeInsets.symmetric(
-                                                        horizontal: 6,
-                                                        vertical: 2,
-                                                      ),
-                                                      decoration: BoxDecoration(
-                                                        color: categoryColor.withOpacity(0.15),
-                                                        borderRadius: BorderRadius.circular(12),
-                                                      ),
-                                                      child: Row(
-                                                        mainAxisSize: MainAxisSize.min,
-                                                        children: [
-                                                          Container(
-                                                            width: 5,
-                                                            height: 5,
-                                                            decoration: BoxDecoration(
-                                                              color: categoryColor,
-                                                              shape: BoxShape.circle,
-                                                            ),
-                                                          ),
-                                                          const SizedBox(width: 3),
-                                                          Text(
-                                                            categoryName,
-                                                            style: TextStyle(
-                                                              fontSize: 10,
-                                                              fontWeight: FontWeight.w500,
-                                                              color: categoryColor,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  Container(
-                                                    padding: const EdgeInsets.symmetric(
-                                                      horizontal: 6,
-                                                      vertical: 2,
-                                                    ),
-                                                    decoration: BoxDecoration(
-                                                      color: priorityColor.withOpacity(0.12),
-                                                      borderRadius: BorderRadius.circular(12),
-                                                    ),
-                                                    child: Text(
-                                                      priorityText,
-                                                      style: TextStyle(
-                                                        fontSize: 10,
-                                                        fontWeight: FontWeight.w600,
-                                                        color: priorityColor,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  if (task.recurrence != null)
-                                                    Icon(
-                                                      Icons.repeat_rounded,
-                                                      size: 14,
-                                                      color: theme.colorScheme.onSurface.withOpacity(0.4),
-                                                    ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.access_time_rounded,
-                                                    size: 12,
-                                                    color: isOverdue
-                                                        ? Colors.redAccent
-                                                        : theme.colorScheme.onSurface.withOpacity(0.4),
-                                                  ),
-                                                  const SizedBox(width: 3),
-                                                  Text(
-                                                    dateTimeStr,
-                                                    style: TextStyle(
-                                                      fontSize: 11,
-                                                      color: isOverdue
-                                                          ? Colors.redAccent
-                                                          : theme.colorScheme.onSurface.withOpacity(0.4),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      // Бутони
-                                      Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(
-                                              Icons.edit_outlined,
-                                              size: 18,
-                                              color: theme.colorScheme.onSurface.withOpacity(0.4),
-                                            ),
-                                            onPressed: () =>
-                                                _openTaskDialog(existing: task),
-                                            visualDensity: VisualDensity.compact,
-                                          ),
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.delete_outline_rounded,
-                                              size: 18,
-                                              color: Colors.redAccent,
-                                            ),
-                                            onPressed: () async {
-                                              await task.delete();
-                                              await WidgetService.updateWidget();
-                                              setState(() {});
-                                            },
-                                            visualDensity: VisualDensity.compact,
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(width: 4),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                            await NotificationService().scheduleForTask(newTask);
+                          }
+                          if (task.isCompleted) {
+                            await NotificationService().cancelForTask(task);
+                          } else if (task.hasReminders) {
+                            await NotificationService().scheduleForTask(task);
+                          }
+                          await WidgetService.updateWidget();
+                          setState(() {});
+                          if (task.isCompleted) _checkAndShowCelebration();
+                        },
+                        onEdit: () => _openTaskDialog(existing: task),
+                        onDelete: () async {
+                          await NotificationService().cancelForTask(task);
+                          await task.delete();
+                          await WidgetService.updateWidget();
+                          setState(() {});
+                        },
+                        dateTimeStr: dateTimeStr,
+                        priorityText: priorityText,
+                        priorityColor: priorityColor,
+                        accentColor: accentColor,
+                        categoryName: categoryName,
+                        recurrenceText: task.recurrence != null ? _recurrenceLabel(task.recurrence, t) : null,
                       );
                     },
                   ),
@@ -1852,3 +1722,5 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 }
+
+

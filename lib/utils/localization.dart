@@ -100,12 +100,38 @@ class LanguageScope extends InheritedNotifier<LanguageController> {
 class ThemeController extends ChangeNotifier {
   ThemeController([ThemeMode? initial]) : _mode = initial ?? ThemeMode.system;
   ThemeMode _mode;
+  bool _isAmoled = false;
+  
   ThemeMode get mode => _mode;
+  bool get isAmoled => _isAmoled;
+
+  Future<void> loadSavedTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final modeIndex = prefs.getInt('themeMode') ?? 0;
+    _isAmoled = prefs.getBool('isAmoled') ?? false;
+    _mode = ThemeMode.values[modeIndex];
+    notifyListeners();
+  }
 
   void setMode(ThemeMode mode) {
-    if (_mode == mode) return;
+    if (_mode == mode && !_isAmoled) return;
     _mode = mode;
+    _isAmoled = false;
+    _saveTheme();
     notifyListeners();
+  }
+
+  void setAmoled(bool value) {
+    _isAmoled = value;
+    if (value) _mode = ThemeMode.dark;
+    _saveTheme();
+    notifyListeners();
+  }
+
+  Future<void> _saveTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('themeMode', _mode.index);
+    await prefs.setBool('isAmoled', _isAmoled);
   }
 }
 
@@ -150,12 +176,53 @@ class AppText {
   String get overdue => _t({'en': 'Overdue', 'bg': 'Просрочени', 'de': 'Überfällig', 'fr': 'En retard', 'it': 'Scadute', 'el': 'Εκπρόθεσμες', 'es': 'Vencidas', 'pt': 'Atrasadas', 'ru': 'Просрочено', 'tr': 'Gecikmiş'});
   String get upcoming => _t({'en': 'Upcoming', 'bg': 'Предстоящи', 'de': 'Bevorstehend', 'fr': 'À venir', 'it': 'In arrivo', 'el': 'Επερχόμενες', 'es': 'Próximas', 'pt': 'Próximas', 'ru': 'Предстоящие', 'tr': 'Yaklaşan'});
   String get activity => _t({'en': 'Activity', 'bg': 'Активност', 'de': 'Aktivität', 'fr': 'Activité', 'it': 'Attività', 'el': 'Δραστηριότητα', 'es': 'Actividad', 'pt': 'Atividade', 'ru': 'Активность', 'tr': 'Etkinlik'});
+  String get taskView => _t({'en': 'Task View', 'bg': 'Изглед на задачите', 'de': 'Aufgabenansicht', 'fr': 'Vue des tâches', 'it': 'Vista attività', 'el': 'Προβολή εργασιών', 'es': 'Vista de tareas', 'pt': 'Visualização', 'ru': 'Вид задач', 'tr': 'Görev Görünümü'});
+  String get viewExpanded => _t({'en': 'Expanded', 'bg': 'Разширен', 'de': 'Erweitert', 'fr': 'Étendu', 'it': 'Espanso', 'el': 'Αναπτυγμένη', 'es': 'Expandido', 'pt': 'Expandido', 'ru': 'Расширенный', 'tr': 'Genişletilmiş'});
+  String get viewExpandedDesc => _t({'en': 'With details and badges', 'bg': 'С детайли и значки', 'de': 'Mit Details', 'fr': 'Avec détails', 'it': 'Con dettagli', 'el': 'Με λεπτομέρειες', 'es': 'Con detalles', 'pt': 'Com detalhes', 'ru': 'С подробностями', 'tr': 'Detaylarla'});
+  String get viewCompact => _t({'en': 'Compact', 'bg': 'Компактен', 'de': 'Kompakt', 'fr': 'Compact', 'it': 'Compatto', 'el': 'Συμπαγής', 'es': 'Compacto', 'pt': 'Compacto', 'ru': 'Компактный', 'tr': 'Kompakt'});
+  String get viewCompactDesc => _t({'en': 'Less space, more tasks', 'bg': 'По-малко място, повече задачи', 'de': 'Weniger Platz', 'fr': 'Moins de place', 'it': 'Meno spazio', 'el': 'Λιγότερος χώρος', 'es': 'Menos espacio', 'pt': 'Menos espaço', 'ru': 'Меньше места', 'tr': 'Daha az alan'});
+
   String get statistics => _t({'en': 'Statistics', 'bg': 'Статистики', 'de': 'Statistiken', 'fr': 'Statistiques', 'it': 'Statistiche', 'el': 'Στατιστικά', 'es': 'Estadísticas', 'pt': 'Estatísticas', 'ru': 'Статистика', 'tr': 'İstatistikler'});
   String get viewProgress => _t({'en': 'View your progress', 'bg': 'Преглед на твоя прогрес', 'de': 'Zeige deinen Fortschritt', 'fr': 'Voir votre progression', 'it': 'Visualizza i tuoi progressi', 'el': 'Δείτε την πρόοδό σας', 'es': 'Ver tu progreso', 'pt': 'Ver seu progresso', 'ru': 'Посмотреть прогресс', 'tr': 'İlerlemenizi görün'});
   String get today => _t({'en': 'Today', 'bg': 'Днес', 'de': 'Heute', 'fr': "Aujourd'hui", 'it': 'Oggi', 'el': 'Σήμερα', 'es': 'Hoy', 'pt': 'Hoje', 'ru': 'Сегодня', 'tr': 'Bugün'});
   String get week => _t({'en': 'Week', 'bg': 'Седмица', 'de': 'Woche', 'fr': 'Semaine', 'it': 'Settimana', 'el': 'Εβδομάδα', 'es': 'Semana', 'pt': 'Semana', 'ru': 'Неделя', 'tr': 'Hafta'});
   String get month => _t({'en': 'Month', 'bg': 'Месец', 'de': 'Monat', 'fr': 'Mois', 'it': 'Mese', 'el': 'Μήνας', 'es': 'Mes', 'pt': 'Mês', 'ru': 'Месяц', 'tr': 'Ay'});
   String get day => _t({'en': 'Day', 'bg': 'Ден', 'de': 'Tag', 'fr': 'Jour', 'it': 'Giorno', 'el': 'Ημέρα', 'es': 'Día', 'pt': 'Dia', 'ru': 'День', 'tr': 'Gün'});
+  String get task => _t({'en': 'task', 'bg': 'задача', 'de': 'Aufgabe', 'fr': 'tâche', 'it': 'attività', 'el': 'εργασία', 'es': 'tarea', 'pt': 'tarefa', 'ru': 'задача', 'tr': 'görev'});
+  String get noTasks => _t({'en': 'No tasks for this day', 'bg': 'Няма задачи за този ден', 'de': 'Keine Aufgaben für diesen Tag', 'fr': 'Pas de tâches pour ce jour', 'it': 'Nessuna attività per questo giorno', 'el': 'Δεν υπάρχουν εργασίες για αυτή την ημέρα', 'es': 'No hay tareas para este día', 'pt': 'Sem tarefas para este dia', 'ru': 'Нет задач на этот день', 'tr': 'Bu gün için görev yok'});
+  String get taskTitle => _t({'en': 'Task title', 'bg': 'Заглавие на задача', 'de': 'Aufgabentitel', 'fr': 'Titre de la tâche', 'it': 'Titolo attività', 'el': 'Τίτλος εργασίας', 'es': 'Título de tarea', 'pt': 'Título da tarefa', 'ru': 'Название задачи', 'tr': 'Görev başlığı'});
+
+  // ==================== ДНИ НА СЕДМИЦАТА (ПЪЛНИ) ====================
+  String get monday => _t({'en': 'Monday', 'bg': 'Понеделник', 'de': 'Montag', 'fr': 'Lundi', 'it': 'Lunedì', 'el': 'Δευτέρα', 'es': 'Lunes', 'pt': 'Segunda-feira', 'ru': 'Понедельник', 'tr': 'Pazartesi'});
+  String get tuesday => _t({'en': 'Tuesday', 'bg': 'Вторник', 'de': 'Dienstag', 'fr': 'Mardi', 'it': 'Martedì', 'el': 'Τρίτη', 'es': 'Martes', 'pt': 'Terça-feira', 'ru': 'Вторник', 'tr': 'Salı'});
+  String get wednesday => _t({'en': 'Wednesday', 'bg': 'Сряда', 'de': 'Mittwoch', 'fr': 'Mercredi', 'it': 'Mercoledì', 'el': 'Τετάρτη', 'es': 'Miércoles', 'pt': 'Quarta-feira', 'ru': 'Среда', 'tr': 'Çarşamba'});
+  String get thursday => _t({'en': 'Thursday', 'bg': 'Четвъртък', 'de': 'Donnerstag', 'fr': 'Jeudi', 'it': 'Giovedì', 'el': 'Πέμπτη', 'es': 'Jueves', 'pt': 'Quinta-feira', 'ru': 'Четверг', 'tr': 'Perşembe'});
+  String get friday => _t({'en': 'Friday', 'bg': 'Петък', 'de': 'Freitag', 'fr': 'Vendredi', 'it': 'Venerdì', 'el': 'Παρασκευή', 'es': 'Viernes', 'pt': 'Sexta-feira', 'ru': 'Пятница', 'tr': 'Cuma'});
+  String get saturday => _t({'en': 'Saturday', 'bg': 'Събота', 'de': 'Samstag', 'fr': 'Samedi', 'it': 'Sabato', 'el': 'Σάββατο', 'es': 'Sábado', 'pt': 'Sábado', 'ru': 'Суббота', 'tr': 'Cumartesi'});
+  String get sunday => _t({'en': 'Sunday', 'bg': 'Неделя', 'de': 'Sonntag', 'fr': 'Dimanche', 'it': 'Domenica', 'el': 'Κυριακή', 'es': 'Domingo', 'pt': 'Domingo', 'ru': 'Воскресенье', 'tr': 'Pazar'});
+
+  // ==================== ДНИ НА СЕДМИЦАТА (КРАТКИ) ====================
+  String get mon => _t({'en': 'Mon', 'bg': 'Пон', 'de': 'Mo', 'fr': 'Lun', 'it': 'Lun', 'el': 'Δευ', 'es': 'Lun', 'pt': 'Seg', 'ru': 'Пн', 'tr': 'Pzt'});
+  String get tue => _t({'en': 'Tue', 'bg': 'Вто', 'de': 'Di', 'fr': 'Mar', 'it': 'Mar', 'el': 'Τρι', 'es': 'Mar', 'pt': 'Ter', 'ru': 'Вт', 'tr': 'Sal'});
+  String get wed => _t({'en': 'Wed', 'bg': 'Сря', 'de': 'Mi', 'fr': 'Mer', 'it': 'Mer', 'el': 'Τετ', 'es': 'Mié', 'pt': 'Qua', 'ru': 'Ср', 'tr': 'Çar'});
+  String get thu => _t({'en': 'Thu', 'bg': 'Чет', 'de': 'Do', 'fr': 'Jeu', 'it': 'Gio', 'el': 'Πεμ', 'es': 'Jue', 'pt': 'Qui', 'ru': 'Чт', 'tr': 'Per'});
+  String get fri => _t({'en': 'Fri', 'bg': 'Пет', 'de': 'Fr', 'fr': 'Ven', 'it': 'Ven', 'el': 'Παρ', 'es': 'Vie', 'pt': 'Sex', 'ru': 'Пт', 'tr': 'Cum'});
+  String get sat => _t({'en': 'Sat', 'bg': 'Съб', 'de': 'Sa', 'fr': 'Sam', 'it': 'Sab', 'el': 'Σαβ', 'es': 'Sáb', 'pt': 'Sáb', 'ru': 'Сб', 'tr': 'Cmt'});
+  String get sun => _t({'en': 'Sun', 'bg': 'Нед', 'de': 'So', 'fr': 'Dim', 'it': 'Dom', 'el': 'Κυρ', 'es': 'Dom', 'pt': 'Dom', 'ru': 'Вс', 'tr': 'Paz'});
+
+  // ==================== МЕСЕЦИ ====================
+  String get january => _t({'en': 'January', 'bg': 'Януари', 'de': 'Januar', 'fr': 'Janvier', 'it': 'Gennaio', 'el': 'Ιανουάριος', 'es': 'Enero', 'pt': 'Janeiro', 'ru': 'Январь', 'tr': 'Ocak'});
+  String get february => _t({'en': 'February', 'bg': 'Февруари', 'de': 'Februar', 'fr': 'Février', 'it': 'Febbraio', 'el': 'Φεβρουάριος', 'es': 'Febrero', 'pt': 'Fevereiro', 'ru': 'Февраль', 'tr': 'Şubat'});
+  String get march => _t({'en': 'March', 'bg': 'Март', 'de': 'März', 'fr': 'Mars', 'it': 'Marzo', 'el': 'Μάρτιος', 'es': 'Marzo', 'pt': 'Março', 'ru': 'Март', 'tr': 'Mart'});
+  String get april => _t({'en': 'April', 'bg': 'Април', 'de': 'April', 'fr': 'Avril', 'it': 'Aprile', 'el': 'Απρίλιος', 'es': 'Abril', 'pt': 'Abril', 'ru': 'Апрель', 'tr': 'Nisan'});
+  String get may => _t({'en': 'May', 'bg': 'Май', 'de': 'Mai', 'fr': 'Mai', 'it': 'Maggio', 'el': 'Μάιος', 'es': 'Mayo', 'pt': 'Maio', 'ru': 'Май', 'tr': 'Mayıs'});
+  String get june => _t({'en': 'June', 'bg': 'Юни', 'de': 'Juni', 'fr': 'Juin', 'it': 'Giugno', 'el': 'Ιούνιος', 'es': 'Junio', 'pt': 'Junho', 'ru': 'Июнь', 'tr': 'Haziran'});
+  String get july => _t({'en': 'July', 'bg': 'Юли', 'de': 'Juli', 'fr': 'Juillet', 'it': 'Luglio', 'el': 'Ιούλιος', 'es': 'Julio', 'pt': 'Julho', 'ru': 'Июль', 'tr': 'Temmuz'});
+  String get august => _t({'en': 'August', 'bg': 'Август', 'de': 'August', 'fr': 'Août', 'it': 'Agosto', 'el': 'Αύγουστος', 'es': 'Agosto', 'pt': 'Agosto', 'ru': 'Август', 'tr': 'Ağustos'});
+  String get september => _t({'en': 'September', 'bg': 'Септември', 'de': 'September', 'fr': 'Septembre', 'it': 'Settembre', 'el': 'Σεπτέμβριος', 'es': 'Septiembre', 'pt': 'Setembro', 'ru': 'Сентябрь', 'tr': 'Eylül'});
+  String get october => _t({'en': 'October', 'bg': 'Октомври', 'de': 'Oktober', 'fr': 'Octobre', 'it': 'Ottobre', 'el': 'Οκτώβριος', 'es': 'Octubre', 'pt': 'Outubro', 'ru': 'Октябрь', 'tr': 'Ekim'});
+  String get november => _t({'en': 'November', 'bg': 'Ноември', 'de': 'November', 'fr': 'Novembre', 'it': 'Novembre', 'el': 'Νοέμβριος', 'es': 'Noviembre', 'pt': 'Novembro', 'ru': 'Ноябрь', 'tr': 'Kasım'});
+  String get december => _t({'en': 'December', 'bg': 'Декември', 'de': 'Dezember', 'fr': 'Décembre', 'it': 'Dicembre', 'el': 'Δεκέμβριος', 'es': 'Diciembre', 'pt': 'Dezembro', 'ru': 'Декабрь', 'tr': 'Aralık'});
 
   // ==================== ПРИОРИТЕТ ====================
   String get low => _t({'en': 'Low', 'bg': 'Нисък', 'de': 'Niedrig', 'fr': 'Basse', 'it': 'Bassa', 'el': 'Χαμηλή', 'es': 'Baja', 'pt': 'Baixa', 'ru': 'Низкий', 'tr': 'Düşük'});
@@ -176,6 +243,9 @@ class AppText {
   String get delete => _t({'en': 'Delete', 'bg': 'Изтрий', 'de': 'Löschen', 'fr': 'Supprimer', 'it': 'Elimina', 'el': 'Διαγραφή', 'es': 'Eliminar', 'pt': 'Excluir', 'ru': 'Удалить', 'tr': 'Sil'});
   String get edit => _t({'en': 'Edit', 'bg': 'Редактирай', 'de': 'Bearbeiten', 'fr': 'Modifier', 'it': 'Modifica', 'el': 'Επεξεργασία', 'es': 'Editar', 'pt': 'Editar', 'ru': 'Редактировать', 'tr': 'Düzenle'});
   String get done => _t({'en': 'Done', 'bg': 'Готово', 'de': 'Fertig', 'fr': 'Terminé', 'it': 'Fatto', 'el': 'Έτοιμο', 'es': 'Hecho', 'pt': 'Feito', 'ru': 'Готово', 'tr': 'Tamam'});
+  String get allTasksCompleted => _t({'en': 'All tasks completed!', 'bg': 'Всички задачи са завършени!', 'de': 'Alle Aufgaben erledigt!', 'fr': 'Toutes les tâches terminées!', 'it': 'Tutte le attività completate!', 'el': 'Όλες οι εργασίες ολοκληρώθηκαν!', 'es': '¡Todas las tareas completadas!', 'pt': 'Todas as tarefas concluídas!', 'ru': 'Все задачи выполнены!', 'tr': 'Tüm görevler tamamlandı!'});
+  String get greatJob => _t({'en': 'Great job!', 'bg': 'Страхотна работа!', 'de': 'Großartige Arbeit!', 'fr': 'Excellent travail!', 'it': 'Ottimo lavoro!', 'el': 'Εξαιρετική δουλειά!', 'es': '¡Buen trabajo!', 'pt': 'Ótimo trabalho!', 'ru': 'Отличная работа!', 'tr': 'Harika iş!'});
+  String get tapToContinue => _t({'en': 'Tap to continue', 'bg': 'Докосни за продължение', 'de': 'Tippen zum Fortfahren', 'fr': 'Appuyez pour continuer', 'it': 'Tocca per continuare', 'el': 'Πατήστε για συνέχεια', 'es': 'Toca para continuar', 'pt': 'Toque para continuar', 'ru': 'Нажмите для продолжения', 'tr': 'Devam etmek için dokunun'});
   String get confirm => _t({'en': 'Confirm', 'bg': 'Потвърди', 'de': 'Bestätigen', 'fr': 'Confirmer', 'it': 'Conferma', 'el': 'Επιβεβαίωση', 'es': 'Confirmar', 'pt': 'Confirmar', 'ru': 'Подтвердить', 'tr': 'Onayla'});
   String get replace => _t({'en': 'Replace', 'bg': 'Замени', 'de': 'Ersetzen', 'fr': 'Remplacer', 'it': 'Sostituisci', 'el': 'Αντικατάσταση', 'es': 'Reemplazar', 'pt': 'Substituir', 'ru': 'Заменить', 'tr': 'Değiştir'});
   String get all => _t({'en': 'All', 'bg': 'Всички', 'de': 'Alle', 'fr': 'Tous', 'it': 'Tutti', 'el': 'Όλα', 'es': 'Todos', 'pt': 'Todos', 'ru': 'Все', 'tr': 'Tümü'});
@@ -191,6 +261,9 @@ class AppText {
   String get dateAndTime => _t({'en': 'Date & Time', 'bg': 'Дата и час', 'de': 'Datum & Uhrzeit', 'fr': 'Date et heure', 'it': 'Data e ora', 'el': 'Ημερομηνία & Ώρα', 'es': 'Fecha y hora', 'pt': 'Data e hora', 'ru': 'Дата и время', 'tr': 'Tarih ve Saat'});
   String get time => _t({'en': 'Time', 'bg': 'Час', 'de': 'Uhrzeit', 'fr': 'Heure', 'it': 'Ora', 'el': 'Ώρα', 'es': 'Hora', 'pt': 'Hora', 'ru': 'Время', 'tr': 'Saat'});
   String get priority => _t({'en': 'Priority', 'bg': 'Приоритет', 'de': 'Priorität', 'fr': 'Priorité', 'it': 'Priorità', 'el': 'Προτεραιότητα', 'es': 'Prioridad', 'pt': 'Prioridade', 'ru': 'Приоритет', 'tr': 'Öncelik'});
+  String get sortBy => _t({'en': 'Sort by', 'bg': 'Сортирай по', 'de': 'Sortieren nach', 'fr': 'Trier par', 'it': 'Ordina per', 'el': 'Ταξινόμηση κατά', 'es': 'Ordenar por', 'pt': 'Ordenar por', 'ru': 'Сортировать по', 'tr': 'Sırala'});
+  String get date => _t({'en': 'Date', 'bg': 'Дата', 'de': 'Datum', 'fr': 'Date', 'it': 'Data', 'el': 'Ημερομηνία', 'es': 'Fecha', 'pt': 'Data', 'ru': 'Дата', 'tr': 'Tarih'});
+  String get name => _t({'en': 'Name', 'bg': 'Име', 'de': 'Name', 'fr': 'Nom', 'it': 'Nome', 'el': 'Όνομα', 'es': 'Nombre', 'pt': 'Nome', 'ru': 'Имя', 'tr': 'Ad'});
   String get repeat => _t({'en': 'Repeat', 'bg': 'Повторение', 'de': 'Wiederholung', 'fr': 'Répétition', 'it': 'Ripetizione', 'el': 'Επανάληψη', 'es': 'Repetir', 'pt': 'Repetir', 'ru': 'Повтор', 'tr': 'Tekrar'});
   String get whatNeedsToBeDone => _t({'en': 'What needs to be done?', 'bg': 'Какво трябва да направиш?', 'de': 'Was muss erledigt werden?', 'fr': 'Que faut-il faire?', 'it': 'Cosa bisogna fare?', 'el': 'Τι πρέπει να γίνει;', 'es': '¿Qué hay que hacer?', 'pt': 'O que precisa ser feito?', 'ru': 'Что нужно сделать?', 'tr': 'Ne yapılmalı?'});
 
@@ -208,7 +281,6 @@ class AppText {
   String get defaultCategoryNameCannotChange => _t({'en': 'Default category names cannot be changed', 'bg': 'Името на стандартните категории не може да се променя', 'de': 'Standardkategorienamen können nicht geändert werden', 'fr': 'Les noms des catégories par défaut ne peuvent pas être modifiés', 'it': 'I nomi delle categorie predefinite non possono essere modificati', 'el': 'Τα ονόματα των προεπιλεγμένων κατηγοριών δεν μπορούν να αλλάξουν', 'es': 'Los nombres de las categorías predeterminadas no se pueden cambiar', 'pt': 'Os nomes das categorias padrão não podem ser alterados', 'ru': 'Названия категорий по умолчанию нельзя изменить', 'tr': 'Varsayılan kategori adları değiştirilemez'});
   String get newCat => _t({'en': 'New', 'bg': 'Нова', 'de': 'Neu', 'fr': 'Nouveau', 'it': 'Nuovo', 'el': 'Νέο', 'es': 'Nuevo', 'pt': 'Novo', 'ru': 'Новая', 'tr': 'Yeni'});
   String get color => _t({'en': 'Color', 'bg': 'Цвят', 'de': 'Farbe', 'fr': 'Couleur', 'it': 'Colore', 'el': 'Χρώμα', 'es': 'Color', 'pt': 'Cor', 'ru': 'Цвет', 'tr': 'Renk'});
-  String get name => _t({'en': 'Name', 'bg': 'Име', 'de': 'Name', 'fr': 'Nom', 'it': 'Nome', 'el': 'Όνομα', 'es': 'Nombre', 'pt': 'Nome', 'ru': 'Название', 'tr': 'Ad'});
 
   // ==================== ЕЗИК И ТЕМА ====================
   String get language => _t({'en': 'Language', 'bg': 'Език', 'de': 'Sprache', 'fr': 'Langue', 'it': 'Lingua', 'el': 'Γλώσσα', 'es': 'Idioma', 'pt': 'Idioma', 'ru': 'Язык', 'tr': 'Dil'});
@@ -218,6 +290,7 @@ class AppText {
   String get systemTheme => _t({'en': 'System', 'bg': 'Системна', 'de': 'System', 'fr': 'Système', 'it': 'Sistema', 'el': 'Σύστημα', 'es': 'Sistema', 'pt': 'Sistema', 'ru': 'Системная', 'tr': 'Sistem'});
   String get lightTheme => _t({'en': 'Light', 'bg': 'Светла', 'de': 'Hell', 'fr': 'Clair', 'it': 'Chiaro', 'el': 'Φωτεινό', 'es': 'Claro', 'pt': 'Claro', 'ru': 'Светлая', 'tr': 'Açık'});
   String get darkTheme => _t({'en': 'Dark', 'bg': 'Тъмна', 'de': 'Dunkel', 'fr': 'Sombre', 'it': 'Scuro', 'el': 'Σκοτεινό', 'es': 'Oscuro', 'pt': 'Escuro', 'ru': 'Темная', 'tr': 'Koyu'});
+  String get amoledTheme => _t({'en': 'AMOLED Black', 'bg': 'AMOLED черна', 'de': 'AMOLED Schwarz', 'fr': 'AMOLED Noir', 'it': 'AMOLED Nero', 'el': 'AMOLED Μαύρο', 'es': 'AMOLED Negro', 'pt': 'AMOLED Preto', 'ru': 'AMOLED Черная', 'tr': 'AMOLED Siyah'});
 
   // ==================== АРХИВ ====================
   String get archive => _t({'en': 'Archive', 'bg': 'Архивирай', 'de': 'Archivieren', 'fr': 'Archiver', 'it': 'Archivia', 'el': 'Αρχειοθέτηση', 'es': 'Archivar', 'pt': 'Arquivar', 'ru': 'Архивировать', 'tr': 'Arşivle'});
@@ -466,4 +539,275 @@ class AppText {
     'ru': '$completed из $total задач',
     'tr': '$total görevden $completed',
   });
+
+  // ==================== TRIAL / PRO ====================
+  String trialDaysLeft(int days) => _t({
+    'en': 'Trial: $days days left',
+    'bg': 'Пробен период: $days дни',
+    'de': 'Testversion: $days Tage übrig',
+    'fr': 'Essai: $days jours restants',
+    'it': 'Prova: $days giorni rimasti',
+    'el': 'Δοκιμή: $days ημέρες',
+    'es': 'Prueba: $days días restantes',
+    'pt': 'Teste: $days dias restantes',
+    'ru': 'Пробный период: $days дней',
+    'tr': 'Deneme: $days gün kaldı',
+  });
+
+  String promoDaysLeft(int days) => _t({
+    'en': 'Promo: $days days left',
+    'bg': 'Промо код: $days дни',
+    'de': 'Promo: $days Tage übrig',
+    'fr': 'Promo: $days jours restants',
+    'it': 'Promo: $days giorni rimasti',
+    'el': 'Promo: $days ημέρες',
+    'es': 'Promo: $days días restantes',
+    'pt': 'Promo: $days dias restantes',
+    'ru': 'Промо: $days дней',
+    'tr': 'Promo: $days gün kaldı',
+  });
+
+  String get upgrade => _t({
+    'en': 'Upgrade',
+    'bg': 'Надгради',
+    'de': 'Upgraden',
+    'fr': 'Améliorer',
+    'it': 'Aggiorna',
+    'el': 'Αναβάθμιση',
+    'es': 'Mejorar',
+    'pt': 'Atualizar',
+    'ru': 'Улучшить',
+    'tr': 'Yükselt',
+  });
+
+  // ==================== GOOGLE CALENDAR ====================
+  String get googleCalendar => _t({
+    'en': 'Google Calendar',
+    'bg': 'Google Календар',
+    'de': 'Google Kalender',
+    'fr': 'Google Agenda',
+    'it': 'Google Calendar',
+    'el': 'Ημερολόγιο Google',
+    'es': 'Google Calendar',
+    'pt': 'Google Agenda',
+    'ru': 'Google Календарь',
+    'tr': 'Google Takvim',
+  });
+
+  String get calendarConnected => _t({
+    'en': 'Connected',
+    'bg': 'Свързан',
+    'de': 'Verbunden',
+    'fr': 'Connecté',
+    'it': 'Connesso',
+    'el': 'Συνδεδεμένο',
+    'es': 'Conectado',
+    'pt': 'Conectado',
+    'ru': 'Подключено',
+    'tr': 'Bağlı',
+  });
+
+  String get calendarNotConnected => _t({
+    'en': 'Not connected',
+    'bg': 'Не е свързан',
+    'de': 'Nicht verbunden',
+    'fr': 'Non connecté',
+    'it': 'Non connesso',
+    'el': 'Μη συνδεδεμένο',
+    'es': 'No conectado',
+    'pt': 'Não conectado',
+    'ru': 'Не подключено',
+    'tr': 'Bağlı değil',
+  });
+
+  String get calendarSyncEnabled => _t({
+    'en': 'Tasks sync with Google Calendar',
+    'bg': 'Задачите се синхронизират с Google Календар',
+    'de': 'Aufgaben werden mit Google Kalender synchronisiert',
+    'fr': 'Les tâches sont synchronisées avec Google Agenda',
+    'it': 'Le attività si sincronizzano con Google Calendar',
+    'el': 'Οι εργασίες συγχρονίζονται με το Ημερολόγιο Google',
+    'es': 'Las tareas se sincronizan con Google Calendar',
+    'pt': 'Tarefas sincronizam com Google Agenda',
+    'ru': 'Задачи синхронизируются с Google Календарём',
+    'tr': 'Görevler Google Takvim ile senkronize edilir',
+  });
+
+  String get connectForSync => _t({
+    'en': 'Connect to sync tasks',
+    'bg': 'Свържи се за синхронизация',
+    'de': 'Verbinden zum Synchronisieren',
+    'fr': 'Connecter pour synchroniser',
+    'it': 'Connetti per sincronizzare',
+    'el': 'Συνδεθείτε για συγχρονισμό',
+    'es': 'Conectar para sincronizar',
+    'pt': 'Conectar para sincronizar',
+    'ru': 'Подключитесь для синхронизации',
+    'tr': 'Senkronize etmek için bağlan',
+  });
+
+  String get connect => _t({
+    'en': 'Connect',
+    'bg': 'Свържи',
+    'de': 'Verbinden',
+    'fr': 'Connecter',
+    'it': 'Connetti',
+    'el': 'Σύνδεση',
+    'es': 'Conectar',
+    'pt': 'Conectar',
+    'ru': 'Подключить',
+    'tr': 'Bağlan',
+  });
+
+  String get disconnect => _t({
+    'en': 'Disconnect',
+    'bg': 'Прекъсни',
+    'de': 'Trennen',
+    'fr': 'Déconnecter',
+    'it': 'Disconnetti',
+    'el': 'Αποσύνδεση',
+    'es': 'Desconectar',
+    'pt': 'Desconectar',
+    'ru': 'Отключить',
+    'tr': 'Bağlantıyı kes',
+  });
+
+  String get syncNow => _t({
+    'en': 'Sync now',
+    'bg': 'Синхронизирай',
+    'de': 'Jetzt synchronisieren',
+    'fr': 'Synchroniser',
+    'it': 'Sincronizza ora',
+    'el': 'Συγχρονισμός τώρα',
+    'es': 'Sincronizar ahora',
+    'pt': 'Sincronizar agora',
+    'ru': 'Синхронизировать',
+    'tr': 'Şimdi senkronize et',
+  });
+
+  
+
+  String get connectionFailed => _t({
+    'en': 'Connection failed',
+    'bg': 'Неуспешно свързване',
+    'de': 'Verbindung fehlgeschlagen',
+    'fr': 'Échec de la connexion',
+    'it': 'Connessione fallita',
+    'el': 'Η σύνδεση απέτυχε',
+    'es': 'Error de conexión',
+    'pt': 'Falha na conexão',
+    'ru': 'Ошибка подключения',
+    'tr': 'Bağlantı başarısız',
+  });
+
+  String tasksSynced(int count) => _t({
+    'en': '$count tasks synced',
+    'bg': '$count задачи синхронизирани',
+    'de': '$count Aufgaben synchronisiert',
+    'fr': '$count tâches synchronisées',
+    'it': '$count attività sincronizzate',
+    'el': '$count εργασίες συγχρονίστηκαν',
+    'es': '$count tareas sincronizadas',
+    'pt': '$count tarefas sincronizadas',
+    'ru': '$count задач синхронизировано',
+    'tr': '$count görev senkronize edildi',
+  });
+
+  String get syncFromCalendar => _t({
+    'en': 'Sync from Calendar',
+    'bg': 'Синхронизирай от Calendar',
+    'de': 'Vom Kalender sync',
+    'fr': 'Sync depuis Calendar',
+    'it': 'Sincronizza da Calendar',
+    'el': 'Συγχρονισμός από Calendar',
+    'es': 'Sincronizar desde Calendar',
+    'pt': 'Sincronizar do Calendar',
+    'ru': 'Синхронизировать из Calendar',
+    'tr': 'Calendar\'dan senkronize et',
+  });
+
+  String tasksUpdated(int count) => _t({
+    'en': '$count tasks updated',
+    'bg': '$count задачи обновени',
+    'de': '$count Aufgaben aktualisiert',
+    'fr': '$count tâches mises à jour',
+    'it': '$count attività aggiornate',
+    'el': '$count εργασίες ενημερώθηκαν',
+    'es': '$count tareas actualizadas',
+    'pt': '$count tarefas atualizadas',
+    'ru': '$count задач обновлено',
+    'tr': '$count görev güncellendi',
+  });
+
+  String get importFromCalendar => _t({
+    'en': 'Import from Calendar',
+    'bg': 'Импортирай от Calendar',
+    'de': 'Vom Kalender importieren',
+    'fr': 'Importer du Calendar',
+    'it': 'Importa da Calendar',
+    'el': 'Εισαγωγή από Calendar',
+    'es': 'Importar desde Calendar',
+    'pt': 'Importar do Calendar',
+    'ru': 'Импорт из Calendar',
+    'tr': 'Calendar\'dan içe aktar',
+  });
+
+  String eventsImported(int count) => _t({
+    'en': '$count events imported',
+    'bg': '$count събития импортирани',
+    'de': '$count Ereignisse importiert',
+    'fr': '$count événements importés',
+    'it': '$count eventi importati',
+    'el': '$count εκδηλώσεις εισάχθηκαν',
+    'es': '$count eventos importados',
+    'pt': '$count eventos importados',
+    'ru': '$count событий импортировано',
+    'tr': '$count etkinlik içe aktarıldı',
+  });
+  String get goodMorning => _t({
+    'en': 'Good Morning! 🌅',
+    'bg': 'Добро утро! 🌅',
+    'de': 'Guten Morgen! 🌅',
+    'fr': 'Bonjour! 🌅',
+    'it': 'Buongiorno! 🌅',
+    'el': 'Καλημέρα! 🌅',
+    'es': '¡Buenos días! 🌅',
+    'pt': 'Bom dia! 🌅',
+    'ru': 'Доброе утро! 🌅',
+    'tr': 'Günaydın! 🌅',
+  });
+
+  String get noTasksToday => _t({
+    'en': 'No tasks for today! ✨',
+    'bg': 'Няма задачи за днес! ✨',
+    'de': 'Keine Aufgaben heute! ✨',
+    'fr': "Pas de tâches aujourd'hui! ✨",
+    'it': 'Nessuna attività oggi! ✨',
+    'el': 'Δεν υπάρχουν εργασίες σήμερα! ✨',
+    'es': '¡Sin tareas hoy! ✨',
+    'pt': 'Sem tarefas hoje! ✨',
+    'ru': 'Нет задач на сегодня! ✨',
+    'tr': 'Bugün görev yok! ✨',
+  });
+
+  String get enjoyYourDay => _t({
+    'en': 'Enjoy your day!',
+    'bg': 'Приятен ден!',
+    'de': 'Genieß deinen Tag!',
+    'fr': 'Profitez de votre journée!',
+    'it': 'Goditi la giornata!',
+    'el': 'Απολαύστε την ημέρα σας!',
+    'es': '¡Que tengas un buen día!',
+    'pt': 'Aproveite o seu dia!',
+    'ru': 'Хорошего дня!',
+    'tr': 'İyi günler!',
+  });
+
+  String get morningBriefing => _t({'en': 'Morning Briefing', 'bg': 'Сутрешен преглед', 'de': 'Morgenübersicht', 'fr': 'Résumé du matin', 'it': 'Riepilogo mattutino', 'el': 'Πρωινή ενημέρωση', 'es': 'Resumen matutino', 'pt': 'Resumo matinal', 'ru': 'Утренний обзор', 'tr': 'Sabah özeti'});
+  String get briefingTime => _t({'en': 'Briefing Time', 'bg': 'Час на прегледа', 'de': 'Übersichtszeit', 'fr': 'Heure du résumé', 'it': 'Orario riepilogo', 'el': 'Ώρα ενημέρωσης', 'es': 'Hora del resumen', 'pt': 'Hora do resumo', 'ru': 'Время обзора', 'tr': 'Özet saati'});
+  String dailyTaskSummaryAt(String time) => _t({'en': 'Daily task summary at $time', 'bg': 'Дневен преглед на задачите в $time', 'de': 'Tägliche Aufgabenübersicht um $time', 'fr': 'Résumé quotidien à $time', 'it': 'Riepilogo giornaliero alle $time', 'el': 'Ημερήσια σύνοψη εργασιών στις $time', 'es': 'Resumen diario a las $time', 'pt': 'Resumo diário às $time', 'ru': 'Ежедневный обзор задач в $time', 'tr': 'Günlük görev özeti saat $time'});
+  String briefingTimeSetTo(String time) => _t({'en': 'Briefing time set to $time', 'bg': 'Часът на прегледа е зададен на $time', 'de': 'Übersichtszeit auf $time gesetzt', 'fr': 'Heure du résumé réglée à $time', 'it': 'Orario riepilogo impostato alle $time', 'el': 'Ώρα ενημέρωσης ορίστηκε στις $time', 'es': 'Hora del resumen establecida a las $time', 'pt': 'Hora do resumo definida para $time', 'ru': 'Время обзора установлено на $time', 'tr': 'Özet saati $time olarak ayarlandı'});
+  String get googleTasks => _t({'en': 'Google Tasks', 'bg': 'Google Задачи', 'de': 'Google Aufgaben', 'fr': 'Google Tasks', 'it': 'Google Tasks', 'el': 'Google Tasks', 'es': 'Google Tasks', 'pt': 'Google Tasks', 'ru': 'Google Задачи', 'tr': 'Google Görevler'});
+  String get deleteAllCalendarTasks => _t({'en': 'Delete All Calendar Tasks', 'bg': 'Изтрий всички календарни задачи', 'de': 'Alle Kalenderaufgaben löschen', 'fr': 'Supprimer toutes les tâches du calendrier', 'it': 'Elimina tutte le attività del calendario', 'el': 'Διαγραφή όλων των εργασιών ημερολογίου', 'es': 'Eliminar todas las tareas del calendario', 'pt': 'Excluir todas as tarefas do calendário', 'ru': 'Удалить все задачи из календаря', 'tr': 'Tüm takvim görevlerini sil'});
+  String get deleteCalendarTasksConfirm => _t({'en': 'This will delete all tasks imported from Google Calendar. This action cannot be undone.', 'bg': 'Това ще изтрие всички задачи, импортирани от Google Calendar. Действието е необратимо.', 'de': 'Dies löscht alle aus Google Kalender importierten Aufgaben. Diese Aktion kann nicht rückgängig gemacht werden.', 'fr': 'Cela supprimera toutes les tâches importées de Google Agenda. Cette action est irréversible.', 'it': 'Questo eliminerà tutte le attività importate da Google Calendar. Questa azione non può essere annullata.', 'el': 'Αυτό θα διαγράψει όλες τις εργασίες που εισήχθησαν από το Ημερολόγιο Google. Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.', 'es': 'Esto eliminará todas las tareas importadas de Google Calendar. Esta acción no se puede deshacer.', 'pt': 'Isso excluirá todas as tarefas importadas do Google Agenda. Esta ação não pode ser desfeita.', 'ru': 'Это удалит все задачи, импортированные из Google Календаря. Это действие нельзя отменить.', 'tr': 'Bu, Google Takvimden içe aktarılan tüm görevleri silecektir. Bu işlem geri alınamaz.'});
 }

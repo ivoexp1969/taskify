@@ -1,7 +1,7 @@
-name: task_manager
+﻿name: task_manager
 description: A simple local task manager app.
 publish_to: 'none'
-version: 1.0.2+4
+version: 1.0.19+19
 environment:
   sdk: ">=3.4.0 <4.0.0"
   flutter: ">=3.22.0"
@@ -30,6 +30,13 @@ dependencies:
   fl_chart: 0.68.0
   google_mobile_ads: ^5.2.0
   purchases_flutter: ^8.1.0
+  confetti: ^0.8.0
+  lottie: ^3.2.0
+  glass_kit: ^4.0.2
+  in_app_review: ^2.0.11
+  googleapis_auth: ^1.6.0
+  http: ^1.6.0
+  extension_google_sign_in_as_googleapis_auth: ^2.0.13
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -38,3 +45,6 @@ dev_dependencies:
   flutter_lints: ^4.0.0
 flutter:
   uses-material-design: true
+  assets:
+    - assets/animations/
+

@@ -1,11 +1,11 @@
 {
-    "name": "task_manager",
-    "short_name": "task_manager",
+    "name": "Taskify",
+    "short_name": "Taskify",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Simple task management app",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

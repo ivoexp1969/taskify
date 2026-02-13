@@ -1,44 +1,59 @@
-package com.ivoexp.taskify
+﻿package com.ivoexp.taskify
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
-import android.content.Intent
+import android.content.Context
+import android.os.Build
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "com.example.task_manager/widget"
+    private val CHANNEL = "com.ivoexp.taskify/widget"
+    private val PREFS_NAME = "widget_prefs"
+    private val KEY_WIDGET_PROMPTED = "widget_prompted_v6"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
-                "updateWidget" -> {
-                    updateWidget()
-                    result.success(null)
-                }
-                else -> {
-                    result.notImplemented()
-                }
+                "updateWidget" -> { updateWidgets(); result.success(true) }
+                "requestPinWidget" -> { requestPinWidget(); result.success(true) }
+                else -> result.notImplemented()
             }
         }
     }
 
-    private fun updateWidget() {
-        val appWidgetManager = AppWidgetManager.getInstance(applicationContext)
-        val widgetComponent = ComponentName(applicationContext, TaskWidgetProvider::class.java)
-        val appWidgetIds = appWidgetManager.getAppWidgetIds(widgetComponent)
-        
-        for (appWidgetId in appWidgetIds) {
-            TaskWidgetProvider.updateAppWidget(applicationContext, appWidgetManager, appWidgetId)
+    override fun onResume() {
+        super.onResume()
+        promptWidgetIfNeeded()
+    }
+
+    private fun promptWidgetIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            if (!prefs.getBoolean(KEY_WIDGET_PROMPTED, false)) {
+                prefs.edit().putBoolean(KEY_WIDGET_PROMPTED, true).apply()
+                requestPinWidget()
+            }
         }
-        
-        // Също изпращаме broadcast за обновяване
-        val intent = Intent(applicationContext, TaskWidgetProvider::class.java)
-        intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds)
-        sendBroadcast(intent)
+    }
+
+    private fun requestPinWidget() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val appWidgetManager = AppWidgetManager.getInstance(this)
+            if (appWidgetManager.isRequestPinAppWidgetSupported) {
+                val provider = ComponentName(this, TaskWidgetProvider::class.java)
+                appWidgetManager.requestPinAppWidget(provider, null, null)
+            }
+        }
+    }
+
+    private fun updateWidgets() {
+        val appWidgetManager = AppWidgetManager.getInstance(this)
+        val smallIds = appWidgetManager.getAppWidgetIds(ComponentName(this, TaskWidgetProvider::class.java))
+        for (id in smallIds) { TaskWidgetProvider.updateAppWidget(this, appWidgetManager, id) }
+        val largeIds = appWidgetManager.getAppWidgetIds(ComponentName(this, TaskWidgetLargeProvider::class.java))
+        for (id in largeIds) { TaskWidgetLargeProvider.updateAppWidget(this, appWidgetManager, id) }
     }
 }

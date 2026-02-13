@@ -77,6 +77,13 @@ class Task extends HiveObject with EquatableMixin {
   @HiveField(14)
   DateTime? archivedAt;
 
+/// Estimated duration in minutes (for time blocking)
+  @HiveField(16)
+  int? durationMinutes;
+  /// Google Calendar Event ID - за синхронизация
+  @HiveField(15)
+  String? googleCalendarEventId;
+
   Task({
     required this.title,
     required this.dueDate,
@@ -93,6 +100,8 @@ class Task extends HiveObject with EquatableMixin {
     this.completedAt,
     this.isArchived = false,
     this.archivedAt,
+    this.googleCalendarEventId,
+    this.durationMinutes,
   });
 
   /// Помощен getter - връща reminders или мигрира от старото reminder
@@ -164,5 +173,9 @@ class Task extends HiveObject with EquatableMixin {
         completedAt,
         isArchived,
         archivedAt,
+        googleCalendarEventId,
+        durationMinutes,
       ];
 }
+
+

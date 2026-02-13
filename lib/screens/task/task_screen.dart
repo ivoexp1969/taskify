@@ -1,7 +1,10 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import '../../services/google_calendar_service.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
@@ -11,8 +14,11 @@ import '../../utils/localization.dart';
 import '../../services/notification_service.dart';
 import '../../widgets/reminder_selector.dart';
 import '../../services/widget_service.dart';
+import '../../widgets/celebration_overlay.dart';
+import '../../widgets/task_card_styles.dart';
 
 enum TaskFilter { all, active, completed, overdue, upcoming, archived }
+enum TaskSort { date, priority, name, category }
 
 class TaskScreen extends StatefulWidget {
   const TaskScreen({super.key});
@@ -35,6 +41,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
   // търсене и филтър по категория
   String _searchQuery = '';
   String? _categoryFilterId; // null = всички категории
+  TaskSort _sortBy = TaskSort.date;
+  
+  // Expanded cards за Expandable Tiles дизайн
+  final Set<int> _expandedCards = {};
 
   // Позиция на плаващия бутон
   Offset? _fabOffset;
@@ -50,6 +60,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     super.initState();
     taskBox = Hive.box<Task>('tasks');
     categoryBox = Hive.box<Category>('categories');
+
+    // Слушаме за промени в задачите
+    taskBox.listenable().addListener(_onTasksChanged);
 
     _listAnimationController = AnimationController(
       vsync: this,
@@ -90,7 +103,12 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
   void dispose() {
     _listAnimationController.dispose();
     _titleController.dispose();
+    taskBox.listenable().removeListener(_onTasksChanged);
     super.dispose();
+  }
+
+  void _onTasksChanged() {
+    if (mounted) setState(() {});
   }
 
   DateTime _nextDueDate(DateTime current, String recurrence) {
@@ -141,6 +159,35 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     }
     final timeStr = _formatTime(TimeOfDay.fromDateTime(d));
     return '$dateStr · $timeStr';
+  }
+
+  /// Проверява дали датата е днес
+  bool _isToday(DateTime date) {
+    final now = DateTime.now();
+    return date.year == now.year && 
+           date.month == now.month && 
+           date.day == now.day;
+  }
+
+  /// Проверява дали всички задачи за днес са завършени и показва празнуване
+  void _checkAndCelebrate() {
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    
+    final todayTasks = taskBox.values.where((t) {
+      if (t.isArchived) return false;
+      final taskDate = DateTime(t.dueDate.year, t.dueDate.month, t.dueDate.day);
+      return taskDate.year == todayStart.year && 
+             taskDate.month == todayStart.month && 
+             taskDate.day == todayStart.day;
+    }).toList();
+    
+    if (todayTasks.isEmpty) return;
+    
+    final pendingTasks = todayTasks.where((t) => !t.isCompleted).length;
+    if (pendingTasks > 0) return;
+    
+    showCelebration(context);
   }
 
   Color _priorityColor(int p) {
@@ -214,8 +261,23 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
 
   List<Task> _filteredTasks() {
     final now = DateTime.now();
-    var tasks = taskBox.values.toList()
-      ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+    var tasks = taskBox.values.toList();
+    
+    // Сортиране според избрания метод
+    switch (_sortBy) {
+      case TaskSort.date:
+        tasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
+        break;
+      case TaskSort.priority:
+        tasks.sort((a, b) => b.priority.compareTo(a.priority)); // Висок първи
+        break;
+      case TaskSort.name:
+        tasks.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+        break;
+      case TaskSort.category:
+        tasks.sort((a, b) => a.categoryId.compareTo(b.categoryId));
+        break;
+    }
 
     // филтър по статус
     List<Task> filtered;
@@ -1418,6 +1480,15 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                             );
                             newTask.setSubtasks(tempSubtasks);
                             await taskBox.add(newTask);
+                            // Google Calendar sync
+                            if (GoogleCalendarService().isConnected) {
+                              final eventId = await GoogleCalendarService().addTaskToCalendar(newTask);
+                              if (eventId != null) {
+                                newTask.googleCalendarEventId = eventId;
+                                await newTask.save();
+                              }
+                            }
+
                             await NotificationService().scheduleForTask(newTask);
                           }
 
@@ -1643,20 +1714,26 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
 
     final List<Object> items = [];
     if (tasks.isNotEmpty) {
-      final Map<DateTime, List<Task>> grouped = {};
-      for (final task in tasks) {
-        final d = DateTime(
-          task.dueDate.year,
-          task.dueDate.month,
-          task.dueDate.day,
-        );
-        grouped.putIfAbsent(d, () => <Task>[]).add(task);
-      }
-      final sortedDates = grouped.keys.toList()
-        ..sort((a, b) => a.compareTo(b));
-      for (final date in sortedDates) {
-        items.add(date);
-        items.addAll(grouped[date]!);
+      // Групираме по дата САМО ако сортираме по дата
+      if (_sortBy == TaskSort.date) {
+        final Map<DateTime, List<Task>> grouped = {};
+        for (final task in tasks) {
+          final d = DateTime(
+            task.dueDate.year,
+            task.dueDate.month,
+            task.dueDate.day,
+          );
+          grouped.putIfAbsent(d, () => <Task>[]).add(task);
+        }
+        final sortedDates = grouped.keys.toList()
+          ..sort((a, b) => a.compareTo(b));
+        for (final date in sortedDates) {
+          items.add(date);
+          items.addAll(grouped[date]!);
+        }
+      } else {
+        // За другите сортирания - без групиране
+        items.addAll(tasks);
       }
     }
 
@@ -1669,6 +1746,95 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
             fontWeight: FontWeight.w600,
           ),
         ),
+        actions: [
+          PopupMenuButton<TaskSort>(
+            icon: const Icon(Icons.sort_rounded),
+            tooltip: t.sortBy,
+            onSelected: (sort) => setState(() => _sortBy = sort),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: TaskSort.date,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today_rounded,
+                      size: 20,
+                      color: _sortBy == TaskSort.date ? theme.colorScheme.primary : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      t.date,
+                      style: TextStyle(
+                        fontWeight: _sortBy == TaskSort.date ? FontWeight.bold : null,
+                        color: _sortBy == TaskSort.date ? theme.colorScheme.primary : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: TaskSort.priority,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.flag_rounded,
+                      size: 20,
+                      color: _sortBy == TaskSort.priority ? theme.colorScheme.primary : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      t.priority,
+                      style: TextStyle(
+                        fontWeight: _sortBy == TaskSort.priority ? FontWeight.bold : null,
+                        color: _sortBy == TaskSort.priority ? theme.colorScheme.primary : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: TaskSort.name,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.sort_by_alpha_rounded,
+                      size: 20,
+                      color: _sortBy == TaskSort.name ? theme.colorScheme.primary : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      t.name,
+                      style: TextStyle(
+                        fontWeight: _sortBy == TaskSort.name ? FontWeight.bold : null,
+                        color: _sortBy == TaskSort.name ? theme.colorScheme.primary : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: TaskSort.category,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.folder_rounded,
+                      size: 20,
+                      color: _sortBy == TaskSort.category ? theme.colorScheme.primary : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      t.category,
+                      style: TextStyle(
+                        fontWeight: _sortBy == TaskSort.category ? FontWeight.bold : null,
+                        color: _sortBy == TaskSort.category ? theme.colorScheme.primary : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -2001,6 +2167,15 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                   reminders: task.reminders,
                                 );
                                 await taskBox.add(newTask);
+                            // Google Calendar sync
+                            if (GoogleCalendarService().isConnected) {
+                              final eventId = await GoogleCalendarService().addTaskToCalendar(newTask);
+                              if (eventId != null) {
+                                newTask.googleCalendarEventId = eventId;
+                                await newTask.save();
+                              }
+                            }
+
                                 await NotificationService().scheduleForTask(newTask);
                               }
 
@@ -2012,6 +2187,11 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
 
                               await WidgetService.updateWidget();
                               setState(() {});
+                              
+                              // Проверка за празнуване
+                              if (!wasCompleted && task.isCompleted) {
+                                _checkAndCelebrate();
+                              }
                               return false; // Не изтриваме, само toggle-ваме
                             } else {
                               // Swipe наляво - изтриване с потвърждение
@@ -2106,364 +2286,100 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                               ),
                             );
                           },
-                          child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 4,
-                            horizontal: 2,
-                          ),
-                          child: Opacity(
-                            opacity: isCompleted ? 0.6 : 1.0,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: accentColor.withOpacity(0.15),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.surface,
-                                    border: Border.all(
-                                      color: theme.colorScheme.outline.withOpacity(0.1),
-                                      width: 1,
-                                    ),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: IntrinsicHeight(
-                                    child: Row(
-                                      children: [
-                                        // Цветна лента вляво
-                                        Container(
-                                          width: 5,
-                                          decoration: BoxDecoration(
-                                            color: accentColor,
-                                            borderRadius: const BorderRadius.only(
-                                              topLeft: Radius.circular(16),
-                                              bottomLeft: Radius.circular(16),
-                                            ),
-                                          ),
-                                        ),
-                                        // Checkbox
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                                          child: Transform.scale(
-                                            scale: 1.1,
-                                            child: Checkbox(
-                                              value: task.isCompleted,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(6),
-                                              ),
-                                              activeColor: accentColor,
-                                              onChanged: (bool? value) async {
-                                                final wasCompleted =
-                                                    task.isCompleted;
-                                                setState(() {
-                                                  task.isCompleted =
-                                                      value ?? !task.isCompleted;
-                                                });
-                                                await task.save();
+                          child: ExpandableTaskCard(
+                                task: task,
+                                category: cat,
+                                isOverdue: isOverdue,
+                                isCompleted: isCompleted,
+                                isExpanded: _expandedCards.contains(task.key),
+                                onToggleExpand: () {
+                                  setState(() {
+                                    if (_expandedCards.contains(task.key)) {
+                                      _expandedCards.remove(task.key);
+                                    } else {
+                                      _expandedCards.add(task.key);
+                                    }
+                                  });
+                                },
+                                onToggleComplete: () async {
+                                  final wasCompleted = task.isCompleted;
+                                  setState(() {
+                                    task.isCompleted = !task.isCompleted;
+                                  });
+                                  await task.save();
+                                  
+                                  if (!wasCompleted && task.isCompleted && task.recurrence != null) {
+                                    final nextDate = _nextDueDate(task.dueDate, task.recurrence!);
+                                    final newTask = Task(
+                                      title: task.title,
+                                      dueDate: nextDate,
+                                      categoryId: task.categoryId,
+                                      priority: task.priority,
+                                      recurrence: task.recurrence,
+                                      reminders: task.reminders,
+                                    );
+                                    await taskBox.add(newTask);
+                            // Google Calendar sync
+                            if (GoogleCalendarService().isConnected) {
+                              final eventId = await GoogleCalendarService().addTaskToCalendar(newTask);
+                              if (eventId != null) {
+                                newTask.googleCalendarEventId = eventId;
+                                await newTask.save();
+                              }
+                            }
 
-                                                if (!wasCompleted &&
-                                                    task.isCompleted &&
-                                                    task.recurrence != null) {
-                                                  final nextDate = _nextDueDate(
-                                                    task.dueDate,
-                                                    task.recurrence!,
-                                                  );
-                                                  final newTask = Task(
-                                                    title: task.title,
-                                                    dueDate: nextDate,
-                                                    categoryId: task.categoryId,
-                                                    priority: task.priority,
-                                                    recurrence: task.recurrence,
-                                                    reminder: task.reminder,
-                                                  );
-                                                  await taskBox.add(newTask);
-                                                  await NotificationService()
-                                                      .scheduleForTask(newTask);
-                                                }
-
-                                                if (task.isCompleted) {
-                                                  await NotificationService()
-                                                      .cancelForTask(task);
-                                                } else if (task.reminder != null) {
-                                                  await NotificationService()
-                                                      .scheduleForTask(task);
-                                                }
-
-                                                await WidgetService.updateWidget();
-                                                setState(() {});
-                                              },
-                                            ),
-                                          ),
+                                    await NotificationService().scheduleForTask(newTask);
+                                  }
+                                  
+                                  if (task.isCompleted) {
+                                    await NotificationService().cancelForTask(task);
+                                  } else if (task.hasReminders) {
+                                    await NotificationService().scheduleForTask(task);
+                                  }
+                                  
+                                  await WidgetService.updateWidget();
+                                  setState(() {});
+                                  
+                                  if (!wasCompleted && task.isCompleted) {
+                                    _checkAndCelebrate();
+                                  }
+                                },
+                                onEdit: () => _openTaskDialog(existing: task),
+                                onDelete: () async {
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: Text(t.deletion),
+                                      content: Text(t.deleteTaskMessage(task.title)),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx, false),
+                                          child: Text(t.cancel),
                                         ),
-                                        // Съдържание
-                                        Expanded(
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(vertical: 12),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                // Заглавие
-                                                Text(
-                                                  task.title,
-                                                  maxLines: 2,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.w600,
-                                                    decoration: isCompleted
-                                                        ? TextDecoration.lineThrough
-                                                        : TextDecoration.none,
-                                                    color: isCompleted
-                                                        ? Colors.grey.shade500
-                                                        : theme.colorScheme.onSurface,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 8),
-                                                // Badges
-                                                Wrap(
-                                                  spacing: 6,
-                                                  runSpacing: 4,
-                                                  children: [
-                                                    // Категория badge
-                                                    if (categoryName.isNotEmpty)
-                                                      Container(
-                                                        padding: const EdgeInsets.symmetric(
-                                                          horizontal: 8,
-                                                          vertical: 3,
-                                                        ),
-                                                        decoration: BoxDecoration(
-                                                          color: categoryColor.withOpacity(0.15),
-                                                          borderRadius: BorderRadius.circular(20),
-                                                        ),
-                                                        child: Row(
-                                                          mainAxisSize: MainAxisSize.min,
-                                                          children: [
-                                                            Container(
-                                                              width: 6,
-                                                              height: 6,
-                                                              decoration: BoxDecoration(
-                                                                color: categoryColor,
-                                                                shape: BoxShape.circle,
-                                                              ),
-                                                            ),
-                                                            const SizedBox(width: 4),
-                                                            Text(
-                                                              categoryName,
-                                                              style: TextStyle(
-                                                                fontSize: 11,
-                                                                fontWeight: FontWeight.w500,
-                                                                color: categoryColor.withOpacity(0.9),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    // Приоритет badge
-                                                    Container(
-                                                      padding: const EdgeInsets.symmetric(
-                                                        horizontal: 8,
-                                                        vertical: 3,
-                                                      ),
-                                                      decoration: BoxDecoration(
-                                                        color: priorityColor.withOpacity(0.12),
-                                                        borderRadius: BorderRadius.circular(20),
-                                                      ),
-                                                      child: Text(
-                                                        priorityText,
-                                                        style: TextStyle(
-                                                          fontSize: 11,
-                                                          fontWeight: FontWeight.w600,
-                                                          color: priorityColor,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    // Повторение
-                                                    if (task.recurrence != null)
-                                                      Container(
-                                                        padding: const EdgeInsets.symmetric(
-                                                          horizontal: 8,
-                                                          vertical: 3,
-                                                        ),
-                                                        decoration: BoxDecoration(
-                                                          color: theme.colorScheme.outline.withOpacity(0.1),
-                                                          borderRadius: BorderRadius.circular(20),
-                                                        ),
-                                                        child: Row(
-                                                          mainAxisSize: MainAxisSize.min,
-                                                          children: [
-                                                            Icon(
-                                                              Icons.repeat_rounded,
-                                                              size: 12,
-                                                              color: theme.colorScheme.onSurface.withOpacity(0.6),
-                                                            ),
-                                                            const SizedBox(width: 3),
-                                                            Text(
-                                                              _recurrenceLabel(task.recurrence, t),
-                                                              style: TextStyle(
-                                                                fontSize: 11,
-                                                                color: theme.colorScheme.onSurface.withOpacity(0.6),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    // Напомняне
-                                                    if (hasReminder)
-                                                      Container(
-                                                        padding: const EdgeInsets.symmetric(
-                                                          horizontal: 8,
-                                                          vertical: 3,
-                                                        ),
-                                                        decoration: BoxDecoration(
-                                                          color: Colors.amber.withOpacity(0.15),
-                                                          borderRadius: BorderRadius.circular(20),
-                                                        ),
-                                                        child: Row(
-                                                          mainAxisSize: MainAxisSize.min,
-                                                          children: [
-                                                            const Icon(
-                                                              Icons.notifications_active_rounded,
-                                                              size: 12,
-                                                              color: Colors.amber,
-                                                            ),
-                                                            const SizedBox(width: 3),
-                                                            Text(
-                                                              t.reminder,
-                                                              style: const TextStyle(
-                                                                fontSize: 11,
-                                                                color: Colors.amber,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    // Подзадачи
-                                                    if (task.totalSubtasksCount > 0)
-                                                      Container(
-                                                        padding: const EdgeInsets.symmetric(
-                                                          horizontal: 8,
-                                                          vertical: 3,
-                                                        ),
-                                                        decoration: BoxDecoration(
-                                                          color: theme.colorScheme.primary.withOpacity(0.1),
-                                                          borderRadius: BorderRadius.circular(20),
-                                                        ),
-                                                        child: Row(
-                                                          mainAxisSize: MainAxisSize.min,
-                                                          children: [
-                                                            Icon(
-                                                              Icons.checklist_rounded,
-                                                              size: 12,
-                                                              color: theme.colorScheme.primary,
-                                                            ),
-                                                            const SizedBox(width: 3),
-                                                            Text(
-                                                              '${task.completedSubtasksCount}/${task.totalSubtasksCount}',
-                                                              style: TextStyle(
-                                                                fontSize: 11,
-                                                                color: theme.colorScheme.primary,
-                                                                fontWeight: FontWeight.w500,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    // Бележки
-                                                    if (task.hasNotes)
-                                                      Container(
-                                                        padding: const EdgeInsets.symmetric(
-                                                          horizontal: 8,
-                                                          vertical: 3,
-                                                        ),
-                                                        decoration: BoxDecoration(
-                                                          color: Colors.amber.withOpacity(0.15),
-                                                          borderRadius: BorderRadius.circular(20),
-                                                        ),
-                                                        child: Icon(
-                                                          Icons.note_rounded,
-                                                          size: 12,
-                                                          color: Colors.amber.shade700,
-                                                        ),
-                                                      ),
-                                                  ],
-                                                ),
-                                                const SizedBox(height: 8),
-                                                // Дата и час
-                                                Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.access_time_rounded,
-                                                      size: 14,
-                                                      color: isOverdue
-                                                          ? Colors.redAccent
-                                                          : theme.colorScheme.onSurface.withOpacity(0.5),
-                                                    ),
-                                                    const SizedBox(width: 4),
-                                                    Text(
-                                                      dateTimeStr,
-                                                      style: TextStyle(
-                                                        fontSize: 12,
-                                                        fontWeight: isOverdue ? FontWeight.w600 : FontWeight.normal,
-                                                        color: isOverdue
-                                                            ? Colors.redAccent
-                                                            : theme.colorScheme.onSurface.withOpacity(0.5),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ),
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx, true),
+                                          style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+                                          child: Text(t.delete),
                                         ),
-                                        // Бутони
-                                        Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            IconButton(
-                                              icon: Icon(
-                                                Icons.edit_outlined,
-                                                size: 20,
-                                                color: theme.colorScheme.onSurface.withOpacity(0.5),
-                                              ),
-                                              onPressed: () => _openTaskDialog(existing: task),
-                                              visualDensity: VisualDensity.compact,
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(
-                                                Icons.delete_outline_rounded,
-                                                size: 20,
-                                                color: Colors.redAccent,
-                                              ),
-                                              onPressed: () async {
-                                                await NotificationService()
-                                                    .cancelForTask(task);
-                                                await task.delete();
-                                                await WidgetService.updateWidget();
-                                                setState(() {});
-                                              },
-                                              visualDensity: VisualDensity.compact,
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(width: 4),
                                       ],
                                     ),
-                                  ),
-                                ),
+                                  );
+                                  if (confirm == true) {
+                                    await NotificationService().cancelForTask(task);
+                                    await task.delete();
+                                    await WidgetService.updateWidget();
+                                    setState(() {});
+                                  }
+                                },
+                                dateTimeStr: dateTimeStr,
+                                priorityText: priorityText,
+                                priorityColor: priorityColor,
+                                accentColor: accentColor,
+                                categoryName: categoryName,
+                                recurrenceText: task.recurrence != null ? _recurrenceLabel(task.recurrence, t) : null,
                               ),
-                            ),
-                          ),
-                          ),
-                        ),
-                        ),
+                        ), // Dismissible
+                        ), // TweenAnimationBuilder
                         );
                       },
                     ),
@@ -2504,3 +2420,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     );
   }
 }
+
+
+
+

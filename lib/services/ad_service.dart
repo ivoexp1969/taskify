@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+// Условен import - stub за web, реален пакет за mobile
+import 'ads_stub.dart' if (dart.library.io) 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'pro_service.dart';
 
@@ -21,6 +23,12 @@ class AdService extends ChangeNotifier {
 
   Future<void> initialize() async {
     if (_isInitialized) return;
+    
+    // На web не инициализираме реклами
+    if (kIsWeb) {
+      _isInitialized = true;
+      return;
+    }
 
     try {
       await MobileAds.instance.initialize();
@@ -32,6 +40,8 @@ class AdService extends ChangeNotifier {
   }
 
   Future<void> loadBannerAd() async {
+    // На web не зареждаме реклами
+    if (kIsWeb) return;
    
     if (ProService().isPro) {
       debugPrint('AdService: Pro user, skipping ads');
@@ -54,7 +64,7 @@ class AdService extends ChangeNotifier {
         onAdLoaded: (ad) {
           debugPrint('Banner ad loaded');
           _isBannerAdLoaded = true;
-          notifyListeners(); // Уведомява widget-ите
+          notifyListeners();
         },
         onAdFailedToLoad: (ad, error) {
           debugPrint('Banner ad failed to load: $error');

@@ -1,12 +1,15 @@
-﻿import 'package:flutter/material.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart';
 
 import '../../services/pro_service.dart';
 import '../../utils/localization.dart';
 
+// Условен import за Package тип
+import '../../services/purchases_stub.dart' if (dart.library.io) 'package:purchases_flutter/purchases_flutter.dart';
+
 class PaywallScreen extends StatefulWidget {
   final String? featureName;
-  
+
   const PaywallScreen({super.key, this.featureName});
 
   @override
@@ -16,7 +19,7 @@ class PaywallScreen extends StatefulWidget {
 class _PaywallScreenState extends State<PaywallScreen> {
   final ProService _proService = ProService();
   final TextEditingController _promoController = TextEditingController();
-  List<StoreProduct> _products = [];
+  List<Package> _packages = [];
   bool _isLoading = true;
   bool _isPurchasing = false;
   bool _isApplyingPromo = false;
@@ -25,7 +28,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
   @override
   void initState() {
     super.initState();
-    _loadProducts();
+    _loadOfferings();
   }
 
   @override
@@ -34,21 +37,35 @@ class _PaywallScreenState extends State<PaywallScreen> {
     super.dispose();
   }
 
-  Future<void> _loadProducts() async {
+  Future<void> _loadOfferings() async {
+    // На web не зареждаме продукти
+    if (kIsWeb) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
     try {
-      final products = await _proService.getProducts();
+      final packages = await _proService.getOfferings();
+      debugPrint('Loaded ${packages.length} packages');
+      for (final p in packages) {
+        debugPrint('  - ${p.identifier}: ${p.storeProduct.priceString}');
+      }
+      
       if (mounted) {
         setState(() {
-          _products = products;
+          _packages = packages;
           _isLoading = false;
         });
       }
     } catch (e) {
+      debugPrint('Load offerings error: $e');
       if (mounted) {
         setState(() {
           _error = e.toString();
@@ -58,11 +75,13 @@ class _PaywallScreenState extends State<PaywallScreen> {
     }
   }
 
-  Future<void> _purchase(StoreProduct product) async {
+  Future<void> _purchasePackage(Package package) async {
+    if (kIsWeb) return;
+    
     setState(() => _isPurchasing = true);
 
     try {
-      final success = await _proService.purchase(product);
+      final success = await _proService.purchasePackage(package);
       if (mounted) {
         if (success) {
           Navigator.of(context).pop(true);
@@ -88,6 +107,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Future<void> _applyPromoCode() async {
+    if (kIsWeb) return;
+    
     final code = _promoController.text.trim();
     if (code.isEmpty) return;
 
@@ -102,7 +123,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
             backgroundColor: result.success ? Colors.green : Colors.red,
           ),
         );
-        
+
         if (result.success) {
           Navigator.of(context).pop(true);
         }
@@ -121,6 +142,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Future<void> _restorePurchases() async {
+    if (kIsWeb) return;
+    
     setState(() => _isPurchasing = true);
 
     try {
@@ -162,13 +185,54 @@ class _PaywallScreenState extends State<PaywallScreen> {
     final languageController = LanguageScope.of(context);
     final isBg = languageController.locale.languageCode == 'bg';
 
+    // На web показваме съобщение
+    if (kIsWeb) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Taskify Pro')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.workspace_premium_rounded, size: 80, color: theme.colorScheme.primary),
+                const SizedBox(height: 24),
+                Text(
+                  isBg ? 'Web версията е безплатна!' : 'Web version is free!',
+                  style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  isBg 
+                    ? 'Свали приложението за Android за Pro функции и офлайн достъп.'
+                    : 'Download the Android app for Pro features and offline access.',
+                  style: theme.textTheme.bodyLarge,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(isBg ? 'Разбрах' : 'Got it'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Taskify Pro'),
+        centerTitle: true,
         actions: [
           TextButton(
             onPressed: _isPurchasing ? null : _restorePurchases,
-            child: Text(isBg ? 'Възстанови' : 'Restore'),
+            child: Text(
+              isBg ? 'Възстанови' : 'Restore',
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
           ),
         ],
       ),
@@ -179,56 +243,56 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                      Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
                       const SizedBox(height: 16),
-                      Text(_error!),
+                      Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
                       const SizedBox(height: 16),
                       ElevatedButton(
-                        onPressed: _loadProducts,
-                        child: Text(isBg ? 'Опитай отново' : 'Retry'),
+                        onPressed: _loadOfferings,
+                        child: Text(isBg ? 'Опитай отново' : 'Try again'),
                       ),
                     ],
                   ),
                 )
               : SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // Header
                       Icon(
                         Icons.workspace_premium_rounded,
-                        size: 80,
+                        size: 64,
                         color: theme.colorScheme.primary,
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        isBg ? 'Отключи всички функции' : 'Unlock all features',
+                        isBg ? 'Отключи пълния потенциал' : 'Unlock Full Potential',
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      
-                      if (widget.featureName != null) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.amber.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            '${isBg ? "Нужен е Pro за" : "Pro required for"}: ${widget.featureName}',
-                            style: const TextStyle(color: Colors.amber),
-                            textAlign: TextAlign.center,
-                          ),
+                      const SizedBox(height: 8),
+                      Text(
+                        isBg
+                            ? 'Получи достъп до всички Pro функции'
+                            : 'Get access to all Pro features',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
                         ),
-                      ],
+                        textAlign: TextAlign.center,
+                      ),
 
                       const SizedBox(height: 24),
 
                       // Промо код секция
                       Card(
+                        elevation: 0,
+                        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: Column(
@@ -236,8 +300,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             children: [
                               Row(
                                 children: [
-                                  Icon(Icons.card_giftcard_rounded, 
-                                       color: theme.colorScheme.primary),
+                                  Icon(Icons.card_giftcard_rounded,
+                                      color: theme.colorScheme.primary),
                                   const SizedBox(width: 8),
                                   Text(
                                     isBg ? 'Имаш промо код?' : 'Have a promo code?',
@@ -315,23 +379,41 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
                       const SizedBox(height: 24),
 
-                      // Продукти
-                      if (_products.isEmpty)
+                      // Продукти от Offerings
+                      if (_packages.isEmpty)
                         Center(
-                          child: Text(
-                            isBg ? 'Няма налични продукти' : 'No products available',
-                            style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                          child: Column(
+                            children: [
+                              Icon(Icons.shopping_cart_outlined, 
+                                   size: 48, 
+                                   color: theme.colorScheme.onSurface.withOpacity(0.4)),
+                              const SizedBox(height: 8),
+                              Text(
+                                isBg ? 'Няма налични продукти' : 'No products available',
+                                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                              ),
+                              const SizedBox(height: 8),
+                              TextButton(
+                                onPressed: _loadOfferings,
+                                child: Text(isBg ? 'Опитай отново' : 'Try again'),
+                              ),
+                            ],
                           ),
                         )
                       else
-                        ..._products.map((product) => _ProductCard(
-                          product: product,
-                          onTap: _isPurchasing ? null : () => _purchase(product),
+                        ..._packages.map((package) => _PackageCard(
+                          package: package,
+                          onTap: _isPurchasing ? null : () => _purchasePackage(package),
                           isBg: isBg,
                         )),
 
                       if (_isPurchasing)
-                        const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())),
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
 
                       const SizedBox(height: 24),
                     ],
@@ -358,7 +440,14 @@ class _FeatureItem extends StatelessWidget {
           Icon(icon, size: 24, color: highlight ? Colors.green : theme.colorScheme.primary),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(title, style: TextStyle(fontSize: 15, fontWeight: highlight ? FontWeight.w600 : FontWeight.normal, color: highlight ? Colors.green : null)),
+            child: Text(
+              title, 
+              style: TextStyle(
+                fontSize: 15, 
+                fontWeight: highlight ? FontWeight.w600 : FontWeight.normal, 
+                color: highlight ? Colors.green : null,
+              ),
+            ),
           ),
           Icon(Icons.check_circle_rounded, size: 20, color: Colors.green.withOpacity(0.8)),
         ],
@@ -367,28 +456,33 @@ class _FeatureItem extends StatelessWidget {
   }
 }
 
-class _ProductCard extends StatelessWidget {
-  final StoreProduct product;
+class _PackageCard extends StatelessWidget {
+  final Package package;
   final VoidCallback? onTap;
   final bool isBg;
 
-  const _ProductCard({required this.product, required this.onTap, required this.isBg});
+  const _PackageCard({required this.package, required this.onTap, required this.isBg});
 
-  String _getProductTitle() {
-    if (product.identifier.contains('lifetime')) return isBg ? 'Завинаги' : 'Lifetime';
-    if (product.identifier.contains('yearly')) return isBg ? 'Годишен' : 'Yearly';
-    if (product.identifier.contains('monthly')) return isBg ? 'Месечен' : 'Monthly';
-    return product.title;
+  String _getPackageTitle() {
+    final identifier = package.identifier.toLowerCase();
+    if (identifier.contains('lifetime')) return isBg ? 'Завинаги' : 'Lifetime';
+    if (identifier.contains('annual') || identifier.contains('yearly')) return isBg ? 'Годишен' : 'Yearly';
+    if (identifier.contains('monthly')) return isBg ? 'Месечен' : 'Monthly';
+    return package.storeProduct.title;
   }
 
-  String _getProductSubtitle() {
-    if (product.identifier.contains('lifetime')) return isBg ? 'Еднократно плащане' : 'One-time payment';
-    if (product.identifier.contains('yearly')) return isBg ? 'Спестяваш 50%' : 'Save 50%';
-    if (product.identifier.contains('monthly')) return isBg ? 'Отказ по всяко време' : 'Cancel anytime';
-    return product.description;
+  String _getPackageSubtitle() {
+    final identifier = package.identifier.toLowerCase();
+    if (identifier.contains('lifetime')) return isBg ? 'Еднократно плащане' : 'One-time payment';
+    if (identifier.contains('annual') || identifier.contains('yearly')) return isBg ? 'Спестяваш 50%' : 'Save 50%';
+    if (identifier.contains('monthly')) return isBg ? 'Отказ по всяко време' : 'Cancel anytime';
+    return package.storeProduct.description;
   }
 
-  bool _isPopular() => product.identifier.contains('yearly');
+  bool _isPopular() {
+    final identifier = package.identifier.toLowerCase();
+    return identifier.contains('annual') || identifier.contains('yearly');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -407,7 +501,10 @@ class _ProductCard extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: isPopular ? theme.colorScheme.primary : theme.colorScheme.outline.withOpacity(0.3), width: isPopular ? 2 : 1),
+              border: Border.all(
+                color: isPopular ? theme.colorScheme.primary : theme.colorScheme.outline.withOpacity(0.3), 
+                width: isPopular ? 2 : 1,
+              ),
             ),
             child: Row(
               children: [
@@ -417,23 +514,49 @@ class _ProductCard extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Text(_getProductTitle(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          Text(
+                            _getPackageTitle(), 
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
                           if (isPopular) ...[
                             const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(color: theme.colorScheme.primary, borderRadius: BorderRadius.circular(12)),
-                              child: Text(isBg ? 'Популярен' : 'Popular', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: theme.colorScheme.onPrimary)),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary, 
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                isBg ? 'Популярен' : 'Popular', 
+                                style: TextStyle(
+                                  fontSize: 10, 
+                                  fontWeight: FontWeight.bold, 
+                                  color: theme.colorScheme.onPrimary,
+                                ),
+                              ),
                             ),
                           ],
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Text(_getProductSubtitle(), style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurface.withOpacity(0.6))),
+                      Text(
+                        _getPackageSubtitle(), 
+                        style: TextStyle(
+                          fontSize: 13, 
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                Text(product.priceString, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
+                Text(
+                  package.storeProduct.priceString, 
+                  style: TextStyle(
+                    fontSize: 20, 
+                    fontWeight: FontWeight.bold, 
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
               ],
             ),
           ),
