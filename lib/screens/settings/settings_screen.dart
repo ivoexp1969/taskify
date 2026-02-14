@@ -638,10 +638,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // Format time for display
   String _formatTime(int hour, int minute) {
-    final period = hour >= 12 ? 'PM' : 'AM';
-    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    final hourStr = hour.toString().padLeft(2, '0');
+    
     final minuteStr = minute.toString().padLeft(2, '0');
-    return '$displayHour:$minuteStr $period';
+    return '$hourStr:$minuteStr';
   }
 
   // Select briefing time
