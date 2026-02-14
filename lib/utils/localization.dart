@@ -820,12 +820,4 @@ class AppText {
     return goodEvening;
   }
 
-  String get goodAfternoon => _t({'en': 'Good Afternoon! ☀️', 'bg': 'Добър ден! ☀️', 'de': 'Guten Tag! ☀️', 'fr': "Bon après-midi! ☀️", 'it': 'Buon pomeriggio! ☀️', 'el': 'Καλό απόγευμα! ☀️', 'es': '¡Buenas tardes! ☀️', 'pt': 'Boa tarde! ☀️', 'ru': 'Добрый день! ☀️', 'tr': 'İyi öğleden sonralar! ☀️'});
-  String get goodEvening => _t({'en': 'Good Evening! 🌙', 'bg': 'Добър вечер! 🌙', 'de': 'Guten Abend! 🌙', 'fr': 'Bonsoir! 🌙', 'it': 'Buonasera! 🌙', 'el': 'Καλό βράδυ! 🌙', 'es': '¡Buenas noches! 🌙', 'pt': 'Boa noite! 🌙', 'ru': 'Добрый вечер! 🌙', 'tr': 'İyi akşamlar! 🌙'});
-
-  String greetingForHour(int hour) {
-    if (hour >= 5 && hour < 12) return goodMorning;
-    if (hour >= 12 && hour < 18) return goodAfternoon;
-    return goodEvening;
-  }
 }

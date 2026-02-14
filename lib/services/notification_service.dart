@@ -153,27 +153,20 @@ class NotificationService {
   }
 
   /// Връща текст за напомнянето
-  String _reminderLabel(String reminderType, bool isBg) {
-    switch (reminderType) {
-      case 'at_time':
-        return isBg ? 'Сега е времето!' : 'Time is now!';
-      case 'minus_5m':
-        return isBg ? 'След 5 минути' : 'In 5 minutes';
-      case 'minus_15m':
-        return isBg ? 'След 15 минути' : 'In 15 minutes';
-      case 'minus_30m':
-        return isBg ? 'След 30 минути' : 'In 30 minutes';
-      case 'minus_1h':
-        return isBg ? 'След 1 час' : 'In 1 hour';
-      case 'minus_2h':
-        return isBg ? 'След 2 часа' : 'In 2 hours';
-      case 'minus_1d':
-        return isBg ? 'Утре' : 'Tomorrow';
-      case 'same_day_8':
-        return isBg ? 'Днес' : 'Today';
-      default:
-        return isBg ? 'Напомняне' : 'Reminder';
-    }
+  String _reminderLabel(String reminderType, String lang) {
+    const labels = {
+      'at_time': {'en': 'Time is now!', 'bg': 'Сега е времето!', 'de': 'Zeit ist da!', 'fr': "C'est l'heure!", 'it': "È ora!", 'el': 'Ήρθε η ώρα!', 'es': '¡Es la hora!', 'pt': 'Chegou a hora!', 'ru': 'Время пришло!', 'tr': 'Şimdi zamanı!'},
+      'minus_5m': {'en': 'In 5 minutes', 'bg': 'След 5 минути', 'de': 'In 5 Minuten', 'fr': 'Dans 5 minutes', 'it': 'Tra 5 minuti', 'el': 'Σε 5 λεπτά', 'es': 'En 5 minutos', 'pt': 'Em 5 minutos', 'ru': 'Через 5 минут', 'tr': '5 dakika içinde'},
+      'minus_15m': {'en': 'In 15 minutes', 'bg': 'След 15 минути', 'de': 'In 15 Minuten', 'fr': 'Dans 15 minutes', 'it': 'Tra 15 minuti', 'el': 'Σε 15 λεπτά', 'es': 'En 15 minutos', 'pt': 'Em 15 minutos', 'ru': 'Через 15 минут', 'tr': '15 dakika içinde'},
+      'minus_30m': {'en': 'In 30 minutes', 'bg': 'След 30 минути', 'de': 'In 30 Minuten', 'fr': 'Dans 30 minutes', 'it': 'Tra 30 minuti', 'el': 'Σε 30 λεπτά', 'es': 'En 30 minutos', 'pt': 'Em 30 minutos', 'ru': 'Через 30 минут', 'tr': '30 dakika içinde'},
+      'minus_1h': {'en': 'In 1 hour', 'bg': 'След 1 час', 'de': 'In 1 Stunde', 'fr': 'Dans 1 heure', 'it': 'Tra 1 ora', 'el': 'Σε 1 ώρα', 'es': 'En 1 hora', 'pt': 'Em 1 hora', 'ru': 'Через 1 час', 'tr': '1 saat içinde'},
+      'minus_2h': {'en': 'In 2 hours', 'bg': 'След 2 часа', 'de': 'In 2 Stunden', 'fr': 'Dans 2 heures', 'it': 'Tra 2 ore', 'el': 'Σε 2 ώρες', 'es': 'En 2 horas', 'pt': 'Em 2 horas', 'ru': 'Через 2 часа', 'tr': '2 saat içinde'},
+      'minus_1d': {'en': 'Tomorrow', 'bg': 'Утре', 'de': 'Morgen', 'fr': 'Demain', 'it': 'Domani', 'el': 'Αύριο', 'es': 'Mañana', 'pt': 'Amanhã', 'ru': 'Завтра', 'tr': 'Yarın'},
+      'same_day_8': {'en': 'Today', 'bg': 'Днес', 'de': 'Heute', 'fr': "Aujourd'hui", 'it': 'Oggi', 'el': 'Σήμερα', 'es': 'Hoy', 'pt': 'Hoje', 'ru': 'Сегодня', 'tr': 'Bugün'},
+    };
+    const defaultLabel = {'en': 'Reminder', 'bg': 'Напомняне', 'de': 'Erinnerung', 'fr': 'Rappel', 'it': 'Promemoria', 'el': 'Υπενθύμιση', 'es': 'Recordatorio', 'pt': 'Lembrete', 'ru': 'Напоминание', 'tr': 'Hatırlatıcı'};
+    final map = labels[reminderType] ?? defaultLabel;
+    return map[lang] ?? map['en'] ?? 'Reminder';
   }
 
   /// Отменя всички нотификации за задача
