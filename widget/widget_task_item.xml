@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_task_item"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/widget_task_item_bg"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="10dp"
+    android:minHeight="48dp">
+
+    <!-- Priority indicator bar -->
+    <View
+        android:id="@+id/task_priority_bar"
+        android:layout_width="4dp"
+        android:layout_height="32dp"
+        android:background="@drawable/widget_priority_bar" />
+
+    <!-- Checkbox circle -->
+    <FrameLayout
+        android:id="@+id/task_checkbox_container"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginStart="10dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <View
+            android:id="@+id/task_checkbox_bg"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:background="@drawable/widget_checkbox_unchecked" />
+
+        <ImageView
+            android:id="@+id/task_checkbox_check"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_check"
+            android:tint="#FFFFFF"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <!-- Task content -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/task_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Task title"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="2dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:src="@drawable/ic_time"
+                android:tint="#808080" />
+
+            <TextView
+                android:id="@+id/task_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="14:00"
+                android:textColor="#808080"
+                android:textSize="11sp"
+                android:layout_marginStart="4dp" />
+
+            <!-- Subtasks indicator -->
+            <LinearLayout
+                android:id="@+id/task_subtasks_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginStart="10dp"
+                android:visibility="gone"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:src="@drawable/ic_subtasks"
+                    android:tint="#6366F1" />
+
+                <TextView
+                    android:id="@+id/task_subtasks"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2/3"
+                    android:textColor="#6366F1"
+                    android:textSize="11sp"
+                    android:layout_marginStart="3dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Category dot -->
+    <View
+        android:id="@+id/task_category_dot"
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:background="@drawable/widget_category_dot" />
+
+</LinearLayout>

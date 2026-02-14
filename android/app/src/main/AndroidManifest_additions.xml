@@ -1,0 +1,27 @@
+<!-- Add these inside <application> tag in AndroidManifest.xml -->
+
+<!-- 2x2 Widget -->
+<receiver
+    android:name=".TaskWidgetProvider"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        <action android:name="com.ivoexp.taskify.ACTION_COMPLETE_TASK" />
+    </intent-filter>
+    <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/task_widget_info" />
+</receiver>
+
+<!-- 4x2 Widget -->
+<receiver
+    android:name=".TaskWidgetLargeProvider"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        <action android:name="com.ivoexp.taskify.ACTION_COMPLETE_TASK_LARGE" />
+    </intent-filter>
+    <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/task_widget_large_info" />
+</receiver>

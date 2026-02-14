@@ -198,7 +198,7 @@ class NotificationService {
       }
 
       await task.save();
-    } catch (_) {}
+    } catch (e) { debugPrint('NotificationService error: $e'); }
   }
 
   /// Планира всички напомняния за задача
@@ -222,7 +222,7 @@ class NotificationService {
         if (scheduled == null) continue;
 
         final id = Random().nextInt(0x7FFFFFFF);
-        final label = _reminderLabel(reminderType, true); // TODO: detect language
+        final label = _reminderLabel(reminderType, prefs.getString('app_language') ?? 'en');
 
         await prefs.setString('alarm_${id}_title', task.title);
         await prefs.setString('alarm_${id}_body', label);
@@ -245,7 +245,7 @@ class NotificationService {
         task.notificationIds = newIds;
         await task.save();
       }
-    } catch (_) {}
+    } catch (e) { debugPrint('NotificationService error: $e'); }
   }
 
   /// Generic method to schedule a notification
@@ -287,7 +287,7 @@ class NotificationService {
           rescheduleOnReboot: true,
         );
       }
-    } catch (_) {}
+    } catch (e) { debugPrint('NotificationService error: $e'); }
   }
 
   void _handleMorningBriefingTap() {
@@ -316,6 +316,6 @@ class NotificationService {
       await prefs.remove('alarm_${id}_title');
       await prefs.remove('alarm_${id}_body');
       await prefs.remove('alarm_${id}_payload');
-    } catch (_) {}
+    } catch (e) { debugPrint('NotificationService error: $e'); }
   }
 }
