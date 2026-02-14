@@ -62,7 +62,7 @@ class _BriefingSheet extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        t.goodMorning,
+                        t.greetingForHour(DateTime.now().hour),
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),

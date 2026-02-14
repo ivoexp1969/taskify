@@ -810,4 +810,22 @@ class AppText {
   String get googleTasks => _t({'en': 'Google Tasks', 'bg': 'Google Задачи', 'de': 'Google Aufgaben', 'fr': 'Google Tasks', 'it': 'Google Tasks', 'el': 'Google Tasks', 'es': 'Google Tasks', 'pt': 'Google Tasks', 'ru': 'Google Задачи', 'tr': 'Google Görevler'});
   String get deleteAllCalendarTasks => _t({'en': 'Delete All Calendar Tasks', 'bg': 'Изтрий всички календарни задачи', 'de': 'Alle Kalenderaufgaben löschen', 'fr': 'Supprimer toutes les tâches du calendrier', 'it': 'Elimina tutte le attività del calendario', 'el': 'Διαγραφή όλων των εργασιών ημερολογίου', 'es': 'Eliminar todas las tareas del calendario', 'pt': 'Excluir todas as tarefas do calendário', 'ru': 'Удалить все задачи из календаря', 'tr': 'Tüm takvim görevlerini sil'});
   String get deleteCalendarTasksConfirm => _t({'en': 'This will delete all tasks imported from Google Calendar. This action cannot be undone.', 'bg': 'Това ще изтрие всички задачи, импортирани от Google Calendar. Действието е необратимо.', 'de': 'Dies löscht alle aus Google Kalender importierten Aufgaben. Diese Aktion kann nicht rückgängig gemacht werden.', 'fr': 'Cela supprimera toutes les tâches importées de Google Agenda. Cette action est irréversible.', 'it': 'Questo eliminerà tutte le attività importate da Google Calendar. Questa azione non può essere annullata.', 'el': 'Αυτό θα διαγράψει όλες τις εργασίες που εισήχθησαν από το Ημερολόγιο Google. Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.', 'es': 'Esto eliminará todas las tareas importadas de Google Calendar. Esta acción no se puede deshacer.', 'pt': 'Isso excluirá todas as tarefas importadas do Google Agenda. Esta ação não pode ser desfeita.', 'ru': 'Это удалит все задачи, импортированные из Google Календаря. Это действие нельзя отменить.', 'tr': 'Bu, Google Takvimden içe aktarılan tüm görevleri silecektir. Bu işlem geri alınamaz.'});
+
+  String get goodAfternoon => _t({'en': 'Good Afternoon! ☀️', 'bg': 'Добър ден! ☀️', 'de': 'Guten Tag! ☀️', 'fr': 'Bon après-midi! ☀️', 'it': 'Buon pomeriggio! ☀️', 'el': 'Καλό απόγευμα! ☀️', 'es': '¡Buenas tardes! ☀️', 'pt': 'Boa tarde! ☀️', 'ru': 'Добрый день! ☀️', 'tr': 'İyi öğleden sonralar! ☀️'});
+  String get goodEvening => _t({'en': 'Good Evening! 🌙', 'bg': 'Добър вечер! 🌙', 'de': 'Guten Abend! 🌙', 'fr': 'Bonsoir! 🌙', 'it': 'Buonasera! 🌙', 'el': 'Καλό βράδυ! 🌙', 'es': '¡Buenas noches! 🌙', 'pt': 'Boa noite! 🌙', 'ru': 'Добрый вечер! 🌙', 'tr': 'İyi akşamlar! 🌙'});
+
+  String greetingForHour(int hour) {
+    if (hour >= 5 && hour < 12) return goodMorning;
+    if (hour >= 12 && hour < 18) return goodAfternoon;
+    return goodEvening;
+  }
+
+  String get goodAfternoon => _t({'en': 'Good Afternoon! ☀️', 'bg': 'Добър ден! ☀️', 'de': 'Guten Tag! ☀️', 'fr': "Bon après-midi! ☀️", 'it': 'Buon pomeriggio! ☀️', 'el': 'Καλό απόγευμα! ☀️', 'es': '¡Buenas tardes! ☀️', 'pt': 'Boa tarde! ☀️', 'ru': 'Добрый день! ☀️', 'tr': 'İyi öğleden sonralar! ☀️'});
+  String get goodEvening => _t({'en': 'Good Evening! 🌙', 'bg': 'Добър вечер! 🌙', 'de': 'Guten Abend! 🌙', 'fr': 'Bonsoir! 🌙', 'it': 'Buonasera! 🌙', 'el': 'Καλό βράδυ! 🌙', 'es': '¡Buenas noches! 🌙', 'pt': 'Boa noite! 🌙', 'ru': 'Добрый вечер! 🌙', 'tr': 'İyi akşamlar! 🌙'});
+
+  String greetingForHour(int hour) {
+    if (hour >= 5 && hour < 12) return goodMorning;
+    if (hour >= 12 && hour < 18) return goodAfternoon;
+    return goodEvening;
+  }
 }
