@@ -86,23 +86,25 @@ class _HomeScreenState extends State<HomeScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         final languageController = LanguageScope.of(context);
-        final isBg = languageController.locale.languageCode == 'bg';
+        final lang = languageController.locale.languageCode;
+        
+        const welcomeTitle = {'en': 'Welcome!', 'bg': 'Добре дошъл!', 'de': 'Willkommen!', 'fr': 'Bienvenue!', 'it': 'Benvenuto!', 'el': 'Καλώς ήρθες!', 'es': '¡Bienvenido!', 'pt': 'Bem-vindo!', 'ru': 'Добро пожаловать!', 'tr': 'Hoş geldin!'};
+        const welcomeBody = {'en': 'You have 14 days free Pro access!\n\nTry all features and see how Taskify can help you be more productive.', 'bg': 'Имаш 14 дни безплатен Pro достъп!\n\nИзползвай всички функции и виж как Taskify ще ти помогне да си по-продуктивен.', 'de': 'Du hast 14 Tage kostenlosen Pro-Zugang!\n\nProbiere alle Funktionen aus.', 'fr': 'Vous avez 14 jours d\'accès Pro gratuit!\n\nEssayez toutes les fonctionnalités.', 'it': 'Hai 14 giorni di accesso Pro gratuito!\n\nProva tutte le funzionalità.', 'el': 'Έχεις 14 ημέρες δωρεάν Pro πρόσβαση!\n\nΔοκίμασε όλες τις λειτουργίες.', 'es': '¡Tienes 14 días de acceso Pro gratis!\n\nPrueba todas las funciones.', 'pt': 'Você tem 14 dias de acesso Pro grátis!\n\nExperimente todos os recursos.', 'ru': 'У вас 14 дней бесплатного Pro доступа!\n\nПопробуйте все функции.', 'tr': '14 gün ücretsiz Pro erişiminiz var!\n\nTüm özellikleri deneyin.'};
+        const welcomeBtn = {'en': 'Awesome!', 'bg': 'Страхотно!', 'de': 'Super!', 'fr': 'Génial!', 'it': 'Fantastico!', 'el': 'Τέλεια!', 'es': '¡Genial!', 'pt': 'Incrível!', 'ru': 'Отлично!', 'tr': 'Harika!'};
         
         showDialog(
           context: context,
           barrierDismissible: false,
           builder: (ctx) => AlertDialog(
             icon: const Icon(Icons.celebration_rounded, size: 48, color: Colors.amber),
-            title: Text(isBg ? 'Добре дошъл!' : 'Welcome!'),
+            title: Text(welcomeTitle[lang] ?? welcomeTitle['en']!),
             content: Text(
-              isBg 
-                  ? 'Имаш 14 дни безплатен Pro достъп!\n\nИзползвай всички функции и виж как Taskify ще ти помогне да си по-продуктивен.'
-                  : 'You have 14 days free Pro access!\n\nTry all features and see how Taskify can help you be more productive.',
+              welcomeBody[lang] ?? welcomeBody['en']!,
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: Text(isBg ? 'Страхотно!' : 'Awesome!'),
+                child: Text(welcomeBtn[lang] ?? welcomeBtn['en']!),
               ),
             ],
           ),
@@ -114,12 +116,13 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onDestinationSelected(int index) async {
     if (!kIsWeb && index == 1 && !_proService.canUseCalendar) {
       final languageController = LanguageScope.of(context);
-      final isBg = languageController.locale.languageCode == 'bg';
+      final lang = languageController.locale.languageCode;
+      const calendarName = {'en': 'Calendar', 'bg': 'Календар', 'de': 'Kalender', 'fr': 'Calendrier', 'it': 'Calendario', 'el': 'Ημερολόγιο', 'es': 'Calendario', 'pt': 'Calendário', 'ru': 'Календарь', 'tr': 'Takvim'};
       
       final upgraded = await showPaywallIfNeeded(
         context,
         isFeatureAvailable: false,
-        featureName: isBg ? 'Календар' : 'Calendar',
+        featureName: calendarName[lang] ?? calendarName['en']!,
       );
       
       if (!upgraded) return;
@@ -219,8 +222,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildProBanner(BuildContext context) {
     final theme = Theme.of(context);
-    final languageController = LanguageScope.of(context);
-    final isBg = languageController.locale.languageCode == 'bg';
     
     final daysLeft = _proService.isTrial 
         ? _proService.trialDaysLeft 

@@ -1071,26 +1071,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
           ),
-          // Time Picker (only show if briefing enabled)
-          if (_isMorningBriefingEnabled) ...[
-            const SizedBox(height: 8),
-            Card(
-              child: ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.access_time, color: Colors.blue),
-                ),
-                title: Text(t.briefingTime),
-                subtitle: Text(_formatTime(_briefingHour, _briefingMinute)),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: _selectBriefingTime,
-              ),
-            ),
-          ],
 
           const SizedBox(height: 24),
 

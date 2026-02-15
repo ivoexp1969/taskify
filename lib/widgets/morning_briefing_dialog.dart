@@ -3,6 +3,7 @@ import '../models/task.dart';
 import '../services/morning_briefing_service.dart';
 import '../utils/localization.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 class MorningBriefingDialog {
   static Future<void> show(BuildContext context) async {
@@ -10,6 +11,9 @@ class MorningBriefingDialog {
     final topTasks = await briefingService.getTopTasksForToday();
     
     if (!context.mounted) return;
+    
+    final lang = AppText.of(context).lang;
+    await initializeDateFormatting(lang);
     
     showModalBottomSheet(
       context: context,
@@ -68,7 +72,7 @@ class _BriefingSheet extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        DateFormat('EEEE, MMMM d').format(DateTime.now()),
+                        DateFormat('EEEE, d MMMM', t.lang).format(DateTime.now()),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
@@ -174,7 +178,7 @@ class _BriefingSheet extends StatelessWidget {
                         Text(
                           isOverdue 
                             ? t.overdue
-                            : DateFormat('MMM d, HH:mm').format(dueDate),
+                            : DateFormat('d MMM, HH:mm', t.lang).format(dueDate),
                           style: TextStyle(
                             fontSize: 12,
                             color: isOverdue ? Colors.red : theme.colorScheme.onSurface.withOpacity(0.6),

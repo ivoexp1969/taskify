@@ -147,22 +147,22 @@ class _ReviewPreDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    // Определяме езика (ако имаш достъп до LanguageScope)
-    // За простота използваме Localizations
-    final locale = Localizations.localeOf(context);
-    final isBg = locale.languageCode == 'bg';
+    final lang = Localizations.localeOf(context).languageCode;
+    
+    const titleMap = {'en': 'Do you like Taskify?', 'bg': 'Харесва ли ти Taskify?', 'de': 'Gefällt dir Taskify?', 'fr': 'Tu aimes Taskify?', 'it': 'Ti piace Taskify?', 'el': 'Σου αρέσει το Taskify;', 'es': '¿Te gusta Taskify?', 'pt': 'Gosta do Taskify?', 'ru': 'Нравится Taskify?', 'tr': 'Taskify hoşuna gidiyor mu?'};
+    const subtitleMap = {'en': 'Your opinion matters to us!', 'bg': 'Твоето мнение е важно за нас!', 'de': 'Deine Meinung ist uns wichtig!', 'fr': 'Votre avis compte pour nous!', 'it': 'La tua opinione conta per noi!', 'el': 'Η γνώμη σας μετράει!', 'es': '¡Tu opinión nos importa!', 'pt': 'Sua opinião é importante!', 'ru': 'Ваше мнение важно для нас!', 'tr': 'Görüşünüz bizim için önemli!'};
+    const negMap = {'en': 'Needs improvement', 'bg': 'Има какво да се подобри', 'de': 'Verbesserungsbedarf', 'fr': 'À améliorer', 'it': 'Da migliorare', 'el': 'Χρειάζεται βελτίωση', 'es': 'Necesita mejorar', 'pt': 'Precisa melhorar', 'ru': 'Нужны улучшения', 'tr': 'İyileştirme gerekli'};
+    const posMap = {'en': 'Yes, I love it!', 'bg': 'Да, много!', 'de': 'Ja, ich liebe es!', 'fr': "Oui, j'adore!", 'it': 'Sì, lo adoro!', 'el': 'Ναι, μου αρέσει!', 'es': '¡Sí, me encanta!', 'pt': 'Sim, adoro!', 'ru': 'Да, мне нравится!', 'tr': 'Evet, bayıldım!'};
     
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       icon: const Icon(Icons.star_rounded, size: 48, color: Colors.amber),
       title: Text(
-        isBg ? 'Харесва ли ти Taskify?' : 'Do you like Taskify?',
+        titleMap[lang] ?? titleMap['en']!,
         textAlign: TextAlign.center,
       ),
       content: Text(
-        isBg 
-            ? 'Твоето мнение е важно за нас!'
-            : 'Your opinion matters to us!',
+        subtitleMap[lang] ?? subtitleMap['en']!,
         textAlign: TextAlign.center,
         style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
       ),
@@ -172,14 +172,14 @@ class _ReviewPreDialog extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(false),
           icon: const Icon(Icons.sentiment_dissatisfied_rounded),
           label: Text(
-            isBg ? 'Има какво да се подобри' : 'Needs improvement',
+            negMap[lang] ?? negMap['en']!,
             style: const TextStyle(fontSize: 13),
           ),
         ),
         FilledButton.icon(
           onPressed: () => Navigator.of(context).pop(true),
           icon: const Icon(Icons.favorite_rounded),
-          label: Text(isBg ? 'Да, много!' : 'Yes, I love it!'),
+          label: Text(posMap[lang] ?? posMap['en']!),
         ),
       ],
     );
