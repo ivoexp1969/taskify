@@ -3,6 +3,54 @@ import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../utils/localization.dart';
 
+// 10-language maps for login screen
+const _s = {
+  'login': {'en': 'Login', 'bg': 'Вход', 'de': 'Anmelden', 'fr': 'Connexion', 'it': 'Accedi', 'el': 'Σύνδεση', 'es': 'Iniciar sesión', 'pt': 'Entrar', 'ru': 'Вход', 'tr': 'Giriş'},
+  'register': {'en': 'Register', 'bg': 'Регистрация', 'de': 'Registrieren', 'fr': "S'inscrire", 'it': 'Registrati', 'el': 'Εγγραφή', 'es': 'Registrarse', 'pt': 'Registrar', 'ru': 'Регистрация', 'tr': 'Kayıt ol'},
+  'skip': {'en': 'Skip', 'bg': 'Пропусни', 'de': 'Überspringen', 'fr': 'Passer', 'it': 'Salta', 'el': 'Παράλειψη', 'es': 'Omitir', 'pt': 'Pular', 'ru': 'Пропустить', 'tr': 'Atla'},
+  'signIn': {'en': 'Sign in to your account', 'bg': 'Влез в акаунта си', 'de': 'In dein Konto einloggen', 'fr': 'Connectez-vous à votre compte', 'it': 'Accedi al tuo account', 'el': 'Συνδεθείτε στον λογαριασμό σας', 'es': 'Inicia sesión en tu cuenta', 'pt': 'Entre na sua conta', 'ru': 'Войдите в свой аккаунт', 'tr': 'Hesabınıza giriş yapın'},
+  'createAccount': {'en': 'Create a new account', 'bg': 'Създай нов акаунт', 'de': 'Neues Konto erstellen', 'fr': 'Créer un nouveau compte', 'it': 'Crea un nuovo account', 'el': 'Δημιουργία νέου λογαριασμού', 'es': 'Crear una nueva cuenta', 'pt': 'Criar uma nova conta', 'ru': 'Создать новый аккаунт', 'tr': 'Yeni hesap oluştur'},
+  'email': {'en': 'Email', 'bg': 'Имейл', 'de': 'E-Mail', 'fr': 'E-mail', 'it': 'Email', 'el': 'Email', 'es': 'Correo', 'pt': 'Email', 'ru': 'Эл. почта', 'tr': 'E-posta'},
+  'enterEmail': {'en': 'Enter email', 'bg': 'Въведи имейл', 'de': 'E-Mail eingeben', 'fr': 'Entrez votre e-mail', 'it': 'Inserisci email', 'el': 'Εισάγετε email', 'es': 'Ingrese correo', 'pt': 'Digite email', 'ru': 'Введите email', 'tr': 'E-posta girin'},
+  'invalidEmail': {'en': 'Invalid email', 'bg': 'Невалиден имейл', 'de': 'Ungültige E-Mail', 'fr': 'E-mail invalide', 'it': 'Email non valida', 'el': 'Μη έγκυρο email', 'es': 'Correo inválido', 'pt': 'Email inválido', 'ru': 'Неверный email', 'tr': 'Geçersiz e-posta'},
+  'password': {'en': 'Password', 'bg': 'Парола', 'de': 'Passwort', 'fr': 'Mot de passe', 'it': 'Password', 'el': 'Κωδικός', 'es': 'Contraseña', 'pt': 'Senha', 'ru': 'Пароль', 'tr': 'Şifre'},
+  'enterPassword': {'en': 'Enter password', 'bg': 'Въведи парола', 'de': 'Passwort eingeben', 'fr': 'Entrez le mot de passe', 'it': 'Inserisci password', 'el': 'Εισάγετε κωδικό', 'es': 'Ingrese contraseña', 'pt': 'Digite senha', 'ru': 'Введите пароль', 'tr': 'Şifre girin'},
+  'min6': {'en': 'Minimum 6 characters', 'bg': 'Минимум 6 символа', 'de': 'Mindestens 6 Zeichen', 'fr': 'Minimum 6 caractères', 'it': 'Minimo 6 caratteri', 'el': 'Τουλάχιστον 6 χαρακτήρες', 'es': 'Mínimo 6 caracteres', 'pt': 'Mínimo 6 caracteres', 'ru': 'Минимум 6 символов', 'tr': 'En az 6 karakter'},
+  'forgotPassword': {'en': 'Forgot password?', 'bg': 'Забравена парола?', 'de': 'Passwort vergessen?', 'fr': 'Mot de passe oublié?', 'it': 'Password dimenticata?', 'el': 'Ξεχάσατε τον κωδικό;', 'es': '¿Olvidó su contraseña?', 'pt': 'Esqueceu a senha?', 'ru': 'Забыли пароль?', 'tr': 'Şifrenizi mi unuttunuz?'},
+  'noAccount': {'en': "Don't have an account?", 'bg': 'Нямаш акаунт?', 'de': 'Kein Konto?', 'fr': "Pas de compte?", 'it': 'Non hai un account?', 'el': 'Δεν έχετε λογαριασμό;', 'es': '¿No tienes cuenta?', 'pt': 'Não tem conta?', 'ru': 'Нет аккаунта?', 'tr': 'Hesabınız yok mu?'},
+  'hasAccount': {'en': 'Already have an account?', 'bg': 'Имаш акаунт?', 'de': 'Bereits ein Konto?', 'fr': 'Déjà un compte?', 'it': 'Hai già un account?', 'el': 'Έχετε ήδη λογαριασμό;', 'es': '¿Ya tienes cuenta?', 'pt': 'Já tem conta?', 'ru': 'Уже есть аккаунт?', 'tr': 'Zaten hesabınız var mı?'},
+  'registerAction': {'en': 'Register', 'bg': 'Регистрирай се', 'de': 'Registrieren', 'fr': "S'inscrire", 'it': 'Registrati', 'el': 'Εγγραφή', 'es': 'Registrarse', 'pt': 'Registrar', 'ru': 'Зарегистрироваться', 'tr': 'Kayıt ol'},
+  'loginAction': {'en': 'Login', 'bg': 'Влез', 'de': 'Anmelden', 'fr': 'Se connecter', 'it': 'Accedi', 'el': 'Σύνδεση', 'es': 'Entrar', 'pt': 'Entrar', 'ru': 'Войти', 'tr': 'Giriş'},
+  'verifyEmail': {'en': 'Verify Your Email', 'bg': 'Потвърдете имейла', 'de': 'E-Mail bestätigen', 'fr': 'Vérifiez votre e-mail', 'it': 'Verifica la tua email', 'el': 'Επιβεβαιώστε το email σας', 'es': 'Verifique su correo', 'pt': 'Verifique seu email', 'ru': 'Подтвердите email', 'tr': 'E-postanızı doğrulayın'},
+  'verifyBody': {'en': 'Please check your inbox and click the verification link before logging in.\n\n⚠️ Check your Spam folder too!', 'bg': 'Моля, проверете пощата си и кликнете на линка за потвърждение, преди да влезете.\n\n⚠️ Проверете и папка "Спам"!', 'de': 'Bitte prüfen Sie Ihren Posteingang und klicken Sie auf den Bestätigungslink.\n\n⚠️ Prüfen Sie auch den Spam-Ordner!', 'fr': 'Veuillez vérifier votre boîte de réception et cliquer sur le lien de vérification.\n\n⚠️ Vérifiez aussi le dossier Spam!', 'it': 'Controlla la posta e clicca sul link di verifica.\n\n⚠️ Controlla anche la cartella Spam!', 'el': 'Ελέγξτε τα εισερχόμενά σας και κάντε κλικ στον σύνδεσμο επαλήθευσης.\n\n⚠️ Ελέγξτε και τον φάκελο Spam!', 'es': 'Revise su bandeja de entrada y haga clic en el enlace de verificación.\n\n⚠️ Revise también la carpeta de Spam!', 'pt': 'Verifique sua caixa de entrada e clique no link de verificação.\n\n⚠️ Verifique também a pasta Spam!', 'ru': 'Проверьте почту и нажмите на ссылку подтверждения.\n\n⚠️ Проверьте также папку Спам!', 'tr': 'Gelen kutunuzu kontrol edin ve doğrulama bağlantısına tıklayın.\n\n⚠️ Spam klasörünü de kontrol edin!'},
+  'resendEmail': {'en': 'Resend Email', 'bg': 'Изпрати отново', 'de': 'Erneut senden', 'fr': 'Renvoyer', 'it': 'Reinvia', 'el': 'Επαναποστολή', 'es': 'Reenviar', 'pt': 'Reenviar', 'ru': 'Отправить снова', 'tr': 'Tekrar gönder'},
+  'emailSent': {'en': 'Verification email sent', 'bg': 'Имейлът е изпратен отново', 'de': 'Bestätigungs-E-Mail gesendet', 'fr': 'E-mail de vérification envoyé', 'it': 'Email di verifica inviata', 'el': 'Το email επαλήθευσης στάλθηκε', 'es': 'Correo de verificación enviado', 'pt': 'Email de verificação enviado', 'ru': 'Письмо отправлено', 'tr': 'Doğrulama e-postası gönderildi'},
+  'ok': {'en': 'OK', 'bg': 'Добре', 'de': 'OK', 'fr': 'OK', 'it': 'OK', 'el': 'OK', 'es': 'OK', 'pt': 'OK', 'ru': 'OK', 'tr': 'Tamam'},
+  'error': {'en': 'Error', 'bg': 'Грешка', 'de': 'Fehler', 'fr': 'Erreur', 'it': 'Errore', 'el': 'Σφάλμα', 'es': 'Error', 'pt': 'Erro', 'ru': 'Ошибка', 'tr': 'Hata'},
+  'checkEmail': {'en': 'Check Your Email', 'bg': 'Проверете пощата си', 'de': 'Prüfen Sie Ihre E-Mail', 'fr': 'Vérifiez votre e-mail', 'it': 'Controlla la tua email', 'el': 'Ελέγξτε το email σας', 'es': 'Revise su correo', 'pt': 'Verifique seu email', 'ru': 'Проверьте почту', 'tr': 'E-postanızı kontrol edin'},
+  'goToLogin': {'en': 'Go to Login', 'bg': 'Към вход', 'de': 'Zum Login', 'fr': 'Aller à la connexion', 'it': 'Vai al login', 'el': 'Μετάβαση στη σύνδεση', 'es': 'Ir al inicio de sesión', 'pt': 'Ir para login', 'ru': 'Перейти к входу', 'tr': 'Girişe git'},
+  'enterEmailAddr': {'en': 'Enter email address', 'bg': 'Въведи имейл адрес', 'de': 'E-Mail-Adresse eingeben', 'fr': "Entrez l'adresse e-mail", 'it': 'Inserisci indirizzo email', 'el': 'Εισάγετε διεύθυνση email', 'es': 'Ingrese dirección de correo', 'pt': 'Digite endereço de email', 'ru': 'Введите адрес email', 'tr': 'E-posta adresi girin'},
+  'resetSent': {'en': 'Password reset email sent', 'bg': 'Изпратен е имейл за възстановяване на паролата', 'de': 'E-Mail zum Zurücksetzen gesendet', 'fr': 'E-mail de réinitialisation envoyé', 'it': 'Email di ripristino inviata', 'el': 'Στάλθηκε email επαναφοράς', 'es': 'Correo de restablecimiento enviado', 'pt': 'Email de redefinição enviado', 'ru': 'Письмо для сброса отправлено', 'tr': 'Şifre sıfırlama e-postası gönderildi'},
+};
+
+String _t(String key, String lang) => _s[key]?[lang] ?? _s[key]?['en'] ?? '';
+
+String _regSuccessBody(String email, String lang) {
+  const m = {
+    'en': 'We sent a verification link to EMAIL.\n\nPlease click the link to activate your account.\n\n⚠️ Check your Spam folder if you don\'t see the email!',
+    'bg': 'Изпратихме линк за потвърждение на EMAIL.\n\nМоля, кликнете на линка, за да активирате акаунта си.\n\n⚠️ Проверете и папка "Спам" ако не виждате имейла!',
+    'de': 'Wir haben einen Bestätigungslink an EMAIL gesendet.\n\nBitte klicken Sie auf den Link.\n\n⚠️ Prüfen Sie auch den Spam-Ordner!',
+    'fr': 'Nous avons envoyé un lien de vérification à EMAIL.\n\nCliquez sur le lien pour activer votre compte.\n\n⚠️ Vérifiez aussi le dossier Spam!',
+    'it': 'Abbiamo inviato un link di verifica a EMAIL.\n\nClicca sul link per attivare il tuo account.\n\n⚠️ Controlla anche la cartella Spam!',
+    'el': 'Στείλαμε σύνδεσμο επαλήθευσης στο EMAIL.\n\nΚάντε κλικ στον σύνδεσμο για να ενεργοποιήσετε τον λογαριασμό σας.\n\n⚠️ Ελέγξτε και τον φάκελο Spam!',
+    'es': 'Enviamos un enlace de verificación a EMAIL.\n\nHaga clic en el enlace para activar su cuenta.\n\n⚠️ Revise también la carpeta de Spam!',
+    'pt': 'Enviamos um link de verificação para EMAIL.\n\nClique no link para ativar sua conta.\n\n⚠️ Verifique também a pasta Spam!',
+    'ru': 'Мы отправили ссылку для подтверждения на EMAIL.\n\nНажмите на ссылку, чтобы активировать аккаунт.\n\n⚠️ Проверьте также папку Спам!',
+    'tr': 'EMAIL adresine doğrulama bağlantısı gönderdik.\n\nHesabınızı etkinleştirmek için bağlantıya tıklayın.\n\n⚠️ Spam klasörünü de kontrol edin!',
+  };
+  return (m[lang] ?? m['en']!).replaceAll('EMAIL', email);
+}
+
 class LoginScreen extends StatefulWidget {
   final VoidCallback? onSkip;
   
@@ -30,6 +78,8 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  String get _lang => LanguageScope.of(context).locale.languageCode;
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     
@@ -42,7 +92,6 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text;
 
     if (_isLogin) {
-      // Вход
       final result = await _authService.login(email: email, password: password);
       
       if (!mounted) return;
@@ -56,7 +105,6 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() => _errorMessage = result.error);
       }
     } else {
-      // Регистрация
       final result = await _authService.register(email: email, password: password);
       
       if (!mounted) return;
@@ -71,18 +119,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showVerificationDialog() {
-    final languageController = LanguageScope.of(context);
-    final isBg = languageController.locale.languageCode == 'bg';
+    final lang = _lang;
     
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(isBg ? 'Потвърдете имейла' : 'Verify Your Email'),
-        content: Text(
-          isBg 
-              ? 'Моля, проверете пощата си и кликнете на линка за потвърждение, преди да влезете.\n\n⚠️ Проверете и папка "Спам"!'
-              : 'Please check your inbox and click the verification link before logging in.\n\n⚠️ Check your Spam folder too!',
-        ),
+        title: Text(_t('verifyEmail', lang)),
+        content: Text(_t('verifyBody', lang)),
         actions: [
           TextButton(
             onPressed: () async {
@@ -94,18 +137,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 SnackBar(
                   content: Text(
                     result.success
-                        ? (isBg ? 'Имейлът е изпратен отново' : 'Verification email sent')
-                        : (result.error ?? (isBg ? 'Грешка' : 'Error')),
+                        ? _t('emailSent', lang)
+                        : (result.error ?? _t('error', lang)),
                   ),
                   backgroundColor: result.success ? Colors.green : Colors.red,
                 ),
               );
             },
-            child: Text(isBg ? 'Изпрати отново' : 'Resend Email'),
+            child: Text(_t('resendEmail', lang)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(isBg ? 'Добре' : 'OK'),
+            child: Text(_t('ok', lang)),
           ),
         ],
       ),
@@ -113,20 +156,15 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showRegistrationSuccessDialog() {
-    final languageController = LanguageScope.of(context);
-    final isBg = languageController.locale.languageCode == 'bg';
+    final lang = _lang;
     
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         icon: const Icon(Icons.mark_email_read, size: 48, color: Colors.green),
-        title: Text(isBg ? 'Проверете пощата си' : 'Check Your Email'),
-        content: Text(
-          isBg 
-              ? 'Изпратихме линк за потвърждение на ${_emailController.text.trim()}.\n\nМоля, кликнете на линка, за да активирате акаунта си.\n\n⚠️ Проверете и папка "Спам" ако не виждате имейла!'
-              : 'We sent a verification link to ${_emailController.text.trim()}.\n\nPlease click the link to activate your account.\n\n⚠️ Check your Spam folder if you don\'t see the email!',
-        ),
+        title: Text(_t('checkEmail', lang)),
+        content: Text(_regSuccessBody(_emailController.text.trim(), lang)),
         actions: [
           TextButton(
             onPressed: () {
@@ -136,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 _errorMessage = null;
               });
             },
-            child: Text(isBg ? 'Към вход' : 'Go to Login'),
+            child: Text(_t('goToLogin', lang)),
           ),
         ],
       ),
@@ -144,13 +182,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _resetPassword() async {
-    final languageController = LanguageScope.of(context);
-    final isBg = languageController.locale.languageCode == 'bg';
+    final lang = _lang;
     
     final email = _emailController.text.trim();
     
     if (email.isEmpty) {
-      setState(() => _errorMessage = isBg ? 'Въведи имейл адрес' : 'Enter email address');
+      setState(() => _errorMessage = _t('enterEmailAddr', lang));
       return;
     }
 
@@ -168,9 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (result.success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(isBg 
-              ? 'Изпратен е имейл за възстановяване на паролата' 
-              : 'Password reset email sent'),
+          content: Text(_t('resetSent', lang)),
           backgroundColor: Colors.green,
         ),
       );
@@ -182,19 +217,16 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final languageController = LanguageScope.of(context);
-    final isBg = languageController.locale.languageCode == 'bg';
+    final lang = _lang;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isLogin 
-            ? (isBg ? 'Вход' : 'Login') 
-            : (isBg ? 'Регистрация' : 'Register')),
+        title: Text(_isLogin ? _t('login', lang) : _t('register', lang)),
         actions: [
           if (widget.onSkip != null)
             TextButton(
               onPressed: widget.onSkip,
-              child: Text(isBg ? 'Пропусни' : 'Skip'),
+              child: Text(_t('skip', lang)),
             ),
         ],
       ),
@@ -205,7 +237,6 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Икона
               Icon(
                 Icons.task_alt_rounded,
                 size: 80,
@@ -213,7 +244,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 16),
               
-              // Заглавие
               Text(
                 'Taskify',
                 style: theme.textTheme.headlineMedium?.copyWith(
@@ -224,9 +254,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 8),
               
               Text(
-                _isLogin
-                    ? (isBg ? 'Влез в акаунта си' : 'Sign in to your account')
-                    : (isBg ? 'Създай нов акаунт' : 'Create a new account'),
+                _isLogin ? _t('signIn', lang) : _t('createAccount', lang),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurface.withOpacity(0.6),
                 ),
@@ -234,7 +262,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 32),
 
-              // Грешка
               if (_errorMessage != null) ...[
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -258,13 +285,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 16),
               ],
 
-              // Email
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
-                  labelText: isBg ? 'Имейл' : 'Email',
+                  labelText: _t('email', lang),
                   prefixIcon: const Icon(Icons.email_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -272,24 +298,23 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return isBg ? 'Въведи имейл' : 'Enter email';
+                    return _t('enterEmail', lang);
                   }
                   if (!value.contains('@') || !value.contains('.')) {
-                    return isBg ? 'Невалиден имейл' : 'Invalid email';
+                    return _t('invalidEmail', lang);
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
 
-              // Парола
               TextFormField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
                 textInputAction: TextInputAction.done,
                 onFieldSubmitted: (_) => _submit(),
                 decoration: InputDecoration(
-                  labelText: isBg ? 'Парола' : 'Password',
+                  labelText: _t('password', lang),
                   prefixIcon: const Icon(Icons.lock_outlined),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -307,30 +332,26 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return isBg ? 'Въведи парола' : 'Enter password';
+                    return _t('enterPassword', lang);
                   }
                   if (!_isLogin && value.length < 6) {
-                    return isBg ? 'Минимум 6 символа' : 'Minimum 6 characters';
+                    return _t('min6', lang);
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 8),
 
-              // Забравена парола
               if (_isLogin)
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: _isLoading ? null : _resetPassword,
-                    child: Text(
-                      isBg ? 'Забравена парола?' : 'Forgot password?',
-                    ),
+                    child: Text(_t('forgotPassword', lang)),
                   ),
                 ),
               const SizedBox(height: 24),
 
-              // Бутон
               SizedBox(
                 height: 50,
                 child: ElevatedButton(
@@ -352,9 +373,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         )
                       : Text(
-                          _isLogin
-                              ? (isBg ? 'Вход' : 'Login')
-                              : (isBg ? 'Регистрация' : 'Register'),
+                          _isLogin ? _t('login', lang) : _t('register', lang),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -364,14 +383,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Превключване вход/регистрация
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    _isLogin
-                        ? (isBg ? 'Нямаш акаунт?' : "Don't have an account?")
-                        : (isBg ? 'Имаш акаунт?' : 'Already have an account?'),
+                    _isLogin ? _t('noAccount', lang) : _t('hasAccount', lang),
                     style: TextStyle(
                       color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
@@ -386,9 +402,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             });
                           },
                     child: Text(
-                      _isLogin
-                          ? (isBg ? 'Регистрирай се' : 'Register')
-                          : (isBg ? 'Влез' : 'Login'),
+                      _isLogin ? _t('registerAction', lang) : _t('loginAction', lang),
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),

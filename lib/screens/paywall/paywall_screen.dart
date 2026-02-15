@@ -7,6 +7,43 @@ import '../../utils/localization.dart';
 // Условен import за Package тип
 import '../../services/purchases_stub.dart' if (dart.library.io) 'package:purchases_flutter/purchases_flutter.dart';
 
+const _p = {
+  'thanksPro': {'en': 'Thank you! You are now Pro!', 'bg': 'Благодарим ти! Вече си Pro!', 'de': 'Danke! Du bist jetzt Pro!', 'fr': 'Merci! Vous êtes maintenant Pro!', 'it': 'Grazie! Ora sei Pro!', 'el': 'Ευχαριστούμε! Είσαι πλέον Pro!', 'es': '¡Gracias! ¡Ahora eres Pro!', 'pt': 'Obrigado! Agora você é Pro!', 'ru': 'Спасибо! Теперь вы Pro!', 'tr': 'Teşekkürler! Artık Pro\'sunuz!'},
+  'error': {'en': 'Error', 'bg': 'Грешка', 'de': 'Fehler', 'fr': 'Erreur', 'it': 'Errore', 'el': 'Σφάλμα', 'es': 'Error', 'pt': 'Erro', 'ru': 'Ошибка', 'tr': 'Hata'},
+  'purchasesRestored': {'en': 'Purchases restored!', 'bg': 'Покупките са възстановени!', 'de': 'Käufe wiederhergestellt!', 'fr': 'Achats restaurés!', 'it': 'Acquisti ripristinati!', 'el': 'Οι αγορές επαναφέρθηκαν!', 'es': '¡Compras restauradas!', 'pt': 'Compras restauradas!', 'ru': 'Покупки восстановлены!', 'tr': 'Satın almalar geri yüklendi!'},
+  'noPurchases': {'en': 'No purchases found', 'bg': 'Няма намерени покупки', 'de': 'Keine Käufe gefunden', 'fr': 'Aucun achat trouvé', 'it': 'Nessun acquisto trovato', 'el': 'Δεν βρέθηκαν αγορές', 'es': 'No se encontraron compras', 'pt': 'Nenhuma compra encontrada', 'ru': 'Покупки не найдены', 'tr': 'Satın alma bulunamadı'},
+  'webFree': {'en': 'Web version is free!', 'bg': 'Web версията е безплатна!', 'de': 'Die Web-Version ist kostenlos!', 'fr': 'La version web est gratuite!', 'it': 'La versione web è gratuita!', 'el': 'Η web έκδοση είναι δωρεάν!', 'es': '¡La versión web es gratuita!', 'pt': 'A versão web é gratuita!', 'ru': 'Веб-версия бесплатна!', 'tr': 'Web sürümü ücretsiz!'},
+  'downloadAndroid': {'en': 'Download the Android app for Pro features and offline access.', 'bg': 'Свали приложението за Android за Pro функции и офлайн достъп.', 'de': 'Laden Sie die Android-App für Pro-Funktionen herunter.', 'fr': "Téléchargez l'application Android pour les fonctionnalités Pro.", 'it': "Scarica l'app Android per le funzionalità Pro.", 'el': 'Κατεβάστε την εφαρμογή Android για Pro λειτουργίες.', 'es': 'Descarga la app de Android para funciones Pro.', 'pt': 'Baixe o app Android para recursos Pro.', 'ru': 'Скачайте Android-приложение для Pro-функций.', 'tr': 'Pro özellikler için Android uygulamasını indirin.'},
+  'gotIt': {'en': 'Got it', 'bg': 'Разбрах', 'de': 'Verstanden', 'fr': 'Compris', 'it': 'Capito', 'el': 'Κατάλαβα', 'es': 'Entendido', 'pt': 'Entendi', 'ru': 'Понятно', 'tr': 'Anladım'},
+  'restore': {'en': 'Restore', 'bg': 'Възстанови', 'de': 'Wiederherstellen', 'fr': 'Restaurer', 'it': 'Ripristina', 'el': 'Επαναφορά', 'es': 'Restaurar', 'pt': 'Restaurar', 'ru': 'Восстановить', 'tr': 'Geri yükle'},
+  'tryAgain': {'en': 'Try again', 'bg': 'Опитай отново', 'de': 'Erneut versuchen', 'fr': 'Réessayer', 'it': 'Riprova', 'el': 'Δοκιμάστε ξανά', 'es': 'Intentar de nuevo', 'pt': 'Tentar novamente', 'ru': 'Попробовать снова', 'tr': 'Tekrar dene'},
+  'unlockPotential': {'en': 'Unlock Full Potential', 'bg': 'Отключи пълния потенциал', 'de': 'Volles Potenzial freischalten', 'fr': 'Débloquez tout le potentiel', 'it': 'Sblocca il pieno potenziale', 'el': 'Ξεκλειδώστε πλήρες δυναμικό', 'es': 'Desbloquea todo el potencial', 'pt': 'Desbloqueie todo o potencial', 'ru': 'Раскройте весь потенциал', 'tr': 'Tam potansiyeli açın'},
+  'getAccess': {'en': 'Get access to all Pro features', 'bg': 'Получи достъп до всички Pro функции', 'de': 'Zugang zu allen Pro-Funktionen', 'fr': 'Accédez à toutes les fonctionnalités Pro', 'it': 'Accedi a tutte le funzionalità Pro', 'el': 'Αποκτήστε πρόσβαση σε όλες τις Pro λειτουργίες', 'es': 'Obtén acceso a todas las funciones Pro', 'pt': 'Tenha acesso a todos os recursos Pro', 'ru': 'Получите доступ ко всем Pro-функциям', 'tr': 'Tüm Pro özelliklere erişin'},
+  'havePromo': {'en': 'Have a promo code?', 'bg': 'Имаш промо код?', 'de': 'Hast du einen Promo-Code?', 'fr': 'Avez-vous un code promo?', 'it': 'Hai un codice promo?', 'el': 'Έχετε κωδικό προσφοράς;', 'es': '¿Tienes un código promocional?', 'pt': 'Tem um código promocional?', 'ru': 'Есть промокод?', 'tr': 'Promosyon kodunuz var mı?'},
+  'enterCode': {'en': 'Enter code', 'bg': 'Въведи код', 'de': 'Code eingeben', 'fr': 'Entrez le code', 'it': 'Inserisci codice', 'el': 'Εισάγετε κωδικό', 'es': 'Ingrese código', 'pt': 'Digite código', 'ru': 'Введите код', 'tr': 'Kodu girin'},
+  'apply': {'en': 'Apply', 'bg': 'Приложи', 'de': 'Anwenden', 'fr': 'Appliquer', 'it': 'Applica', 'el': 'Εφαρμογή', 'es': 'Aplicar', 'pt': 'Aplicar', 'ru': 'Применить', 'tr': 'Uygula'},
+  'noProducts': {'en': 'No products available', 'bg': 'Няма налични продукти', 'de': 'Keine Produkte verfügbar', 'fr': 'Aucun produit disponible', 'it': 'Nessun prodotto disponibile', 'el': 'Δεν υπάρχουν διαθέσιμα προϊόντα', 'es': 'No hay productos disponibles', 'pt': 'Nenhum produto disponível', 'ru': 'Нет доступных продуктов', 'tr': 'Ürün bulunamadı'},
+  'unlimited': {'en': 'Unlimited tasks', 'bg': 'Неограничени задачи', 'de': 'Unbegrenzte Aufgaben', 'fr': 'Tâches illimitées', 'it': 'Attività illimitate', 'el': 'Απεριόριστες εργασίες', 'es': 'Tareas ilimitadas', 'pt': 'Tarefas ilimitadas', 'ru': 'Безлимитные задачи', 'tr': 'Sınırsız görevler'},
+  'customCat': {'en': 'Custom categories', 'bg': 'Персонализирани категории', 'de': 'Eigene Kategorien', 'fr': 'Catégories personnalisées', 'it': 'Categorie personalizzate', 'el': 'Προσαρμοσμένες κατηγορίες', 'es': 'Categorías personalizadas', 'pt': 'Categorias personalizadas', 'ru': 'Свои категории', 'tr': 'Özel kategoriler'},
+  'multiRemind': {'en': 'Multiple reminders', 'bg': 'Множество напомняния', 'de': 'Mehrere Erinnerungen', 'fr': 'Rappels multiples', 'it': 'Promemoria multipli', 'el': 'Πολλαπλές υπενθυμίσεις', 'es': 'Múltiples recordatorios', 'pt': 'Múltiplos lembretes', 'ru': 'Множество напоминаний', 'tr': 'Çoklu hatırlatıcılar'},
+  'recurring': {'en': 'Recurring tasks', 'bg': 'Повтарящи се задачи', 'de': 'Wiederkehrende Aufgaben', 'fr': 'Tâches récurrentes', 'it': 'Attività ricorrenti', 'el': 'Επαναλαμβανόμενες εργασίες', 'es': 'Tareas recurrentes', 'pt': 'Tarefas recorrentes', 'ru': 'Повторяющиеся задачи', 'tr': 'Tekrarlayan görevler'},
+  'calView': {'en': 'Calendar view', 'bg': 'Календарен изглед', 'de': 'Kalenderansicht', 'fr': 'Vue calendrier', 'it': 'Vista calendario', 'el': 'Προβολή ημερολογίου', 'es': 'Vista de calendario', 'pt': 'Visualização de calendário', 'ru': 'Вид календаря', 'tr': 'Takvim görünümü'},
+  'stats': {'en': 'Statistics', 'bg': 'Статистики', 'de': 'Statistiken', 'fr': 'Statistiques', 'it': 'Statistiche', 'el': 'Στατιστικά', 'es': 'Estadísticas', 'pt': 'Estatísticas', 'ru': 'Статистика', 'tr': 'İstatistikler'},
+  'cloudSync': {'en': 'Cloud sync', 'bg': 'Облачна синхронизация', 'de': 'Cloud-Sync', 'fr': 'Synchronisation cloud', 'it': 'Sincronizzazione cloud', 'el': 'Συγχρονισμός cloud', 'es': 'Sincronización en la nube', 'pt': 'Sincronização na nuvem', 'ru': 'Облачная синхронизация', 'tr': 'Bulut senkronizasyonu'},
+  'voiceInput': {'en': 'Voice input', 'bg': 'Гласов вход', 'de': 'Spracheingabe', 'fr': 'Saisie vocale', 'it': 'Input vocale', 'el': 'Φωνητική εισαγωγή', 'es': 'Entrada de voz', 'pt': 'Entrada de voz', 'ru': 'Голосовой ввод', 'tr': 'Sesli giriş'},
+  'allThemes': {'en': 'All themes', 'bg': 'Всички теми', 'de': 'Alle Themen', 'fr': 'Tous les thèmes', 'it': 'Tutti i temi', 'el': 'Όλα τα θέματα', 'es': 'Todos los temas', 'pt': 'Todos os temas', 'ru': 'Все темы', 'tr': 'Tüm temalar'},
+  'noAds': {'en': 'No ads', 'bg': 'Без реклами', 'de': 'Keine Werbung', 'fr': 'Sans publicité', 'it': 'Senza pubblicità', 'el': 'Χωρίς διαφημίσεις', 'es': 'Sin anuncios', 'pt': 'Sem anúncios', 'ru': 'Без рекламы', 'tr': 'Reklamsız'},
+  'lifetime': {'en': 'Lifetime', 'bg': 'Завинаги', 'de': 'Lebenslang', 'fr': 'À vie', 'it': 'A vita', 'el': 'Εφ\' όρου ζωής', 'es': 'De por vida', 'pt': 'Vitalício', 'ru': 'Навсегда', 'tr': 'Ömür boyu'},
+  'yearly': {'en': 'Yearly', 'bg': 'Годишен', 'de': 'Jährlich', 'fr': 'Annuel', 'it': 'Annuale', 'el': 'Ετήσιο', 'es': 'Anual', 'pt': 'Anual', 'ru': 'Годовой', 'tr': 'Yıllık'},
+  'monthly': {'en': 'Monthly', 'bg': 'Месечен', 'de': 'Monatlich', 'fr': 'Mensuel', 'it': 'Mensile', 'el': 'Μηνιαίο', 'es': 'Mensual', 'pt': 'Mensal', 'ru': 'Месячный', 'tr': 'Aylık'},
+  'oneTime': {'en': 'One-time payment', 'bg': 'Еднократно плащане', 'de': 'Einmalzahlung', 'fr': 'Paiement unique', 'it': 'Pagamento unico', 'el': 'Εφάπαξ πληρωμή', 'es': 'Pago único', 'pt': 'Pagamento único', 'ru': 'Единоразовый платёж', 'tr': 'Tek seferlik ödeme'},
+  'save50': {'en': 'Save 50%', 'bg': 'Спестяваш 50%', 'de': '50% sparen', 'fr': 'Économisez 50%', 'it': 'Risparmia il 50%', 'el': 'Εξοικονομήστε 50%', 'es': 'Ahorra 50%', 'pt': 'Economize 50%', 'ru': 'Скидка 50%', 'tr': '%50 tasarruf'},
+  'cancelAnytime': {'en': 'Cancel anytime', 'bg': 'Отказ по всяко време', 'de': 'Jederzeit kündbar', 'fr': "Annulez à tout moment", 'it': 'Annulla in qualsiasi momento', 'el': 'Ακύρωση οποτεδήποτε', 'es': 'Cancela en cualquier momento', 'pt': 'Cancele a qualquer momento', 'ru': 'Отмена в любое время', 'tr': 'İstediğiniz zaman iptal edin'},
+  'popular': {'en': 'Popular', 'bg': 'Популярен', 'de': 'Beliebt', 'fr': 'Populaire', 'it': 'Popolare', 'el': 'Δημοφιλές', 'es': 'Popular', 'pt': 'Popular', 'ru': 'Популярный', 'tr': 'Popüler'},
+};
+
+String _pt(String key, String lang) => _p[key]?[lang] ?? _p[key]?['en'] ?? '';
+
 class PaywallScreen extends StatefulWidget {
   final String? featureName;
 
@@ -37,12 +74,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
     super.dispose();
   }
 
+  String get _lang => LanguageScope.of(context).locale.languageCode;
+
   Future<void> _loadOfferings() async {
-    // На web не зареждаме продукти
     if (kIsWeb) {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
       return;
     }
 
@@ -86,8 +122,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
         if (success) {
           Navigator.of(context).pop(true);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Благодарим ти! Вече си Pro!'),
+            SnackBar(
+              content: Text(_pt('thanksPro', _lang)),
               backgroundColor: Colors.green,
             ),
           );
@@ -96,7 +132,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Грешка: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('${_pt('error', _lang)}: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -131,7 +167,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Грешка: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('${_pt('error', _lang)}: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -152,15 +188,15 @@ class _PaywallScreenState extends State<PaywallScreen> {
         if (success) {
           Navigator.of(context).pop(true);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Покупките са възстановени!'),
+            SnackBar(
+              content: Text(_pt('purchasesRestored', _lang)),
               backgroundColor: Colors.green,
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Няма намерени покупки'),
+            SnackBar(
+              content: Text(_pt('noPurchases', _lang)),
               backgroundColor: Colors.orange,
             ),
           );
@@ -169,7 +205,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Грешка: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('${_pt('error', _lang)}: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -182,10 +218,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final languageController = LanguageScope.of(context);
-    final isBg = languageController.locale.languageCode == 'bg';
+    final lang = _lang;
 
-    // На web показваме съобщение
     if (kIsWeb) {
       return Scaffold(
         appBar: AppBar(title: const Text('Taskify Pro')),
@@ -198,22 +232,20 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 Icon(Icons.workspace_premium_rounded, size: 80, color: theme.colorScheme.primary),
                 const SizedBox(height: 24),
                 Text(
-                  isBg ? 'Web версията е безплатна!' : 'Web version is free!',
+                  _pt('webFree', lang),
                   style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  isBg 
-                    ? 'Свали приложението за Android за Pro функции и офлайн достъп.'
-                    : 'Download the Android app for Pro features and offline access.',
+                  _pt('downloadAndroid', lang),
                   style: theme.textTheme.bodyLarge,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text(isBg ? 'Разбрах' : 'Got it'),
+                  child: Text(_pt('gotIt', lang)),
                 ),
               ],
             ),
@@ -230,7 +262,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
           TextButton(
             onPressed: _isPurchasing ? null : _restorePurchases,
             child: Text(
-              isBg ? 'Възстанови' : 'Restore',
+              _pt('restore', lang),
               style: TextStyle(color: theme.colorScheme.primary),
             ),
           ),
@@ -249,7 +281,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: _loadOfferings,
-                        child: Text(isBg ? 'Опитай отново' : 'Try again'),
+                        child: Text(_pt('tryAgain', lang)),
                       ),
                     ],
                   ),
@@ -259,7 +291,6 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Header
                       Icon(
                         Icons.workspace_premium_rounded,
                         size: 64,
@@ -267,7 +298,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        isBg ? 'Отключи пълния потенциал' : 'Unlock Full Potential',
+                        _pt('unlockPotential', lang),
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -275,9 +306,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        isBg
-                            ? 'Получи достъп до всички Pro функции'
-                            : 'Get access to all Pro features',
+                        _pt('getAccess', lang),
                         style: theme.textTheme.bodyLarge?.copyWith(
                           color: theme.colorScheme.onSurface.withOpacity(0.7),
                         ),
@@ -286,7 +315,6 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
                       const SizedBox(height: 24),
 
-                      // Промо код секция
                       Card(
                         elevation: 0,
                         color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
@@ -304,7 +332,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                       color: theme.colorScheme.primary),
                                   const SizedBox(width: 8),
                                   Text(
-                                    isBg ? 'Имаш промо код?' : 'Have a promo code?',
+                                    _pt('havePromo', lang),
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w600,
                                       fontSize: 16,
@@ -320,7 +348,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                       controller: _promoController,
                                       textCapitalization: TextCapitalization.characters,
                                       decoration: InputDecoration(
-                                        hintText: isBg ? 'Въведи код' : 'Enter code',
+                                        hintText: _pt('enterCode', lang),
                                         border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(12),
                                         ),
@@ -352,7 +380,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                                 color: Colors.white,
                                               ),
                                             )
-                                          : Text(isBg ? 'Приложи' : 'Apply'),
+                                          : Text(_pt('apply', lang)),
                                     ),
                                   ),
                                 ],
@@ -364,22 +392,20 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
                       const SizedBox(height: 24),
 
-                      // Функции
-                      _FeatureItem(icon: Icons.all_inclusive, title: isBg ? 'Неограничени задачи' : 'Unlimited tasks'),
-                      _FeatureItem(icon: Icons.category_rounded, title: isBg ? 'Персонализирани категории' : 'Custom categories'),
-                      _FeatureItem(icon: Icons.notifications_active_rounded, title: isBg ? 'Множество напомняния' : 'Multiple reminders'),
-                      _FeatureItem(icon: Icons.repeat_rounded, title: isBg ? 'Повтарящи се задачи' : 'Recurring tasks'),
-                      _FeatureItem(icon: Icons.calendar_month_rounded, title: isBg ? 'Календарен изглед' : 'Calendar view'),
-                      _FeatureItem(icon: Icons.bar_chart_rounded, title: isBg ? 'Статистики' : 'Statistics'),
-                      _FeatureItem(icon: Icons.cloud_sync_rounded, title: isBg ? 'Облачна синхронизация' : 'Cloud sync'),
-                      _FeatureItem(icon: Icons.widgets_rounded, title: isBg ? 'Home screen widget' : 'Home screen widget'),
-                      _FeatureItem(icon: Icons.mic_rounded, title: isBg ? 'Гласов вход' : 'Voice input'),
-                      _FeatureItem(icon: Icons.palette_rounded, title: isBg ? 'Всички теми' : 'All themes'),
-                      _FeatureItem(icon: Icons.block_rounded, title: isBg ? 'Без реклами' : 'No ads', highlight: true),
+                      _FeatureItem(icon: Icons.all_inclusive, title: _pt('unlimited', lang)),
+                      _FeatureItem(icon: Icons.category_rounded, title: _pt('customCat', lang)),
+                      _FeatureItem(icon: Icons.notifications_active_rounded, title: _pt('multiRemind', lang)),
+                      _FeatureItem(icon: Icons.repeat_rounded, title: _pt('recurring', lang)),
+                      _FeatureItem(icon: Icons.calendar_month_rounded, title: _pt('calView', lang)),
+                      _FeatureItem(icon: Icons.bar_chart_rounded, title: _pt('stats', lang)),
+                      _FeatureItem(icon: Icons.cloud_sync_rounded, title: _pt('cloudSync', lang)),
+                      _FeatureItem(icon: Icons.widgets_rounded, title: 'Home screen widget'),
+                      _FeatureItem(icon: Icons.mic_rounded, title: _pt('voiceInput', lang)),
+                      _FeatureItem(icon: Icons.palette_rounded, title: _pt('allThemes', lang)),
+                      _FeatureItem(icon: Icons.block_rounded, title: _pt('noAds', lang), highlight: true),
 
                       const SizedBox(height: 24),
 
-                      // Продукти от Offerings
                       if (_packages.isEmpty)
                         Center(
                           child: Column(
@@ -389,13 +415,13 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                    color: theme.colorScheme.onSurface.withOpacity(0.4)),
                               const SizedBox(height: 8),
                               Text(
-                                isBg ? 'Няма налични продукти' : 'No products available',
+                                _pt('noProducts', lang),
                                 style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
                               ),
                               const SizedBox(height: 8),
                               TextButton(
                                 onPressed: _loadOfferings,
-                                child: Text(isBg ? 'Опитай отново' : 'Try again'),
+                                child: Text(_pt('tryAgain', lang)),
                               ),
                             ],
                           ),
@@ -404,7 +430,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                         ..._packages.map((package) => _PackageCard(
                           package: package,
                           onTap: _isPurchasing ? null : () => _purchasePackage(package),
-                          isBg: isBg,
+                          lang: lang,
                         )),
 
                       if (_isPurchasing)
@@ -459,23 +485,23 @@ class _FeatureItem extends StatelessWidget {
 class _PackageCard extends StatelessWidget {
   final Package package;
   final VoidCallback? onTap;
-  final bool isBg;
+  final String lang;
 
-  const _PackageCard({required this.package, required this.onTap, required this.isBg});
+  const _PackageCard({required this.package, required this.onTap, required this.lang});
 
   String _getPackageTitle() {
     final identifier = package.identifier.toLowerCase();
-    if (identifier.contains('lifetime')) return isBg ? 'Завинаги' : 'Lifetime';
-    if (identifier.contains('annual') || identifier.contains('yearly')) return isBg ? 'Годишен' : 'Yearly';
-    if (identifier.contains('monthly')) return isBg ? 'Месечен' : 'Monthly';
+    if (identifier.contains('lifetime')) return _pt('lifetime', lang);
+    if (identifier.contains('annual') || identifier.contains('yearly')) return _pt('yearly', lang);
+    if (identifier.contains('monthly')) return _pt('monthly', lang);
     return package.storeProduct.title;
   }
 
   String _getPackageSubtitle() {
     final identifier = package.identifier.toLowerCase();
-    if (identifier.contains('lifetime')) return isBg ? 'Еднократно плащане' : 'One-time payment';
-    if (identifier.contains('annual') || identifier.contains('yearly')) return isBg ? 'Спестяваш 50%' : 'Save 50%';
-    if (identifier.contains('monthly')) return isBg ? 'Отказ по всяко време' : 'Cancel anytime';
+    if (identifier.contains('lifetime')) return _pt('oneTime', lang);
+    if (identifier.contains('annual') || identifier.contains('yearly')) return _pt('save50', lang);
+    if (identifier.contains('monthly')) return _pt('cancelAnytime', lang);
     return package.storeProduct.description;
   }
 
@@ -527,7 +553,7 @@ class _PackageCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                isBg ? 'Популярен' : 'Popular', 
+                                _pt('popular', lang), 
                                 style: TextStyle(
                                   fontSize: 10, 
                                   fontWeight: FontWeight.bold, 
