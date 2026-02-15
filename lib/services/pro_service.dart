@@ -8,6 +8,41 @@ import 'purchases_stub.dart' if (dart.library.io) 'package:purchases_flutter/pur
 
 /// Лимити за безплатната версия
 class FreeLimits {
+
+// Localized promo/status messages
+const _proMsg = {
+  'notAvailableWeb': {'en': 'Not available on web', 'bg': 'Не е налично на web', 'de': 'Nicht im Web verfügbar', 'fr': 'Non disponible sur le web', 'it': 'Non disponibile sul web', 'el': 'Δεν είναι διαθέσιμο στο web', 'es': 'No disponible en la web', 'pt': 'Não disponível na web', 'ru': 'Недоступно в вебе', 'tr': 'Web\'de kullanılamaz'},
+  'invalidCode': {'en': 'Invalid code', 'bg': 'Невалиден код', 'de': 'Ungültiger Code', 'fr': 'Code invalide', 'it': 'Codice non valido', 'el': 'Μη έγκυρος κωδικός', 'es': 'Código inválido', 'pt': 'Código inválido', 'ru': 'Неверный код', 'tr': 'Geçersiz kod'},
+  'codeInactive': {'en': 'Code is not active', 'bg': 'Кодът не е активен', 'de': 'Code ist nicht aktiv', 'fr': 'Code non actif', 'it': 'Codice non attivo', 'el': 'Ο κωδικός δεν είναι ενεργός', 'es': 'El código no está activo', 'pt': 'Código não está ativo', 'ru': 'Код не активен', 'tr': 'Kod aktif değil'},
+  'codeExpired': {'en': 'Code has expired', 'bg': 'Кодът е изтекъл', 'de': 'Code ist abgelaufen', 'fr': 'Code expiré', 'it': 'Codice scaduto', 'el': 'Ο κωδικός έχει λήξει', 'es': 'El código ha expirado', 'pt': 'Código expirado', 'ru': 'Код истёк', 'tr': 'Kodun süresi dolmuş'},
+  'codeUsedUp': {'en': 'Code is used up', 'bg': 'Кодът е изчерпан', 'de': 'Code aufgebraucht', 'fr': 'Code épuisé', 'it': 'Codice esaurito', 'el': 'Ο κωδικός εξαντλήθηκε', 'es': 'Código agotado', 'pt': 'Código esgotado', 'ru': 'Код исчерпан', 'tr': 'Kod tükendi'},
+  'alreadyUsed': {'en': 'You already used this code', 'bg': 'Вече си използвал този код', 'de': 'Du hast diesen Code bereits verwendet', 'fr': 'Vous avez déjà utilisé ce code', 'it': 'Hai già usato questo codice', 'el': 'Έχετε ήδη χρησιμοποιήσει αυτόν τον κωδικό', 'es': 'Ya usaste este código', 'pt': 'Você já usou este código', 'ru': 'Вы уже использовали этот код', 'tr': 'Bu kodu zaten kullandınız'},
+  'proReactivated': {'en': 'Pro reactivated!', 'bg': 'Pro активиран отново!', 'de': 'Pro reaktiviert!', 'fr': 'Pro réactivé!', 'it': 'Pro riattivato!', 'el': 'Pro επανενεργοποιήθηκε!', 'es': '¡Pro reactivado!', 'pt': 'Pro reativado!', 'ru': 'Pro активирован повторно!', 'tr': 'Pro yeniden etkinleştirildi!'},
+  'proLifetime': {'en': 'Congratulations! You have Pro forever!', 'bg': 'Поздравления! Имаш Pro завинаги!', 'de': 'Glückwunsch! Du hast Pro für immer!', 'fr': 'Félicitations! Vous avez Pro à vie!', 'it': 'Congratulazioni! Hai Pro per sempre!', 'el': 'Συγχαρητήρια! Έχετε Pro για πάντα!', 'es': '¡Felicidades! ¡Tienes Pro para siempre!', 'pt': 'Parabéns! Você tem Pro para sempre!', 'ru': 'Поздравляем! У вас Pro навсегда!', 'tr': 'Tebrikler! Sonsuza kadar Pro\'sunuz!'},
+  'error': {'en': 'Error', 'bg': 'Грешка', 'de': 'Fehler', 'fr': 'Erreur', 'it': 'Errore', 'el': 'Σφάλμα', 'es': 'Error', 'pt': 'Erro', 'ru': 'Ошибка', 'tr': 'Hata'},
+  'webVersion': {'en': 'Web version', 'bg': 'Web версия', 'de': 'Web-Version', 'fr': 'Version web', 'it': 'Versione web', 'el': 'Έκδοση web', 'es': 'Versión web', 'pt': 'Versão web', 'ru': 'Веб-версия', 'tr': 'Web sürümü'},
+  'proPaid': {'en': 'Pro (paid)', 'bg': 'Pro (платен)', 'de': 'Pro (bezahlt)', 'fr': 'Pro (payé)', 'it': 'Pro (pagato)', 'el': 'Pro (πληρωμένο)', 'es': 'Pro (pagado)', 'pt': 'Pro (pago)', 'ru': 'Pro (оплачено)', 'tr': 'Pro (ücretli)'},
+  'proPromoLifetime': {'en': 'Pro (promo - lifetime)', 'bg': 'Pro (промо код - завинаги)', 'de': 'Pro (Promo - lebenslang)', 'fr': 'Pro (promo - à vie)', 'it': 'Pro (promo - a vita)', 'el': 'Pro (προσφορά - εφ\' όρου ζωής)', 'es': 'Pro (promo - de por vida)', 'pt': 'Pro (promo - vitalício)', 'ru': 'Pro (промо - навсегда)', 'tr': 'Pro (promosyon - ömür boyu)'},
+  'free': {'en': 'Free', 'bg': 'Безплатен', 'de': 'Kostenlos', 'fr': 'Gratuit', 'it': 'Gratuito', 'el': 'Δωρεάν', 'es': 'Gratis', 'pt': 'Grátis', 'ru': 'Бесплатно', 'tr': 'Ücretsiz'},
+};
+
+String _pm(String key, String lang) => _proMsg[key]?[lang] ?? _proMsg[key]?['en'] ?? '';
+
+// Localized strings with parameter
+String _proForDays(int days, String lang) {
+  const m = {'en': 'Congratulations! You have Pro for DAYS days!', 'bg': 'Поздравления! Имаш Pro за DAYS дни!', 'de': 'Glückwunsch! Du hast Pro für DAYS Tage!', 'fr': 'Félicitations! Vous avez Pro pour DAYS jours!', 'it': 'Congratulazioni! Hai Pro per DAYS giorni!', 'el': 'Συγχαρητήρια! Έχετε Pro για DAYS ημέρες!', 'es': '¡Felicidades! ¡Tienes Pro por DAYS días!', 'pt': 'Parabéns! Você tem Pro por DAYS dias!', 'ru': 'Поздравляем! У вас Pro на DAYS дней!', 'tr': 'Tebrikler! DAYS gün Pro\'sunuz!'};
+  return (m[lang] ?? m['en']!).replaceAll('DAYS', '$days');
+}
+
+String _proPromoDays(int days, String lang) {
+  const m = {'en': 'Pro (promo - DAYS days)', 'bg': 'Pro (промо код - DAYS дни)', 'de': 'Pro (Promo - DAYS Tage)', 'fr': 'Pro (promo - DAYS jours)', 'it': 'Pro (promo - DAYS giorni)', 'el': 'Pro (προσφορά - DAYS ημέρες)', 'es': 'Pro (promo - DAYS días)', 'pt': 'Pro (promo - DAYS dias)', 'ru': 'Pro (промо - DAYS дней)', 'tr': 'Pro (promosyon - DAYS gün)'};
+  return (m[lang] ?? m['en']!).replaceAll('DAYS', '$days');
+}
+
+String _proTrialDays(int days, String lang) {
+  const m = {'en': 'Pro (trial - DAYS days)', 'bg': 'Pro (пробен период - DAYS дни)', 'de': 'Pro (Test - DAYS Tage)', 'fr': 'Pro (essai - DAYS jours)', 'it': 'Pro (prova - DAYS giorni)', 'el': 'Pro (δοκιμή - DAYS ημέρες)', 'es': 'Pro (prueba - DAYS días)', 'pt': 'Pro (teste - DAYS dias)', 'ru': 'Pro (пробный - DAYS дней)', 'tr': 'Pro (deneme - DAYS gün)'};
+  return (m[lang] ?? m['en']!).replaceAll('DAYS', '$days');
+}
   static const int maxTasks = 30;
   static const int maxCategories = 3;
   static const int maxRemindersPerTask = 1;
@@ -172,36 +207,38 @@ class ProService extends ChangeNotifier {
   /// Прилага промо код
   Future<({bool success, String message})> applyPromoCode(String code) async {
     if (kIsWeb) {
-      return (success: false, message: 'Не е налично на web');
+      return (success: false, message: _pm('notAvailableWeb', 'en'));
     }
     
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final lang = prefs.getString('app_language') ?? 'en';
       final codeUpper = code.toUpperCase().trim();
 
       final docRef = FirebaseFirestore.instance.collection('promo_codes').doc(codeUpper);
       final doc = await docRef.get();
 
       if (!doc.exists) {
-        return (success: false, message: 'Невалиден код');
+        return (success: false, message: _pm('invalidCode', lang));
       }
 
       final data = doc.data()!;
 
       if (data['isActive'] != true) {
-        return (success: false, message: 'Кодът не е активен');
+        return (success: false, message: _pm('codeInactive', lang));
       }
 
       if (data['expiresAt'] != null) {
         final expiresAt = (data['expiresAt'] as Timestamp).toDate();
         if (DateTime.now().isAfter(expiresAt)) {
-          return (success: false, message: 'Кодът е изтекъл');
+          return (success: false, message: _pm('codeExpired', lang));
         }
       }
 
       final maxUses = data['maxUses'] as int? ?? 0;
       final usedCount = data['usedCount'] as int? ?? 0;
       if (maxUses > 0 && usedCount >= maxUses) {
-        return (success: false, message: 'Кодът е изчерпан');
+        return (success: false, message: _pm('codeUsedUp', lang));
       }
 
       final userId = FirebaseAuth.instance.currentUser?.uid;
@@ -211,8 +248,6 @@ class ProService extends ChangeNotifier {
       // За lifetime кодове - позволяваме повторна активация (след преинсталация)
       if (userId != null && usedBy.contains(userId)) {
         if (type == 'lifetime') {
-          // Просто активираме отново
-          final prefs = await SharedPreferences.getInstance();
           await prefs.setString('applied_promo_code', codeUpper);
           await prefs.setString('promo_type', 'lifetime');
           await prefs.remove('promo_end_date');
@@ -220,15 +255,14 @@ class ProService extends ChangeNotifier {
           _promoEndDate = null;
           _appliedPromoCode = codeUpper;
           notifyListeners();
-          return (success: true, message: 'Pro активиран отново!');
+          return (success: true, message: _pm('proReactivated', lang));
         }
-        return (success: false, message: 'Вече си използвал този код');
+        return (success: false, message: _pm('alreadyUsed', lang));
       }
       
 
       final days = data['days'] as int? ?? 0;
 
-      final prefs = await SharedPreferences.getInstance();
       await prefs.setString('applied_promo_code', codeUpper);
       await prefs.setString('promo_type', type);
 
@@ -253,13 +287,15 @@ class ProService extends ChangeNotifier {
       notifyListeners();
 
       if (type == 'lifetime') {
-        return (success: true, message: 'Поздравления! Имаш Pro завинаги!');
+        return (success: true, message: _pm('proLifetime', lang));
       } else {
-        return (success: true, message: 'Поздравления! Имаш Pro за $days дни!');
+        return (success: true, message: _proForDays(days, lang));
       }
     } catch (e) {
       debugPrint('Apply promo code error: $e');
-      return (success: false, message: 'Грешка: $e');
+      final prefs = await SharedPreferences.getInstance();
+      final lang = prefs.getString('app_language') ?? 'en';
+      return (success: false, message: '${_pm('error', lang)}: $e');
     }
   }
 
@@ -399,20 +435,20 @@ class ProService extends ChangeNotifier {
     }
   }
 
-  String getStatusText(bool isBg) {
+  String getStatusText(String lang) {
     if (kIsWeb) {
-      return isBg ? 'Web версия' : 'Web version';
+      return _pm('webVersion', lang);
     }
     if (_isPro) {
-      return isBg ? 'Pro (платен)' : 'Pro (paid)';
+      return _pm('proPaid', lang);
     } else if (_isPromoCode && _promoEndDate == null) {
-      return isBg ? 'Pro (промо код - завинаги)' : 'Pro (promo - lifetime)';
+      return _pm('proPromoLifetime', lang);
     } else if (_isPromoCode && _promoEndDate != null) {
-      return isBg ? 'Pro (промо код - $promoDaysLeft дни)' : 'Pro (promo - $promoDaysLeft days)';
+      return _proPromoDays(promoDaysLeft, lang);
     } else if (_isTrial) {
-      return isBg ? 'Pro (пробен период - $trialDaysLeft дни)' : 'Pro (trial - $trialDaysLeft days)';
+      return _proTrialDays(trialDaysLeft, lang);
     } else {
-      return isBg ? 'Безплатен' : 'Free';
+      return _pm('free', lang);
     }
   }
 
