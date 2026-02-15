@@ -6,9 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 // Условен import - stub за web, реален пакет за mobile
 import 'purchases_stub.dart' if (dart.library.io) 'package:purchases_flutter/purchases_flutter.dart';
 
-/// Лимити за безплатната версия
-class FreeLimits {
-
 // Localized promo/status messages
 const _proMsg = {
   'notAvailableWeb': {'en': 'Not available on web', 'bg': 'Не е налично на web', 'de': 'Nicht im Web verfügbar', 'fr': 'Non disponible sur le web', 'it': 'Non disponibile sul web', 'el': 'Δεν είναι διαθέσιμο στο web', 'es': 'No disponible en la web', 'pt': 'Não disponível na web', 'ru': 'Недоступно в вебе', 'tr': 'Web\'de kullanılamaz'},
@@ -28,7 +25,6 @@ const _proMsg = {
 
 String _pm(String key, String lang) => _proMsg[key]?[lang] ?? _proMsg[key]?['en'] ?? '';
 
-// Localized strings with parameter
 String _proForDays(int days, String lang) {
   const m = {'en': 'Congratulations! You have Pro for DAYS days!', 'bg': 'Поздравления! Имаш Pro за DAYS дни!', 'de': 'Glückwunsch! Du hast Pro für DAYS Tage!', 'fr': 'Félicitations! Vous avez Pro pour DAYS jours!', 'it': 'Congratulazioni! Hai Pro per DAYS giorni!', 'el': 'Συγχαρητήρια! Έχετε Pro για DAYS ημέρες!', 'es': '¡Felicidades! ¡Tienes Pro por DAYS días!', 'pt': 'Parabéns! Você tem Pro por DAYS dias!', 'ru': 'Поздравляем! У вас Pro на DAYS дней!', 'tr': 'Tebrikler! DAYS gün Pro\'sunuz!'};
   return (m[lang] ?? m['en']!).replaceAll('DAYS', '$days');
@@ -43,6 +39,9 @@ String _proTrialDays(int days, String lang) {
   const m = {'en': 'Pro (trial - DAYS days)', 'bg': 'Pro (пробен период - DAYS дни)', 'de': 'Pro (Test - DAYS Tage)', 'fr': 'Pro (essai - DAYS jours)', 'it': 'Pro (prova - DAYS giorni)', 'el': 'Pro (δοκιμή - DAYS ημέρες)', 'es': 'Pro (prueba - DAYS días)', 'pt': 'Pro (teste - DAYS dias)', 'ru': 'Pro (пробный - DAYS дней)', 'tr': 'Pro (deneme - DAYS gün)'};
   return (m[lang] ?? m['en']!).replaceAll('DAYS', '$days');
 }
+
+/// Лимити за безплатната версия
+class FreeLimits {
   static const int maxTasks = 30;
   static const int maxCategories = 3;
   static const int maxRemindersPerTask = 1;
