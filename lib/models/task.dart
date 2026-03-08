@@ -80,6 +80,9 @@ class Task extends HiveObject with EquatableMixin {
 /// Estimated duration in minutes (for time blocking)
   @HiveField(16)
   int? durationMinutes;
+  /// Template type for smart UI (shopping, packing, workout, etc)
+  @HiveField(17)
+  String? template;
   /// Google Calendar Event ID - за синхронизация
   @HiveField(15)
   String? googleCalendarEventId;
@@ -100,8 +103,8 @@ class Task extends HiveObject with EquatableMixin {
     this.completedAt,
     this.isArchived = false,
     this.archivedAt,
-    this.googleCalendarEventId,
-    this.durationMinutes,
+    this.googleCalendarEventId,    this.durationMinutes,
+    this.template,
   });
 
   /// Помощен getter - връща reminders или мигрира от старото reminder
@@ -173,8 +176,8 @@ class Task extends HiveObject with EquatableMixin {
         completedAt,
         isArchived,
         archivedAt,
-        googleCalendarEventId,
-        durationMinutes,
+        googleCalendarEventId,        durationMinutes,
+        template,
       ];
 }
 

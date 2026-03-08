@@ -721,7 +721,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       await Share.shareXFiles(
         [XFile(file.path)],
-        subject: 'Task Manager Backup',
+        subject: t.backupSubject,
         text: t.tasksBackup,
       );
 
@@ -1538,23 +1538,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         String categoryId;
                         switch (eventType) {
                           case 'birthday':
-                            categoryId = await getOrCreateCat(catIdBirthdays, 'Birthdays', 0xFFE91E63);
+                            categoryId = await getOrCreateCat(catIdBirthdays, t.catBirthdays, 0xFFE91E63);
                             break;
                           case 'outOfOffice':
-                            categoryId = await getOrCreateCat(catIdOoo, 'Out of Office', 0xFFFF9800);
+                            categoryId = await getOrCreateCat(catIdOoo, t.catOutOfOffice, 0xFFFF9800);
                             break;
                           case 'focusTime':
-                            categoryId = await getOrCreateCat(catIdFocus, 'Focus Time', 0xFF9C27B0);
+                            categoryId = await getOrCreateCat(catIdFocus, t.catFocusTime, 0xFF9C27B0);
                             break;
                           case 'workingLocation':
-                            categoryId = await getOrCreateCat(catIdLocation, 'Work Location', 0xFF4CAF50);
+                            categoryId = await getOrCreateCat(catIdLocation, t.catWorkLocation, 0xFF4CAF50);
                             break;
                           default:
-                            categoryId = await getOrCreateCat(catIdCalendar, 'Calendar Events', 0xFF2196F3);
+                            categoryId = await getOrCreateCat(catIdCalendar, t.catCalendarEvents, 0xFF2196F3);
                         }
                         
                         final newTask = Task(
-                          title: event['summary'] ?? 'Untitled Event',
+                          title: event['summary'] ?? t.untitledEvent,
                           dueDate: dueDate,
                           categoryId: categoryId,
                           priority: eventType == 'birthday' ? 2 : 1,
@@ -1629,12 +1629,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         // Create task
                         final categoryId = await getOrCreateCat(
                           catIdGoogleTasks, 
-                          'Google Tasks', 
+                          t.googleTasks, 
                           0xFF4CAF50, // Green color
                         );
                         
                         final newTask = Task(
-                          title: gTask['title'] ?? 'Untitled Task',
+                          title: gTask['title'] ?? t.untitledTask,
                           dueDate: dueDate,
                           categoryId: categoryId,
                           priority: 1,
@@ -1648,7 +1648,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Imported: $imported, Skipped: $skipped')),
+                          SnackBar(content: Text(t.importedSkipped(imported, skipped))),
                         );
                       }
                     },
@@ -1664,7 +1664,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: const Icon(Icons.delete_forever, color: Colors.red),
                     ),
                     title: Text(t.deleteAllCalendarTasks),
-                    subtitle: const Text('Remove all imported events', style: TextStyle(fontSize: 12)),
+                    subtitle: Text(t.removeAllImported, style: const TextStyle(fontSize: 12)),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () async {
                       // Confirm dialog
@@ -1676,11 +1676,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Cancel'),
+                              child: Text(t.cancel),
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                              child: Text(t.delete, style: const TextStyle(color: Colors.red)),
                             ),
                           ],
                         ),
@@ -1699,7 +1699,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Deleted ${tasksToDelete.length} calendar tasks'),
+                              content: Text(t.deletedCalendarTasks(tasksToDelete.length)),
                               duration: const Duration(seconds: 2),
                             ),
                           );

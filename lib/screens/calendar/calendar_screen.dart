@@ -39,6 +39,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   int _selectedPriority = 1;
   String _selectedRecurrence = 'none';
   final Set<int> _expandedCards = {};
+  bool _needsDefaults = false;
 
   @override
   void initState() {
@@ -50,34 +51,31 @@ class _CalendarScreenState extends State<CalendarScreen> {
     taskBox.listenable().addListener(_onTasksChanged);
 
     if (categoryBox.isEmpty) {
-      final defaults = [
-        Category(
-          id: 'work',
-          name: 'Work',
-          colorValue: Colors.blue.value,
-          isDefault: true,
-        ),
-        Category(
-          id: 'personal',
-          name: 'Personal',
-          colorValue: Colors.green.value,
-          isDefault: true,
-        ),
-        Category(
-          id: 'shopping',
-          name: 'Shopping',
-          colorValue: Colors.orange.value,
-          isDefault: true,
-        ),
-      ];
-      for (var c in defaults) {
-        categoryBox.put(c.id, c);
-      }
+      // Defaults will be created in didChangeDependencies where context is available
+      _needsDefaults = true;
     }
     _selectedCategoryId = categoryBox.values.first.id;
 
     final now = DateTime.now();
     _selectedDay = DateTime(now.year, now.month, now.day);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_needsDefaults && categoryBox.isEmpty) {
+      final t = AppText.of(context);
+      final defaults = [
+        Category(id: 'work', name: t.catWork, colorValue: Colors.blue.value, isDefault: true),
+        Category(id: 'personal', name: t.catPersonal, colorValue: Colors.green.value, isDefault: true),
+        Category(id: 'shopping', name: t.catShopping, colorValue: Colors.orange.value, isDefault: true),
+      ];
+      for (var c in defaults) {
+        categoryBox.put(c.id, c);
+      }
+      _needsDefaults = false;
+      _selectedCategoryId = categoryBox.values.first.id;
+    }
   }
 
   @override

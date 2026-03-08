@@ -34,13 +34,14 @@ class TaskAdapter extends TypeAdapter<Task> {
       archivedAt: fields[14] as DateTime?,
       googleCalendarEventId: fields[15] as String?,
       durationMinutes: fields[16] as int?,
+      template: fields[17] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Task obj) {
     writer
-      ..writeByte(17)
+      ..writeByte(18)
       ..writeByte(0)
       ..write(obj.title)
       ..writeByte(1)
@@ -73,6 +74,8 @@ class TaskAdapter extends TypeAdapter<Task> {
       ..write(obj.archivedAt)
       ..writeByte(16)
       ..write(obj.durationMinutes)
+      ..writeByte(17)
+      ..write(obj.template)
       ..writeByte(15)
       ..write(obj.googleCalendarEventId);
   }

@@ -15,7 +15,9 @@ import '../../services/notification_service.dart';
 import '../../widgets/reminder_selector.dart';
 import '../../services/widget_service.dart';
 import '../../widgets/celebration_overlay.dart';
+import '../../widgets/shopping_list_widget.dart';
 import '../../widgets/task_card_styles.dart';
+import 'shopping_list_screen.dart';
 
 enum TaskFilter { all, active, completed, overdue, upcoming, archived }
 enum TaskSort { date, priority, name, category }
@@ -45,6 +47,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
   
   // Expanded cards за Expandable Tiles дизайн
   final Set<int> _expandedCards = {};
+  bool _needsDefaults = false;
 
   // Позиция на плаващия бутон
   Offset? _fabOffset;
@@ -71,32 +74,28 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     _listAnimationController.forward();
 
     if (categoryBox.isEmpty) {
+      _needsDefaults = true;
+    }
+
+    _selectedCategoryId = categoryBox.isEmpty ? '' : categoryBox.values.first.id;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_needsDefaults && categoryBox.isEmpty) {
+      final t = AppText.of(context);
       final defaults = [
-        Category(
-          id: 'work',
-          name: 'Work',
-          colorValue: Colors.blue.value,
-          isDefault: true,
-        ),
-        Category(
-          id: 'personal',
-          name: 'Personal',
-          colorValue: Colors.green.value,
-          isDefault: true,
-        ),
-        Category(
-          id: 'shopping',
-          name: 'Shopping',
-          colorValue: Colors.orange.value,
-          isDefault: true,
-        ),
+        Category(id: 'work', name: t.catWork, colorValue: Colors.blue.value, isDefault: true),
+        Category(id: 'personal', name: t.catPersonal, colorValue: Colors.green.value, isDefault: true),
+        Category(id: 'shopping', name: t.catShopping, colorValue: Colors.orange.value, isDefault: true),
       ];
       for (var c in defaults) {
         categoryBox.put(c.id, c);
       }
+      _needsDefaults = false;
+      _selectedCategoryId = categoryBox.values.first.id;
     }
-
-    _selectedCategoryId = categoryBox.values.first.id;
   }
 
   @override
@@ -1466,9 +1465,13 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                               ..notes = tempNotes.trim().isEmpty ? null : tempNotes.trim();
                             existing.setReminders(tempReminders);
                             existing.setSubtasks(tempSubtasks);
+                            existing.template = tempCategoryId == 'shopping' ? 'shopping' : null;
                             await existing.save();
                             await NotificationService().scheduleForTask(existing);
                           } else {
+                            // Auto-detect template от category
+                            final String? autoTemplate = tempCategoryId == 'shopping' ? 'shopping' : null;
+                            
                             final newTask = Task(
                               title: titleText,
                               dueDate: dueDateToSave,
@@ -1477,6 +1480,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                               recurrence: recurrenceToSave,
                               reminders: tempReminders.isEmpty ? null : tempReminders,
                               notes: tempNotes.trim().isEmpty ? null : tempNotes.trim(),
+                              template: autoTemplate,
                             );
                             newTask.setSubtasks(tempSubtasks);
                             await taskBox.add(newTask);
@@ -2165,6 +2169,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                   priority: task.priority,
                                   recurrence: task.recurrence,
                                   reminders: task.reminders,
+                                  template: task.template,
                                 );
                                 await taskBox.add(newTask);
                             // Google Calendar sync
@@ -2226,6 +2231,25 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                             setState(() {});
                           },
                           child: GestureDetector(
+                          onTap: () {
+                            // Shopping List специален екран
+                            if (task.template == 'shopping') {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (ctx) => Scaffold(
+                                    appBar: AppBar(
+                                      title: Text(task.title),
+                                    ),
+                                    body: ShoppingListWidget(
+                                      task: task,
+                                      onTaskUpdated: (updatedTask) => setState(() {}),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                          },
                           onLongPress: () {
                             showModalBottomSheet(
                               context: context,
@@ -2344,7 +2368,15 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                     _checkAndCelebrate();
                                   }
                                 },
-                                onEdit: () => _openTaskDialog(existing: task),
+                                onEdit: () {
+                                  if (task.template == 'shopping') {
+                                    Navigator.push(context, MaterialPageRoute(
+                                      builder: (_) => ShoppingListScreen(task: task),
+                                    )).then((_) => setState(() {}));
+                                  } else {
+                                    _openTaskDialog(existing: task);
+                                  }
+                                },
                                 onDelete: () async {
                                   final confirm = await showDialog<bool>(
                                     context: context,

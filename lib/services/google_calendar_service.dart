@@ -27,7 +27,9 @@ class GoogleCalendarService {
   GoogleSignIn _getGoogleSignIn() {
     _googleSignIn ??= GoogleSignIn(
       scopes: scopes,
-      serverClientId: FirebaseAuth.instance.app.options.androidClientId,
+      serverClientId: kIsWeb 
+          ? '929046134968-m6ffgsd8dsotabi7ivkjdsqfnlm041n.apps.googleusercontent.com'
+          : FirebaseAuth.instance.app.options.androidClientId,
     );
     return _googleSignIn!;
   }
@@ -413,3 +415,4 @@ class GoogleCalendarService {
     }
   }
 }
+

@@ -34,36 +34,207 @@ class TaskWidgetLargeProvider : AppWidgetProvider() {
         const val PREFS_NAME = "FlutterSharedPreferences"
         const val TASKS_KEY = "flutter.widget_tasks"
         const val LANGUAGE_KEY = "flutter.app_language"
-        private fun isBg(context: Context): Boolean {
-            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            return prefs.getString(LANGUAGE_KEY, "bg") == "bg"
-        }
-
         private fun getEmptyMessage(context: Context): String {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val lang = prefs.getString(LANGUAGE_KEY, "bg") ?: "bg"
             val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
-            val index = hour % 4
+            val index = hour % 12
             
             val messages = when (lang) {
-                "bg" -> listOf("🤔 Няма ли да свършим нещо?", "🎉 Свободен ден!", "✅ Всичко е готово!", "😎 Време за почивка!")
-                "en" -> listOf("🤔 Nothing to do today?", "🎉 Free day!", "✅ All done!", "😎 Time to relax!")
-                "de" -> listOf("🤔 Nichts zu tun heute?", "🎉 Freier Tag!", "✅ Alles erledigt!", "😎 Zeit zum Entspannen!")
-                "fr" -> listOf("🤔 Rien à faire?", "🎉 Journée libre!", "✅ Tout est fait!", "😎 Temps de repos!")
-                "it" -> listOf("🤔 Niente da fare oggi?", "🎉 Giorno libero!", "✅ Tutto fatto!", "😎 Tempo di relax!")
-                "es" -> listOf("🤔 ¿Nada que hacer?", "🎉 ¡Día libre!", "✅ ¡Todo listo!", "😎 ¡A descansar!")
-                "pt" -> listOf("🤔 Nada para fazer?", "🎉 Dia livre!", "✅ Tudo pronto!", "😎 Hora de relaxar!")
-                "ru" -> listOf("🤔 Нечего делать?", "🎉 Свободный день!", "✅ Всё готово!", "😎 Время отдыхать!")
-                "el" -> listOf("🤔 Τίποτα για σήμερα;", "🎉 Ελεύθερη μέρα!", "✅ Όλα έτοιμα!", "😎 Ώρα για χαλάρωση!")
-                "tr" -> listOf("🤔 Yapacak bir şey yok?", "🎉 Boş gün!", "✅ Her şey tamam!", "😎 Dinlenme zamanı!")
-                else -> listOf("🤔 Nothing to do today?", "🎉 Free day!", "✅ All done!", "😎 Time to relax!")
+                "bg" -> listOf(
+                    "🦥 Дори мързелът ти завижда",
+                    "🏖️ Плажен режим: активиран",
+                    "🎮 Нула задачи. Време за игри?",
+                    "🧘 Вътрешен мир: постигнат",
+                    "🦸 Всички задачи — победени!",
+                    "🍕 Няма задачи = време за пица!",
+                    "🚀 Всичко чисто. Готов за излитане!",
+                    "🎵 Без задачи, само вайб",
+                    "🐱 Дори котката ти е впечатлена",
+                    "🌴 Рай на земята: 0 задачи",
+                    "🏆 Шампион по продуктивност!",
+                    "☕ Само кафе и спокойствие"
+                )
+                "en" -> listOf(
+                    "🦥 Even sloths envy your free time",
+                    "🏖️ Beach mode: activated",
+                    "🎮 Zero tasks. Game time?",
+                    "🧘 Inner peace: achieved",
+                    "🦸 All tasks — defeated!",
+                    "🍕 No tasks = pizza time!",
+                    "🚀 All clear. Ready for takeoff!",
+                    "🎵 No tasks, just vibes",
+                    "🐱 Even your cat is impressed",
+                    "🌴 Paradise found: 0 tasks",
+                    "🏆 Productivity champion!",
+                    "☕ Just coffee and calm"
+                )
+                "de" -> listOf(
+                    "🦥 Selbst Faultiere beneiden dich",
+                    "🏖️ Strandmodus: aktiviert",
+                    "🎮 Null Aufgaben. Spielzeit?",
+                    "🧘 Innerer Frieden: erreicht",
+                    "🦸 Alle Aufgaben — besiegt!",
+                    "🍕 Keine Aufgaben = Pizzazeit!",
+                    "🚀 Alles klar. Bereit zum Abheben!",
+                    "🎵 Keine Aufgaben, nur gute Laune",
+                    "🐱 Selbst deine Katze staunt",
+                    "🌴 Paradies gefunden: 0 Aufgaben",
+                    "🏆 Produktivitäts-Champion!",
+                    "☕ Nur Kaffee und Gelassenheit"
+                )
+                "fr" -> listOf(
+                    "🦥 Même les paresseux t'envient",
+                    "🏖️ Mode plage : activé",
+                    "🎮 Zéro tâche. On joue ?",
+                    "🧘 Paix intérieure : atteinte",
+                    "🦸 Toutes les tâches — vaincues !",
+                    "🍕 Pas de tâches = pizza !",
+                    "🚀 Tout est clair. Prêt au décollage !",
+                    "🎵 Pas de tâches, que du bon",
+                    "🐱 Même ton chat est impressionné",
+                    "🌴 Paradis trouvé : 0 tâches",
+                    "🏆 Champion de productivité !",
+                    "☕ Juste un café et du calme"
+                )
+                "it" -> listOf(
+                    "🦥 Anche i bradipi ti invidiano",
+                    "🏖️ Modalità spiaggia: attivata",
+                    "🎮 Zero compiti. Si gioca?",
+                    "🧘 Pace interiore: raggiunta",
+                    "🦸 Tutti i compiti — sconfitti!",
+                    "🍕 Niente compiti = pizza!",
+                    "🚀 Tutto libero. Pronti al decollo!",
+                    "🎵 Niente compiti, solo relax",
+                    "🐱 Anche il gatto è colpito",
+                    "🌴 Paradiso trovato: 0 compiti",
+                    "🏆 Campione di produttività!",
+                    "☕ Solo caffè e tranquillità"
+                )
+                "es" -> listOf(
+                    "🦥 Hasta los perezosos te envidian",
+                    "🏖️ Modo playa: activado",
+                    "🎮 Cero tareas. ¿Jugamos?",
+                    "🧘 Paz interior: alcanzada",
+                    "🦸 ¡Todas las tareas — vencidas!",
+                    "🍕 Sin tareas = ¡hora de pizza!",
+                    "🚀 Todo listo. ¡Listos para despegar!",
+                    "🎵 Sin tareas, solo buena onda",
+                    "🐱 Hasta tu gato está impresionado",
+                    "🌴 Paraíso encontrado: 0 tareas",
+                    "🏆 ¡Campeón de productividad!",
+                    "☕ Solo café y tranquilidad"
+                )
+                "pt" -> listOf(
+                    "🦥 Até as preguiças te invejam",
+                    "🏖️ Modo praia: ativado",
+                    "🎮 Zero tarefas. Hora de jogar?",
+                    "🧘 Paz interior: alcançada",
+                    "🦸 Todas as tarefas — vencidas!",
+                    "🍕 Sem tarefas = hora da pizza!",
+                    "🚀 Tudo limpo. Pronto pra decolar!",
+                    "🎵 Sem tarefas, só boa vibe",
+                    "🐱 Até o gato ficou impressionado",
+                    "🌴 Paraíso encontrado: 0 tarefas",
+                    "🏆 Campeão de produtividade!",
+                    "☕ Só café e tranquilidade"
+                )
+                "ru" -> listOf(
+                    "🦥 Даже ленивцы тебе завидуют",
+                    "🏖️ Режим пляжа: активирован",
+                    "🎮 Ноль задач. Поиграем?",
+                    "🧘 Внутренний покой: достигнут",
+                    "🦸 Все задачи — повержены!",
+                    "🍕 Нет задач = время пиццы!",
+                    "🚀 Всё чисто. Готов к взлёту!",
+                    "🎵 Без задач, только вайб",
+                    "🐱 Даже кот впечатлён",
+                    "🌴 Рай найден: 0 задач",
+                    "🏆 Чемпион продуктивности!",
+                    "☕ Только кофе и спокойствие"
+                )
+                "el" -> listOf(
+                    "🦥 Ακόμα και οι βραδύποδες σε ζηλεύουν",
+                    "🏖️ Λειτουργία παραλίας: ενεργή",
+                    "🎮 Μηδέν εργασίες. Παιχνίδι;",
+                    "🧘 Εσωτερική γαλήνη: επιτεύχθηκε",
+                    "🦸 Όλες οι εργασίες — νικήθηκαν!",
+                    "🍕 Καμία εργασία = ώρα για πίτσα!",
+                    "🚀 Όλα καθαρά. Έτοιμοι για απογείωση!",
+                    "🎵 Χωρίς εργασίες, μόνο χαλάρωση",
+                    "🐱 Ακόμα και η γάτα εντυπωσιάστηκε",
+                    "🌴 Παράδεισος: 0 εργασίες",
+                    "🏆 Πρωταθλητής παραγωγικότητας!",
+                    "☕ Μόνο καφές και ηρεμία"
+                )
+                "tr" -> listOf(
+                    "🦥 Tembel hayvanlar bile kıskanıyor",
+                    "🏖️ Plaj modu: aktif",
+                    "🎮 Sıfır görev. Oyun zamanı?",
+                    "🧘 İç huzur: sağlandı",
+                    "🦸 Tüm görevler — yenildi!",
+                    "🍕 Görev yok = pizza zamanı!",
+                    "🚀 Her şey temiz. Kalkışa hazır!",
+                    "🎵 Görev yok, sadece keyif",
+                    "🐱 Kedin bile etkilendi",
+                    "🌴 Cennet bulundu: 0 görev",
+                    "🏆 Verimlilik şampiyonu!",
+                    "☕ Sadece kahve ve huzur"
+                )
+                else -> listOf(
+                    "🦥 Even sloths envy your free time",
+                    "🏖️ Beach mode: activated",
+                    "🎮 Zero tasks. Game time?",
+                    "🧘 Inner peace: achieved",
+                    "🦸 All tasks — defeated!",
+                    "🍕 No tasks = pizza time!",
+                    "🚀 All clear. Ready for takeoff!",
+                    "🎵 No tasks, just vibes",
+                    "🐱 Even your cat is impressed",
+                    "🌴 Paradise found: 0 tasks",
+                    "🏆 Productivity champion!",
+                    "☕ Just coffee and calm"
+                )
             }
             return messages[index]
         }
 
+        private fun getTaskCountText(count: Int, context: Context): String {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val lang = prefs.getString(LANGUAGE_KEY, "bg") ?: "bg"
+            return when (lang) {
+                "bg" -> "$count задачи"
+                "de" -> "$count Aufgaben"
+                "fr" -> "$count tâches"
+                "it" -> "$count attività"
+                "es" -> "$count tareas"
+                "pt" -> "$count tarefas"
+                "ru" -> "$count задач"
+                "el" -> "$count εργασίες"
+                "tr" -> "$count görev"
+                else -> "$count tasks"
+            }
+        }
+
+        private fun getErrorText(context: Context): String {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val lang = prefs.getString(LANGUAGE_KEY, "bg") ?: "bg"
+            return when (lang) {
+                "bg" -> "Грешка"
+                "de" -> "Fehler"
+                "fr" -> "Erreur"
+                "it" -> "Errore"
+                "es" -> "Error"
+                "pt" -> "Erro"
+                "ru" -> "Ошибка"
+                "el" -> "Σφάλμα"
+                "tr" -> "Hata"
+                else -> "Error"
+            }
+        }
+
         fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
             val views = RemoteViews(context.packageName, R.layout.task_widget_large)
-            val isBg = isBg(context)
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val tasksJson = prefs.getString(TASKS_KEY, "[]") ?: "[]"
             try {
@@ -85,7 +256,7 @@ class TaskWidgetLargeProvider : AppWidgetProvider() {
                     views.setTextViewText(R.id.empty_text, getEmptyMessage(context))
                     rows.forEach { views.setViewVisibility(it.first, View.GONE) }
                 } else {
-                    views.setTextViewText(R.id.widget_title, if (isBg) "${tasks.size} задачи" else "${tasks.size} tasks")
+                    views.setTextViewText(R.id.widget_title, getTaskCountText(tasks.size, context))
                     views.setViewVisibility(R.id.empty_container, View.GONE)
                     for (i in 0 until 5) {
                         val (rowId, titleId, checkboxId) = rows[i]
@@ -105,7 +276,7 @@ class TaskWidgetLargeProvider : AppWidgetProvider() {
                 }
             } catch (e: Exception) {
                 views.setViewVisibility(R.id.empty_container, View.VISIBLE)
-                views.setTextViewText(R.id.empty_text, if (isBg) "Грешка" else "Error")
+                views.setTextViewText(R.id.empty_text, getErrorText(context))
                 listOf(R.id.task_row_1, R.id.task_row_2, R.id.task_row_3, R.id.task_row_4, R.id.task_row_5).forEach { views.setViewVisibility(it, View.GONE) }
             }
             context.packageManager.getLaunchIntentForPackage(context.packageName)?.let {
