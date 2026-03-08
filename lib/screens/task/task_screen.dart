@@ -17,7 +17,6 @@ import '../../services/widget_service.dart';
 import '../../widgets/celebration_overlay.dart';
 import 'shopping_list_screen.dart';
 import '../../widgets/task_card_styles.dart';
-import 'shopping_list_screen.dart';
 
 enum TaskFilter { all, active, completed, overdue, upcoming, archived }
 enum TaskSort { date, priority, name, category }
