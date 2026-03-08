@@ -274,6 +274,15 @@ class AppText {
   String get addItem => _t({'en': 'Add item...', 'bg': 'Добави артикул...', 'de': 'Artikel hinzufügen...', 'fr': 'Ajouter un article...', 'it': 'Aggiungi articolo...', 'el': 'Προσθήκη αντικειμένου...', 'es': 'Añadir artículo...', 'pt': 'Adicionar item...', 'ru': 'Добавить товар...', 'tr': 'Öğe ekle...'});
   String get enterItem => _t({'en': 'Enter item...', 'bg': 'Въведи артикул...', 'de': 'Artikel eingeben...', 'fr': 'Saisir un article...', 'it': 'Inserisci articolo...', 'el': 'Εισάγετε αντικείμενο...', 'es': 'Introducir artículo...', 'pt': 'Digite o item...', 'ru': 'Введите товар...', 'tr': 'Öğe girin...'});
   String get clearCompleted => _t({'en': 'Clear done', 'bg': 'Изчисти готовите', 'de': 'Erledigte löschen', 'fr': 'Effacer les faits', 'it': 'Cancella completati', 'el': 'Καθαρισμός ολοκληρωμένων', 'es': 'Limpiar hechos', 'pt': 'Limpar concluídos', 'ru': 'Очистить выполненные', 'tr': 'Tamamlananları temizle'});
+  String get catWork => _t({'en': 'Work', 'bg': 'Работа', 'de': 'Arbeit', 'fr': 'Travail', 'it': 'Lavoro', 'el': 'Εργασία', 'es': 'Trabajo', 'pt': 'Trabalho', 'ru': 'Работа', 'tr': 'İş'});
+  String get catPersonal => _t({'en': 'Personal', 'bg': 'Лично', 'de': 'Persönlich', 'fr': 'Personnel', 'it': 'Personale', 'el': 'Προσωπικό', 'es': 'Personal', 'pt': 'Pessoal', 'ru': 'Личное', 'tr': 'Kişisel'});
+  String get catShopping => _t({'en': 'Shopping', 'bg': 'Пазаруване', 'de': 'Einkaufen', 'fr': 'Courses', 'it': 'Spesa', 'el': 'Αγορές', 'es': 'Compras', 'pt': 'Compras', 'ru': 'Покупки', 'tr': 'Alışveriş'});
+  String get backupSubject => _t({'en': 'Taskify Backup', 'bg': 'Taskify резервно копие', 'de': 'Taskify Sicherung', 'fr': 'Sauvegarde Taskify', 'it': 'Backup Taskify', 'el': 'Αντίγραφο Taskify', 'es': 'Copia de seguridad Taskify', 'pt': 'Backup Taskify', 'ru': 'Резервная копия Taskify', 'tr': 'Taskify Yedekleme'});
+  String get catBirthdays => _t({'en': 'Birthdays', 'bg': 'Рождени дни', 'de': 'Geburtstage', 'fr': 'Anniversaires', 'it': 'Compleanni', 'el': 'Γενέθλια', 'es': 'Cumpleaños', 'pt': 'Aniversários', 'ru': 'Дни рождения', 'tr': 'Doğum günleri'});
+  String get catOutOfOffice => _t({'en': 'Out of Office', 'bg': 'Извън офиса', 'de': 'Außer Haus', 'fr': 'Hors du bureau', 'it': 'Fuori ufficio', 'el': 'Εκτός γραφείου', 'es': 'Fuera de la oficina', 'pt': 'Fora do escritório', 'ru': 'Вне офиса', 'tr': 'Ofis dışında'});
+  String get catFocusTime => _t({'en': 'Focus Time', 'bg': 'Фокус', 'de': 'Fokuszeit', 'fr': 'Temps de concentration', 'it': 'Tempo di concentrazione', 'el': 'Χρόνος εστίασης', 'es': 'Tiempo de enfoque', 'pt': 'Tempo de foco', 'ru': 'Время фокуса', 'tr': 'Odaklanma zamanı'});
+  String get catWorkLocation => _t({'en': 'Work Location', 'bg': 'Работно място', 'de': 'Arbeitsort', 'fr': 'Lieu de travail', 'it': 'Luogo di lavoro', 'el': 'Τόπος εργασίας', 'es': 'Lugar de trabajo', 'pt': 'Local de trabalho', 'ru': 'Место работы', 'tr': 'Çalışma yeri'});
+  String get catCalendarEvents => _t({'en': 'Calendar Events', 'bg': 'Календарни събития', 'de': 'Kalendereinträge', 'fr': 'Événements du calendrier', 'it': 'Eventi del calendario', 'el': 'Εκδηλώσεις ημερολογίου', 'es': 'Eventos del calendario', 'pt': 'Eventos do calendário', 'ru': 'События календаря', 'tr': 'Takvim etkinlikleri'});
   String get shopping => _t({'en': 'Shopping', 'bg': 'Пазаруване', 'de': 'Einkaufen', 'fr': 'Courses', 'it': 'Spesa', 'el': 'Αγορές', 'es': 'Compras', 'pt': 'Compras', 'ru': 'Покупки', 'tr': 'Alışveriş'});
   String get categories => _t({'en': 'Categories', 'bg': 'Категории', 'de': 'Kategorien', 'fr': 'Catégories', 'it': 'Categorie', 'el': 'Κατηγορίες', 'es': 'Categorías', 'pt': 'Categorias', 'ru': 'Категории', 'tr': 'Kategoriler'});
   String get manageCategories => _t({'en': 'Manage Categories', 'bg': 'Управление на категории', 'de': 'Kategorien verwalten', 'fr': 'Gérer les catégories', 'it': 'Gestisci categorie', 'el': 'Διαχείριση κατηγοριών', 'es': 'Gestionar categorías', 'pt': 'Gerenciar categorias', 'ru': 'Управление категориями', 'tr': 'Kategorileri yönet'});
@@ -817,31 +826,6 @@ class AppText {
 
   String get goodAfternoon => _t({'en': 'Good Afternoon! ☀️', 'bg': 'Добър ден! ☀️', 'de': 'Guten Tag! ☀️', 'fr': 'Bon après-midi! ☀️', 'it': 'Buon pomeriggio! ☀️', 'el': 'Καλό απόγευμα! ☀️', 'es': '¡Buenas tardes! ☀️', 'pt': 'Boa tarde! ☀️', 'ru': 'Добрый день! ☀️', 'tr': 'İyi öğleden sonralar! ☀️'});
   String get goodEvening => _t({'en': 'Good Evening! 🌙', 'bg': 'Добър вечер! 🌙', 'de': 'Guten Abend! 🌙', 'fr': 'Bonsoir! 🌙', 'it': 'Buonasera! 🌙', 'el': 'Καλό βράδυ! 🌙', 'es': '¡Buenas noches! 🌙', 'pt': 'Boa noite! 🌙', 'ru': 'Добрый вечер! 🌙', 'tr': 'İyi akşamlar! 🌙'});
-  // Shopping List
-    'en': 'Add item...',
-    'bg': 'Добави артикул...',
-    'de': 'Artikel hinzufügen...',
-    'fr': 'Ajouter un article...',
-    'it': 'Aggiungi articolo...',
-    'el': 'Προσθήκη αντικειμένου...',
-    'es': 'Añadir artículo...',
-    'pt': 'Adicionar item...',
-    'ru': 'Добавить товар...',
-    'tr': 'Ürün ekle...',
-  });
-
-    'en': 'Add items to the list',
-    'bg': 'Добави артикули в списъка',
-    'de': 'Artikel zur Liste hinzufügen',
-    'fr': 'Ajouter des articles à la liste',
-    'it': 'Aggiungi articoli alla lista',
-    'el': 'Προσθέστε αντικείμενα στη λίστα',
-    'es': 'Añadir artículos a la lista',
-    'pt': 'Adicionar itens à lista',
-    'ru': 'Добавить товары в список',
-    'tr': 'Listeye ürün ekle',
-  });
-
   String get totalItems => _t({
     'en': 'Total items',
     'bg': 'Общо артикули',

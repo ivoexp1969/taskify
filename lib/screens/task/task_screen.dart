@@ -15,7 +15,7 @@ import '../../services/notification_service.dart';
 import '../../widgets/reminder_selector.dart';
 import '../../services/widget_service.dart';
 import '../../widgets/celebration_overlay.dart';
-import '../../widgets/shopping_list_widget.dart';
+import 'shopping_list_screen.dart';
 import '../../widgets/task_card_styles.dart';
 import 'shopping_list_screen.dart';
 
@@ -2234,20 +2234,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                           onTap: () {
                             // Shopping List специален екран
                             if (task.template == 'shopping') {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (ctx) => Scaffold(
-                                    appBar: AppBar(
-                                      title: Text(task.title),
-                                    ),
-                                    body: ShoppingListWidget(
-                                      task: task,
-                                      onTaskUpdated: (updatedTask) => setState(() {}),
-                                    ),
-                                  ),
-                                ),
-                              );
+                              Navigator.push(context, MaterialPageRoute(
+                                builder: (_) => ShoppingListScreen(task: task),
+                              )).then((_) => setState(() {}));
+                              return;
                             }
                           },
                           onLongPress: () {
