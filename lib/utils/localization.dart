@@ -909,4 +909,128 @@ class AppText {
   String get reminderFallback => _t({'en': 'Reminder', 'bg': 'Напомняне', 'de': 'Erinnerung', 'fr': 'Rappel', 'it': 'Promemoria', 'el': 'Υπενθύμιση', 'es': 'Recordatorio', 'pt': 'Lembrete', 'ru': 'Напоминание', 'tr': 'Hatırlatıcı'});
   String get taskDueFallback => _t({'en': 'You have a task to complete', 'bg': 'Имаш задача за изпълнение', 'de': 'Du hast eine Aufgabe zu erledigen', 'fr': 'Vous avez une tâche à accomplir', 'it': 'Hai un\'attività da completare', 'el': 'Έχετε μια εργασία να ολοκληρώσετε', 'es': 'Tienes una tarea por completar', 'pt': 'Você tem uma tarefa para concluir', 'ru': 'У вас есть задача для выполнения', 'tr': 'Tamamlamanız gereken bir görev var'});
 
+
+  String get newEntry => _t({'en': 'New Entry', 'bg': 'Нов запис', 'de': 'Neuer Eintrag', 'fr': 'Nouvelle entrée', 'it': 'Nuova voce', 'el': 'Νέα εγγραφή', 'es': 'Nueva entrada', 'pt': 'Nova entrada', 'ru': 'Новая запись', 'tr': 'Yeni kayıt'});
+  String get typeTask => _t({'en': 'Task', 'bg': 'Задача', 'de': 'Aufgabe', 'fr': 'Tâche', 'it': 'Attività', 'el': 'Εργασία', 'es': 'Tarea', 'pt': 'Tarefa', 'ru': 'Задача', 'tr': 'Görev'});
+  String get typeShopping => _t({'en': 'Shopping', 'bg': 'Пазаруване', 'de': 'Einkaufen', 'fr': 'Courses', 'it': 'Spesa', 'el': 'Αγορές', 'es': 'Compras', 'pt': 'Compras', 'ru': 'Покупки', 'tr': 'Alışveriş'});
+  String get typeBirthday => _t({'en': 'Birthday', 'bg': 'Рожден ден', 'de': 'Geburtstag', 'fr': 'Anniversaire', 'it': 'Compleanno', 'el': 'Γενέθλια', 'es': 'Cumpleaños', 'pt': 'Aniversário', 'ru': 'День рождения', 'tr': 'Doğum günü'});
+  String get typeMeeting => _t({'en': 'Meeting', 'bg': 'Среща', 'de': 'Treffen', 'fr': 'Réunion', 'it': 'Incontro', 'el': 'Συνάντηση', 'es': 'Reunión', 'pt': 'Reunião', 'ru': 'Встреча', 'tr': 'Toplantı'});
+  String get typeWorkout => _t({'en': 'Workout', 'bg': 'Тренировка', 'de': 'Training', 'fr': 'Entraînement', 'it': 'Allenamento', 'el': 'Γυμναστική', 'es': 'Ejercicio', 'pt': 'Treino', 'ru': 'Тренировка', 'tr': 'Egzersiz'});
+  String get typePayment => _t({'en': 'Payment', 'bg': 'Плащане', 'de': 'Zahlung', 'fr': 'Paiement', 'it': 'Pagamento', 'el': 'Πληρωμή', 'es': 'Pago', 'pt': 'Pagamento', 'ru': 'Платёж', 'tr': 'Ödeme'});
+  String get typeTravel => _t({'en': 'Travel', 'bg': 'Пътуване', 'de': 'Reise', 'fr': 'Voyage', 'it': 'Viaggio', 'el': 'Ταξίδι', 'es': 'Viaje', 'pt': 'Viagem', 'ru': 'Путешествие', 'tr': 'Seyahat'});
+  String get typeGift => _t({'en': 'Gift', 'bg': 'Подарък', 'de': 'Geschenk', 'fr': 'Cadeau', 'it': 'Regalo', 'el': 'Δώρο', 'es': 'Regalo', 'pt': 'Presente', 'ru': 'Подарок', 'tr': 'Hediye'});
+
+
+  String get jan => _t({'en': 'Jan', 'bg': 'ян', 'de': 'Jan', 'fr': 'jan', 'it': 'gen', 'el': 'Ιαν', 'es': 'ene', 'pt': 'jan', 'ru': 'янв', 'tr': 'Oca'});
+  String get feb => _t({'en': 'Feb', 'bg': 'фев', 'de': 'Feb', 'fr': 'fév', 'it': 'feb', 'el': 'Φεβ', 'es': 'feb', 'pt': 'fev', 'ru': 'фев', 'tr': 'Şub'});
+  String get mar => _t({'en': 'Mar', 'bg': 'мар', 'de': 'Mär', 'fr': 'mar', 'it': 'mar', 'el': 'Μαρ', 'es': 'mar', 'pt': 'mar', 'ru': 'мар', 'tr': 'Mar'});
+  String get apr => _t({'en': 'Apr', 'bg': 'апр', 'de': 'Apr', 'fr': 'avr', 'it': 'apr', 'el': 'Απρ', 'es': 'abr', 'pt': 'abr', 'ru': 'апр', 'tr': 'Nis'});
+  String get jun => _t({'en': 'Jun', 'bg': 'юн', 'de': 'Jun', 'fr': 'jun', 'it': 'giu', 'el': 'Ιουν', 'es': 'jun', 'pt': 'jun', 'ru': 'июн', 'tr': 'Haz'});
+  String get jul => _t({'en': 'Jul', 'bg': 'юл', 'de': 'Jul', 'fr': 'jul', 'it': 'lug', 'el': 'Ιουλ', 'es': 'jul', 'pt': 'jul', 'ru': 'июл', 'tr': 'Tem'});
+  String get aug => _t({'en': 'Aug', 'bg': 'авг', 'de': 'Aug', 'fr': 'aoû', 'it': 'ago', 'el': 'Αυγ', 'es': 'ago', 'pt': 'ago', 'ru': 'авг', 'tr': 'Ağu'});
+  String get sep => _t({'en': 'Sep', 'bg': 'сеп', 'de': 'Sep', 'fr': 'sep', 'it': 'set', 'el': 'Σεπ', 'es': 'sep', 'pt': 'set', 'ru': 'сен', 'tr': 'Eyl'});
+  String get oct => _t({'en': 'Oct', 'bg': 'окт', 'de': 'Okt', 'fr': 'oct', 'it': 'ott', 'el': 'Οκτ', 'es': 'oct', 'pt': 'out', 'ru': 'окт', 'tr': 'Eki'});
+  String get nov => _t({'en': 'Nov', 'bg': 'ное', 'de': 'Nov', 'fr': 'nov', 'it': 'nov', 'el': 'Νοε', 'es': 'nov', 'pt': 'nov', 'ru': 'ноя', 'tr': 'Kas'});
+  String get dec => _t({'en': 'Dec', 'bg': 'дек', 'de': 'Dez', 'fr': 'déc', 'it': 'dic', 'el': 'Δεκ', 'es': 'dic', 'pt': 'dez', 'ru': 'дек', 'tr': 'Ara'});
+  String get addBirthday => _t({'en': 'Add Birthday', 'bg': 'Добави рожден ден', 'de': 'Geburtstag hinzufügen', 'fr': 'Ajouter anniversaire', 'it': 'Aggiungi compleanno', 'el': 'Προσθήκη γενεθλίων', 'es': 'Añadir cumpleaños', 'pt': 'Adicionar aniversário', 'ru': 'Добавить день рождения', 'tr': 'Doğum günü ekle'});
+  String get editBirthday => _t({'en': 'Edit Birthday', 'bg': 'Редакция', 'de': 'Bearbeiten', 'fr': 'Modifier', 'it': 'Modifica', 'el': 'Επεξεργασία', 'es': 'Editar', 'pt': 'Editar', 'ru': 'Редактировать', 'tr': 'Düzenle'});
+  String get birthdayDate => _t({'en': 'Birthday date', 'bg': 'Дата на рождения ден', 'de': 'Geburtsdatum', 'fr': 'Date d’anniversaire', 'it': 'Data di nascita', 'el': 'Ημερομηνία γενεθλίων', 'es': 'Fecha de cumpleaños', 'pt': 'Data de aniversário', 'ru': 'Дата рождения', 'tr': 'Doğum tarihi'});
+  String get birthdayNameHint => _t({'en': 'e.g. Maria', 'bg': 'напр. Мария', 'de': 'z.B. Maria', 'fr': 'ex. Maria', 'it': 'es. Maria', 'el': 'π.χ. Μαρία', 'es': 'ej. María', 'pt': 'ex. Maria', 'ru': 'напр. Мария', 'tr': 'ör. Maria'});
+  String get birthYear => _t({'en': 'Birth year', 'bg': 'Година на раждане', 'de': 'Geburtsjahr', 'fr': 'Année de naissance', 'it': 'Anno di nascita', 'el': 'Έτος γέννησης', 'es': 'Año de nacimiento', 'pt': 'Ano de nascimento', 'ru': 'Год рождения', 'tr': 'Doğum yılı'});
+  String get birthYearHint => _t({'en': 'e.g. 1990', 'bg': 'напр. 1990', 'de': 'z.B. 1990', 'fr': 'ex. 1990', 'it': 'es. 1990', 'el': 'π.χ. 1990', 'es': 'ej. 1990', 'pt': 'ex. 1990', 'ru': 'напр. 1990', 'tr': 'ör. 1990'});
+  String get onDay => _t({'en': 'On the day', 'bg': 'На деня', 'de': 'Am Tag', 'fr': 'Le jour même', 'it': 'Il giorno', 'el': 'Ην ημέρα', 'es': 'El día', 'pt': 'No dia', 'ru': 'В день', 'tr': 'Günü'});
+  String get oneDayBefore => _t({'en': '1 day before', 'bg': '1 ден преди', 'de': '1 Tag vorher', 'fr': '1 jour avant', 'it': '1 giorno prima', 'el': '1 μέρα πριν', 'es': '1 día antes', 'pt': '1 dia antes', 'ru': 'За 1 день', 'tr': '1 gün önce'});
+  String get oneWeekBefore => _t({'en': '1 week before', 'bg': '1 седмица преди', 'de': '1 Woche vorher', 'fr': '1 semaine avant', 'it': '1 settimana prima', 'el': '1 εβδομάδα πριν', 'es': '1 semana antes', 'pt': '1 semana antes', 'ru': 'За 1 неделю', 'tr': '1 hafta önce'});
+  String get optional => _t({'en': 'optional', 'bg': 'незадължително', 'de': 'optional', 'fr': 'facultatif', 'it': 'facoltativo', 'el': 'πραιρετικό', 'es': 'opcional', 'pt': 'opcional', 'ru': 'необязательно', 'tr': 'isteğe bağlı'});
+  String turnsAge(int age) => _t({'en': 'turns $age', 'bg': 'става $age', 'de': 'wird $age', 'fr': 'aura $age ans', 'it': 'compie $age', 'el': 'γίνεται $age', 'es': 'cumple $age', 'pt': 'completa $age', 'ru': 'исполняется $age', 'tr': '$age yaşına giriyor'});
+
+
+  String get sameDayMorning => _t({'en': 'Same day at 8:00', 'bg': 'Същия ден в 8:00', 'de': 'Am selben Tag um 8:00', 'fr': 'Le même jour à 8h00', 'it': 'Lo stesso giorno alle 8:00', 'el': 'Την ίδια μέρα στις 8:00', 'es': 'El mismo día a las 8:00', 'pt': 'No mesmo dia às 8:00', 'ru': 'В тот же день в 8:00', 'tr': 'Aynı gün saat 8:00'});
+
+
+  String get catMeeting => _t({'en': 'Meetings', 'bg': 'Срещи', 'de': 'Treffen', 'fr': 'Réunions', 'it': 'Incontri', 'el': 'Συναντήσεις', 'es': 'Reuniones', 'pt': 'Reuniões', 'ru': 'Встречи', 'tr': 'Toplantılar'});
+  String get catWorkout => _t({'en': 'Workouts', 'bg': 'Тренировки', 'de': 'Training', 'fr': 'Entraînements', 'it': 'Allenamenti', 'el': 'Γυμναστική', 'es': 'Ejercicios', 'pt': 'Treinos', 'ru': 'Тренировки', 'tr': 'Antrenmanlar'});
+  String get catPayment => _t({'en': 'Payments', 'bg': 'Плащания', 'de': 'Zahlungen', 'fr': 'Paiements', 'it': 'Pagamenti', 'el': 'Πληρωμές', 'es': 'Pagos', 'pt': 'Pagamentos', 'ru': 'Платежи', 'tr': 'Ödemeler'});
+  String get catTravel => _t({'en': 'Travel', 'bg': 'Пътувания', 'de': 'Reisen', 'fr': 'Voyages', 'it': 'Viaggi', 'el': 'Ταξίδια', 'es': 'Viajes', 'pt': 'Viagens', 'ru': 'Путешествия', 'tr': 'Seyahatler'});
+  String get catGift => _t({'en': 'Gifts', 'bg': 'Подаръци', 'de': 'Geschenke', 'fr': 'Cadeaux', 'it': 'Regali', 'el': 'Δώρα', 'es': 'Regalos', 'pt': 'Presentes', 'ru': 'Подарки', 'tr': 'Hediyeler'});
+
+  String get addMeeting => _t({'en': 'Add Meeting', 'bg': 'Добави среща', 'de': 'Treffen hinzufügen', 'fr': 'Ajouter réunion', 'it': 'Aggiungi incontro', 'el': 'Προσθήκη συνάντησης', 'es': 'Añadir reunión', 'pt': 'Adicionar reunião', 'ru': 'Добавить встречу', 'tr': 'Toplantı ekle'});
+
+  String get editMeeting => _t({'en': 'Edit Meeting', 'bg': 'Редакция на среща', 'de': 'Treffen bearbeiten', 'fr': 'Modifier réunion', 'it': 'Modifica incontro', 'el': 'Επεξεργασία συνάντησης', 'es': 'Editar reunión', 'pt': 'Editar reunião', 'ru': 'Редактировать', 'tr': 'Toplantıyı düzenle'});
+
+  String get meetingWith => _t({'en': 'With who', 'bg': 'С кого', 'de': 'Mit wem', 'fr': 'Avec qui', 'it': 'Con chi', 'el': 'Με ποιον', 'es': 'Con quién', 'pt': 'Com quem', 'ru': 'С кем', 'tr': 'Kiminle'});
+
+  String get meetingWithHint => _t({'en': 'e.g. Ivan', 'bg': 'напр. Иван', 'de': 'z.B. Ivan', 'fr': 'ex. Ivan', 'it': 'es. Ivan', 'el': 'π.χ. Ιβαν', 'es': 'ej. Ivan', 'pt': 'ex. Ivan', 'ru': 'напр. Иван', 'tr': 'ör. Ivan'});
+
+  String get meetingPlace => _t({'en': 'Place', 'bg': 'Място', 'de': 'Ort', 'fr': 'Lieu', 'it': 'Luogo', 'el': 'Τόπος', 'es': 'Lugar', 'pt': 'Local', 'ru': 'Место', 'tr': 'Yer'});
+
+  String get meetingPlaceHint => _t({'en': 'e.g. Office', 'bg': 'напр. Офис', 'de': 'z.B. Büro', 'fr': 'ex. Bureau', 'it': 'es. Ufficio', 'el': 'π.χ. Γραφείο', 'es': 'ej. Oficina', 'pt': 'ex. Escritório', 'ru': 'напр. Офис', 'tr': 'ör. Ofis'});
+
+  String get atTime => _t({'en': 'At time', 'bg': 'В часа', 'de': 'Zur Zeit', 'fr': 'À l’heure', 'it': 'All’ora', 'el': 'Στην ώρα', 'es': 'A la hora', 'pt': 'Na hora', 'ru': 'В время', 'tr': 'Saatinde'});
+
+  String get minus15m => _t({'en': '15 min before', 'bg': '15 мин. преди', 'de': '15 Min. vorher', 'fr': '15 min avant', 'it': '15 min prima', 'el': '15 λεπτά πριν', 'es': '15 min antes', 'pt': '15 min antes', 'ru': 'За 15 мин.', 'tr': '15 dk önce'});
+
+  String get minus1h => _t({'en': '1 hour before', 'bg': '1 час преди', 'de': '1 Std. vorher', 'fr': '1 heure avant', 'it': '1 ora prima', 'el': '1 ώρα πριν', 'es': '1 hora antes', 'pt': '1 hora antes', 'ru': 'За 1 час', 'tr': '1 saat önce'});
+
+  String meetingTitle(String name) => _t({'en': 'Meeting with $name', 'bg': 'Среща с $name', 'de': 'Treffen mit $name', 'fr': 'Réunion avec $name', 'it': 'Incontro con $name', 'el': 'Συνάντηση με $name', 'es': 'Reunión con $name', 'pt': 'Reunião com $name', 'ru': 'Встреча с $name', 'tr': '$name ile toplantı'});
+
+  String get addWorkout => _t({'en': 'Add Workout', 'bg': 'Добави тренировка', 'de': 'Training hinzufügen', 'fr': 'Ajouter entraînement', 'it': 'Aggiungi allenamento', 'el': 'Προσθήκη γυμναστικής', 'es': 'Añadir entrenamiento', 'pt': 'Adicionar treino', 'ru': 'Добавить тренировку', 'tr': 'Antrenman ekle'});
+
+  String get editWorkout => _t({'en': 'Edit Workout', 'bg': 'Редакция на тренировка', 'de': 'Training bearbeiten', 'fr': 'Modifier entraînement', 'it': 'Modifica allenamento', 'el': 'Επεξεργασία γυμναστικής', 'es': 'Editar entrenamiento', 'pt': 'Editar treino', 'ru': 'Редактировать', 'tr': 'Antrenmanı düzenle'});
+
+  String get workoutType => _t({'en': 'Type of workout', 'bg': 'Вид тренировка', 'de': 'Trainingsart', 'fr': 'Type d’entraînement', 'it': 'Tipo di allenamento', 'el': 'Είδος γυμναστικής', 'es': 'Tipo de entrenamiento', 'pt': 'Tipo de treino', 'ru': 'Вид тренировки', 'tr': 'Antrenman türü'});
+
+  String get workoutTypeHint => _t({'en': 'e.g. Running', 'bg': 'напр. Бягане', 'de': 'z.B. Laufen', 'fr': 'ex. Course', 'it': 'es. Corsa', 'el': 'π.χ. Τρέξιμο', 'es': 'ej. Correr', 'pt': 'ex. Corrida', 'ru': 'напр. Бег', 'tr': 'ör. Koşma'});
+
+  String get workoutDuration => _t({'en': 'Duration', 'bg': 'Продължителност', 'de': 'Dauer', 'fr': 'Durée', 'it': 'Durata', 'el': 'Διάρκεια', 'es': 'Duración', 'pt': 'Duração', 'ru': 'Продолжительность', 'tr': 'Süre'});
+
+  String get workoutDurationHint => _t({'en': 'e.g. 45 min', 'bg': 'напр. 45 мин', 'de': 'z.B. 45 Min', 'fr': 'ex. 45 min', 'it': 'es. 45 min', 'el': 'π.χ. 45 λεπτά', 'es': 'ej. 45 min', 'pt': 'ex. 45 min', 'ru': 'напр. 45 мин', 'tr': 'ör. 45 dak'});
+
+  String get addPayment => _t({'en': 'Add Payment', 'bg': 'Добави плащане', 'de': 'Zahlung hinzufügen', 'fr': 'Ajouter paiement', 'it': 'Aggiungi pagamento', 'el': 'Προσθήκη πληρωμής', 'es': 'Añadir pago', 'pt': 'Adicionar pagamento', 'ru': 'Добавить платёж', 'tr': 'Ödeme ekle'});
+
+  String get editPayment => _t({'en': 'Edit Payment', 'bg': 'Редакция на плащане', 'de': 'Zahlung bearbeiten', 'fr': 'Modifier paiement', 'it': 'Modifica pagamento', 'el': 'Επεξεργασία πληρωμής', 'es': 'Editar pago', 'pt': 'Editar pagamento', 'ru': 'Редактировать', 'tr': 'Ödemeyi düzenle'});
+
+  String get paymentWhat => _t({'en': 'What', 'bg': 'Какво', 'de': 'Was', 'fr': 'Quoi', 'it': 'Cosa', 'el': 'Τι', 'es': 'Qué', 'pt': 'O quê', 'ru': 'Что', 'tr': 'Ne'});
+
+  String get paymentWhatHint => _t({'en': 'e.g. Rent', 'bg': 'напр. Наем', 'de': 'z.B. Miete', 'fr': 'ex. Loyer', 'it': 'es. Affitto', 'el': 'π.χ. Ενοίκιο', 'es': 'ej. Alquiler', 'pt': 'ex. Aluguel', 'ru': 'напр. Аренда', 'tr': 'ör. Kira'});
+
+  String get paymentAmount => _t({'en': 'Amount', 'bg': 'Сума', 'de': 'Betrag', 'fr': 'Montant', 'it': 'Importo', 'el': 'Ποσό', 'es': 'Monto', 'pt': 'Valor', 'ru': 'Сумма', 'tr': 'Tutar'});
+
+  String get paymentAmountHint => _t({'en': 'e.g. 500', 'bg': 'напр. 500', 'de': 'z.B. 500', 'fr': 'ex. 500', 'it': 'es. 500', 'el': 'π.χ. 500', 'es': 'ej. 500', 'pt': 'ex. 500', 'ru': 'напр. 500', 'tr': 'ör. 500'});
+
+  String get addTravel => _t({'en': 'Add Travel', 'bg': 'Добави пътуване', 'de': 'Reise hinzufügen', 'fr': 'Ajouter voyage', 'it': 'Aggiungi viaggio', 'el': 'Προσθήκη ταξιδιού', 'es': 'Añadir viaje', 'pt': 'Adicionar viagem', 'ru': 'Добавить путешествие', 'tr': 'Seyahat ekle'});
+
+  String get editTravel => _t({'en': 'Edit Travel', 'bg': 'Редакция на пътуване', 'de': 'Reise bearbeiten', 'fr': 'Modifier voyage', 'it': 'Modifica viaggio', 'el': 'Επεξεργασία ταξιδιού', 'es': 'Editar viaje', 'pt': 'Editar viagem', 'ru': 'Редактировать', 'tr': 'Seyahati düzenle'});
+
+  String get travelDestination => _t({'en': 'Destination', 'bg': 'Дестинация', 'de': 'Ziel', 'fr': 'Destination', 'it': 'Destinazione', 'el': 'Προορισμός', 'es': 'Destino', 'pt': 'Destino', 'ru': 'Назначение', 'tr': 'Hedef'});
+
+  String get travelDestHint => _t({'en': 'e.g. London', 'bg': 'напр. Лондон', 'de': 'z.B. London', 'fr': 'ex. Londres', 'it': 'es. Londra', 'el': 'π.χ. Λονδίνο', 'es': 'ej. Londres', 'pt': 'ex. Londres', 'ru': 'напр. Лондон', 'tr': 'ör. Londra'});
+
+  String get travelDeparture => _t({'en': 'Departure', 'bg': 'Тръгване', 'de': 'Abfahrt', 'fr': 'Départ', 'it': 'Partenza', 'el': 'Αναχώρηση', 'es': 'Salida', 'pt': 'Partida', 'ru': 'Отъезд', 'tr': 'Kalkış'});
+
+  String get travelReturn => _t({'en': 'Return', 'bg': 'Връщане', 'de': 'Rückkehr', 'fr': 'Retour', 'it': 'Ritorno', 'el': 'Επιστροφή', 'es': 'Regreso', 'pt': 'Regresso', 'ru': 'Возвращение', 'tr': 'Dönüş'});
+
+  String get addGift => _t({'en': 'Add Gift', 'bg': 'Добави подарък', 'de': 'Geschenk hinzufügen', 'fr': 'Ajouter cadeau', 'it': 'Aggiungi regalo', 'el': 'Προσθήκη δώρου', 'es': 'Añadir regalo', 'pt': 'Adicionar presente', 'ru': 'Добавить подарок', 'tr': 'Hediye ekle'});
+
+  String get editGift => _t({'en': 'Edit Gift', 'bg': 'Редакция на подарък', 'de': 'Geschenk bearbeiten', 'fr': 'Modifier cadeau', 'it': 'Modifica regalo', 'el': 'Επεξεργασία δώρου', 'es': 'Editar regalo', 'pt': 'Editar presente', 'ru': 'Редактировать', 'tr': 'Hediyeyi düzenle'});
+
+  String get giftFor => _t({'en': 'For who', 'bg': 'За кого', 'de': 'Für wen', 'fr': 'Pour qui', 'it': 'Per chi', 'el': 'Για ποιον', 'es': 'Para quién', 'pt': 'Para quem', 'ru': 'Для кого', 'tr': 'Kime'});
+
+  String get giftForHint => _t({'en': 'e.g. Maria', 'bg': 'напр. Мария', 'de': 'z.B. Maria', 'fr': 'ex. Maria', 'it': 'es. Maria', 'el': 'π.χ. Μαρία', 'es': 'ej. María', 'pt': 'ex. Maria', 'ru': 'напр. Мария', 'tr': 'ör. Maria'});
+
+  String get giftOccasion => _t({'en': 'Occasion', 'bg': 'Повод', 'de': 'Anlass', 'fr': 'Occasion', 'it': 'Occasione', 'el': 'Αφορμή', 'es': 'Ocasión', 'pt': 'Ocasião', 'ru': 'Повод', 'tr': 'Vesile'});
+
+  String get giftOccasionHint => _t({'en': 'e.g. Birthday', 'bg': 'напр. Рожден ден', 'de': 'z.B. Geburtstag', 'fr': 'ex. Anniversaire', 'it': 'es. Compleanno', 'el': 'π.χ. Γενέθλια', 'es': 'ej. Cumpleaños', 'pt': 'ex. Aniversário', 'ru': 'напр. День рождения', 'tr': 'ör. Doğum günü'});
+
+  String get giftBudget => _t({'en': 'Budget', 'bg': 'Бюджет', 'de': 'Budget', 'fr': 'Budget', 'it': 'Budget', 'el': 'Προϋπολογισμός', 'es': 'Presupuesto', 'pt': 'Orçamento', 'ru': 'Бюджет', 'tr': 'Bütçe'});
+
+  String get giftBudgetHint => _t({'en': 'e.g. 50', 'bg': 'напр. 50', 'de': 'z.B. 50', 'fr': 'ex. 50', 'it': 'es. 50', 'el': 'π.χ. 50', 'es': 'ej. 50', 'pt': 'ex. 50', 'ru': 'напр. 50', 'tr': 'ör. 50'});
+
+  String get giftDeadline => _t({'en': 'Deadline', 'bg': 'Краен срок', 'de': 'Fällig', 'fr': 'Date limite', 'it': 'Scadenza', 'el': 'Προθεσμία', 'es': 'Fecha límite', 'pt': 'Prazo', 'ru': 'Срок', 'tr': 'Son tarih'});
+
+  String get none2 => _t({'en': 'None', 'bg': 'Без', 'de': 'Keine', 'fr': 'Aucune', 'it': 'Nessuna', 'el': 'Καμία', 'es': 'Ninguna', 'pt': 'Nenhuma', 'ru': 'Нет', 'tr': 'Yok'});
+
+  String travelTitle(String name) => _t({'en': 'Trip to $name', 'bg': 'Пътуване до $name', 'de': 'Reise nach $name', 'fr': 'Voyage à $name', 'it': 'Viaggio a $name', 'el': 'Ταξίδι στο $name', 'es': 'Viaje a $name', 'pt': 'Viagem a $name', 'ru': 'Поездка в $name', 'tr': '$name’a seyahat'});
+
+  String giftTitle(String name) => _t({'en': 'Gift for $name', 'bg': 'Подарък за $name', 'de': 'Geschenk für $name', 'fr': 'Cadeau pour $name', 'it': 'Regalo per $name', 'el': 'Δώρο για $name', 'es': 'Regalo para $name', 'pt': 'Presente para $name', 'ru': 'Подарок для $name', 'tr': '$name için hediye'});
 }

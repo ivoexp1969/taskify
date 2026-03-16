@@ -14,8 +14,16 @@ import '../../utils/localization.dart';
 import '../../services/notification_service.dart';
 import '../../widgets/reminder_selector.dart';
 import '../../services/widget_service.dart';
+import '../../services/ad_service.dart';
 import '../../widgets/celebration_overlay.dart';
 import 'shopping_list_screen.dart';
+import 'task_type_selector.dart';
+import 'birthday_dialog.dart';
+import 'meeting_dialog.dart';
+import 'workout_dialog.dart';
+import 'payment_dialog.dart';
+import 'travel_dialog.dart';
+import 'gift_dialog.dart';
 import '../../widgets/task_card_styles.dart';
 
 enum TaskFilter { all, active, completed, overdue, upcoming, archived }
@@ -82,12 +90,33 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Добавяме липсващи нови категории при съществуващи потребители
+    if (!categoryBox.containsKey('birthday') || !categoryBox.containsKey('meeting')) {
+      final t = AppText.of(context);
+      final newCats = [
+        Category(id: 'birthday', name: t.catBirthdays, colorValue: const Color(0xFFD4537E).value, isDefault: true),
+        Category(id: 'meeting', name: t.catMeeting, colorValue: const Color(0xFF378ADD).value, isDefault: true),
+        Category(id: 'workout', name: t.catWorkout, colorValue: const Color(0xFFBA7517).value, isDefault: true),
+        Category(id: 'payment', name: t.catPayment, colorValue: const Color(0xFF639922).value, isDefault: true),
+        Category(id: 'travel', name: t.catTravel, colorValue: const Color(0xFF7F77DD).value, isDefault: true),
+        Category(id: 'gift', name: t.catGift, colorValue: const Color(0xFFD85A30).value, isDefault: true),
+      ];
+      for (var c in newCats) {
+        if (!categoryBox.containsKey(c.id)) categoryBox.put(c.id, c);
+      }
+    }
     if (_needsDefaults && categoryBox.isEmpty) {
       final t = AppText.of(context);
       final defaults = [
         Category(id: 'work', name: t.catWork, colorValue: Colors.blue.value, isDefault: true),
         Category(id: 'personal', name: t.catPersonal, colorValue: Colors.green.value, isDefault: true),
         Category(id: 'shopping', name: t.catShopping, colorValue: Colors.orange.value, isDefault: true),
+        Category(id: 'birthday', name: t.catBirthdays, colorValue: const Color(0xFFD4537E).value, isDefault: true),
+        Category(id: 'meeting', name: t.catMeeting, colorValue: const Color(0xFF378ADD).value, isDefault: true),
+        Category(id: 'workout', name: t.catWorkout, colorValue: const Color(0xFFBA7517).value, isDefault: true),
+        Category(id: 'payment', name: t.catPayment, colorValue: const Color(0xFF639922).value, isDefault: true),
+        Category(id: 'travel', name: t.catTravel, colorValue: const Color(0xFF7F77DD).value, isDefault: true),
+        Category(id: 'gift', name: t.catGift, colorValue: const Color(0xFFD85A30).value, isDefault: true),
       ];
       for (var c in defaults) {
         categoryBox.put(c.id, c);
@@ -637,6 +666,19 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
         );
       },
     );
+  }
+
+  static Color? _templateAccentColor(String? template) {
+    switch (template) {
+      case 'shopping': return const Color(0xFF00E5A0);
+      case 'birthday': return const Color(0xFFFF6FA8);
+      case 'meeting':  return const Color(0xFF4DB8FF);
+      case 'workout':  return const Color(0xFFFFB347);
+      case 'payment':  return const Color(0xFF8AE000);
+      case 'travel':   return const Color(0xFFA78BFF);
+      case 'gift':     return const Color(0xFFFF7043);
+      default: return null;
+    }
   }
 
   void _openTaskDialog({Task? existing}) {
@@ -1454,6 +1496,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                           final recurrenceToSave =
                               tempRecurrence == 'none' ? null : tempRecurrence;
 
+                          Task? _openShoppingAfterCreate;
                           if (isEditing) {
                             existing!
                               ..title = titleText
@@ -1464,7 +1507,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                               ..notes = tempNotes.trim().isEmpty ? null : tempNotes.trim();
                             existing.setReminders(tempReminders);
                             existing.setSubtasks(tempSubtasks);
-                            existing.template = tempCategoryId == 'shopping' ? 'shopping' : null;
+                            if (existing.template == null || existing.template == 'shopping') { existing.template = tempCategoryId == 'shopping' ? 'shopping' : null; }
                             await existing.save();
                             await NotificationService().scheduleForTask(existing);
                           } else {
@@ -1483,6 +1526,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                             );
                             newTask.setSubtasks(tempSubtasks);
                             await taskBox.add(newTask);
+                            AdService().onUserAction();
                             // Google Calendar sync
                             if (GoogleCalendarService().isConnected) {
                               final eventId = await GoogleCalendarService().addTaskToCalendar(newTask);
@@ -1493,12 +1537,18 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                             }
 
                             await NotificationService().scheduleForTask(newTask);
+                            _openShoppingAfterCreate = autoTemplate == 'shopping' ? newTask : null;
                           }
 
                           await WidgetService.updateWidget();
                           _titleController.clear();
                           refreshParent();  // Обновяваме главния екран
                           Navigator.pop(innerContext);
+                          if (_openShoppingAfterCreate != null && context.mounted) {
+                            Navigator.push(context, MaterialPageRoute(
+                              builder: (_) => ShoppingListScreen(task: _openShoppingAfterCreate!),
+                            )).then((_) => refreshParent());
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: categoryColor,
@@ -2072,7 +2122,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                         // Цветът на лентата: червен ако е просрочено, иначе цвета на категорията
                         final accentColor = isOverdue
                             ? Colors.redAccent
-                            : categoryColor;
+                            : (_templateAccentColor(task.template) 
+                                ?? categoryColor);
 
                         // Staggered анимация
                         final animationDelay = (index * 0.05).clamp(0.0, 0.3);
@@ -2158,6 +2209,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                               task.isCompleted = !task.isCompleted;
                               task.completedAt = task.isCompleted ? DateTime.now() : null;
                               await task.save();
+                              if (task.isCompleted) AdService().onUserAction();
 
                               if (!wasCompleted && task.isCompleted && task.recurrence != null) {
                                 final nextDate = _nextDueDate(task.dueDate, task.recurrence!);
@@ -2232,10 +2284,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                           child: GestureDetector(
                           onTap: () {
                             // Shopping List специален екран
-                            if (task.template == 'shopping') {
-                              Navigator.push(context, MaterialPageRoute(
-                                builder: (_) => ShoppingListScreen(task: task),
-                              )).then((_) => setState(() {}));
+                            if (task.categoryId == 'shopping' || task.template == 'shopping') {
+                              ShoppingListScreen.show(context, task).then((_) => setState(() {}));
                               return;
                             }
                           },
@@ -2306,6 +2356,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                 isCompleted: isCompleted,
                                 isExpanded: _expandedCards.contains(task.key),
                                 onToggleExpand: () {
+                                  if (task.categoryId == 'shopping' || task.template == 'shopping') {
+                                    ShoppingListScreen.show(context, task).then((_) => setState(() {}));
+                                    return;
+                                  }
                                   setState(() {
                                     if (_expandedCards.contains(task.key)) {
                                       _expandedCards.remove(task.key);
@@ -2358,10 +2412,20 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                   }
                                 },
                                 onEdit: () {
-                                  if (task.template == 'shopping') {
-                                    Navigator.push(context, MaterialPageRoute(
-                                      builder: (_) => ShoppingListScreen(task: task),
-                                    )).then((_) => setState(() {}));
+                                  if (task.categoryId == 'shopping') {
+                                    ShoppingListScreen.show(context, task).then((_) => setState(() {}));
+                                  } else if (task.template == 'birthday') {
+                                    BirthdayDialog.show(context, existing: task).then((_) => setState(() {}));
+                                  } else if (task.template == 'meeting') {
+                                    MeetingDialog.show(context, existing: task).then((_) => setState(() {}));
+                                  } else if (task.template == 'workout') {
+                                    WorkoutDialog.show(context, existing: task).then((_) => setState(() {}));
+                                  } else if (task.template == 'payment') {
+                                    PaymentDialog.show(context, existing: task).then((_) => setState(() {}));
+                                  } else if (task.template == 'travel') {
+                                    TravelDialog.show(context, existing: task).then((_) => setState(() {}));
+                                  } else if (task.template == 'gift') {
+                                    GiftDialog.show(context, existing: task).then((_) => setState(() {}));
                                   } else {
                                     _openTaskDialog(existing: task);
                                   }
@@ -2431,7 +2495,18 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                 });
               },
               child: FloatingActionButton(
-                onPressed: () => _openTaskDialog(),
+                onPressed: () async {
+                final type = await TaskTypeSelector.show(context);
+                if (type == null || !mounted) return;
+                if (type == 'shopping') { ShoppingListScreen.create(context).then((_) => setState(() {})); return; }
+                if (type == 'birthday') { BirthdayDialog.show(context); return; }
+                if (type == 'meeting') { MeetingDialog.show(context); return; }
+                if (type == 'workout') { WorkoutDialog.show(context); return; }
+                if (type == 'payment') { PaymentDialog.show(context); return; }
+                if (type == 'travel') { TravelDialog.show(context); return; }
+                if (type == 'gift') { GiftDialog.show(context); return; }
+                _openTaskDialog();
+              },
                 child: const Icon(Icons.add),
               ),
             ),

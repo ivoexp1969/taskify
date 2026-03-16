@@ -39,6 +39,7 @@ class GlassTaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final t = AppText.of(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
@@ -98,7 +99,8 @@ class GlassTaskCard extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(task.title,
+                              Text(
+                                task.template == 'meeting' ? '${t.meetingTitle(task.title)}' : task.template == 'travel' ? '${t.travelTitle(task.title)}' : task.template == 'gift' ? '${t.giftTitle(task.title)}' : task.title,
                                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, decoration: isCompleted ? TextDecoration.lineThrough : null, color: theme.colorScheme.onSurface),
                                 maxLines: 2, overflow: TextOverflow.ellipsis,
                               ),
@@ -246,13 +248,13 @@ class ExpandableTaskCard extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  task.title,
+                                  task.template == 'meeting' ? '${t.meetingTitle(task.title)}' : task.template == 'travel' ? '${t.travelTitle(task.title)}' : task.template == 'gift' ? '${t.giftTitle(task.title)}' : task.title,
                                   style: TextStyle(
                                     fontSize: isExpanded ? 14.5 : 13.5,
                                     fontWeight: FontWeight.w600,
                                     decoration: isCompleted ? TextDecoration.lineThrough : null,
                                     decorationColor: theme.colorScheme.onSurface.withOpacity(0.4),
-                                    color: theme.colorScheme.onSurface,
+                                    color: isCompleted ? theme.colorScheme.onSurface : (task.template != null || task.googleCalendarEventId != null ? accentColor : theme.colorScheme.onSurface),
                                     height: 1.3,
                                   ),
                                   maxLines: isExpanded ? 3 : 1,
@@ -353,7 +355,50 @@ class ExpandableTaskCard extends StatelessWidget {
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        task.notes!,
+                                        () {
+                                          final notes = task.notes!;
+                                          if (notes.startsWith('birthYear:')) {
+                                            return '${t.birthYear}: ${notes.replaceFirst('birthYear:', '').split('\n').first}';
+                                          }
+                                          if (notes.contains('with:') || notes.contains('place:')) {
+                                            final parts = <String>[];
+                                            for (final line in notes.split('\n')) {
+                                              if (line.startsWith('with:')) parts.add('${t.meetingWith}: ${line.replaceFirst('with:', '')}');
+                                              if (line.startsWith('place:')) parts.add('${t.meetingPlace}: ${line.replaceFirst('place:', '')}');
+                                            }
+                                            return parts.join(' · ');
+                                          }
+                                          if (notes.contains('type:') || notes.contains('duration:')) {
+                                            final parts = <String>[];
+                                            for (final line in notes.split('\n')) {
+                                              if (line.startsWith('type:')) parts.add(line.replaceFirst('type:', ''));
+                                              if (line.startsWith('duration:')) parts.add(line.replaceFirst('duration:', ''));
+                                            }
+                                            return parts.join(' · ');
+                                          }
+                                          if (notes.contains('what:') || notes.contains('amount:')) {
+                                            final parts = <String>[];
+                                            for (final line in notes.split('\n')) {
+                                              if (line.startsWith('what:')) parts.add(line.replaceFirst('what:', ''));
+                                              if (line.startsWith('amount:')) parts.add('${t.paymentAmount}: ${line.replaceFirst('amount:', '')}');
+                                            }
+                                            return parts.join(' · ');
+                                          }
+                                          if (notes.contains('dest:')) {
+                                            for (final line in notes.split('\n')) {
+                                              if (line.startsWith('dest:')) return line.replaceFirst('dest:', '');
+                                            }
+                                          }
+                                          if (notes.contains('for:') || notes.contains('occasion:') || notes.contains('budget:')) {
+                                            final parts = <String>[];
+                                            for (final line in notes.split('\n')) {
+                                              if (line.startsWith('occasion:')) parts.add(line.replaceFirst('occasion:', ''));
+                                              if (line.startsWith('budget:')) parts.add('${t.giftBudget}: ${line.replaceFirst('budget:', '')}');
+                                            }
+                                            if (parts.isNotEmpty) return parts.join(' · ');
+                                          }
+                                          return notes;
+                                        }(),
                                         style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withOpacity(0.55), height: 1.4),
                                         maxLines: 2, overflow: TextOverflow.ellipsis,
                                       ),

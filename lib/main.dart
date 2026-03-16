@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -113,6 +114,13 @@ class MyApp extends StatelessWidget {
                 navigatorKey: MyApp.navigatorKey,
                 debugShowCheckedModeBanner: false,
               title: 'Taskify',
+              locale: languageController.locale,
+              supportedLocales: SupportedLocales.all,
+              localizationsDelegates: const [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
               themeMode: themeController.isAmoled ? ThemeMode.dark : themeController.mode,
               theme: _buildLightTheme(),
               darkTheme: themeController.isAmoled ? _buildAmoledTheme() : _buildDarkTheme(),

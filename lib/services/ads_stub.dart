@@ -65,3 +65,21 @@ class AdWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const SizedBox.shrink();
 }
+
+class FullScreenContentCallback {
+  final void Function(Ad)? onAdDismissedFullScreenContent;
+  final void Function(Ad, dynamic)? onAdFailedToShowFullScreenContent;
+  const FullScreenContentCallback({this.onAdDismissedFullScreenContent, this.onAdFailedToShowFullScreenContent});
+}
+
+class InterstitialAdLoadCallback {
+  final void Function(InterstitialAd) onAdLoaded;
+  final void Function(dynamic) onAdFailedToLoad;
+  const InterstitialAdLoadCallback({required this.onAdLoaded, required this.onAdFailedToLoad});
+}
+
+class InterstitialAd extends Ad {
+  FullScreenContentCallback? fullScreenContentCallback;
+  static Future<void> load({required String adUnitId, required dynamic request, required InterstitialAdLoadCallback adLoadCallback}) async {}
+  Future<void> show() async {}
+}

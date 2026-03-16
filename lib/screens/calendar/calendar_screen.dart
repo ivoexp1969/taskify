@@ -153,6 +153,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return '$dateStr · $timeStr';
   }
 
+  static Color? _templateAccentColor(String? template) {
+    switch (template) {
+      case 'shopping': return const Color(0xFF00E5A0);
+      case 'birthday': return const Color(0xFFFF6FA8);
+      case 'meeting':  return const Color(0xFF4DB8FF);
+      case 'workout':  return const Color(0xFFFFB347);
+      case 'payment':  return const Color(0xFF8AE000);
+      case 'travel':   return const Color(0xFFA78BFF);
+      case 'gift':     return const Color(0xFFFF7043);
+      default: return null;
+    }
+  }
+
   Color _priorityColor(int p) {
     switch (p) {
       case 0:
@@ -1645,7 +1658,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
                       final accentColor = isOverdue
                           ? Colors.redAccent
-                          : categoryColor;
+                          : (_templateAccentColor(task.template)
+                              ?? categoryColor);
 
                       return ExpandableTaskCard(
                         task: task,

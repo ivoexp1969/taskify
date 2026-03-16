@@ -1,10 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import '../../models/task.dart';
 import '../../utils/localization.dart';
 
 class ShoppingListScreen extends StatefulWidget {
   final Task task;
   const ShoppingListScreen({super.key, required this.task});
+
+  static Future<void> show(BuildContext context, Task task) {
+    return Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ShoppingListScreen(task: task)),
+    );
+  }
+
+  static Future<void> create(BuildContext context) async {
+    final taskBox = Hive.box<Task>('tasks');
+    final t = AppText.of(context);
+    final task = Task(
+      title: t.shoppingList,
+      dueDate: DateTime.now(),
+      categoryId: 'shopping',
+      priority: 1,
+      template: 'shopping',
+    );
+    await taskBox.add(task);
+    if (context.mounted) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => ShoppingListScreen(task: task)),
+      );
+    }
+  }
 
   @override
   State<ShoppingListScreen> createState() => _ShoppingListScreenState();
@@ -72,6 +99,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     final total = _items.length;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

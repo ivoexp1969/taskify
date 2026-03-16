@@ -138,16 +138,24 @@ class Task extends HiveObject with EquatableMixin {
     return subtasks!.map((s) {
       final parts = s.split(':');
       final done = parts[0] == '1';
-      final text = parts.length > 1 ? parts.sublist(1).join(':') : '';
-      return {'done': done, 'text': text};
+      int qty = 1;
+      String text = '';
+      if (parts.length >= 3) {
+        qty = int.tryParse(parts[1]) ?? 1;
+        text = parts.sublist(2).join(':');
+      } else if (parts.length == 2) {
+        text = parts[1];
+      }
+      return {'done': done, 'text': text, 'qty': qty};
     }).toList();
   }
 
   void setSubtasks(List<Map<String, dynamic>> list) {
     subtasks = list.map((item) {
       final done = item['done'] == true ? '1' : '0';
+      final qty = (item['qty'] as int?) ?? 1;
       final text = item['text'] ?? '';
-      return '$done:$text';
+      return '$done:$qty:$text';
     }).toList();
   }
 

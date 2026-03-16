@@ -42,18 +42,18 @@ String _proTrialDays(int days, String lang) {
 
 /// Лимити за безплатната версия
 class FreeLimits {
-  static const int maxTasks = 30;
-  static const int maxCategories = 3;
-  static const int maxRemindersPerTask = 1;
-  static const bool canUseRecurrence = false;
+  static const int maxTasks = 50;
+  static const int maxCategories = 10;
+  static const int maxRemindersPerTask = 3;
+  static const bool canUseRecurrence = true;
   static const bool canUseCalendar = false;
   static const bool canUseStatistics = false;
   static const bool canUseCloudSync = false;
   static const bool canUseWidget = false;
-  static const bool canUseVoiceInput = false;
+  static const bool canUseVoiceInput = true;
   static const bool canUseExportImport = false;
-  static const bool canChangeTheme = false;
-  static const bool canChangeLanguage = false;
+  static const bool canChangeTheme = true;
+  static const bool canChangeLanguage = true;
   static const bool showAds = true;
 }
 
