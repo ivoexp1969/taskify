@@ -2227,6 +2227,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                   recurrence: task.recurrence,
                                   reminders: task.reminders,
                                   template: task.template,
+                                  notes: task.notes,
                                 );
                                 await taskBox.add(newTask);
                             // Google Calendar sync
