@@ -372,7 +372,7 @@ class ExpandableTaskCard extends StatelessWidget {
                                             final parts = <String>[];
                                             for (final line in notes.split('\n')) {
                                               if (line.startsWith('type:')) parts.add(line.replaceFirst('type:', ''));
-                                              if (line.startsWith('duration:')) parts.add(line.replaceFirst('duration:', ''));
+                                              if (line.startsWith('duration:')) parts.add('${t.workoutDuration}: ${line.replaceFirst('duration:', '')}');
                                             }
                                             return parts.join(' · ');
                                           }

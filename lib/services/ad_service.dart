@@ -19,7 +19,7 @@ class AdService extends ChangeNotifier {
   static const int _actionsPerAd = 5;
   static const String _lastAppOpenKey = 'last_app_open_ad';
 
-  static const String _interstitialAdUnitId = 'ca-app-pub-4385157735120275/XXXXXXXXXX';
+  static const String _interstitialAdUnitId = 'ca-app-pub-4385157735120275/2061138507';
   static const String _testInterstitialAdUnitId = 'ca-app-pub-3940256099942544/1033173712';
 
   bool get isInterstitialAdLoaded => _isInterstitialAdLoaded;

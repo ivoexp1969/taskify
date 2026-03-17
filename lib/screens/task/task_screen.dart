@@ -261,6 +261,12 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
             'work': t.work,
             'personal': t.personal,
             'shopping': t.shopping,
+            'birthday': t.catBirthdays,
+            'meeting': t.catMeeting,
+            'workout': t.catWorkout,
+            'payment': t.catPayment,
+            'travel': t.catTravel,
+            'gift': t.catGift,
           }[c.id] ??
           c.name;
     }
@@ -2288,6 +2294,13 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                               ShoppingListScreen.show(context, task).then((_) => setState(() {}));
                               return;
                             }
+                            // Edit диалог по тип
+                            if (task.template == 'birthday') { BirthdayDialog.show(context, existing: task).then((_) => setState(() {})); return; }
+                            if (task.template == 'meeting') { MeetingDialog.show(context, existing: task).then((_) => setState(() {})); return; }
+                            if (task.template == 'workout') { WorkoutDialog.show(context, existing: task).then((_) => setState(() {})); return; }
+                            if (task.template == 'payment') { PaymentDialog.show(context, existing: task).then((_) => setState(() {})); return; }
+                            if (task.template == 'travel') { TravelDialog.show(context, existing: task).then((_) => setState(() {})); return; }
+                            if (task.template == 'gift') { GiftDialog.show(context, existing: task).then((_) => setState(() {})); return; }
                           },
                           onLongPress: () {
                             showModalBottomSheet(
@@ -2374,6 +2387,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                     task.isCompleted = !task.isCompleted;
                                   });
                                   await task.save();
+                                  if (!wasCompleted && task.isCompleted) AdService().onUserAction();
                                   
                                   if (!wasCompleted && task.isCompleted && task.recurrence != null) {
                                     final nextDate = _nextDueDate(task.dueDate, task.recurrence!);
@@ -2384,6 +2398,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                       priority: task.priority,
                                       recurrence: task.recurrence,
                                       reminders: task.reminders,
+                                      template: task.template,
+                                      notes: task.notes,
                                     );
                                     await taskBox.add(newTask);
                             // Google Calendar sync
@@ -2499,12 +2515,12 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                 final type = await TaskTypeSelector.show(context);
                 if (type == null || !mounted) return;
                 if (type == 'shopping') { ShoppingListScreen.create(context).then((_) => setState(() {})); return; }
-                if (type == 'birthday') { BirthdayDialog.show(context); return; }
-                if (type == 'meeting') { MeetingDialog.show(context); return; }
-                if (type == 'workout') { WorkoutDialog.show(context); return; }
-                if (type == 'payment') { PaymentDialog.show(context); return; }
-                if (type == 'travel') { TravelDialog.show(context); return; }
-                if (type == 'gift') { GiftDialog.show(context); return; }
+                if (type == 'birthday') { BirthdayDialog.show(context).then((_) => setState(() {})); return; }
+                if (type == 'meeting') { MeetingDialog.show(context).then((_) => setState(() {})); return; }
+                if (type == 'workout') { WorkoutDialog.show(context).then((_) => setState(() {})); return; }
+                if (type == 'payment') { PaymentDialog.show(context).then((_) => setState(() {})); return; }
+                if (type == 'travel') { TravelDialog.show(context).then((_) => setState(() {})); return; }
+                if (type == 'gift') { GiftDialog.show(context).then((_) => setState(() {})); return; }
                 _openTaskDialog();
               },
                 child: const Icon(Icons.add),

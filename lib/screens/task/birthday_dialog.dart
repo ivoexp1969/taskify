@@ -270,9 +270,7 @@ class BirthdayDialog {
       },
     );
 
-    // Dispose controllers
-    nameCtrl.dispose();
-    yearCtrl.dispose();
+    // Controllers are local variables - GC handles cleanup
   }
 }
 
