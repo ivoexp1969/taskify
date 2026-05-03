@@ -51,10 +51,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
     taskBox.listenable().addListener(_onTasksChanged);
 
     if (categoryBox.isEmpty) {
-      // Defaults will be created in didChangeDependencies where context is available
       _needsDefaults = true;
     }
-    _selectedCategoryId = categoryBox.values.first.id;
+    _selectedCategoryId = categoryBox.isEmpty ? '' : categoryBox.values.first.id;
 
     final now = DateTime.now();
     _selectedDay = DateTime(now.year, now.month, now.day);
@@ -63,23 +62,27 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_needsDefaults && categoryBox.isEmpty) {
-      final t = AppText.of(context);
-      final defaults = [
-        Category(id: 'work', name: t.catWork, colorValue: Colors.blue.value, isDefault: true),
-        Category(id: 'personal', name: t.catPersonal, colorValue: Colors.green.value, isDefault: true),
-        Category(id: 'shopping', name: t.catShopping, colorValue: Colors.orange.value, isDefault: true),
-        Category(id: 'birthday', name: t.catBirthdays, colorValue: const Color(0xFFD4537E).value, isDefault: true),
-        Category(id: 'meeting', name: t.catMeeting, colorValue: const Color(0xFF378ADD).value, isDefault: true),
-        Category(id: 'workout', name: t.catWorkout, colorValue: const Color(0xFFBA7517).value, isDefault: true),
-        Category(id: 'payment', name: t.catPayment, colorValue: const Color(0xFF639922).value, isDefault: true),
-        Category(id: 'travel', name: t.catTravel, colorValue: const Color(0xFF7F77DD).value, isDefault: true),
-        Category(id: 'gift', name: t.catGift, colorValue: const Color(0xFFD85A30).value, isDefault: true),
-      ];
-      for (var c in defaults) {
+    if (!_needsDefaults) return;
+    _needsDefaults = false;
+    final t = AppText.of(context);
+    final defaults = [
+      Category(id: 'work', name: t.catWork, colorValue: Colors.blue.value, isDefault: true),
+      Category(id: 'personal', name: t.catPersonal, colorValue: Colors.green.value, isDefault: true),
+      Category(id: 'shopping', name: t.catShopping, colorValue: Colors.orange.value, isDefault: true),
+      Category(id: 'birthday', name: t.catBirthdays, colorValue: const Color(0xFFD4537E).value, isDefault: true),
+      Category(id: 'meeting', name: t.catMeeting, colorValue: const Color(0xFF378ADD).value, isDefault: true),
+      Category(id: 'workout', name: t.catWorkout, colorValue: const Color(0xFFBA7517).value, isDefault: true),
+      Category(id: 'payment', name: t.catPayment, colorValue: const Color(0xFF639922).value, isDefault: true),
+      Category(id: 'travel', name: t.catTravel, colorValue: const Color(0xFF7F77DD).value, isDefault: true),
+      Category(id: 'gift', name: t.catGift, colorValue: const Color(0xFFD85A30).value, isDefault: true),
+    ];
+    // Добавяме само липсващите категории (не презаписваме потребителски промени)
+    for (final c in defaults) {
+      if (!categoryBox.containsKey(c.id)) {
         categoryBox.put(c.id, c);
       }
-      _needsDefaults = false;
+    }
+    if (categoryBox.isNotEmpty && _selectedCategoryId.isEmpty) {
       _selectedCategoryId = categoryBox.values.first.id;
     }
   }
