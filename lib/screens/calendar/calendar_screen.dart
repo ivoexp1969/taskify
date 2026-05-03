@@ -69,6 +69,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
         Category(id: 'work', name: t.catWork, colorValue: Colors.blue.value, isDefault: true),
         Category(id: 'personal', name: t.catPersonal, colorValue: Colors.green.value, isDefault: true),
         Category(id: 'shopping', name: t.catShopping, colorValue: Colors.orange.value, isDefault: true),
+        Category(id: 'birthday', name: t.catBirthdays, colorValue: const Color(0xFFD4537E).value, isDefault: true),
+        Category(id: 'meeting', name: t.catMeeting, colorValue: const Color(0xFF378ADD).value, isDefault: true),
+        Category(id: 'workout', name: t.catWorkout, colorValue: const Color(0xFFBA7517).value, isDefault: true),
+        Category(id: 'payment', name: t.catPayment, colorValue: const Color(0xFF639922).value, isDefault: true),
+        Category(id: 'travel', name: t.catTravel, colorValue: const Color(0xFF7F77DD).value, isDefault: true),
+        Category(id: 'gift', name: t.catGift, colorValue: const Color(0xFFD85A30).value, isDefault: true),
       ];
       for (var c in defaults) {
         categoryBox.put(c.id, c);
@@ -351,7 +357,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 boxShadow: isSelected
                                     ? [
                                         BoxShadow(
-                                          color: color.withOpacity(0.5),
+                                          color: color.withValues(alpha: 0.5),
                                           blurRadius: 8,
                                           spreadRadius: 2,
                                         ),
@@ -513,7 +519,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             color: Theme.of(innerContext)
                                 .colorScheme
                                 .primary
-                                .withOpacity(0.1),
+                                .withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
                           todayTextStyle: TextStyle(
@@ -619,7 +625,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.black.withValues(alpha: 0.15),
                     blurRadius: 20,
                     offset: const Offset(0, -5),
                   ),
@@ -633,7 +639,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.outline.withOpacity(0.3),
+                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -645,7 +651,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: categoryColor.withOpacity(0.15),
+                            color: categoryColor.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
@@ -673,7 +679,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           },
                           icon: Icon(
                             Icons.close_rounded,
-                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
                         ),
                       ],
@@ -697,18 +703,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             decoration: InputDecoration(
                               hintText: t.whatNeedsToBeDone,
                               hintStyle: TextStyle(
-                                color: theme.colorScheme.onSurface.withOpacity(0.4),
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                                 fontWeight: FontWeight.normal,
                               ),
                               filled: true,
-                              fillColor: theme.colorScheme.outline.withOpacity(0.08),
+                              fillColor: theme.colorScheme.outline.withValues(alpha: 0.08),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide.none,
                               ),
                               prefixIcon: Icon(
                                 Icons.title_rounded,
-                                color: theme.colorScheme.onSurface.withOpacity(0.4),
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                               ),
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 20,
@@ -743,8 +749,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: isSelected
-                                          ? catColor.withOpacity(0.2)
-                                          : theme.colorScheme.outline.withOpacity(0.08),
+                                          ? catColor.withValues(alpha: 0.2)
+                                          : theme.colorScheme.outline.withValues(alpha: 0.08),
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
                                         color: isSelected ? catColor : Colors.transparent,
@@ -786,7 +792,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   ),
                                   decoration: BoxDecoration(
                                     border: Border.all(
-                                      color: theme.colorScheme.outline.withOpacity(0.3),
+                                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
                                     ),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -879,7 +885,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                       vertical: 14,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: theme.colorScheme.outline.withOpacity(0.08),
+                                      color: theme.colorScheme.outline.withValues(alpha: 0.08),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Row(
@@ -929,7 +935,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                       vertical: 14,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: theme.colorScheme.outline.withOpacity(0.08),
+                                      color: theme.colorScheme.outline.withValues(alpha: 0.08),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Row(
@@ -949,7 +955,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                             fontWeight: FontWeight.w500,
                                             color: tempTime != null
                                                 ? theme.colorScheme.onSurface
-                                                : theme.colorScheme.onSurface.withOpacity(0.4),
+                                                : theme.colorScheme.onSurface.withValues(alpha: 0.4),
                                           ),
                                         ),
                                       ],
@@ -1047,10 +1053,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               width: double.infinity,
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.outline.withOpacity(0.08),
+                                color: theme.colorScheme.outline.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(12),
                                 border: tempNotes.trim().isNotEmpty
-                                    ? Border.all(color: Colors.amber.withOpacity(0.5), width: 1)
+                                    ? Border.all(color: Colors.amber.withValues(alpha: 0.5), width: 1)
                                     : null,
                               ),
                               child: Row(
@@ -1060,7 +1066,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     size: 20,
                                     color: tempNotes.trim().isNotEmpty
                                         ? Colors.amber.shade700
-                                        : theme.colorScheme.onSurface.withOpacity(0.4),
+                                        : theme.colorScheme.onSurface.withValues(alpha: 0.4),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
@@ -1071,7 +1077,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                       style: TextStyle(
                                         color: tempNotes.trim().isNotEmpty
                                             ? theme.colorScheme.onSurface
-                                            : theme.colorScheme.onSurface.withOpacity(0.4),
+                                            : theme.colorScheme.onSurface.withValues(alpha: 0.4),
                                       ),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
@@ -1081,7 +1087,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     Icon(
                                       Icons.edit_outlined,
                                       size: 16,
-                                      color: theme.colorScheme.onSurface.withOpacity(0.4),
+                                      color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                                     ),
                                 ],
                               ),
@@ -1099,7 +1105,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       color: theme.colorScheme.surface,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, -5),
                         ),
@@ -1200,7 +1206,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         Icon(
           icon,
           size: 18,
-          color: theme.colorScheme.onSurface.withOpacity(0.5),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
         ),
         const SizedBox(width: 8),
         Text(
@@ -1208,7 +1214,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface.withOpacity(0.5),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             letterSpacing: 0.5,
           ),
         ),
@@ -1229,10 +1235,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            color: selected ? color.withOpacity(0.15) : Colors.transparent,
+            color: selected ? color.withValues(alpha: 0.15) : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: selected ? color : Colors.grey.withOpacity(0.3),
+              color: selected ? color : Colors.grey.withValues(alpha: 0.3),
               width: selected ? 2 : 1,
             ),
           ),
@@ -1268,7 +1274,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.outline.withOpacity(0.08),
+        color: theme.colorScheme.outline.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
       ),
       child: DropdownButtonHideUnderline(
@@ -1277,7 +1283,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           isExpanded: true,
           icon: Icon(
             Icons.keyboard_arrow_down_rounded,
-            color: theme.colorScheme.onSurface.withOpacity(0.5),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
           ),
           items: items.entries.map((entry) {
             return DropdownMenuItem<String>(
@@ -1300,7 +1306,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }) {
     final theme = Theme.of(context);
     final bg = selected
-        ? theme.colorScheme.primary.withOpacity(0.12)
+        ? theme.colorScheme.primary.withValues(alpha: 0.12)
         : Colors.transparent;
     final fg =
         selected ? theme.colorScheme.primary : Colors.grey.shade700;
@@ -1502,7 +1508,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ),
                       todayDecoration: BoxDecoration(
                         color:
-                            theme.colorScheme.primary.withOpacity(0.1),
+                            theme.colorScheme.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       todayTextStyle: TextStyle(
@@ -1734,5 +1740,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 }
+
 
 

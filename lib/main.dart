@@ -10,6 +10,7 @@ import 'screens/home/home_screen.dart';
 import 'utils/localization.dart';
 import 'services/widget_service.dart';
 import 'services/pro_service.dart';
+import 'services/review_service.dart';
 import 'services/ad_service.dart';
 import 'services/task_view_preference.dart';
 import 'services/notification_service.dart';
@@ -48,7 +49,7 @@ Future<void> main() async {
   if (!kIsWeb) {
     WidgetService.setupWidgetListener();
     await WidgetService.syncFromWidget();
-    await WidgetService.updateWidget();
+    WidgetService.updateWidget();
   }
 
   // Pro и Ad сервизи инициализация
@@ -57,10 +58,10 @@ Future<void> main() async {
   await TaskViewPreference().initialize();
   
   // Try reconnect Google Calendar silently
-  await GoogleCalendarService().tryReconnect();
+  GoogleCalendarService().tryReconnect();
 
   // Initialize notification service (registers tap handler)
-  await NotificationService().init();
+  NotificationService().init();
   
   // Setup morning briefing notification callback
   NotificationService.setMorningBriefingCallback((BuildContext context) {
@@ -212,7 +213,7 @@ class MyApp extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
-            color: Colors.white.withOpacity(0.08),
+            color: Colors.white.withValues(alpha: 0.08),
             width: 1,
           ),
         ),
@@ -252,4 +253,7 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+
+
 

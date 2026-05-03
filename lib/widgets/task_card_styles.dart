@@ -55,16 +55,16 @@ class GlassTaskCard extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    accentColor.withOpacity(0.15),
-                    accentColor.withOpacity(0.05),
-                    theme.colorScheme.surface.withOpacity(0.1),
+                    accentColor.withValues(alpha: 0.15),
+                    accentColor.withValues(alpha: 0.05),
+                    theme.colorScheme.surface.withValues(alpha: 0.1),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: accentColor.withOpacity(0.3), width: 1.5),
+                border: Border.all(color: accentColor.withValues(alpha: 0.3), width: 1.5),
                 boxShadow: [
-                  BoxShadow(color: accentColor.withOpacity(0.2), blurRadius: 20, spreadRadius: -5),
-                  if (isOverdue) BoxShadow(color: Colors.redAccent.withOpacity(0.3), blurRadius: 30, spreadRadius: -5),
+                  BoxShadow(color: accentColor.withValues(alpha: 0.2), blurRadius: 20, spreadRadius: -5),
+                  if (isOverdue) BoxShadow(color: Colors.redAccent.withValues(alpha: 0.3), blurRadius: 30, spreadRadius: -5),
                 ],
               ),
               child: Material(
@@ -87,7 +87,7 @@ class GlassTaskCard extends StatelessWidget {
                                   ? LinearGradient(colors: [Colors.green.shade400, Colors.green.shade600])
                                   : null,
                               border: Border.all(
-                                color: isCompleted ? Colors.transparent : accentColor.withOpacity(0.6),
+                                color: isCompleted ? Colors.transparent : accentColor.withValues(alpha: 0.6),
                                 width: 2,
                               ),
                             ),
@@ -190,21 +190,21 @@ class ExpandableTaskCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(isExpanded ? 16 : 12),
             border: Border.all(
               color: isExpanded
-                  ? accentColor.withOpacity(0.35)
+                  ? accentColor.withValues(alpha: 0.35)
                   : (isOverdue && !isCompleted
-                      ? Colors.red.withOpacity(0.2)
-                      : theme.colorScheme.outline.withOpacity(0.08)),
+                      ? Colors.red.withValues(alpha: 0.2)
+                      : theme.colorScheme.outline.withValues(alpha: 0.08)),
               width: isExpanded ? 1.5 : 1,
             ),
             boxShadow: [
               if (isExpanded)
                 BoxShadow(
-                  color: accentColor.withOpacity(isDark ? 0.2 : 0.1),
+                  color: accentColor.withValues(alpha: isDark ? 0.2 : 0.1),
                   blurRadius: 16, offset: const Offset(0, 4), spreadRadius: -2,
                 )
               else
                 BoxShadow(
-                  color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
                   blurRadius: 6, offset: const Offset(0, 1),
                 ),
             ],
@@ -234,7 +234,7 @@ class ExpandableTaskCard extends StatelessWidget {
                               color: isOverdue && !isCompleted ? Colors.redAccent : accentColor,
                               borderRadius: BorderRadius.circular(2),
                               boxShadow: isOverdue && !isCompleted
-                                  ? [BoxShadow(color: Colors.redAccent.withOpacity(0.5), blurRadius: 6, spreadRadius: -1)]
+                                  ? [BoxShadow(color: Colors.redAccent.withValues(alpha: 0.5), blurRadius: 6, spreadRadius: -1)]
                                   : null,
                             ),
                           ),
@@ -253,7 +253,7 @@ class ExpandableTaskCard extends StatelessWidget {
                                     fontSize: isExpanded ? 14.5 : 13.5,
                                     fontWeight: FontWeight.w600,
                                     decoration: isCompleted ? TextDecoration.lineThrough : null,
-                                    decorationColor: theme.colorScheme.onSurface.withOpacity(0.4),
+                                    decorationColor: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                                     color: isCompleted ? theme.colorScheme.onSurface : (task.template != null || task.googleCalendarEventId != null ? accentColor : theme.colorScheme.onSurface),
                                     height: 1.3,
                                   ),
@@ -268,7 +268,7 @@ class ExpandableTaskCard extends StatelessWidget {
                                       _MiniPill(
                                         icon: Icons.schedule_rounded,
                                         text: dateTimeStr,
-                                        color: isOverdue ? Colors.redAccent : theme.colorScheme.onSurface.withOpacity(0.45),
+                                        color: isOverdue ? Colors.redAccent : theme.colorScheme.onSurface.withValues(alpha: 0.45),
                                         bold: isOverdue,
                                       ),
                                       if (task.totalSubtasksCount > 0) ...[
@@ -278,20 +278,20 @@ class ExpandableTaskCard extends StatelessWidget {
                                           text: '${task.completedSubtasksCount}/${task.totalSubtasksCount}',
                                           color: task.completedSubtasksCount == task.totalSubtasksCount
                                               ? Colors.green
-                                              : theme.colorScheme.primary.withOpacity(0.6),
+                                              : theme.colorScheme.primary.withValues(alpha: 0.6),
                                         ),
                                       ],
                                       if (task.hasNotes) ...[
                                         const SizedBox(width: 6),
-                                        Icon(Icons.sticky_note_2_outlined, size: 12, color: theme.colorScheme.onSurface.withOpacity(0.3)),
+                                        Icon(Icons.sticky_note_2_outlined, size: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
                                       ],
                                       if (task.hasReminders) ...[
                                         const SizedBox(width: 6),
-                                        Icon(Icons.notifications_active_rounded, size: 12, color: Colors.amber.withOpacity(0.7)),
+                                        Icon(Icons.notifications_active_rounded, size: 12, color: Colors.amber.withValues(alpha: 0.7)),
                                       ],
                                       if (task.googleCalendarEventId != null) ...[
                                         const SizedBox(width: 6),
-                                        Icon(Icons.event_rounded, size: 12, color: Colors.blue.withOpacity(0.5)),
+                                        Icon(Icons.event_rounded, size: 12, color: Colors.blue.withValues(alpha: 0.5)),
                                       ],
                                     ],
                                   ),
@@ -308,7 +308,7 @@ class ExpandableTaskCard extends StatelessWidget {
                                 color: priorityColor,
                                 shape: BoxShape.circle,
                                 boxShadow: task.priority == 2
-                                    ? [BoxShadow(color: priorityColor.withOpacity(0.5), blurRadius: 4)]
+                                    ? [BoxShadow(color: priorityColor.withValues(alpha: 0.5), blurRadius: 4)]
                                     : null,
                               ),
                             ),
@@ -321,7 +321,7 @@ class ExpandableTaskCard extends StatelessWidget {
                             child: Icon(
                               Icons.keyboard_arrow_down_rounded,
                               size: 20,
-                              color: theme.colorScheme.onSurface.withOpacity(0.3),
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                             ),
                           ),
                         ],
@@ -335,7 +335,7 @@ class ExpandableTaskCard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Divider(height: 1, color: theme.colorScheme.outline.withOpacity(0.1)),
+                            Divider(height: 1, color: theme.colorScheme.outline.withValues(alpha: 0.1)),
                             const SizedBox(height: 10),
 
                             // Бележки preview
@@ -344,14 +344,14 @@ class ExpandableTaskCard extends StatelessWidget {
                                 width: double.infinity,
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.onSurface.withOpacity(0.03),
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.03),
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: theme.colorScheme.outline.withOpacity(0.06)),
+                                  border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.06)),
                                 ),
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Icon(Icons.sticky_note_2_outlined, size: 14, color: theme.colorScheme.onSurface.withOpacity(0.35)),
+                                    Icon(Icons.sticky_note_2_outlined, size: 14, color: theme.colorScheme.onSurface.withValues(alpha: 0.35)),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
@@ -399,7 +399,7 @@ class ExpandableTaskCard extends StatelessWidget {
                                           }
                                           return notes;
                                         }(),
-                                        style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withOpacity(0.55), height: 1.4),
+                                        style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.55), height: 1.4),
                                         maxLines: 2, overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
@@ -486,9 +486,9 @@ class _ModernCheckbox extends StatelessWidget {
           gradient: isChecked
               ? LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Colors.green.shade400, Colors.green.shade600])
               : null,
-          border: Border.all(color: isChecked ? Colors.transparent : color.withOpacity(0.4), width: 2),
+          border: Border.all(color: isChecked ? Colors.transparent : color.withValues(alpha: 0.4), width: 2),
           boxShadow: isChecked
-              ? [BoxShadow(color: Colors.green.withOpacity(0.35), blurRadius: 8, spreadRadius: -2)]
+              ? [BoxShadow(color: Colors.green.withValues(alpha: 0.35), blurRadius: 8, spreadRadius: -2)]
               : null,
         ),
         child: isChecked ? const Icon(Icons.check_rounded, size: 15, color: Colors.white) : null,
@@ -529,13 +529,13 @@ class _DetailChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final chipColor = color ?? theme.colorScheme.onSurface.withOpacity(0.55);
+    final chipColor = color ?? theme.colorScheme.onSurface.withValues(alpha: 0.55);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: chipColor.withOpacity(0.08),
+        color: chipColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: chipColor.withOpacity(0.12), width: 0.5),
+        border: Border.all(color: chipColor.withValues(alpha: 0.12), width: 0.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -563,21 +563,21 @@ class _SubtaskProgress extends StatelessWidget {
     final barColor = isDone ? Colors.green : color;
     return Row(
       children: [
-        Icon(isDone ? Icons.check_circle_rounded : Icons.checklist_rounded, size: 14, color: barColor.withOpacity(0.7)),
+        Icon(isDone ? Icons.check_circle_rounded : Icons.checklist_rounded, size: 14, color: barColor.withValues(alpha: 0.7)),
         const SizedBox(width: 8),
         Expanded(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: barColor.withOpacity(0.08),
-              valueColor: AlwaysStoppedAnimation(barColor.withOpacity(0.7)),
+              backgroundColor: barColor.withValues(alpha: 0.08),
+              valueColor: AlwaysStoppedAnimation(barColor.withValues(alpha: 0.7)),
               minHeight: 5,
             ),
           ),
         ),
         const SizedBox(width: 8),
-        Text('$completed/$total', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: barColor.withOpacity(0.7))),
+        Text('$completed/$total', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: barColor.withValues(alpha: 0.7))),
       ],
     );
   }
@@ -601,7 +601,7 @@ class _ActionButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.06),
+            color: color.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
@@ -633,10 +633,10 @@ class _GlowChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
-        boxShadow: glowing ? [BoxShadow(color: color.withOpacity(0.4), blurRadius: 8, spreadRadius: -2)] : null,
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+        boxShadow: glowing ? [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 8, spreadRadius: -2)] : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -664,14 +664,14 @@ class _SubtasksChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: c.withOpacity(0.15),
+        color: c.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: c.withOpacity(0.3), width: 1),
+        border: Border.all(color: c.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(width: 14, height: 14, child: CircularProgressIndicator(value: progress, strokeWidth: 2, backgroundColor: c.withOpacity(0.2), valueColor: AlwaysStoppedAnimation(c))),
+          SizedBox(width: 14, height: 14, child: CircularProgressIndicator(value: progress, strokeWidth: 2, backgroundColor: c.withValues(alpha: 0.2), valueColor: AlwaysStoppedAnimation(c))),
           const SizedBox(width: 6),
           Text('$completed/$total', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: c)),
         ],
@@ -696,9 +696,9 @@ class _GlassIconButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withOpacity(0.2)),
+            border: Border.all(color: color.withValues(alpha: 0.2)),
           ),
           child: Icon(icon, size: 20, color: color),
         ),

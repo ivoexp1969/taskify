@@ -41,6 +41,7 @@ class _CelebrationOverlayState extends State<CelebrationOverlay>
     if (_isClosing || !mounted) return;
     _isClosing = true;
     Navigator.of(context).pop();
+    widget.onComplete();
   }
 
   @override
@@ -55,7 +56,7 @@ class _CelebrationOverlayState extends State<CelebrationOverlay>
     final theme = Theme.of(context);
     
     return Material(
-      color: Colors.black.withOpacity(0.75),
+      color: Colors.black.withValues(alpha: 0.75),
       child: InkWell(
         onTap: _close,
         child: Center(
@@ -99,7 +100,7 @@ class _CelebrationOverlayState extends State<CelebrationOverlay>
                   t.greatJob,
                   style: TextStyle(
                     fontSize: 24,
-                    color: Colors.white.withOpacity(0.95),
+                    color: Colors.white.withValues(alpha: 0.95),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -114,7 +115,7 @@ class _CelebrationOverlayState extends State<CelebrationOverlay>
                   t.tapToContinue,
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                   ),
                 ),
               ),
@@ -127,7 +128,7 @@ class _CelebrationOverlayState extends State<CelebrationOverlay>
 }
 
 /// Показва празничния overlay
-void showCelebration(BuildContext context) {
+void showCelebration(BuildContext context, {VoidCallback? onComplete}) {
   showGeneralDialog(
     context: context,
     barrierDismissible: false,
@@ -136,7 +137,7 @@ void showCelebration(BuildContext context) {
     transitionDuration: const Duration(milliseconds: 300),
     pageBuilder: (dialogContext, animation, secondaryAnimation) {
       return CelebrationOverlay(
-        onComplete: () {},
+        onComplete: onComplete ?? () {},
       );
     },
     transitionBuilder: (context, animation, secondaryAnimation, child) {
@@ -147,3 +148,5 @@ void showCelebration(BuildContext context) {
     },
   );
 }
+
+

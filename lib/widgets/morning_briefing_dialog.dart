@@ -51,7 +51,7 @@ class _BriefingSheet extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
+                    color: Colors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
@@ -74,7 +74,7 @@ class _BriefingSheet extends StatelessWidget {
                       Text(
                         DateFormat('EEEE, d MMMM', t.lang).format(DateTime.now()),
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
                     ],
@@ -99,7 +99,7 @@ class _BriefingSheet extends StatelessWidget {
                   Icon(
                     Icons.check_circle_outline,
                     size: 64,
-                    color: theme.colorScheme.primary.withOpacity(0.5),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -111,7 +111,7 @@ class _BriefingSheet extends StatelessWidget {
                   Text(
                     t.enjoyYourDay,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -132,12 +132,12 @@ class _BriefingSheet extends StatelessWidget {
                 
                 return Container(
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                    color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isOverdue 
-                        ? Colors.red.withOpacity(0.3)
-                        : theme.colorScheme.outline.withOpacity(0.1),
+                        ? Colors.red.withValues(alpha: 0.3)
+                        : theme.colorScheme.outline.withValues(alpha: 0.1),
                     ),
                   ),
                   child: ListTile(
@@ -149,7 +149,7 @@ class _BriefingSheet extends StatelessWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: _getPriorityColor(task.priority).withOpacity(0.1),
+                        color: _getPriorityColor(task.priority).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Center(
@@ -172,7 +172,7 @@ class _BriefingSheet extends StatelessWidget {
                         Icon(
                           isOverdue ? Icons.warning : Icons.schedule,
                           size: 14,
-                          color: isOverdue ? Colors.red : theme.colorScheme.onSurface.withOpacity(0.6),
+                          color: isOverdue ? Colors.red : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -181,14 +181,14 @@ class _BriefingSheet extends StatelessWidget {
                             : DateFormat('d MMM, HH:mm', t.lang).format(dueDate),
                           style: TextStyle(
                             fontSize: 12,
-                            color: isOverdue ? Colors.red : theme.colorScheme.onSurface.withOpacity(0.6),
+                            color: isOverdue ? Colors.red : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
                     ) : null,
                     trailing: Icon(
                       Icons.chevron_right,
-                      color: theme.colorScheme.onSurface.withOpacity(0.3),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                     ),
                     onTap: () => Navigator.pop(ctx),
                   ),

@@ -107,8 +107,8 @@ class ReminderSelector extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: !hasAnySelected
-                  ? theme.colorScheme.outline.withOpacity(0.15)
-                  : theme.colorScheme.outline.withOpacity(0.08),
+                  ? theme.colorScheme.outline.withValues(alpha: 0.15)
+                  : theme.colorScheme.outline.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: !hasAnySelected
@@ -125,7 +125,7 @@ class ReminderSelector extends StatelessWidget {
                   size: 16,
                   color: !hasAnySelected
                       ? theme.colorScheme.onSurface
-                      : theme.colorScheme.onSurface.withOpacity(0.5),
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
                 const SizedBox(width: 6),
                 Text(
@@ -135,7 +135,7 @@ class ReminderSelector extends StatelessWidget {
                     fontWeight: !hasAnySelected ? FontWeight.w600 : FontWeight.normal,
                     color: !hasAnySelected
                         ? theme.colorScheme.onSurface
-                        : theme.colorScheme.onSurface.withOpacity(0.7),
+                        : theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -160,8 +160,8 @@ class ReminderSelector extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? theme.colorScheme.primary.withOpacity(0.15)
-                        : theme.colorScheme.outline.withOpacity(0.08),
+                        ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                        : theme.colorScheme.outline.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: isSelected
@@ -180,7 +180,7 @@ class ReminderSelector extends StatelessWidget {
                         size: 16,
                         color: isSelected
                             ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface.withOpacity(0.5),
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                       const SizedBox(width: 6),
                       Text(

@@ -16,6 +16,7 @@ import '../../widgets/reminder_selector.dart';
 import '../../services/widget_service.dart';
 import '../../services/ad_service.dart';
 import '../../widgets/celebration_overlay.dart';
+import '../../services/review_service.dart';
 import 'shopping_list_screen.dart';
 import 'task_type_selector.dart';
 import 'birthday_dialog.dart';
@@ -197,7 +198,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
   }
 
   /// Проверява дали всички задачи за днес са завършени и показва празнуване
-  void _checkAndCelebrate() {
+  void _checkAndCelebrate({VoidCallback? onComplete, DateTime? taskDate}) {
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
     
@@ -209,12 +210,13 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
              taskDate.day == todayStart.day;
     }).toList();
     
+    debugPrint('Today tasks count: ' + todayTasks.length.toString());
     if (todayTasks.isEmpty) return;
     
     final pendingTasks = todayTasks.where((t) => !t.isCompleted).length;
     if (pendingTasks > 0) return;
     
-    showCelebration(context);
+    showCelebration(context, onComplete: onComplete);
   }
 
   Color _priorityColor(int p) {
@@ -454,7 +456,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                 boxShadow: isSelected
                                     ? [
                                         BoxShadow(
-                                          color: color.withOpacity(0.5),
+                                          color: color.withValues(alpha: 0.5),
                                           blurRadius: 8,
                                           spreadRadius: 2,
                                         ),
@@ -618,7 +620,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                             color: Theme.of(innerContext)
                                 .colorScheme
                                 .primary
-                                .withOpacity(0.1),
+                                .withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
                           todayTextStyle: TextStyle(
@@ -746,7 +748,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.black.withValues(alpha: 0.15),
                     blurRadius: 20,
                     offset: const Offset(0, -5),
                   ),
@@ -760,7 +762,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.outline.withOpacity(0.3),
+                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -772,7 +774,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: categoryColor.withOpacity(0.15),
+                            color: categoryColor.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
@@ -800,7 +802,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                           },
                           icon: Icon(
                             Icons.close_rounded,
-                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
                         ),
                       ],
@@ -824,18 +826,18 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                             decoration: InputDecoration(
                               hintText: t.whatNeedsToBeDone,
                               hintStyle: TextStyle(
-                                color: theme.colorScheme.onSurface.withOpacity(0.4),
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                                 fontWeight: FontWeight.normal,
                               ),
                               filled: true,
-                              fillColor: theme.colorScheme.outline.withOpacity(0.08),
+                              fillColor: theme.colorScheme.outline.withValues(alpha: 0.08),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide.none,
                               ),
                               prefixIcon: Icon(
                                 Icons.title_rounded,
-                                color: theme.colorScheme.onSurface.withOpacity(0.4),
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -890,7 +892,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                                   width: 80,
                                                   height: 80,
                                                   decoration: BoxDecoration(
-                                                    color: categoryColor.withOpacity(0.1),
+                                                    color: categoryColor.withValues(alpha: 0.1),
                                                     shape: BoxShape.circle,
                                                   ),
                                                   child: Icon(
@@ -912,7 +914,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                                 Text(
                                                   t.speakNow,
                                                   style: TextStyle(
-                                                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                                                   ),
                                                 ),
                                               ],
@@ -966,8 +968,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                     ),
                                     decoration: BoxDecoration(
                                       color: isSelected
-                                          ? catColor.withOpacity(0.2)
-                                          : theme.colorScheme.outline.withOpacity(0.08),
+                                          ? catColor.withValues(alpha: 0.2)
+                                          : theme.colorScheme.outline.withValues(alpha: 0.08),
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
                                         color: isSelected ? catColor : Colors.transparent,
@@ -1010,7 +1012,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                   ),
                                   decoration: BoxDecoration(
                                     border: Border.all(
-                                      color: theme.colorScheme.outline.withOpacity(0.3),
+                                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
                                       style: BorderStyle.solid,
                                     ),
                                     borderRadius: BorderRadius.circular(12),
@@ -1107,7 +1109,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                       vertical: 14,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: theme.colorScheme.outline.withOpacity(0.08),
+                                      color: theme.colorScheme.outline.withValues(alpha: 0.08),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Row(
@@ -1160,7 +1162,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                       vertical: 14,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: theme.colorScheme.outline.withOpacity(0.08),
+                                      color: theme.colorScheme.outline.withValues(alpha: 0.08),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Row(
@@ -1181,7 +1183,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                               fontWeight: FontWeight.w500,
                                               color: tempTime != null
                                                   ? theme.colorScheme.onSurface
-                                                  : theme.colorScheme.onSurface.withOpacity(0.4),
+                                                  : theme.colorScheme.onSurface.withValues(alpha: 0.4),
                                             ),
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -1264,7 +1266,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                         border: Border.all(
                                           color: subtask['done'] == true
                                               ? categoryColor
-                                              : theme.colorScheme.outline.withOpacity(0.3),
+                                              : theme.colorScheme.outline.withValues(alpha: 0.3),
                                           width: 2,
                                         ),
                                       ),
@@ -1287,7 +1289,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                             ? TextDecoration.lineThrough
                                             : null,
                                         color: subtask['done'] == true
-                                            ? theme.colorScheme.onSurface.withOpacity(0.5)
+                                            ? theme.colorScheme.onSurface.withValues(alpha: 0.5)
                                             : theme.colorScheme.onSurface,
                                       ),
                                     ),
@@ -1296,7 +1298,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                     icon: Icon(
                                       Icons.close_rounded,
                                       size: 18,
-                                      color: theme.colorScheme.onSurface.withOpacity(0.4),
+                                      color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                                     ),
                                     onPressed: () {
                                       setSheetState(() {
@@ -1350,7 +1352,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                               ),
                               decoration: BoxDecoration(
                                 border: Border.all(
-                                  color: theme.colorScheme.outline.withOpacity(0.2),
+                                  color: theme.colorScheme.outline.withValues(alpha: 0.2),
                                 ),
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -1425,10 +1427,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                               width: double.infinity,
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.outline.withOpacity(0.08),
+                                color: theme.colorScheme.outline.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(12),
                                 border: tempNotes.trim().isNotEmpty
-                                    ? Border.all(color: Colors.amber.withOpacity(0.5), width: 1)
+                                    ? Border.all(color: Colors.amber.withValues(alpha: 0.5), width: 1)
                                     : null,
                               ),
                               child: Row(
@@ -1438,7 +1440,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                     size: 20,
                                     color: tempNotes.trim().isNotEmpty
                                         ? Colors.amber.shade700
-                                        : theme.colorScheme.onSurface.withOpacity(0.4),
+                                        : theme.colorScheme.onSurface.withValues(alpha: 0.4),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
@@ -1449,7 +1451,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                       style: TextStyle(
                                         color: tempNotes.trim().isNotEmpty
                                             ? theme.colorScheme.onSurface
-                                            : theme.colorScheme.onSurface.withOpacity(0.4),
+                                            : theme.colorScheme.onSurface.withValues(alpha: 0.4),
                                       ),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
@@ -1459,7 +1461,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                     Icon(
                                       Icons.edit_outlined,
                                       size: 16,
-                                      color: theme.colorScheme.onSurface.withOpacity(0.4),
+                                      color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                                     ),
                                 ],
                               ),
@@ -1477,7 +1479,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                       color: theme.colorScheme.surface,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, -5),
                         ),
@@ -1549,7 +1551,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                           await WidgetService.updateWidget();
                           _titleController.clear();
                           refreshParent();  // Обновяваме главния екран
-                          Navigator.pop(innerContext);
+                          if (innerContext.mounted) Navigator.pop(innerContext);
                           if (_openShoppingAfterCreate != null && context.mounted) {
                             Navigator.push(context, MaterialPageRoute(
                               builder: (_) => ShoppingListScreen(task: _openShoppingAfterCreate!),
@@ -1593,7 +1595,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
         Icon(
           icon,
           size: 18,
-          color: theme.colorScheme.onSurface.withOpacity(0.5),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
         ),
         const SizedBox(width: 8),
         Text(
@@ -1601,7 +1603,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface.withOpacity(0.5),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             letterSpacing: 0.5,
           ),
         ),
@@ -1623,10 +1625,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            color: selected ? color.withOpacity(0.15) : Colors.transparent,
+            color: selected ? color.withValues(alpha: 0.15) : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: selected ? color : Colors.grey.withOpacity(0.3),
+              color: selected ? color : Colors.grey.withValues(alpha: 0.3),
               width: selected ? 2 : 1,
             ),
           ),
@@ -1662,7 +1664,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.outline.withOpacity(0.08),
+        color: theme.colorScheme.outline.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
       ),
       child: DropdownButtonHideUnderline(
@@ -1671,7 +1673,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
           isExpanded: true,
           icon: Icon(
             Icons.keyboard_arrow_down_rounded,
-            color: theme.colorScheme.onSurface.withOpacity(0.5),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
           ),
           items: items.entries.map((entry) {
             return DropdownMenuItem<String>(
@@ -1704,16 +1706,16 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
           decoration: BoxDecoration(
             color: selected 
-                ? color.withOpacity(0.15) 
-                : theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                ? color.withValues(alpha: 0.15) 
+                : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: selected ? color.withOpacity(0.5) : Colors.transparent,
+              color: selected ? color.withValues(alpha: 0.5) : Colors.transparent,
               width: 1.5,
             ),
             boxShadow: selected ? [
               BoxShadow(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -1724,7 +1726,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
               Icon(
                 icon,
                 size: 18,
-                color: selected ? color : theme.colorScheme.onSurface.withOpacity(0.4),
+                color: selected ? color : theme.colorScheme.onSurface.withValues(alpha: 0.4),
               ),
               const SizedBox(height: 4),
               Text(
@@ -1744,8 +1746,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                     fontSize: 9,
                     fontWeight: FontWeight.w500,
                     color: selected 
-                        ? color.withOpacity(0.8)
-                        : theme.colorScheme.onSurface.withOpacity(0.5),
+                        ? color.withValues(alpha: 0.8)
+                        : theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -1962,8 +1964,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                         prefixIcon: const Icon(Icons.search, size: 20),
                         isDense: true,
                         filled: true,
-                        fillColor: theme.colorScheme.surfaceVariant
-                            .withOpacity(0.4),
+                        fillColor: theme.colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.4),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(999),
                           borderSide: BorderSide.none,
@@ -1986,8 +1988,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceVariant
-                            .withOpacity(0.4),
+                        color: theme.colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.4),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: DropdownButton<String>(
@@ -2045,7 +2047,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                           decoration: BoxDecoration(
                             color: _filter == TaskFilter.archived
                                 ? Colors.grey
-                                : theme.colorScheme.surfaceVariant.withOpacity(0.4),
+                                : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                             shape: BoxShape.circle,
                           ),
                           child: Badge(
@@ -2253,7 +2255,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                               
                               // Проверка за празнуване
                               if (!wasCompleted && task.isCompleted) {
-                                _checkAndCelebrate();
+                                _checkAndCelebrate(taskDate: task.dueDate, onComplete: () {
+                                  if (context.mounted) ReviewService().onTaskCompleted(context);
+                                });
                               }
                               return false; // Не изтриваме, само toggle-ваме
                             } else {
@@ -2315,7 +2319,11 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                       title: Text(t.edit),
                                       onTap: () {
                                         Navigator.pop(ctx);
-                                        _openTaskDialog(existing: task);
+                                        if (task.categoryId == 'shopping' || task.template == 'shopping') {
+                                          ShoppingListScreen.show(context, task).then((_) => setState(() {}));
+                                        } else {
+                                          _openTaskDialog(existing: task);
+                                        }
                                       },
                                     ),
                                     if (!task.isArchived)
@@ -2425,11 +2433,13 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                   setState(() {});
                                   
                                   if (!wasCompleted && task.isCompleted) {
-                                    _checkAndCelebrate();
+                                    _checkAndCelebrate(taskDate: task.dueDate, onComplete: () {
+                                      if (context.mounted) ReviewService().onTaskCompleted(context);
+                                    });
                                   }
                                 },
                                 onEdit: () {
-                                  if (task.categoryId == 'shopping') {
+                                  if (task.categoryId == 'shopping' || task.template == 'shopping') {
                                     ShoppingListScreen.show(context, task).then((_) => setState(() {}));
                                   } else if (task.template == 'birthday') {
                                     BirthdayDialog.show(context, existing: task).then((_) => setState(() {}));
@@ -2498,7 +2508,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
             child: GestureDetector(
               onPanUpdate: (details) {
                 setState(() {
-                  final screenSize = MediaQuery.of(context).size;
+                  final screenSize = MediaQuery.sizeOf(context);
                   final appBarHeight = kToolbarHeight + MediaQuery.of(context).padding.top;
                   
                   double newX = (_fabOffset?.dx ?? (screenSize.width - 56 - 16)) + details.delta.dx;
@@ -2533,6 +2543,17 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 

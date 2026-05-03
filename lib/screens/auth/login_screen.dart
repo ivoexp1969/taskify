@@ -256,7 +256,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Text(
                 _isLogin ? _t('signIn', lang) : _t('createAccount', lang),
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -266,7 +266,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -389,7 +389,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     _isLogin ? _t('noAccount', lang) : _t('hasAccount', lang),
                     style: TextStyle(
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                   TextButton(

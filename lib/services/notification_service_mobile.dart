@@ -1,14 +1,17 @@
+import 'dart:io' show Platform;
 import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz_data;
 
 import '../models/task.dart';
 import '../main.dart';
 
-// Top-level функция за alarm callback
+// Top-level функция за alarm callback (Android only)
 @pragma('vm:entry-point')
 Future<void> _alarmCallback(int id) async {
   final plugin = FlutterLocalNotificationsPlugin();
@@ -19,10 +22,10 @@ Future<void> _alarmCallback(int id) async {
 
   final prefs = await SharedPreferences.getInstance();
   final lang = prefs.getString('app_language') ?? 'en';
-  
+
   const _fallbackTitle = {'en': 'Reminder', 'bg': 'Напомняне', 'de': 'Erinnerung', 'fr': 'Rappel', 'it': 'Promemoria', 'el': 'Υπενθύμιση', 'es': 'Recordatorio', 'pt': 'Lembrete', 'ru': 'Напоминание', 'tr': 'Hatırlatıcı'};
   const _fallbackBody = {'en': 'You have a task to complete', 'bg': 'Имаш задача за изпълнение', 'de': 'Du hast eine Aufgabe zu erledigen', 'fr': 'Vous avez une tâche à accomplir', 'it': 'Hai un\'attività da completare', 'el': 'Έχετε μια εργασία να ολοκληρώσετε', 'es': 'Tienes una tarea por completar', 'pt': 'Você tem uma tarefa para concluir', 'ru': 'У вас есть задача для выполнения', 'tr': 'Tamamlamanız gereken bir görev var'};
-  
+
   final title = prefs.getString('alarm_${id}_title') ?? (_fallbackTitle[lang] ?? _fallbackTitle['en']!);
   final body = prefs.getString('alarm_${id}_body') ?? (_fallbackBody[lang] ?? _fallbackBody['en']!);
   final payload = prefs.getString('alarm_${id}_payload');
@@ -43,7 +46,6 @@ Future<void> _alarmCallback(int id) async {
 
   await plugin.show(id, title, body, platformDetails, payload: payload);
 
-  // If this is morning briefing, set flag so app shows dialog on launch
   if (payload == 'morning_briefing') {
     await prefs.setBool('show_morning_briefing', true);
   }
@@ -67,7 +69,6 @@ class NotificationService {
 
   bool _initialized = false;
 
-  /// Call from main() to register notification tap handler
   Future<void> init() async {
     await _initIfNeeded();
     final launchDetails = await _plugin.getNotificationAppLaunchDetails();
@@ -83,7 +84,11 @@ class NotificationService {
   Future<void> _initIfNeeded() async {
     if (_initialized) return;
 
-    await AndroidAlarmManager.initialize();
+    tz_data.initializeTimeZones();
+
+    if (Platform.isAndroid) {
+      await AndroidAlarmManager.initialize();
+    }
 
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosInit = DarwinInitializationSettings(
@@ -106,17 +111,21 @@ class NotificationService {
       },
     );
 
-    final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    if (Platform.isAndroid) {
+      final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+      await androidPlugin?.requestNotificationsPermission();
+    }
 
-    if (androidPlugin != null) {
-      await androidPlugin.requestNotificationsPermission();
+    if (Platform.isIOS) {
+      final iosPlugin = _plugin.resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>();
+      await iosPlugin?.requestPermissions(alert: true, badge: true, sound: true);
     }
 
     _initialized = true;
   }
 
-  /// Изчислява времето за напомняне спрямо типа
   DateTime? _computeReminderTime(DateTime dueDate, String reminderType) {
     final now = DateTime.now();
     DateTime result;
@@ -150,14 +159,10 @@ class NotificationService {
         return null;
     }
 
-    if (result.isBefore(now)) {
-      return null;
-    }
-
+    if (result.isBefore(now)) return null;
     return result;
   }
 
-  /// Връща текст за напомнянето
   String _reminderLabel(String reminderType, String lang) {
     const labels = {
       'at_time': {'en': 'Time is now!', 'bg': 'Сега е времето!', 'de': 'Zeit ist da!', 'fr': "C'est l'heure!", 'it': "È ora!", 'el': 'Ήρθε η ώρα!', 'es': '¡Es la hora!', 'pt': 'Chegou a hora!', 'ru': 'Время пришло!', 'tr': 'Şimdi zamanı!'},
@@ -174,23 +179,40 @@ class NotificationService {
     return map[lang] ?? map['en'] ?? 'Reminder';
   }
 
-  /// Отменя всички нотификации за задача
+  NotificationDetails _buildNotificationDetails(String title) {
+    const androidDetails = AndroidNotificationDetails(
+      'task_reminders',
+      'Task reminders',
+      channelDescription: 'Reminders for your tasks',
+      importance: Importance.max,
+      priority: Priority.max,
+      visibility: NotificationVisibility.public,
+      enableVibration: true,
+      playSound: true,
+      category: AndroidNotificationCategory.reminder,
+    );
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+    return const NotificationDetails(android: androidDetails, iOS: iosDetails);
+  }
+
   Future<void> cancelForTask(Task task) async {
     try {
       await _initIfNeeded();
 
-      // Отменяме новите нотификации (списък)
       if (task.notificationIds != null) {
         for (final id in task.notificationIds!) {
-          await AndroidAlarmManager.cancel(id);
+          if (Platform.isAndroid) await AndroidAlarmManager.cancel(id);
           await _plugin.cancel(id);
         }
         task.notificationIds = null;
       }
 
-      // Отменяме старата нотификация (за съвместимост)
       if (task.notificationId != null) {
-        await AndroidAlarmManager.cancel(task.notificationId!);
+        if (Platform.isAndroid) await AndroidAlarmManager.cancel(task.notificationId!);
         await _plugin.cancel(task.notificationId!);
         task.notificationId = null;
       }
@@ -199,18 +221,13 @@ class NotificationService {
     } catch (e) { debugPrint('NotificationService error: $e'); }
   }
 
-  /// Планира всички напомняния за задача
   Future<void> scheduleForTask(Task task) async {
     try {
       await _initIfNeeded();
-
-      // Първо отменяме старите
       await cancelForTask(task);
 
       final remindersList = task.remindersList;
-      if (remindersList.isEmpty) {
-        return;
-      }
+      if (remindersList.isEmpty) return;
 
       final prefs = await SharedPreferences.getInstance();
       final newIds = <int>[];
@@ -222,19 +239,33 @@ class NotificationService {
         final id = Random().nextInt(0x7FFFFFFF);
         final label = _reminderLabel(reminderType, prefs.getString('app_language') ?? 'en');
 
-        await prefs.setString('alarm_${id}_title', task.title);
-        await prefs.setString('alarm_${id}_body', label);
+        if (Platform.isAndroid) {
+          await prefs.setString('alarm_${id}_title', task.title);
+          await prefs.setString('alarm_${id}_body', label);
 
-        final success = await AndroidAlarmManager.oneShotAt(
-          scheduled,
-          id,
-          _alarmCallback,
-          exact: true,
-          wakeup: true,
-          rescheduleOnReboot: true,
-        );
+          final success = await AndroidAlarmManager.oneShotAt(
+            scheduled,
+            id,
+            _alarmCallback,
+            exact: true,
+            wakeup: true,
+            rescheduleOnReboot: true,
+          );
 
-        if (success) {
+          if (success) newIds.add(id);
+        } else {
+          // iOS: use flutter_local_notifications zonedSchedule
+          final tzScheduled = tz.TZDateTime.from(scheduled, tz.local);
+          await _plugin.zonedSchedule(
+            id,
+            task.title,
+            label,
+            tzScheduled,
+            _buildNotificationDetails(task.title),
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+          );
           newIds.add(id);
         }
       }
@@ -246,7 +277,6 @@ class NotificationService {
     } catch (e) { debugPrint('NotificationService error: $e'); }
   }
 
-  /// Generic method to schedule a notification
   Future<void> scheduleNotification({
     required int id,
     required String title,
@@ -257,63 +287,98 @@ class NotificationService {
   }) async {
     try {
       await _initIfNeeded();
-      final prefs = await SharedPreferences.getInstance();
-      
-      await prefs.setString('alarm_${id}_title', title);
-      await prefs.setString('alarm_${id}_body', body);
-      if (payload != null) {
-        await prefs.setString('alarm_${id}_payload', payload);
-      }
 
-      if (isDaily) {
-        await AndroidAlarmManager.periodic(
-          const Duration(days: 1),
-          id,
-          _alarmCallback,
-          exact: true,
-          wakeup: true,
-          rescheduleOnReboot: true,
-          startAt: scheduledDate,
-        );
+      if (Platform.isAndroid) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('alarm_${id}_title', title);
+        await prefs.setString('alarm_${id}_body', body);
+        if (payload != null) await prefs.setString('alarm_${id}_payload', payload);
+
+        if (isDaily) {
+          await AndroidAlarmManager.periodic(
+            const Duration(days: 1),
+            id,
+            _alarmCallback,
+            exact: true,
+            wakeup: true,
+            rescheduleOnReboot: true,
+            startAt: scheduledDate,
+          );
+        } else {
+          await AndroidAlarmManager.oneShotAt(
+            scheduledDate,
+            id,
+            _alarmCallback,
+            exact: true,
+            wakeup: true,
+            rescheduleOnReboot: true,
+          );
+        }
       } else {
-        await AndroidAlarmManager.oneShotAt(
-          scheduledDate,
-          id,
-          _alarmCallback,
-          exact: true,
-          wakeup: true,
-          rescheduleOnReboot: true,
+        // iOS
+        final tzScheduled = tz.TZDateTime.from(scheduledDate, tz.local);
+        const iosDetails = DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
         );
+        const details = NotificationDetails(iOS: iosDetails);
+
+        if (isDaily) {
+          await _plugin.zonedSchedule(
+            id,
+            title,
+            body,
+            tzScheduled,
+            details,
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+            matchDateTimeComponents: DateTimeComponents.time,
+            payload: payload,
+          );
+        } else {
+          await _plugin.zonedSchedule(
+            id,
+            title,
+            body,
+            tzScheduled,
+            details,
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+            payload: payload,
+          );
+        }
       }
     } catch (e) { debugPrint('NotificationService error: $e'); }
   }
 
   void _handleMorningBriefingTap() {
-    // Import is needed in main.dart
     final context = MyApp.navigatorKey.currentContext;
     if (context != null) {
-      // We'll import and call the dialog from main.dart
       _showBriefingCallback?.call(context);
     }
   }
-  
+
   static Function(BuildContext)? _showBriefingCallback;
-  
+
   static void setMorningBriefingCallback(Function(BuildContext) callback) {
     _showBriefingCallback = callback;
   }
-  
-  /// Generic method to cancel a notification
+
   Future<void> cancelNotification(int id) async {
     try {
       await _initIfNeeded();
-      await AndroidAlarmManager.cancel(id);
+      if (Platform.isAndroid) await AndroidAlarmManager.cancel(id);
       await _plugin.cancel(id);
-      
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('alarm_${id}_title');
-      await prefs.remove('alarm_${id}_body');
-      await prefs.remove('alarm_${id}_payload');
+
+      if (Platform.isAndroid) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('alarm_${id}_title');
+        await prefs.remove('alarm_${id}_body');
+        await prefs.remove('alarm_${id}_payload');
+      }
     } catch (e) { debugPrint('NotificationService error: $e'); }
   }
 }

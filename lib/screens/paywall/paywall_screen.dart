@@ -308,7 +308,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       Text(
                         _pt('getAccess', lang),
                         style: theme.textTheme.bodyLarge?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -317,7 +317,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
                       Card(
                         elevation: 0,
-                        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -412,11 +412,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             children: [
                               Icon(Icons.shopping_cart_outlined, 
                                    size: 48, 
-                                   color: theme.colorScheme.onSurface.withOpacity(0.4)),
+                                   color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                               const SizedBox(height: 8),
                               Text(
                                 _pt('noProducts', lang),
-                                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                                style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                               ),
                               const SizedBox(height: 8),
                               TextButton(
@@ -475,7 +475,7 @@ class _FeatureItem extends StatelessWidget {
               ),
             ),
           ),
-          Icon(Icons.check_circle_rounded, size: 20, color: Colors.green.withOpacity(0.8)),
+          Icon(Icons.check_circle_rounded, size: 20, color: Colors.green.withValues(alpha: 0.8)),
         ],
       ),
     );
@@ -518,7 +518,7 @@ class _PackageCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: Material(
-        color: isPopular ? theme.colorScheme.primary.withOpacity(0.1) : theme.colorScheme.surface,
+        color: isPopular ? theme.colorScheme.primary.withValues(alpha: 0.1) : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: onTap,
@@ -528,7 +528,7 @@ class _PackageCard extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isPopular ? theme.colorScheme.primary : theme.colorScheme.outline.withOpacity(0.3), 
+                color: isPopular ? theme.colorScheme.primary : theme.colorScheme.outline.withValues(alpha: 0.3), 
                 width: isPopular ? 2 : 1,
               ),
             ),
@@ -569,7 +569,7 @@ class _PackageCard extends StatelessWidget {
                         _getPackageSubtitle(), 
                         style: TextStyle(
                           fontSize: 13, 
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
                     ],

@@ -136,7 +136,7 @@ class _Sheet extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: theme.colorScheme.outline.withOpacity(0.3),
+              color: theme.colorScheme.outline.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -187,7 +187,7 @@ class _Sheet extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
-                          color: theme.colorScheme.onSurface.withOpacity(0.75),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
                           height: 1.2,
                         ),
                         textAlign: TextAlign.center,

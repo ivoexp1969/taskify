@@ -1,4 +1,5 @@
 ﻿import 'dart:convert';
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -9,7 +10,7 @@ class WidgetService {
   static const _channel = MethodChannel('com.ivoexp.taskify/widget');
 
   static Future<void> updateWidget() async {
-    if (kIsWeb) return;
+    if (kIsWeb || !Platform.isAndroid) return;
     try {
       await _syncTasksToPrefs();
       await _channel.invokeMethod('updateWidget');
@@ -57,7 +58,7 @@ class WidgetService {
   }
 
   static Future<void> requestPinWidget() async {
-    if (kIsWeb) return;
+    if (kIsWeb || !Platform.isAndroid) return;
     try {
       await _channel.invokeMethod('requestPinWidget');
     } catch (e) {
@@ -66,7 +67,7 @@ class WidgetService {
   }
 
   static void setupWidgetListener() {
-    if (kIsWeb) return;
+    if (kIsWeb || !Platform.isAndroid) return;
     final taskBox = Hive.box<Task>('tasks');
     taskBox.watch().listen((_) {
       updateWidget();
@@ -74,7 +75,7 @@ class WidgetService {
   }
 
   static Future<void> syncFromWidget() async {
-    if (kIsWeb) return;
+    if (kIsWeb || !Platform.isAndroid) return;
     try {
       final prefs = await SharedPreferences.getInstance();
       final tasksJson = prefs.getString('widget_tasks');

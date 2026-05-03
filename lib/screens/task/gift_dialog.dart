@@ -66,7 +66,7 @@ class GiftDialog {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Center(child: Container(width: 40, height: 4,
-                        decoration: BoxDecoration(color: theme.colorScheme.outline.withOpacity(0.3),
+                        decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(2)))),
                       const SizedBox(height: 16),
                       Row(children: [
@@ -78,7 +78,7 @@ class GiftDialog {
                         Text(existing != null ? t.editGift : t.typeGift,
                           style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
                         const Spacer(),
-                        IconButton(icon: Icon(Icons.close, color: theme.colorScheme.onSurface.withOpacity(0.5)),
+                        IconButton(icon: Icon(Icons.close, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
                           onPressed: () => Navigator.pop(ctx)),
                       ]),
                       const SizedBox(height: 20),
@@ -88,9 +88,9 @@ class GiftDialog {
                       const SizedBox(height: 16),
                       Row(children: [
                         Text(t.giftOccasion, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
-                          color: theme.colorScheme.onSurface.withOpacity(0.6))),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                         Text('  (${t.optional})', style: TextStyle(fontSize: 12,
-                          color: theme.colorScheme.onSurface.withOpacity(0.35))),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.35))),
                       ]),
                       const SizedBox(height: 6),
                       _Field(controller: occasionCtrl, hint: t.giftOccasionHint, theme: theme, isDark: isDark),
@@ -99,9 +99,9 @@ class GiftDialog {
                         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Wrap(children: [
                             Text(t.giftBudget, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500,
-                              color: theme.colorScheme.onSurface.withOpacity(0.6))),
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                             Text(' (${t.optional})', style: TextStyle(fontSize: 11,
-                              color: theme.colorScheme.onSurface.withOpacity(0.35))),
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.35))),
                           ]),
                           const SizedBox(height: 6),
                           _Field(controller: budgetCtrl, hint: t.giftBudgetHint, theme: theme, isDark: isDark,
@@ -111,7 +111,7 @@ class GiftDialog {
                         const SizedBox(width: 12),
                         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Text(t.giftDeadline, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500,
-                            color: theme.colorScheme.onSurface.withOpacity(0.6))),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                           const SizedBox(height: 6),
                           GestureDetector(
                             onTap: () async {
@@ -122,7 +122,7 @@ class GiftDialog {
                             },
                             child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                               decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF1e1e2e) : theme.colorScheme.surfaceVariant.withOpacity(0.4),
+                                color: isDark ? const Color(0xFF1e1e2e) : theme.colorScheme.surfaceVariant.withValues(alpha: 0.4),
                                 borderRadius: BorderRadius.circular(12)),
                               child: Row(children: [
                                 Icon(Icons.calendar_today_outlined, size: 16, color: accent),
@@ -134,7 +134,7 @@ class GiftDialog {
                       ]),
                       const SizedBox(height: 16),
                       Text(t.reminders, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
-                        color: theme.colorScheme.onSurface.withOpacity(0.6))),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                       const SizedBox(height: 8),
                       Wrap(spacing: 8, runSpacing: 8, children: [
                         _ReminderChip(label: t.oneDayBefore, value: 'minus_1d', selected: reminders.contains('minus_1d'), accent: accent,
@@ -191,7 +191,7 @@ class _Label extends StatelessWidget {
   const _Label(this.text, this.theme);
   @override
   Widget build(BuildContext context) => Text(text, style: TextStyle(fontSize: 13,
-    fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface.withOpacity(0.6)));
+    fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)));
 }
 
 class _Field extends StatelessWidget {
@@ -206,8 +206,8 @@ class _Field extends StatelessWidget {
     keyboardType: keyboardType, inputFormatters: inputFormatters,
     style: TextStyle(fontSize: 15, color: theme.colorScheme.onSurface),
     decoration: InputDecoration(hintText: hint,
-      hintStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.35)),
-      filled: true, fillColor: isDark ? const Color(0xFF1e1e2e) : theme.colorScheme.surfaceVariant.withOpacity(0.4),
+      hintStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.35)),
+      filled: true, fillColor: isDark ? const Color(0xFF1e1e2e) : theme.colorScheme.surfaceVariant.withValues(alpha: 0.4),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12)));
 }
@@ -218,8 +218,8 @@ class _ReminderChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) => GestureDetector(onTap: onTap,
     child: Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      decoration: BoxDecoration(color: selected ? accent.withOpacity(0.15) : Colors.transparent,
-        border: Border.all(color: selected ? accent : Colors.grey.withOpacity(0.3)),
+      decoration: BoxDecoration(color: selected ? accent.withValues(alpha: 0.15) : Colors.transparent,
+        border: Border.all(color: selected ? accent : Colors.grey.withValues(alpha: 0.3)),
         borderRadius: BorderRadius.circular(20)),
       child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500,
         color: selected ? accent : Colors.grey))));

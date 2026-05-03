@@ -34,7 +34,13 @@ class TaskCard extends StatelessWidget {
     final catColor = category != null ? Color(category!.colorValue) : Colors.grey;
     final priorityColor = task.priority == 2 ? Colors.red : (task.priority == 1 ? Colors.orange : Colors.green);
     final now = DateTime.now();
-    final isOverdue = !task.isCompleted && task.dueDate.isBefore(now);
+    // Задачи само с дата (час=0) не са overdue докато денят не е минал изцяло
+    final isOverdue = !task.isCompleted && (() {
+      if (task.dueDate.hour != 0 || task.dueDate.minute != 0) {
+        return task.dueDate.isBefore(now);
+      }
+      return now.isAfter(DateTime(task.dueDate.year, task.dueDate.month, task.dueDate.day, 23, 59, 59));
+    })();
     final accentColor = isOverdue ? Colors.redAccent : catColor;
 
     if (viewPref.isCompact) {
@@ -60,7 +66,7 @@ class TaskCard extends StatelessWidget {
                 Checkbox(value: task.isCompleted, onChanged: onCheckChanged, activeColor: accent),
                 Expanded(child: Text(task.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(decoration: task.isCompleted ? TextDecoration.lineThrough : null))),
                 Container(width: 8, height: 8, margin: const EdgeInsets.only(right: 8), decoration: BoxDecoration(color: priority, shape: BoxShape.circle)),
-                Padding(padding: const EdgeInsets.only(right: 12), child: Text(_formatTime(task.dueDate), style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurface.withOpacity(0.5)))),
+                Padding(padding: const EdgeInsets.only(right: 12), child: Text(_formatTime(task.dueDate), style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)))),
               ],
             ),
           ),
@@ -104,7 +110,7 @@ class TaskCard extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(right: 12),
-                  child: Text(_formatTime(task.dueDate), style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withOpacity(0.6))),
+                  child: Text(_formatTime(task.dueDate), style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                 ),
               ],
             ),
@@ -117,7 +123,7 @@ class TaskCard extends StatelessWidget {
   Widget _chip(Color c, String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(color: c.withOpacity(0.15), borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(color: c.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
       child: Text(text, style: TextStyle(fontSize: 10, color: c, fontWeight: FontWeight.w500)),
     );
   }

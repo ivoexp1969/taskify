@@ -298,7 +298,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                         CircularProgressIndicator(
                           value: completionRate / 100,
                           strokeWidth: 10,
-                          backgroundColor: theme.colorScheme.outline.withOpacity(0.2),
+                          backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.2),
                           valueColor: AlwaysStoppedAnimation(
                             completionRate >= 75
                                 ? Colors.green
@@ -335,7 +335,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                           t.tasksOfTotal(completedTotal, totalTasks),
                           style: TextStyle(
                             fontSize: 14,
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -374,7 +374,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                           t.dayStreak,
                           style: TextStyle(
                             fontSize: 12,
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -407,7 +407,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                           t.mostProductive,
                           style: TextStyle(
                             fontSize: 12,
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -494,7 +494,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                               _localizedCategoryName(cat, lang),
                               style: TextStyle(
                                 fontSize: 12,
-                                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                               ),
                             ),
                           ],
@@ -553,7 +553,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
                               dayLabels[day.weekday - 1],
                               style: TextStyle(
                                 fontSize: 10,
-                                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                               ),
                             );
                           },
@@ -641,7 +641,7 @@ class _StatCard extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 11,
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
               textAlign: TextAlign.center,
             ),

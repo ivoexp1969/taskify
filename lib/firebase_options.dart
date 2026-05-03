@@ -54,7 +54,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '929046134968',
     projectId: 'taskify-1969',
     storageBucket: 'taskify-1969.firebasestorage.app',
-    iosBundleId: 'com.example.taskManager',
+    iosBundleId: 'com.ivoexp.taskify',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -63,7 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '929046134968',
     projectId: 'taskify-1969',
     storageBucket: 'taskify-1969.firebasestorage.app',
-    iosBundleId: 'com.example.taskManager',
+    iosBundleId: 'com.ivoexp.taskify',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

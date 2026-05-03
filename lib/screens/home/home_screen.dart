@@ -167,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
             boxShadow: [
               if (!isDark)
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
+                  color: Colors.black.withValues(alpha: 0.06),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -178,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: NavigationBar(
               height: 64,
               backgroundColor: Colors.transparent,
-              indicatorColor: theme.colorScheme.primary.withOpacity(isDark ? 0.25 : 0.12),
+              indicatorColor: theme.colorScheme.primary.withValues(alpha: isDark ? 0.25 : 0.12),
               labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
               selectedIndex: _currentIndex,
               onDestinationSelected: _onDestinationSelected,
@@ -266,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
             style: TextButton.styleFrom(
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               minimumSize: Size.zero,
             ),

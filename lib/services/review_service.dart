@@ -164,7 +164,7 @@ class _ReviewPreDialog extends StatelessWidget {
       content: Text(
         subtitleMap[lang] ?? subtitleMap['en']!,
         textAlign: TextAlign.center,
-        style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+        style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
       ),
       actionsAlignment: MainAxisAlignment.spaceEvenly,
       actions: [
