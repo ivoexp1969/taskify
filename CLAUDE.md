@@ -1,106 +1,62 @@
-# CLAUDE.md
+# Taskify - Flutter Task Management App
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Indie Flutter app, Android-first, live on Google Play.
+Repo: github.com/ivoexp1969/taskify
 
-## Commands
+## Tech Stack
+- Flutter (Dart)
+- Hive — local database
+- Firebase — backend services
+- RevenueCat — subscriptions: premium_monthly, premium_yearly, premium_lifetime (14-day trial)
+- AdMob — advertising
+- Google Calendar API — bidirectional sync via OAuth
 
-```bash
-# Install dependencies
+## Localization (10 languages)
+bg (Bulgarian), en, de, fr, it, el (Greek), es, pt, ru, tr
+
+**CRITICAL:** All UI strings MUST use AppLocalizations.
+NEVER hardcode user-facing text in Dart files.
+When adding a new string, add the key to all 10 .arb files.
+
+## UI Conventions
+- `ExpandableTaskCard` is the standard task list widget (notes preview, overdue tinting, animated checkboxes, priority dots, subtask progress bars)
+- Shopping-category tasks open a bottom sheet directly on tap — no card expansion
+- Recurring task deletion uses a dialog: "delete current" / "delete all future"
+- For Dismissible widgets, wrap state changes in `WidgetsBinding.instance.addPostFrameCallback` to avoid widget tree conflicts
+
+## Build Environment
+- JDK 17 required (Gradle)
+- Android home screen widgets: 2x1 and 3x1 sizes
+- Must support 16KB memory pages for Play Store
+
+## Build Commands
+```powershell
+flutter clean
 flutter pub get
-
-# Regenerate Hive adapters (run after modifying any @HiveType model)
-flutter pub run build_runner build --delete-conflicting-outputs
-
-# Run in development
-flutter run
-
-# Build release APK
 flutter build apk --release
-
-# Build Google Play App Bundle
 flutter build appbundle --release
-
-# Run tests
-flutter test
 ```
 
-## Architecture Overview
+## Promo Codes
+- Firebase: `IVA` — lifetime access, 20-user cap
 
-**Taskify** is a Flutter task manager app (package: `com.ivoexp.taskify`) targeting Android (minSdk 26 / targetSdk 36). The app is offline-first with optional cloud sync via Firebase Firestore.
+## Current Version
+v1.0.20 (Feb 2026)
 
-### Data Layer
+## Recent Work
+- **v1.0.20:** Localization audit — fixed 27 hardcoded strings across 5 files, added 18 new keys; redesigned ExpandableTaskCard
+- **v1.11:** Google Calendar bidirectional sync (OAuth + Google Cloud Console); rotating multilingual home-widget messages with emojis; Firebase promo `IVA`
+- **iOS exploration:** removed `cloud_firestore` dependency for Xcode/Firebase compatibility on native iOS build
 
-- **Local storage:** Hive (NoSQL) is the primary store. Tasks and categories live in named boxes (`tasks`, `categories`). Hive adapters are code-generated — after changing any `@HiveType` model, run `build_runner`.
-- **Cloud storage:** Firestore under `users/{uid}/tasks` and `users/{uid}/categories`. Sync is manual (full upload or full download, not real-time); implemented in `lib/services/firestore_service.dart`.
-- **Generated code:** `lib/models/task.g.dart` is auto-generated from `lib/models/task.dart`. Never edit `.g.dart` files by hand.
+## Working Style
+- Communicate in Bulgarian
+- Provide ready-to-run PowerShell commands for all file edits — user does not edit files manually
+- Verify every code/script at least 3 times before delivering: (1) bracket/parenthesis count, (2) pattern match against actual file content, (3) logical correctness check
+- Test PowerShell logic mentally in bash before delivering
+- No assumptions, no hallucinations — only verified facts
+- Keep responses concise, no filler
 
-### Service Singletons
-
-All major services use the singleton pattern (private constructor + factory). Key services:
-
-| Service | File | Responsibility |
-|---|---|---|
-| `FirestoreService` | `lib/services/firestore_service.dart` | Cloud upload/download |
-| `AuthService` | `lib/services/auth_service.dart` | Firebase email/password auth |
-| `ProService` | `lib/services/pro_service.dart` | RevenueCat subscriptions + trial |
-| `AdService` | `lib/services/ad_service*.dart` | Google Mobile Ads |
-| `GoogleCalendarService` | `lib/services/google_calendar_service.dart` | Google Calendar OAuth + API |
-| `NotificationService` | `lib/services/notification_service.dart` | Local notifications + alarms |
-| `WidgetService` | `lib/services/widget_service.dart` | Native home-screen widget sync |
-
-### Platform-Conditional Imports
-
-Several services have stub implementations for web/desktop:
-
-- `notification_service.dart` exports either `notification_service_mobile.dart` or `notification_service_stub.dart`
-- `pro_service.dart` has a web stub (RevenueCat is mobile-only)
-- Ad and widget services are also mobile-only
-
-When modifying these, update both the real implementation and the stub.
-
-### State Management
-
-The app uses a lightweight custom `ChangeNotifier` pattern — no Provider, Riverpod, or BLoC. `LanguageController` and `ThemeController` are passed down the widget tree manually. Theme changes rebuild via `AnimatedBuilder`.
-
-### App Initialization Sequence (`lib/main.dart`)
-
-The `main()` function runs these in order:
-1. `Firebase.initializeApp()`
-2. Hive init + register adapters + open boxes
-3. `WidgetService.setupWidgetListener()` (mobile only)
-4. `ProService().initialize()` — must complete before UI to gate features
-5. `AdService().initialize()`
-6. `TaskViewPreference().initialize()`
-7. `GoogleCalendarService().tryReconnect()` — silent reconnect
-8. `NotificationService().init()` — sets up tap handler
-
-### Navigation
-
-- 3-tab bottom nav: **Tasks** → **Calendar** → **Settings**
-- A global `NavigatorKey` in `main.dart` is used by `NotificationService` to show the morning briefing dialog from outside the widget tree.
-
-### Pro / Free Feature Gating
-
-`ProService` exposes `isPro`, `isInTrial`, and `daysLeftInTrial`. Feature gates are checked inline throughout the UI. Free tier limits: 50 tasks, 10 categories, no cloud sync, no calendar, no statistics, no widget. The RevenueCat entitlement ID is `Taskify 1969 Pro`.
-
-### Localization
-
-- Supported languages: English, Bulgarian, German, French, Italian, Greek, Spanish, Portuguese, Russian, Turkish.
-- String lookup is in `lib/utils/localization.dart` (large file, ~110 KB). `lib/l10n/` holds `.arb` files for Flutter's built-in `flutter_localizations`.
-- Language preference is stored in SharedPreferences and set at startup.
-
-### Task Model Fields Worth Knowing
-
-- `recurrence`: `'daily'`, `'weekly'`, `'monthly'`, `'yearly'`
-- `reminders`: list of strings — `'at_time'`, `'minus_5m'`, `'minus_30m'`, `'minus_1h'`, `'minus_1d'`, `'same_day_8'`
-- `subtasks`: list of strings encoded as `"checked:qty:text"` (e.g. `"0:1:Buy milk"`)
-- `template`: drives smart UI (e.g. `'shopping'`, `'workout'`, `'packing'`)
-- `googleCalendarEventId`: non-null when synced to Google Calendar
-
-### Firebase Project
-
-Project ID: `taskify-1969`. Firebase config is in `lib/firebase_options.dart` (auto-generated by FlutterFire CLI — do not edit by hand).
-
-### Android Signing
-
-Release builds require a `key.properties` file in `android/` (not committed). The `build.gradle.kts` reads keystore path, alias, and passwords from it.
+## Monetization Context
+Actively seeking realistic revenue opportunities — assist proactively across:
+- Taskify (subscriptions, ads, premium features)
+- Facebook group "УМОПОМРАЧИТЕЛНИ БАЛАДИ" (197,000+ members)
