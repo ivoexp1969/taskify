@@ -1,4 +1,3 @@
-import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -34,11 +33,11 @@ class AdService extends ChangeNotifier {
   static const String _testBannerAndroid = 'ca-app-pub-3940256099942544/6300978111';
   static const String _testBannerIos = 'ca-app-pub-3940256099942544/2934735716';
 
-  String get _interstitialAdUnitId => (!kIsWeb && Platform.isIOS)
+  String get _interstitialAdUnitId => (defaultTargetPlatform == TargetPlatform.iOS)
       ? _interstitialAdUnitIdIos
       : _interstitialAdUnitIdAndroid;
 
-  String get _testInterstitialAdUnitId => (!kIsWeb && Platform.isIOS)
+  String get _testInterstitialAdUnitId => (defaultTargetPlatform == TargetPlatform.iOS)
       ? _testInterstitialIos
       : _testInterstitialAndroid;
 
@@ -48,11 +47,11 @@ class AdService extends ChangeNotifier {
   BannerAd? _bannerAd;
   bool _isBannerAdLoaded = false;
 
-  String get _bannerAdUnitId => (!kIsWeb && Platform.isIOS)
+  String get _bannerAdUnitId => (defaultTargetPlatform == TargetPlatform.iOS)
       ? _bannerAdUnitIdIos
       : _bannerAdUnitIdAndroid;
 
-  String get _testBannerAdUnitId => (!kIsWeb && Platform.isIOS)
+  String get _testBannerAdUnitId => (defaultTargetPlatform == TargetPlatform.iOS)
       ? _testBannerIos
       : _testBannerAndroid;
 
