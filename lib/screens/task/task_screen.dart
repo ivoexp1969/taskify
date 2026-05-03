@@ -201,21 +201,24 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
   void _checkAndCelebrate({VoidCallback? onComplete, DateTime? taskDate}) {
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
-    
+
+    // Ако задачата не е за днес, не празднуваме
+    if (taskDate != null) {
+      final td = DateTime(taskDate.year, taskDate.month, taskDate.day);
+      if (td != todayStart) return;
+    }
+
     final todayTasks = taskBox.values.where((t) {
       if (t.isArchived) return false;
-      final taskDate = DateTime(t.dueDate.year, t.dueDate.month, t.dueDate.day);
-      return taskDate.year == todayStart.year && 
-             taskDate.month == todayStart.month && 
-             taskDate.day == todayStart.day;
+      final due = DateTime(t.dueDate.year, t.dueDate.month, t.dueDate.day);
+      return due == todayStart;
     }).toList();
-    
-    debugPrint('Today tasks count: ' + todayTasks.length.toString());
+
     if (todayTasks.isEmpty) return;
-    
+
     final pendingTasks = todayTasks.where((t) => !t.isCompleted).length;
     if (pendingTasks > 0) return;
-    
+
     showCelebration(context, onComplete: onComplete);
   }
 
