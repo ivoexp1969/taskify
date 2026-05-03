@@ -2233,6 +2233,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                   reminders: task.reminders,
                                   template: task.template,
                                   notes: task.notes,
+                                  subtasks: task.subtasks?.map((s) {
+                                    final parts = s.split(':');
+                                    return parts.length >= 2 ? '0:${parts.sublist(1).join(':')}' : s;
+                                  }).toList(),
                                 );
                                 await taskBox.add(newTask);
                             // Google Calendar sync
@@ -2412,6 +2416,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                       reminders: task.reminders,
                                       template: task.template,
                                       notes: task.notes,
+                                      subtasks: task.subtasks?.map((s) {
+                                        final parts = s.split(':');
+                                        return parts.length >= 2 ? '0:${parts.sublist(1).join(':')}' : s;
+                                      }).toList(),
                                     );
                                     await taskBox.add(newTask);
                             // Google Calendar sync
