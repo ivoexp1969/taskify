@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -111,10 +112,11 @@ class ProService extends ChangeNotifier {
     }
 
     try {
-      // Конфигурация на RevenueCat с production API key
-      await Purchases.configure(
-        PurchasesConfiguration('goog_OgZMwPkNQbGIxgAGLLDTUmaLTqT'),
-      );
+      // RevenueCat API ключове — различни за Android и iOS
+      const _rcAndroidKey = 'goog_OgZMwPkNQbGIxgAGLLDTUmaLTqT';
+      const _rcIosKey = 'appl_REPLACE_WITH_IOS_KEY'; // TODO: вземи от RevenueCat Dashboard → App Settings → iOS
+      final rcKey = (!kIsWeb && Platform.isIOS) ? _rcIosKey : _rcAndroidKey;
+      await Purchases.configure(PurchasesConfiguration(rcKey));
 
       Purchases.addCustomerInfoUpdateListener((customerInfo) {
         _updateProStatus(customerInfo);

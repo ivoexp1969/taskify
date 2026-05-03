@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
@@ -85,6 +86,12 @@ class NotificationService {
     if (_initialized) return;
 
     tz_data.initializeTimeZones();
+    try {
+      final String tzName = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(tzName));
+    } catch (_) {
+      tz.setLocalLocation(tz.UTC);
+    }
 
     if (Platform.isAndroid) {
       await AndroidAlarmManager.initialize();

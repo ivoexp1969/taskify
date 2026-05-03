@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,16 +20,41 @@ class AdService extends ChangeNotifier {
   static const int _actionsPerAd = 5;
   static const String _lastAppOpenKey = 'last_app_open_ad';
 
-  static const String _interstitialAdUnitId = 'ca-app-pub-4385157735120275/2061138507';
-  static const String _testInterstitialAdUnitId = 'ca-app-pub-3940256099942544/1033173712';
+  // Android production ad unit IDs
+  static const String _interstitialAdUnitIdAndroid = 'ca-app-pub-4385157735120275/2061138507';
+  static const String _bannerAdUnitIdAndroid = 'ca-app-pub-4385157735120275/2402990338';
+
+  // iOS production ad unit IDs — TODO: вземи от AdMob конзолата след добавяне на iOS app
+  static const String _interstitialAdUnitIdIos = 'ca-app-pub-4385157735120275/REPLACE_IOS_INTERSTITIAL';
+  static const String _bannerAdUnitIdIos = 'ca-app-pub-4385157735120275/REPLACE_IOS_BANNER';
+
+  // Test ad unit IDs (от Google) — различни за Android и iOS
+  static const String _testInterstitialAndroid = 'ca-app-pub-3940256099942544/1033173712';
+  static const String _testInterstitialIos = 'ca-app-pub-3940256099942544/4411468910';
+  static const String _testBannerAndroid = 'ca-app-pub-3940256099942544/6300978111';
+  static const String _testBannerIos = 'ca-app-pub-3940256099942544/2934735716';
+
+  String get _interstitialAdUnitId => (!kIsWeb && Platform.isIOS)
+      ? _interstitialAdUnitIdIos
+      : _interstitialAdUnitIdAndroid;
+
+  String get _testInterstitialAdUnitId => (!kIsWeb && Platform.isIOS)
+      ? _testInterstitialIos
+      : _testInterstitialAndroid;
 
   bool get isInterstitialAdLoaded => _isInterstitialAdLoaded;
 
-  // Banner Ad - запазваме за banner_ad_widget.dart
+  // Banner Ad — запазваме за banner_ad_widget.dart
   BannerAd? _bannerAd;
   bool _isBannerAdLoaded = false;
-  static const String _bannerAdUnitId = 'ca-app-pub-4385157735120275/2402990338';
-  static const String _testBannerAdUnitId = 'ca-app-pub-3940256099942544/6300978111';
+
+  String get _bannerAdUnitId => (!kIsWeb && Platform.isIOS)
+      ? _bannerAdUnitIdIos
+      : _bannerAdUnitIdAndroid;
+
+  String get _testBannerAdUnitId => (!kIsWeb && Platform.isIOS)
+      ? _testBannerIos
+      : _testBannerAndroid;
 
   bool get isBannerAdLoaded => _isBannerAdLoaded;
   BannerAd? get bannerAd => _bannerAd;

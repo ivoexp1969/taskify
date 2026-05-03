@@ -27,9 +27,10 @@ class GoogleCalendarService {
   GoogleSignIn _getGoogleSignIn() {
     _googleSignIn ??= GoogleSignIn(
       scopes: scopes,
-      serverClientId: kIsWeb 
+      // Web използва Web Client ID; mobile — четат от google-services.json / GoogleService-Info.plist
+      serverClientId: kIsWeb
           ? '929046134968-m6ffgsd8dsotabi7ivkjdsqfnlm041n.apps.googleusercontent.com'
-          : FirebaseAuth.instance.app.options.androidClientId,
+          : null,
     );
     return _googleSignIn!;
   }
