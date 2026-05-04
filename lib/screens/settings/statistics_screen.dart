@@ -16,6 +16,7 @@ class StatisticsScreen extends StatefulWidget {
 class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBindingObserver {
   late Box<Task> taskBox;
   late Box<Category> categoryBox;
+  int _periodDays = 7;
 
   @override
   void initState() {
@@ -38,6 +39,174 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
   void _refresh() {
     if (mounted) {
       setState(() {});
+    }
+  }
+
+  String _periodTitle(int days, String lang) {
+    if (days == 7) {
+      const m = {'en': 'Last 7 days', 'bg': 'Последните 7 дни', 'de': 'Letzte 7 Tage', 'fr': '7 derniers jours', 'it': 'Ultimi 7 giorni', 'el': 'Τελευταίες 7 μέρες', 'es': 'Últimos 7 días', 'pt': 'Últimos 7 dias', 'ru': 'Последние 7 дней', 'tr': 'Son 7 gün'};
+      return m[lang] ?? m['en']!;
+    }
+    if (days == 30) {
+      const m = {'en': 'Last 30 days', 'bg': 'Последните 30 дни', 'de': 'Letzte 30 Tage', 'fr': '30 derniers jours', 'it': 'Ultimi 30 giorni', 'el': 'Τελευταίες 30 μέρες', 'es': 'Últimos 30 días', 'pt': 'Últimos 30 dias', 'ru': 'Последние 30 дней', 'tr': 'Son 30 gün'};
+      return m[lang] ?? m['en']!;
+    }
+    const m = {'en': 'Last 3 months', 'bg': 'Последните 3 месеца', 'de': 'Letzte 3 Monate', 'fr': '3 derniers mois', 'it': 'Ultimi 3 mesi', 'el': 'Τελευταίοι 3 μήνες', 'es': 'Últimos 3 meses', 'pt': 'Últimos 3 meses', 'ru': 'Последние 3 месяца', 'tr': 'Son 3 ay'};
+    return m[lang] ?? m['en']!;
+  }
+
+  Widget _buildBarChart(ThemeData theme, String lang) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    if (_periodDays == 7) {
+      const dayLabels = {
+        'en': ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+        'bg': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
+        'de': ['M', 'D', 'M', 'D', 'F', 'S', 'S'],
+        'fr': ['L', 'M', 'M', 'J', 'V', 'S', 'D'],
+        'it': ['L', 'M', 'M', 'G', 'V', 'S', 'D'],
+        'el': ['Δ', 'Τ', 'Τ', 'Π', 'Π', 'Σ', 'Κ'],
+        'es': ['L', 'M', 'M', 'J', 'V', 'S', 'D'],
+        'pt': ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'],
+        'ru': ['П', 'В', 'С', 'Ч', 'П', 'С', 'В'],
+        'tr': ['P', 'S', 'Ç', 'P', 'C', 'C', 'P'],
+      };
+      return BarChart(
+        BarChartData(
+          alignment: BarChartAlignment.spaceAround,
+          barTouchData: BarTouchData(enabled: false),
+          titlesData: FlTitlesData(
+            show: true,
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  final day = today.subtract(Duration(days: 6 - value.toInt()));
+                  final labels = dayLabels[lang] ?? dayLabels['en']!;
+                  return Text(
+                    labels[day.weekday - 1],
+                    style: TextStyle(fontSize: 10, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+                  );
+                },
+              ),
+            ),
+            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          ),
+          borderData: FlBorderData(show: false),
+          gridData: const FlGridData(show: false),
+          barGroups: List.generate(7, (index) {
+            final dayStart = today.subtract(Duration(days: 6 - index));
+            final dayEnd = dayStart.add(const Duration(days: 1));
+            final count = _completedInPeriod(dayStart, dayEnd);
+            return BarChartGroupData(
+              x: index,
+              barRods: [
+                BarChartRodData(
+                  toY: count.toDouble(),
+                  color: theme.colorScheme.primary,
+                  width: 20,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                ),
+              ],
+            );
+          }),
+        ),
+      );
+    } else if (_periodDays == 30) {
+      return BarChart(
+        BarChartData(
+          alignment: BarChartAlignment.spaceAround,
+          barTouchData: BarTouchData(enabled: false),
+          titlesData: FlTitlesData(
+            show: true,
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  final idx = value.toInt();
+                  if (idx % 7 != 0 && idx != 29) return const SizedBox.shrink();
+                  final day = today.subtract(Duration(days: 29 - idx));
+                  return Text(
+                    '${day.day}',
+                    style: TextStyle(fontSize: 9, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+                  );
+                },
+              ),
+            ),
+            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          ),
+          borderData: FlBorderData(show: false),
+          gridData: const FlGridData(show: false),
+          barGroups: List.generate(30, (index) {
+            final dayStart = today.subtract(Duration(days: 29 - index));
+            final dayEnd = dayStart.add(const Duration(days: 1));
+            final count = _completedInPeriod(dayStart, dayEnd);
+            return BarChartGroupData(
+              x: index,
+              barRods: [
+                BarChartRodData(
+                  toY: count.toDouble(),
+                  color: theme.colorScheme.primary,
+                  width: 8,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(3)),
+                ),
+              ],
+            );
+          }),
+        ),
+      );
+    } else {
+      return BarChart(
+        BarChartData(
+          alignment: BarChartAlignment.spaceAround,
+          barTouchData: BarTouchData(enabled: false),
+          titlesData: FlTitlesData(
+            show: true,
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  final i = value.toInt();
+                  final daysFromEnd = (12 - i) * 7;
+                  final weekEnd = today.subtract(Duration(days: daysFromEnd)).add(const Duration(days: 1));
+                  final weekStart = weekEnd.subtract(const Duration(days: 7));
+                  return Text(
+                    '${weekStart.day}/${weekStart.month}',
+                    style: TextStyle(fontSize: 8, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+                  );
+                },
+              ),
+            ),
+            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          ),
+          borderData: FlBorderData(show: false),
+          gridData: const FlGridData(show: false),
+          barGroups: List.generate(13, (i) {
+            final daysFromEnd = (12 - i) * 7;
+            final weekEnd = today.subtract(Duration(days: daysFromEnd)).add(const Duration(days: 1));
+            final weekStart = weekEnd.subtract(const Duration(days: 7));
+            final count = _completedInPeriod(weekStart, weekEnd);
+            return BarChartGroupData(
+              x: i,
+              barRods: [
+                BarChartRodData(
+                  toY: count.toDouble(),
+                  color: theme.colorScheme.primary,
+                  width: 16,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                ),
+              ],
+            );
+          }),
+        ),
+      );
     }
   }
 
@@ -156,42 +325,15 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
     }
     if (c.isDefault) {
       final translations = {
-        'work': {
-          'en': 'Work',
-          'bg': 'Работа',
-          'de': 'Arbeit',
-          'fr': 'Travail',
-          'it': 'Lavoro',
-          'el': 'Εργασία',
-          'es': 'Trabajo',
-          'pt': 'Trabalho',
-          'ru': 'Работа',
-          'tr': 'İş',
-        },
-        'personal': {
-          'en': 'Personal',
-          'bg': 'Лични',
-          'de': 'Persönlich',
-          'fr': 'Personnel',
-          'it': 'Personale',
-          'el': 'Προσωπικά',
-          'es': 'Personal',
-          'pt': 'Pessoal',
-          'ru': 'Личное',
-          'tr': 'Kişisel',
-        },
-        'shopping': {
-          'en': 'Shopping',
-          'bg': 'Пазаруване',
-          'de': 'Einkaufen',
-          'fr': 'Courses',
-          'it': 'Spesa',
-          'el': 'Αγορές',
-          'es': 'Compras',
-          'pt': 'Compras',
-          'ru': 'Покупки',
-          'tr': 'Alışveriş',
-        },
+        'work': {'en': 'Work', 'bg': 'Работа', 'de': 'Arbeit', 'fr': 'Travail', 'it': 'Lavoro', 'el': 'Εργασία', 'es': 'Trabajo', 'pt': 'Trabalho', 'ru': 'Работа', 'tr': 'İş'},
+        'personal': {'en': 'Personal', 'bg': 'Лични', 'de': 'Persönlich', 'fr': 'Personnel', 'it': 'Personale', 'el': 'Προσωπικά', 'es': 'Personal', 'pt': 'Pessoal', 'ru': 'Личное', 'tr': 'Kişisel'},
+        'shopping': {'en': 'Shopping', 'bg': 'Пазаруване', 'de': 'Einkaufen', 'fr': 'Courses', 'it': 'Spesa', 'el': 'Αγορές', 'es': 'Compras', 'pt': 'Compras', 'ru': 'Покупки', 'tr': 'Alışveriş'},
+        'birthday': {'en': 'Birthday', 'bg': 'Рождени дни', 'de': 'Geburtstag', 'fr': 'Anniversaire', 'it': 'Compleanno', 'el': 'Γενέθλια', 'es': 'Cumpleaños', 'pt': 'Aniversário', 'ru': 'День рождения', 'tr': 'Doğum günü'},
+        'meeting': {'en': 'Meeting', 'bg': 'Срещи', 'de': 'Besprechung', 'fr': 'Réunion', 'it': 'Riunione', 'el': 'Συνάντηση', 'es': 'Reunión', 'pt': 'Reunião', 'ru': 'Встреча', 'tr': 'Toplantı'},
+        'workout': {'en': 'Workout', 'bg': 'Тренировка', 'de': 'Training', 'fr': 'Entraînement', 'it': 'Allenamento', 'el': 'Άσκηση', 'es': 'Entrenamiento', 'pt': 'Treino', 'ru': 'Тренировка', 'tr': 'Egzersiz'},
+        'payment': {'en': 'Payment', 'bg': 'Плащания', 'de': 'Zahlung', 'fr': 'Paiement', 'it': 'Pagamento', 'el': 'Πληρωμή', 'es': 'Pago', 'pt': 'Pagamento', 'ru': 'Платёж', 'tr': 'Ödeme'},
+        'travel': {'en': 'Travel', 'bg': 'Пътувания', 'de': 'Reise', 'fr': 'Voyage', 'it': 'Viaggio', 'el': 'Ταξίδι', 'es': 'Viaje', 'pt': 'Viagem', 'ru': 'Путешествие', 'tr': 'Seyahat'},
+        'gift': {'en': 'Gift', 'bg': 'Подаръци', 'de': 'Geschenk', 'fr': 'Cadeau', 'it': 'Regalo', 'el': 'Δώρο', 'es': 'Regalo', 'pt': 'Presente', 'ru': 'Подарок', 'tr': 'Hediye'},
       };
       return translations[c.id]?[lang] ?? translations[c.id]?['en'] ?? c.name;
     }
@@ -509,13 +651,31 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
 
           const SizedBox(height: 24),
 
-          // Седмична активност
-          Text(
-            t.last7Days,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+          // Активност по период
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _periodTitle(_periodDays, lang),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Row(
+                children: [7, 30, 90].map((days) => Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: ChoiceChip(
+                    label: Text(days == 7 ? '7d' : days == 30 ? '30d' : '3m'),
+                    selected: _periodDays == days,
+                    onSelected: (_) => setState(() => _periodDays = days),
+                    labelStyle: const TextStyle(fontSize: 12),
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                  ),
+                )).toList(),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           Card(
@@ -523,78 +683,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
               padding: const EdgeInsets.all(16),
               child: SizedBox(
                 height: 150,
-                child: BarChart(
-                  BarChartData(
-                    alignment: BarChartAlignment.spaceAround,
-                    barTouchData: BarTouchData(enabled: false),
-                    titlesData: FlTitlesData(
-                      show: true,
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (value, meta) {
-                            final day = DateTime.now().subtract(
-                              Duration(days: 6 - value.toInt()),
-                            );
-                            const labels = {
-                              'en': ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-                              'bg': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
-                              'de': ['M', 'D', 'M', 'D', 'F', 'S', 'S'],
-                              'fr': ['L', 'M', 'M', 'J', 'V', 'S', 'D'],
-                              'it': ['L', 'M', 'M', 'G', 'V', 'S', 'D'],
-                              'el': ['Δ', 'Τ', 'Τ', 'Π', 'Π', 'Σ', 'Κ'],
-                              'es': ['L', 'M', 'M', 'J', 'V', 'S', 'D'],
-                              'pt': ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'],
-                              'ru': ['П', 'В', 'С', 'Ч', 'П', 'С', 'В'],
-                              'tr': ['P', 'S', 'Ç', 'P', 'C', 'C', 'P'],
-                            };
-                            final dayLabels = labels[lang] ?? labels['en']!;
-                            return Text(
-                              dayLabels[day.weekday - 1],
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      leftTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                      topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                      rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                    ),
-                    borderData: FlBorderData(show: false),
-                    gridData: const FlGridData(show: false),
-                    barGroups: List.generate(7, (index) {
-                      final day = DateTime.now().subtract(
-                        Duration(days: 6 - index),
-                      );
-                      final dayStart = DateTime(day.year, day.month, day.day);
-                      final dayEnd = dayStart.add(const Duration(days: 1));
-                      final count = _completedInPeriod(dayStart, dayEnd);
-                      
-                      return BarChartGroupData(
-                        x: index,
-                        barRods: [
-                          BarChartRodData(
-                            toY: count.toDouble(),
-                            color: theme.colorScheme.primary,
-                            width: 20,
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(6),
-                            ),
-                          ),
-                        ],
-                      );
-                    }),
-                  ),
-                ),
+                child: _buildBarChart(theme, lang),
               ),
             ),
           ),
