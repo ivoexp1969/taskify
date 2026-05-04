@@ -96,5 +96,13 @@
             </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/task_widget_large_info" />
         </receiver>
+
+        <receiver android:name=".TaskWidgetMediumProvider" android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.ivoexp.taskify.ACTION_COMPLETE_TASK_MEDIUM" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/task_widget_medium_info" />
+        </receiver>
     </application>
 </manifest>

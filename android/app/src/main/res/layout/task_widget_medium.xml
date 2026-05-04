@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_container" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@drawable/widget_background" android:orientation="vertical" android:padding="10dp">
+    <!-- Header: icon + date + remaining count -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
+        <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@mipmap/ic_launcher"/>
+        <TextView android:id="@+id/widget_date" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:layout_marginStart="6dp" android:textColor="#FFFFFF" android:textSize="11sp" android:textStyle="bold"/>
+        <TextView android:id="@+id/widget_count" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textColor="#80FFFFFF" android:textSize="10sp"/>
+    </LinearLayout>
+    <!-- Empty state -->
+    <LinearLayout android:id="@+id/empty_container" android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:gravity="center" android:visibility="gone">
+        <TextView android:id="@+id/empty_text" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textColor="#80FFFFFF" android:textSize="11sp" android:gravity="center"/>
+    </LinearLayout>
+    <!-- Task rows -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:layout_marginTop="6dp" android:orientation="vertical">
+        <LinearLayout android:id="@+id/task_row_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="3dp" android:background="@drawable/widget_row_bg" android:gravity="center_vertical" android:padding="5dp">
+            <ImageView android:id="@+id/task_checkbox_1" android:layout_width="14dp" android:layout_height="14dp" android:background="@drawable/widget_checkbox"/>
+            <TextView android:id="@+id/priority_dot_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="●" android:textSize="8sp" android:textColor="#EF5350" android:layout_marginStart="3dp" android:visibility="gone"/>
+            <TextView android:id="@+id/task_title_1" android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_marginStart="4dp" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="11sp"/>
+            <TextView android:id="@+id/task_time_1" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="#80FFFFFF" android:textSize="9sp" android:layout_marginStart="6dp" android:visibility="gone"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/task_row_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="3dp" android:background="@drawable/widget_row_bg" android:gravity="center_vertical" android:padding="5dp" android:visibility="gone">
+            <ImageView android:id="@+id/task_checkbox_2" android:layout_width="14dp" android:layout_height="14dp" android:background="@drawable/widget_checkbox"/>
+            <TextView android:id="@+id/priority_dot_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="●" android:textSize="8sp" android:textColor="#EF5350" android:layout_marginStart="3dp" android:visibility="gone"/>
+            <TextView android:id="@+id/task_title_2" android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_marginStart="4dp" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="11sp"/>
+            <TextView android:id="@+id/task_time_2" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="#80FFFFFF" android:textSize="9sp" android:layout_marginStart="6dp" android:visibility="gone"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/task_row_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="3dp" android:background="@drawable/widget_row_bg" android:gravity="center_vertical" android:padding="5dp" android:visibility="gone">
+            <ImageView android:id="@+id/task_checkbox_3" android:layout_width="14dp" android:layout_height="14dp" android:background="@drawable/widget_checkbox"/>
+            <TextView android:id="@+id/priority_dot_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="●" android:textSize="8sp" android:textColor="#EF5350" android:layout_marginStart="3dp" android:visibility="gone"/>
+            <TextView android:id="@+id/task_title_3" android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_marginStart="4dp" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="11sp"/>
+            <TextView android:id="@+id/task_time_3" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="#80FFFFFF" android:textSize="9sp" android:layout_marginStart="6dp" android:visibility="gone"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/task_row_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="3dp" android:background="@drawable/widget_row_bg" android:gravity="center_vertical" android:padding="5dp" android:visibility="gone">
+            <ImageView android:id="@+id/task_checkbox_4" android:layout_width="14dp" android:layout_height="14dp" android:background="@drawable/widget_checkbox"/>
+            <TextView android:id="@+id/priority_dot_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="●" android:textSize="8sp" android:textColor="#EF5350" android:layout_marginStart="3dp" android:visibility="gone"/>
+            <TextView android:id="@+id/task_title_4" android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_marginStart="4dp" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="11sp"/>
+            <TextView android:id="@+id/task_time_4" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="#80FFFFFF" android:textSize="9sp" android:layout_marginStart="6dp" android:visibility="gone"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/task_row_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@drawable/widget_row_bg" android:gravity="center_vertical" android:padding="5dp" android:visibility="gone">
+            <ImageView android:id="@+id/task_checkbox_5" android:layout_width="14dp" android:layout_height="14dp" android:background="@drawable/widget_checkbox"/>
+            <TextView android:id="@+id/priority_dot_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="●" android:textSize="8sp" android:textColor="#EF5350" android:layout_marginStart="3dp" android:visibility="gone"/>
+            <TextView android:id="@+id/task_title_5" android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_marginStart="4dp" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="11sp"/>
+            <TextView android:id="@+id/task_time_5" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="#80FFFFFF" android:textSize="9sp" android:layout_marginStart="6dp" android:visibility="gone"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -2,4 +2,5 @@
 <resources>
     <string name="widget_description">Показва до 3 задачи за деня</string>
     <string name="widget_large_description">Показва до 5 задачи за деня с бутон за добавяне</string>
+    <string name="widget_description_medium">Показва до 5 задачи с дата, час и приоритет (4×2)</string>
 </resources>

@@ -17,20 +17,23 @@
         <LinearLayout android:id="@+id/task_row_1" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginBottom="2dp" android:background="@drawable/widget_row_bg" android:gravity="center_vertical" android:padding="4dp">
             <ImageView android:id="@+id/task_checkbox_1" android:layout_width="16dp" android:layout_height="16dp" android:background="@drawable/widget_checkbox"/>
+            <TextView android:id="@+id/priority_dot_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="●" android:textSize="8sp" android:textColor="#EF5350" android:layout_marginStart="3dp" android:visibility="gone"/>
             <TextView android:id="@+id/task_title_1" android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_marginStart="6dp" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="10sp"/>
+                android:layout_marginStart="4dp" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="10sp"/>
         </LinearLayout>
         <LinearLayout android:id="@+id/task_row_2" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginBottom="2dp" android:background="@drawable/widget_row_bg" android:gravity="center_vertical" android:padding="4dp" android:visibility="gone">
             <ImageView android:id="@+id/task_checkbox_2" android:layout_width="16dp" android:layout_height="16dp" android:background="@drawable/widget_checkbox"/>
+            <TextView android:id="@+id/priority_dot_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="●" android:textSize="8sp" android:textColor="#EF5350" android:layout_marginStart="3dp" android:visibility="gone"/>
             <TextView android:id="@+id/task_title_2" android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_marginStart="6dp" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="10sp"/>
+                android:layout_marginStart="4dp" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="10sp"/>
         </LinearLayout>
         <LinearLayout android:id="@+id/task_row_3" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:background="@drawable/widget_row_bg" android:gravity="center_vertical" android:padding="4dp" android:visibility="gone">
             <ImageView android:id="@+id/task_checkbox_3" android:layout_width="16dp" android:layout_height="16dp" android:background="@drawable/widget_checkbox"/>
+            <TextView android:id="@+id/priority_dot_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="●" android:textSize="8sp" android:textColor="#EF5350" android:layout_marginStart="3dp" android:visibility="gone"/>
             <TextView android:id="@+id/task_title_3" android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_marginStart="6dp" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="10sp"/>
+                android:layout_marginStart="4dp" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="10sp"/>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

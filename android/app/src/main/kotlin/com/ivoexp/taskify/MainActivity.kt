@@ -55,5 +55,7 @@ class MainActivity : FlutterActivity() {
         for (id in smallIds) { TaskWidgetProvider.updateAppWidget(this, appWidgetManager, id) }
         val largeIds = appWidgetManager.getAppWidgetIds(ComponentName(this, TaskWidgetLargeProvider::class.java))
         for (id in largeIds) { TaskWidgetLargeProvider.updateAppWidget(this, appWidgetManager, id) }
+        val mediumIds = appWidgetManager.getAppWidgetIds(ComponentName(this, TaskWidgetMediumProvider::class.java))
+        for (id in mediumIds) { TaskWidgetMediumProvider.updateAppWidget(this, appWidgetManager, id) }
     }
 }

@@ -35,6 +35,20 @@ class TaskWidgetProvider : AppWidgetProvider() {
         const val TASKS_KEY = "flutter.widget_tasks"
         const val LANGUAGE_KEY = "flutter.app_language"
 
+        private fun setPriorityDot(views: RemoteViews, dotId: Int, priority: Int) {
+            if (priority > 0) {
+                val color = when (priority) {
+                    3 -> 0xFFEF5350.toInt()
+                    2 -> 0xFFFFB74D.toInt()
+                    else -> 0xFF64B5F6.toInt()
+                }
+                views.setViewVisibility(dotId, View.VISIBLE)
+                views.setTextColor(dotId, color)
+            } else {
+                views.setViewVisibility(dotId, View.GONE)
+            }
+        }
+
         private fun getErrorText(context: Context): String {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val lang = prefs.getString(LANGUAGE_KEY, "bg") ?: "bg"
@@ -246,32 +260,34 @@ class TaskWidgetProvider : AppWidgetProvider() {
                     val t = tasksArray.getJSONObject(i)
                     if (!t.optBoolean("isCompleted", false)) tasks.add(t)
                 }
+                data class WidgetRow(val rowId: Int, val titleId: Int, val checkboxId: Int, val dotId: Int)
                 val rows = listOf(
-                    Triple(R.id.task_row_1, R.id.task_title_1, R.id.task_checkbox_1),
-                    Triple(R.id.task_row_2, R.id.task_title_2, R.id.task_checkbox_2),
-                    Triple(R.id.task_row_3, R.id.task_title_3, R.id.task_checkbox_3))
+                    WidgetRow(R.id.task_row_1, R.id.task_title_1, R.id.task_checkbox_1, R.id.priority_dot_1),
+                    WidgetRow(R.id.task_row_2, R.id.task_title_2, R.id.task_checkbox_2, R.id.priority_dot_2),
+                    WidgetRow(R.id.task_row_3, R.id.task_title_3, R.id.task_checkbox_3, R.id.priority_dot_3))
                 if (tasks.isEmpty()) {
                     views.setTextViewText(R.id.widget_title, "Taskify")
                     views.setViewVisibility(R.id.empty_container, View.VISIBLE)
                     views.setTextViewText(R.id.empty_text, getEmptyMessage(context))
-                    rows.forEach { views.setViewVisibility(it.first, View.GONE) }
+                    rows.forEach { views.setViewVisibility(it.rowId, View.GONE) }
                 } else {
                     views.setTextViewText(R.id.widget_title, getTaskCountText(tasks.size, context))
                     views.setViewVisibility(R.id.empty_container, View.GONE)
                     for (i in 0 until 3) {
-                        val (rowId, titleId, checkboxId) = rows[i]
+                        val row = rows[i]
                         if (i < tasks.size) {
                             val task = tasks[i]
                             val key = task.optInt("key", -1)
-                            views.setViewVisibility(rowId, View.VISIBLE)
-                            views.setTextViewText(titleId, task.optString("title", ""))
+                            views.setViewVisibility(row.rowId, View.VISIBLE)
+                            views.setTextViewText(row.titleId, task.optString("title", ""))
+                            setPriorityDot(views, row.dotId, task.optInt("priority", 0))
                             val intent = Intent(context, TaskWidgetProvider::class.java).apply {
                                 action = ACTION_COMPLETE_TASK
                                 putExtra(EXTRA_TASK_KEY, key)
                                 data = Uri.parse("taskify://complete/$key")
                             }
-                            views.setOnClickPendingIntent(checkboxId, PendingIntent.getBroadcast(context, key, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE))
-                        } else { views.setViewVisibility(rowId, View.GONE) }
+                            views.setOnClickPendingIntent(row.checkboxId, PendingIntent.getBroadcast(context, key, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE))
+                        } else { views.setViewVisibility(row.rowId, View.GONE) }
                     }
                 }
             } catch (e: Exception) {
