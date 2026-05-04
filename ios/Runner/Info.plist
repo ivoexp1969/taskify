@@ -75,7 +75,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<!-- Замени com.googleusercontent.apps.XXXXXXX с реалния REVERSED_CLIENT_ID от GoogleService-Info.plist -->
-				<string>com.googleusercontent.apps.929046134968-REPLACE_WITH_REAL_REVERSED_CLIENT_ID</string>
+				<string>com.googleusercontent.apps.929046134968-g21i568en2jccqqvlkj4e2reqks9kuij</string>
 			</array>
 		</dict>
 	</array>

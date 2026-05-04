@@ -50,20 +50,22 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyA6tco-owpSj5QH5K49ZklzGDpXMfnNB9Q',
-    appId: '1:929046134968:ios:f6ff8bad848d5949c8744d',
+    appId: '1:929046134968:ios:b874cebb82070f6dc8744d',
     messagingSenderId: '929046134968',
     projectId: 'taskify-1969',
     storageBucket: 'taskify-1969.firebasestorage.app',
     iosBundleId: 'com.ivoexp.taskify',
+    clientId: '929046134968-g21i568en2jccqqvlkj4e2reqks9kuij.apps.googleusercontent.com',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyA6tco-owpSj5QH5K49ZklzGDpXMfnNB9Q',
-    appId: '1:929046134968:ios:f6ff8bad848d5949c8744d',
+    appId: '1:929046134968:ios:b874cebb82070f6dc8744d',
     messagingSenderId: '929046134968',
     projectId: 'taskify-1969',
     storageBucket: 'taskify-1969.firebasestorage.app',
     iosBundleId: 'com.ivoexp.taskify',
+    clientId: '929046134968-g21i568en2jccqqvlkj4e2reqks9kuij.apps.googleusercontent.com',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
