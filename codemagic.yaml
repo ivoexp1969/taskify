@@ -1,0 +1,28 @@
+workflows:
+  ios-test-build:
+    name: iOS Test Build (Unsigned)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Flutter doctor
+        script: flutter doctor -v
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios
+          pod install --repo-update
+      - name: Build iOS (no codesign)
+        script: flutter build ios --release --no-codesign
+      - name: Package .app for Appetize.io
+        script: |
+          cd build/ios/iphoneos
+          zip -r Runner.app.zip Runner.app
+    artifacts:
+      - build/ios/iphoneos/Runner.app.zip
+      - build/ios/iphoneos/Runner.app
+      - flutter_drive.log
