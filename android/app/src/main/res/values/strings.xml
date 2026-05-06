@@ -2,5 +2,6 @@
 <resources>
     <string name="app_name">Taskify</string>
     <string name="widget_description">Показва задачите за днес</string>
+    <string name="widget_description_medium">Taskify 4x2</string>
     <string name="widget_description_large">Taskify 3x1</string>
 </resources>

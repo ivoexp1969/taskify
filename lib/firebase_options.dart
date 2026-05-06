@@ -55,7 +55,6 @@ class DefaultFirebaseOptions {
     projectId: 'taskify-1969',
     storageBucket: 'taskify-1969.firebasestorage.app',
     iosBundleId: 'com.ivoexp.taskify',
-    clientId: '929046134968-g21i568en2jccqqvlkj4e2reqks9kuij.apps.googleusercontent.com',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -65,7 +64,6 @@ class DefaultFirebaseOptions {
     projectId: 'taskify-1969',
     storageBucket: 'taskify-1969.firebasestorage.app',
     iosBundleId: 'com.ivoexp.taskify',
-    clientId: '929046134968-g21i568en2jccqqvlkj4e2reqks9kuij.apps.googleusercontent.com',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
