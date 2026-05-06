@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,9 +51,8 @@ class GoogleCalendarService {
           return;
         }
       }
-      // Silent fail — потребителят ще трябва да свърже ръчно
+      // Silent fail — само in-memory, не трием prefs (може да е временна мрежова грешка)
       _isConnected = false;
-      await prefs.setBool('google_calendar_connected', false);
     } catch (e) {
       debugPrint('Silent reconnect failed: $e');
       _isConnected = false;

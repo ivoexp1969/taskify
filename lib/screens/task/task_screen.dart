@@ -2262,9 +2262,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                               
                               // Проверка за празнуване
                               if (!wasCompleted && task.isCompleted) {
-                                _checkAndCelebrate(taskDate: task.dueDate, onComplete: () {
-                                  if (context.mounted) ReviewService().onTaskCompleted(context);
-                                });
+                                _checkAndCelebrate(taskDate: task.dueDate);
+                                ReviewService().onTaskCompleted(context);
                               }
                               return false; // Не изтриваме, само toggle-ваме
                             } else {
@@ -2444,9 +2443,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                   setState(() {});
                                   
                                   if (!wasCompleted && task.isCompleted) {
-                                    _checkAndCelebrate(taskDate: task.dueDate, onComplete: () {
-                                      if (context.mounted) ReviewService().onTaskCompleted(context);
-                                    });
+                                    _checkAndCelebrate(taskDate: task.dueDate);
+                                    ReviewService().onTaskCompleted(context);
                                   }
                                 },
                                 onEdit: () {
