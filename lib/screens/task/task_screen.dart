@@ -27,6 +27,7 @@ import 'travel_dialog.dart';
 import 'gift_dialog.dart';
 import '../../widgets/task_card_styles.dart';
 import '../../widgets/pomodoro_timer_sheet.dart';
+import '../settings/statistics_screen.dart';
 
 enum TaskFilter { all, active, completed, overdue, upcoming, archived }
 enum TaskSort { date, priority, name, category }
@@ -1907,6 +1908,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
             color: theme.colorScheme.surface,
             child: Column(
               children: [
+            // Productivity banner — streak + today's score
+            _ProductivityBanner(taskBox: taskBox),
+
             // Статистика - нов дизайн
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
@@ -2550,6 +2554,168 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════
+// Productivity Banner — streak + today's score
+// ══════════════════════════════════════════════════
+class _ProductivityBanner extends StatelessWidget {
+  final Box<Task> taskBox;
+
+  const _ProductivityBanner({required this.taskBox});
+
+  int _calculateStreak() {
+    final now = DateTime.now();
+    int streak = 0;
+    for (int i = 0; i < 365; i++) {
+      final day = DateTime(now.year, now.month, now.day).subtract(Duration(days: i));
+      final nextDay = day.add(const Duration(days: 1));
+      final completedOnDay = taskBox.values.where((t) {
+        if (!t.isCompleted) return false;
+        final d = t.completedAt ?? t.dueDate;
+        return d.isAfter(day) && d.isBefore(nextDay);
+      }).length;
+      if (completedOnDay > 0) {
+        streak++;
+      } else if (i > 0) {
+        break;
+      }
+    }
+    return streak;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final t = AppText.of(context);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    final todayTasks = taskBox.values.where((task) {
+      if (task.isArchived) return false;
+      final due = DateTime(task.dueDate.year, task.dueDate.month, task.dueDate.day);
+      return due == today;
+    }).toList();
+
+    final completedToday = todayTasks.where((task) => task.isCompleted).length;
+    final totalToday = todayTasks.length;
+    final score = totalToday > 0 ? completedToday / totalToday : 0.0;
+    final streak = _calculateStreak();
+
+    if (streak == 0 && totalToday == 0) return const SizedBox.shrink();
+
+    final scoreColor = score >= 1.0 ? Colors.green : (score >= 0.5 ? Colors.orange : theme.colorScheme.primary);
+
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const StatisticsScreen()),
+      ),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+              theme.colorScheme.surface,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: theme.colorScheme.outline.withValues(alpha: 0.1),
+          ),
+        ),
+        child: Row(
+          children: [
+            // Streak
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      streak > 0 ? '🔥' : '💤',
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      '$streak',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  t.streakDays,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                  ),
+                ),
+              ],
+            ),
+
+            // Separator
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              width: 1,
+              height: 34,
+              color: theme.colorScheme.outline.withValues(alpha: 0.12),
+            ),
+
+            // Today's score
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        t.todayScore,
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                        ),
+                      ),
+                      Text(
+                        totalToday > 0 ? '$completedToday / $totalToday' : '—',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: scoreColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: score,
+                      minHeight: 5,
+                      backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.07),
+                      valueColor: AlwaysStoppedAnimation<Color>(scoreColor),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 8),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 18,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.25),
+            ),
+          ],
+        ),
       ),
     );
   }

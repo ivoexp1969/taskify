@@ -1058,6 +1058,10 @@ class AppText {
 
   String giftTitle(String name) => _t({'en': 'Gift for $name', 'bg': 'Подарък за $name', 'de': 'Geschenk für $name', 'fr': 'Cadeau pour $name', 'it': 'Regalo per $name', 'el': 'Δώρο για $name', 'es': 'Regalo para $name', 'pt': 'Presente para $name', 'ru': 'Подарок для $name', 'tr': '$name için hediye'});
 
+  // ==================== PRODUCTIVITY ====================
+  String get streakDays => _t({'en': 'day streak', 'bg': 'дни поред', 'de': 'Tage-Serie', 'fr': 'jours consécutifs', 'it': 'giorni di fila', 'el': 'μέρες σερί', 'es': 'días seguidos', 'pt': 'dias seguidos', 'ru': 'дней подряд', 'tr': 'günlük seri'});
+  String get todayScore => _t({'en': 'Today', 'bg': 'Днес', 'de': 'Heute', 'fr': "Aujourd'hui", 'it': 'Oggi', 'el': 'Σήμερα', 'es': 'Hoy', 'pt': 'Hoje', 'ru': 'Сегодня', 'tr': 'Bugün'});
+
   // ==================== POMODORO ====================
   String get pomodoroFocus => _t({'en': 'Focus', 'bg': 'Фокус', 'de': 'Fokus', 'fr': 'Focus', 'it': 'Focus', 'el': 'Εστίαση', 'es': 'Foco', 'pt': 'Foco', 'ru': 'Фокус', 'tr': 'Odak'});
   String get pomodoroSession => _t({'en': 'Focus Session', 'bg': 'Сесия на фокус', 'de': 'Fokus-Sitzung', 'fr': 'Session de focus', 'it': 'Sessione focus', 'el': 'Συνεδρία εστίασης', 'es': 'Sesión de enfoque', 'pt': 'Sessão de foco', 'ru': 'Сессия фокуса', 'tr': 'Odak Seansı'});
