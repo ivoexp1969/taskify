@@ -139,6 +139,7 @@ class ExpandableTaskCard extends StatelessWidget {
   final VoidCallback onToggleComplete;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback? onStartPomodoro;
   final String dateTimeStr;
   final String priorityText;
   final Color priorityColor;
@@ -157,6 +158,7 @@ class ExpandableTaskCard extends StatelessWidget {
     required this.onToggleComplete,
     required this.onEdit,
     required this.onDelete,
+    this.onStartPomodoro,
     required this.dateTimeStr,
     required this.priorityText,
     required this.priorityColor,
@@ -445,6 +447,10 @@ class ExpandableTaskCard extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
+                                if (onStartPomodoro != null && !isCompleted) ...[
+                                  _ActionButton(icon: Icons.timer_outlined, label: t.pomodoroFocus, color: Colors.deepOrange, onTap: onStartPomodoro!),
+                                  const SizedBox(width: 6),
+                                ],
                                 _ActionButton(icon: Icons.edit_outlined, label: t.edit, color: theme.colorScheme.primary, onTap: onEdit),
                                 const SizedBox(width: 6),
                                 _ActionButton(icon: Icons.delete_outline_rounded, label: t.delete, color: Colors.redAccent, onTap: onDelete),

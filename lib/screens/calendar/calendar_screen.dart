@@ -15,6 +15,7 @@ import '../../services/widget_service.dart';
 import '../../services/task_view_preference.dart';
 import '../../widgets/celebration_overlay.dart';
 import '../../widgets/task_card_styles.dart';
+import '../../widgets/pomodoro_timer_sheet.dart';
 
 enum CalendarView { day, week, month }
 
@@ -1728,6 +1729,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           await WidgetService.updateWidget();
                           setState(() {});
                         },
+                        onStartPomodoro: () => PomodoroTimerSheet.show(context, task),
                         dateTimeStr: dateTimeStr,
                         priorityText: priorityText,
                         priorityColor: priorityColor,

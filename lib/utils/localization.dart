@@ -1057,4 +1057,14 @@ class AppText {
   });
 
   String giftTitle(String name) => _t({'en': 'Gift for $name', 'bg': 'Подарък за $name', 'de': 'Geschenk für $name', 'fr': 'Cadeau pour $name', 'it': 'Regalo per $name', 'el': 'Δώρο για $name', 'es': 'Regalo para $name', 'pt': 'Presente para $name', 'ru': 'Подарок для $name', 'tr': '$name için hediye'});
+
+  // ==================== POMODORO ====================
+  String get pomodoroFocus => _t({'en': 'Focus', 'bg': 'Фокус', 'de': 'Fokus', 'fr': 'Focus', 'it': 'Focus', 'el': 'Εστίαση', 'es': 'Foco', 'pt': 'Foco', 'ru': 'Фокус', 'tr': 'Odak'});
+  String get pomodoroSession => _t({'en': 'Focus Session', 'bg': 'Сесия на фокус', 'de': 'Fokus-Sitzung', 'fr': 'Session de focus', 'it': 'Sessione focus', 'el': 'Συνεδρία εστίασης', 'es': 'Sesión de enfoque', 'pt': 'Sessão de foco', 'ru': 'Сессия фокуса', 'tr': 'Odak Seansı'});
+  String get pomodoroComplete => _t({'en': 'Session complete!', 'bg': 'Сесията приключи!', 'de': 'Sitzung abgeschlossen!', 'fr': 'Session terminée!', 'it': 'Sessione completata!', 'el': 'Η συνεδρία ολοκληρώθηκε!', 'es': '¡Sesión completada!', 'pt': 'Sessão concluída!', 'ru': 'Сессия завершена!', 'tr': 'Seans tamamlandı!'});
+  String get pomodoroStart => _t({'en': 'Start', 'bg': 'Старт', 'de': 'Starten', 'fr': 'Démarrer', 'it': 'Avvia', 'el': 'Έναρξη', 'es': 'Iniciar', 'pt': 'Iniciar', 'ru': 'Старт', 'tr': 'Başlat'});
+  String get pomodoroPause => _t({'en': 'Pause', 'bg': 'Пауза', 'de': 'Pause', 'fr': 'Pause', 'it': 'Pausa', 'el': 'Παύση', 'es': 'Pausar', 'pt': 'Pausar', 'ru': 'Пауза', 'tr': 'Duraklat'});
+  String get pomodoroStop => _t({'en': 'Stop', 'bg': 'Спри', 'de': 'Stopp', 'fr': 'Arrêter', 'it': 'Ferma', 'el': 'Διακοπή', 'es': 'Detener', 'pt': 'Parar', 'ru': 'Стоп', 'tr': 'Durdur'});
+  String get pomodoroClose => _t({'en': 'Close', 'bg': 'Затвори', 'de': 'Schließen', 'fr': 'Fermer', 'it': 'Chiudi', 'el': 'Κλείσιμο', 'es': 'Cerrar', 'pt': 'Fechar', 'ru': 'Закрыть', 'tr': 'Kapat'});
+  String get pomodoroAgain => _t({'en': 'Again', 'bg': 'Отново', 'de': 'Nochmal', 'fr': 'Encore', 'it': 'Di nuovo', 'el': 'Ξανά', 'es': 'Otra vez', 'pt': 'Novamente', 'ru': 'Снова', 'tr': 'Tekrar'});
 }

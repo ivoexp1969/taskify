@@ -26,6 +26,7 @@ import 'payment_dialog.dart';
 import 'travel_dialog.dart';
 import 'gift_dialog.dart';
 import '../../widgets/task_card_styles.dart';
+import '../../widgets/pomodoro_timer_sheet.dart';
 
 enum TaskFilter { all, active, completed, overdue, upcoming, archived }
 enum TaskSort { date, priority, name, category }
@@ -2492,6 +2493,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                     setState(() {});
                                   }
                                 },
+                                onStartPomodoro: () => PomodoroTimerSheet.show(context, task),
                                 dateTimeStr: dateTimeStr,
                                 priorityText: priorityText,
                                 priorityColor: priorityColor,
