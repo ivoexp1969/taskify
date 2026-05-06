@@ -1046,14 +1046,14 @@ class AppText {
   String get onboardingPage4Desc => _t({
     'en': 'Start managing your tasks like a pro. Your 14-day free Pro trial is already active!',
     'bg': 'Започни да управляваш задачите си като про. Твоят 14-дневен безплатен Pro пробен период вече е активен!',
-    'de': 'Starte dein Aufgabenmanagement wie ein Profi. Dein 14-taegiger Pro-Test ist bereits aktiv!',
-    'fr': 'Gerez vos taches comme un pro. Votre essai gratuit Pro de 14 jours est deja actif!',
-    'it': 'Gestisci le tue attivita come un professionista. Il periodo di prova Pro da 14 giorni e gia attivo!',
+    'de': 'Starte dein Aufgabenmanagement wie ein Profi. Dein 14-tägiger Pro-Test ist bereits aktiv!',
+    'fr': 'Gérez vos tâches comme un pro. Votre essai gratuit Pro de 14 jours est déjà actif!',
+    'it': 'Gestisci le tue attività come un professionista. Il periodo di prova Pro da 14 giorni è già attivo!',
     'el': 'Ξεκίνα επαγγελματικά. Η δωρεάν δοκιμή Pro 14 ημερών είναι ήδη ενεργή!',
-    'es': 'Gestiona tus tareas como un profesional. Tu prueba Pro de 14 dias ya esta activa!',
-    'pt': 'Gerencie suas tarefas como um profissional. Seu teste Pro de 14 dias ja esta ativo!',
+    'es': 'Gestiona tus tareas como un profesional. Tu prueba Pro de 14 días ya está activa!',
+    'pt': 'Gerencie suas tarefas como um profissional. Seu teste Pro de 14 dias já está ativo!',
     'ru': 'Управляй задачами как профессионал. 14-дневный бесплатный Pro период уже активен!',
-    'tr': 'Gorevlerinizi profesyonel gibi yonetin. 14 gunluk ucretsiz Pro denemeniz aktif!',
+    'tr': 'Görevlerinizi profesyonel gibi yönetin. 14 günlük ücretsiz Pro denemeniz aktif!',
   });
 
   String giftTitle(String name) => _t({'en': 'Gift for $name', 'bg': 'Подарък за $name', 'de': 'Geschenk für $name', 'fr': 'Cadeau pour $name', 'it': 'Regalo per $name', 'el': 'Δώρο για $name', 'es': 'Regalo para $name', 'pt': 'Presente para $name', 'ru': 'Подарок для $name', 'tr': '$name için hediye'});
