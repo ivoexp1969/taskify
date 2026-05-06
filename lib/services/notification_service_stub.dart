@@ -34,6 +34,10 @@ class NotificationService {
     // No-op на web
   }
 
+  Future<void> scheduleTrialCountdownNotification(DateTime trialEndDate) async {
+    // No-op на web
+  }
+
   Future<void> cancelNotification(int id) async {
     // No-op на web
   }

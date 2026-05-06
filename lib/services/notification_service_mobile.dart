@@ -12,6 +12,62 @@ import 'package:timezone/data/latest.dart' as tz_data;
 import '../models/task.dart';
 import '../main.dart';
 
+// Background handler за notification action buttons (snooze)
+@pragma('vm:entry-point')
+Future<void> _onNotificationActionBackground(NotificationResponse details) async {
+  if (details.actionId != 'snooze') return;
+
+  final plugin = FlutterLocalNotificationsPlugin();
+  const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+  await plugin.initialize(const InitializationSettings(android: androidInit));
+
+  tz_data.initializeTimeZones();
+  try {
+    final tzName = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(tzName));
+  } catch (_) {
+    tz.setLocalLocation(tz.UTC);
+  }
+
+  final prefs = await SharedPreferences.getInstance();
+  final lang = prefs.getString('app_language') ?? 'en';
+  final id = details.id ?? 0;
+
+  const fallbackTitle = {'en': 'Reminder', 'bg': 'Напомняне', 'de': 'Erinnerung', 'fr': 'Rappel', 'it': 'Promemoria', 'el': 'Υπενθύμιση', 'es': 'Recordatorio', 'pt': 'Lembrete', 'ru': 'Напоминание', 'tr': 'Hatırlatıcı'};
+  final title = prefs.getString('alarm_${id}_title') ?? (fallbackTitle[lang] ?? fallbackTitle['en']!);
+
+  const snoozeBody = {'en': 'Snoozed • 30 minutes', 'bg': 'Отложено • 30 минути', 'de': 'Verschoben • 30 Minuten', 'fr': 'Reporté • 30 minutes', 'it': 'Posticipato • 30 minuti', 'el': 'Αναβλήθηκε • 30 λεπτά', 'es': 'Pospuesto • 30 minutos', 'pt': 'Adiado • 30 minutos', 'ru': 'Отложено • 30 минут', 'tr': 'Ertelendi • 30 dakika'};
+  const snoozeLabel = {'en': '⏰ +30 min', 'bg': '⏰ +30 мин', 'de': '⏰ +30 Min', 'fr': '⏰ +30 min', 'it': '⏰ +30 min', 'el': '⏰ +30 λεπτά', 'es': '⏰ +30 min', 'pt': '⏰ +30 min', 'ru': '⏰ +30 мин', 'tr': '⏰ +30 dk'};
+
+  final newId = (id + 5000) & 0x7FFFFFFF;
+  await prefs.setString('alarm_${newId}_title', title);
+
+  final scheduled = tz.TZDateTime.now(tz.local).add(const Duration(minutes: 30));
+
+  final androidDetails = AndroidNotificationDetails(
+    'task_reminders',
+    'Task reminders',
+    channelDescription: 'Reminders for your tasks',
+    importance: Importance.max,
+    priority: Priority.max,
+    enableVibration: true,
+    playSound: true,
+    actions: [
+      AndroidNotificationAction('snooze', snoozeLabel[lang] ?? snoozeLabel['en']!, cancelNotification: true),
+    ],
+  );
+
+  await plugin.zonedSchedule(
+    newId,
+    title,
+    snoozeBody[lang] ?? snoozeBody['en']!,
+    scheduled,
+    NotificationDetails(android: androidDetails),
+    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+  );
+}
+
 // Top-level функция за alarm callback (Android only)
 @pragma('vm:entry-point')
 Future<void> _alarmCallback(int id) async {
@@ -19,19 +75,25 @@ Future<void> _alarmCallback(int id) async {
 
   const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
   const initSettings = InitializationSettings(android: androidInit);
-  await plugin.initialize(initSettings);
+  await plugin.initialize(
+    initSettings,
+    onDidReceiveBackgroundNotificationResponse: _onNotificationActionBackground,
+  );
 
   final prefs = await SharedPreferences.getInstance();
   final lang = prefs.getString('app_language') ?? 'en';
 
-  const _fallbackTitle = {'en': 'Reminder', 'bg': 'Напомняне', 'de': 'Erinnerung', 'fr': 'Rappel', 'it': 'Promemoria', 'el': 'Υπενθύμιση', 'es': 'Recordatorio', 'pt': 'Lembrete', 'ru': 'Напоминание', 'tr': 'Hatırlatıcı'};
-  const _fallbackBody = {'en': 'You have a task to complete', 'bg': 'Имаш задача за изпълнение', 'de': 'Du hast eine Aufgabe zu erledigen', 'fr': 'Vous avez une tâche à accomplir', 'it': 'Hai un\'attività da completare', 'el': 'Έχετε μια εργασία να ολοκληρώσετε', 'es': 'Tienes una tarea por completar', 'pt': 'Você tem uma tarefa para concluir', 'ru': 'У вас есть задача для выполнения', 'tr': 'Tamamlamanız gereken bir görev var'};
+  const fallbackTitle = {'en': 'Reminder', 'bg': 'Напомняне', 'de': 'Erinnerung', 'fr': 'Rappel', 'it': 'Promemoria', 'el': 'Υπενθύμιση', 'es': 'Recordatorio', 'pt': 'Lembrete', 'ru': 'Напоминание', 'tr': 'Hatırlatıcı'};
+  const fallbackBody = {'en': 'You have a task to complete', 'bg': 'Имаш задача за изпълнение', 'de': 'Du hast eine Aufgabe zu erledigen', 'fr': 'Vous avez une tâche à accomplir', 'it': 'Hai un\'attività da completare', 'el': 'Έχετε μια εργασία να ολοκληρώσετε', 'es': 'Tienes una tarea por completar', 'pt': 'Você tem uma tarefa para concluir', 'ru': 'У вас есть задача для выполнения', 'tr': 'Tamamlamanız gereken bir görev var'};
 
-  final title = prefs.getString('alarm_${id}_title') ?? (_fallbackTitle[lang] ?? _fallbackTitle['en']!);
-  final body = prefs.getString('alarm_${id}_body') ?? (_fallbackBody[lang] ?? _fallbackBody['en']!);
+  final title = prefs.getString('alarm_${id}_title') ?? (fallbackTitle[lang] ?? fallbackTitle['en']!);
+  final body = prefs.getString('alarm_${id}_body') ?? (fallbackBody[lang] ?? fallbackBody['en']!);
   final payload = prefs.getString('alarm_${id}_payload');
 
-  const androidDetails = AndroidNotificationDetails(
+  const snoozeLabel = {'en': '⏰ +30 min', 'bg': '⏰ +30 мин', 'de': '⏰ +30 Min', 'fr': '⏰ +30 min', 'it': '⏰ +30 min', 'el': '⏰ +30 λεπτά', 'es': '⏰ +30 min', 'pt': '⏰ +30 min', 'ru': '⏰ +30 мин', 'tr': '⏰ +30 dk'};
+  final isMorningBriefing = payload == 'morning_briefing';
+
+  final androidDetails = AndroidNotificationDetails(
     'task_reminders',
     'Task reminders',
     channelDescription: 'Reminders for your tasks',
@@ -41,17 +103,24 @@ Future<void> _alarmCallback(int id) async {
     enableVibration: true,
     playSound: true,
     category: AndroidNotificationCategory.reminder,
+    actions: isMorningBriefing ? const [] : [
+      AndroidNotificationAction(
+        'snooze',
+        snoozeLabel[lang] ?? snoozeLabel['en']!,
+        cancelNotification: true,
+      ),
+    ],
   );
 
-  const platformDetails = NotificationDetails(android: androidDetails);
+  final platformDetails = NotificationDetails(android: androidDetails);
 
   await plugin.show(id, title, body, platformDetails, payload: payload);
 
-  if (payload == 'morning_briefing') {
+  if (isMorningBriefing) {
     await prefs.setBool('show_morning_briefing', true);
   }
 
-  if (payload != 'morning_briefing') {
+  if (!isMorningBriefing) {
     await prefs.remove('alarm_${id}_title');
     await prefs.remove('alarm_${id}_body');
     await prefs.remove('alarm_${id}_payload');
@@ -114,8 +183,11 @@ class NotificationService {
       onDidReceiveNotificationResponse: (details) {
         if (details.payload == 'morning_briefing') {
           _handleMorningBriefingTap();
+        } else if (details.actionId == 'snooze') {
+          _onNotificationActionBackground(details);
         }
       },
+      onDidReceiveBackgroundNotificationResponse: _onNotificationActionBackground,
     );
 
     if (Platform.isAndroid) {
@@ -372,6 +444,77 @@ class NotificationService {
 
   static void setMorningBriefingCallback(Function(BuildContext) callback) {
     _showBriefingCallback = callback;
+  }
+
+  Future<void> scheduleTrialCountdownNotification(DateTime trialEndDate) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getBool('trial_countdown_done') ?? false) return;
+      await prefs.setBool('trial_countdown_done', true);
+
+      final lang = prefs.getString('app_language') ?? 'en';
+      const titles = {
+        'en': '⏰ Pro trial ends in 3 days',
+        'bg': '⏰ Pro пробният период е до 3 дни',
+        'de': '⏰ Pro-Test endet in 3 Tagen',
+        'fr': '⏰ L\'essai Pro se termine dans 3 jours',
+        'it': '⏰ Il periodo di prova Pro finisce tra 3 giorni',
+        'el': '⏰ Η δοκιμή Pro λήγει σε 3 ημέρες',
+        'es': '⏰ El período de prueba Pro termina en 3 días',
+        'pt': '⏰ O período de teste Pro termina em 3 dias',
+        'ru': '⏰ Пробный период Pro заканчивается через 3 дня',
+        'tr': '⏰ Pro deneme süresi 3 gün sonra sona eriyor',
+      };
+      const bodies = {
+        'en': 'Upgrade now to keep all your tasks, reminders and calendar sync.',
+        'bg': 'Надстрой сега, за да запазиш задачите, напомнянията и синхронизацията.',
+        'de': 'Jetzt upgraden, um Aufgaben, Erinnerungen und Kalender zu behalten.',
+        'fr': 'Mettez à niveau pour conserver vos tâches, rappels et la synchronisation.',
+        'it': 'Aggiorna ora per mantenere attività, promemoria e sincronizzazione.',
+        'el': 'Αναβαθμίστε τώρα για να διατηρήσετε εργασίες, υπενθυμίσεις και συγχρονισμό.',
+        'es': 'Actualiza ahora para mantener tareas, recordatorios y sincronización.',
+        'pt': 'Atualize agora para manter suas tarefas, lembretes e sincronização.',
+        'ru': 'Обновитесь, чтобы сохранить задачи, напоминания и синхронизацию.',
+        'tr': 'Görevlerinizi, hatırlatıcılarınızı ve senkronizasyonu korumak için yükseltin.',
+      };
+
+      await _initIfNeeded();
+
+      final notifDate = trialEndDate.subtract(const Duration(days: 3));
+      final now = DateTime.now();
+
+      if (notifDate.isBefore(now)) {
+        final daysLeft = trialEndDate.difference(now).inDays;
+        if (daysLeft <= 0) return;
+
+        const androidDetails = AndroidNotificationDetails(
+          'trial_countdown',
+          'Trial',
+          channelDescription: 'Trial expiry notifications',
+          importance: Importance.high,
+          priority: Priority.high,
+        );
+        const iosDetails = DarwinNotificationDetails(presentAlert: true, presentSound: true);
+
+        await _plugin.show(
+          997,
+          titles[lang] ?? titles['en']!,
+          bodies[lang] ?? bodies['en']!,
+          const NotificationDetails(android: androidDetails, iOS: iosDetails),
+          payload: 'trial_countdown',
+        );
+      } else {
+        await scheduleNotification(
+          id: 997,
+          title: titles[lang] ?? titles['en']!,
+          body: bodies[lang] ?? bodies['en']!,
+          scheduledDate: notifDate,
+          payload: 'trial_countdown',
+        );
+      }
+    } catch (e) {
+      debugPrint('scheduleTrialCountdownNotification error: $e');
+    }
   }
 
   Future<void> cancelNotification(int id) async {

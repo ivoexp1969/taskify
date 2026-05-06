@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Поддържани езици
@@ -934,7 +934,7 @@ class AppText {
   String get dec => _t({'en': 'Dec', 'bg': 'дек', 'de': 'Dez', 'fr': 'déc', 'it': 'dic', 'el': 'Δεκ', 'es': 'dic', 'pt': 'dez', 'ru': 'дек', 'tr': 'Ara'});
   String get addBirthday => _t({'en': 'Add Birthday', 'bg': 'Добави рожден ден', 'de': 'Geburtstag hinzufügen', 'fr': 'Ajouter anniversaire', 'it': 'Aggiungi compleanno', 'el': 'Προσθήκη γενεθλίων', 'es': 'Añadir cumpleaños', 'pt': 'Adicionar aniversário', 'ru': 'Добавить день рождения', 'tr': 'Doğum günü ekle'});
   String get editBirthday => _t({'en': 'Edit Birthday', 'bg': 'Редакция', 'de': 'Bearbeiten', 'fr': 'Modifier', 'it': 'Modifica', 'el': 'Επεξεργασία', 'es': 'Editar', 'pt': 'Editar', 'ru': 'Редактировать', 'tr': 'Düzenle'});
-  String get birthdayDate => _t({'en': 'Birthday date', 'bg': 'Дата на рождения ден', 'de': 'Geburtsdatum', 'fr': 'Date d’anniversaire', 'it': 'Data di nascita', 'el': 'Ημερομηνία γενεθλίων', 'es': 'Fecha de cumpleaños', 'pt': 'Data de aniversário', 'ru': 'Дата рождения', 'tr': 'Doğum tarihi'});
+  String get birthdayDate => _t({'en': 'Birthday date', 'bg': 'Дата на рождения ден', 'de': 'Geburtsdatum', 'fr': 'Date d\'anniversaire', 'it': 'Data di nascita', 'el': 'Ημερομηνία γενεθλίων', 'es': 'Fecha de cumpleaños', 'pt': 'Data de aniversário', 'ru': 'Дата рождения', 'tr': 'Doğum tarihi'});
   String get birthdayNameHint => _t({'en': 'e.g. Maria', 'bg': 'напр. Мария', 'de': 'z.B. Maria', 'fr': 'ex. Maria', 'it': 'es. Maria', 'el': 'π.χ. Μαρία', 'es': 'ej. María', 'pt': 'ex. Maria', 'ru': 'напр. Мария', 'tr': 'ör. Maria'});
   String get birthYear => _t({'en': 'Birth year', 'bg': 'Година на раждане', 'de': 'Geburtsjahr', 'fr': 'Année de naissance', 'it': 'Anno di nascita', 'el': 'Έτος γέννησης', 'es': 'Año de nacimiento', 'pt': 'Ano de nascimento', 'ru': 'Год рождения', 'tr': 'Doğum yılı'});
   String get birthYearHint => _t({'en': 'e.g. 1990', 'bg': 'напр. 1990', 'de': 'z.B. 1990', 'fr': 'ex. 1990', 'it': 'es. 1990', 'el': 'π.χ. 1990', 'es': 'ej. 1990', 'pt': 'ex. 1990', 'ru': 'напр. 1990', 'tr': 'ör. 1990'});
@@ -966,7 +966,7 @@ class AppText {
 
   String get meetingPlaceHint => _t({'en': 'e.g. Office', 'bg': 'напр. Офис', 'de': 'z.B. Büro', 'fr': 'ex. Bureau', 'it': 'es. Ufficio', 'el': 'π.χ. Γραφείο', 'es': 'ej. Oficina', 'pt': 'ex. Escritório', 'ru': 'напр. Офис', 'tr': 'ör. Ofis'});
 
-  String get atTime => _t({'en': 'At time', 'bg': 'В часа', 'de': 'Zur Zeit', 'fr': 'À l’heure', 'it': 'All’ora', 'el': 'Στην ώρα', 'es': 'A la hora', 'pt': 'Na hora', 'ru': 'В время', 'tr': 'Saatinde'});
+  String get atTime => _t({'en': 'At time', 'bg': 'В часа', 'de': 'Zur Zeit', 'fr': 'A l\'heure', 'it': 'All\'ora', 'el': 'Στην ώρα', 'es': 'A la hora', 'pt': 'Na hora', 'ru': 'В время', 'tr': 'Saatinde'});
 
   String get minus15m => _t({'en': '15 min before', 'bg': '15 мин. преди', 'de': '15 Min. vorher', 'fr': '15 min avant', 'it': '15 min prima', 'el': '15 λεπτά πριν', 'es': '15 min antes', 'pt': '15 min antes', 'ru': 'За 15 мин.', 'tr': '15 dk önce'});
 
@@ -978,7 +978,7 @@ class AppText {
 
   String get editWorkout => _t({'en': 'Edit Workout', 'bg': 'Редакция на тренировка', 'de': 'Training bearbeiten', 'fr': 'Modifier entraînement', 'it': 'Modifica allenamento', 'el': 'Επεξεργασία γυμναστικής', 'es': 'Editar entrenamiento', 'pt': 'Editar treino', 'ru': 'Редактировать', 'tr': 'Antrenmanı düzenle'});
 
-  String get workoutType => _t({'en': 'Type of workout', 'bg': 'Вид тренировка', 'de': 'Trainingsart', 'fr': 'Type d’entraînement', 'it': 'Tipo di allenamento', 'el': 'Είδος γυμναστικής', 'es': 'Tipo de entrenamiento', 'pt': 'Tipo de treino', 'ru': 'Вид тренировки', 'tr': 'Antrenman türü'});
+  String get workoutType => _t({'en': 'Type of workout', 'bg': 'Вид тренировка', 'de': 'Trainingsart', 'fr': 'Type d\'entrainement', 'it': 'Tipo di allenamento', 'el': 'Είδος γυμναστικής', 'es': 'Tipo de entrenamiento', 'pt': 'Tipo de treino', 'ru': 'Вид тренировки', 'tr': 'Antrenman türü'});
 
   String get workoutTypeHint => _t({'en': 'e.g. Running', 'bg': 'напр. Бягане', 'de': 'z.B. Laufen', 'fr': 'ex. Course', 'it': 'es. Corsa', 'el': 'π.χ. Τρέξιμο', 'es': 'ej. Correr', 'pt': 'ex. Corrida', 'ru': 'напр. Бег', 'tr': 'ör. Koşma'});
 
@@ -1030,7 +1030,31 @@ class AppText {
 
   String get none2 => _t({'en': 'None', 'bg': 'Без', 'de': 'Keine', 'fr': 'Aucune', 'it': 'Nessuna', 'el': 'Καμία', 'es': 'Ninguna', 'pt': 'Nenhuma', 'ru': 'Нет', 'tr': 'Yok'});
 
-  String travelTitle(String name) => _t({'en': 'Trip to $name', 'bg': 'Пътуване до $name', 'de': 'Reise nach $name', 'fr': 'Voyage à $name', 'it': 'Viaggio a $name', 'el': 'Ταξίδι στο $name', 'es': 'Viaje a $name', 'pt': 'Viagem a $name', 'ru': 'Поездка в $name', 'tr': '$name’a seyahat'});
+  String travelTitle(String name) => _t({'en': 'Trip to $name', 'bg': 'Пътуване до $name', 'de': 'Reise nach $name', 'fr': 'Voyage à $name', 'it': 'Viaggio a $name', 'el': 'Ταξίδι στο $name', 'es': 'Viaje a $name', 'pt': 'Viagem a $name', 'ru': 'Поездка в $name', 'tr': "$name'a seyahat"});
+
+  // ==================== ONBOARDING ====================
+  String get onboardingSkip => _t({'en': 'Skip', 'bg': 'Пропусни', 'de': 'Überspringen', 'fr': 'Passer', 'it': 'Salta', 'el': 'Παράλειψη', 'es': 'Omitir', 'pt': 'Pular', 'ru': 'Пропустить', 'tr': 'Atla'});
+  String get onboardingNext => _t({'en': 'Next', 'bg': 'Напред', 'de': 'Weiter', 'fr': 'Suivant', 'it': 'Avanti', 'el': 'Επόμενο', 'es': 'Siguiente', 'pt': 'Próximo', 'ru': 'Далее', 'tr': 'İleri'});
+  String get onboardingGetStarted => _t({'en': 'Get started', 'bg': 'Започни', 'de': 'Loslegen', 'fr': 'Commencer', 'it': 'Inizia', 'el': 'Ξεκινήστε', 'es': 'Empezar', 'pt': 'Começar', 'ru': 'Начать', 'tr': 'Başla'});
+  String get onboardingPage1Title => _t({'en': 'Welcome to Taskify', 'bg': 'Добре дошъл в Taskify', 'de': 'Willkommen bei Taskify', 'fr': 'Bienvenue dans Taskify', 'it': 'Benvenuto in Taskify', 'el': 'Καλώς ήρθες στο Taskify', 'es': 'Bienvenido a Taskify', 'pt': 'Bem-vindo ao Taskify', 'ru': 'Добро пожаловать в Taskify', 'tr': 'Taskify\'e Hoş Geldiniz'});
+  String get onboardingPage1Desc => _t({'en': 'Smart task management in your pocket. Organize your day, meet your goals.', 'bg': 'Умно управление на задачи в джоба ти. Организирай деня си, постигай целите си.', 'de': 'Intelligentes Aufgabenmanagement in deiner Tasche.', 'fr': 'Gestion intelligente des tâches dans votre poche.', 'it': 'Gestione intelligente delle attività sempre con te.', 'el': 'Έξυπνη διαχείριση εργασιών στην τσέπη σου.', 'es': 'Gestión inteligente de tareas en tu bolsillo.', 'pt': 'Gerenciamento inteligente de tarefas no seu bolso.', 'ru': 'Умное управление задачами у тебя в кармане.', 'tr': 'Akıllı görev yönetimi cebinizde.'});
+  String get onboardingPage2Title => _t({'en': 'Stay organized', 'bg': 'Бъди организиран', 'de': 'Organisiert bleiben', 'fr': 'Restez organisé', 'it': 'Resta organizzato', 'el': 'Μείνε οργανωμένος', 'es': 'Mantente organizado', 'pt': 'Fique organizado', 'ru': 'Оставайся организованным', 'tr': 'Düzenli kal'});
+  String get onboardingPage2Desc => _t({'en': 'Create tasks with categories, priorities and subtasks. Set due dates and recurring reminders.', 'bg': 'Създавай задачи с категории, приоритети и подзадачи. Задавай крайни срокове и повтарящи се напомняния.', 'de': 'Erstelle Aufgaben mit Kategorien, Prioritäten und Unteraufgaben.', 'fr': 'Créez des tâches avec catégories, priorités et sous-tâches.', 'it': 'Crea attività con categorie, priorità e sottoattività.', 'el': 'Δημιούργησε εργασίες με κατηγορίες, προτεραιότητες και υποεργασίες.', 'es': 'Crea tareas con categorías, prioridades y subtareas.', 'pt': 'Crie tarefas com categorias, prioridades e subtarefas.', 'ru': 'Создавай задачи с категориями, приоритетами и подзадачами.', 'tr': 'Kategoriler, öncelikler ve alt görevlerle görevler oluşturun.'});
+  String get onboardingPage3Title => _t({'en': 'Never forget', 'bg': 'Никога не забравяй', 'de': 'Nie vergessen', 'fr': 'Ne rien oublier', 'it': 'Non dimenticare mai', 'el': 'Μην ξεχάσεις ποτέ', 'es': 'Nunca olvides', 'pt': 'Nunca esqueça', 'ru': 'Никогда не забывай', 'tr': 'Asla unutma'});
+  String get onboardingPage3Desc => _t({'en': 'Set smart reminders and get notified at the right time. Daily morning briefings keep you on track.', 'bg': 'Задавай умни напомняния и получавай известия навреме. Ежедневните сутрешни брифинги ти помагат да не изоставаш.', 'de': 'Stelle Erinnerungen ein und bleib auf dem richtigen Weg.', 'fr': 'Définissez des rappels intelligents et restez sur la bonne voie.', 'it': 'Imposta promemoria intelligenti e ricevi notifiche al momento giusto.', 'el': 'Ορίστε έξυπνες υπενθυμίσεις και λάβετε ειδοποιήσεις την κατάλληλη στιγμή.', 'es': 'Configura recordatorios inteligentes y recibe notificaciones en el momento adecuado.', 'pt': 'Configure lembretes inteligentes e receba notificações na hora certa.', 'ru': 'Устанавливай умные напоминания и получай уведомления вовремя.', 'tr': 'Akıllı hatırlatıcılar ayarlayın ve doğru zamanda bildirim alın.'});
+  String get onboardingPage4Title => _t({'en': 'You\'re all set!', 'bg': 'Готов си!', 'de': 'Alles bereit!', 'fr': 'Tout est prêt!', 'it': 'Tutto pronto!', 'el': 'Είσαι έτοιμος!', 'es': '¡Todo listo!', 'pt': 'Tudo pronto!', 'ru': 'Всё готово!', 'tr': 'Hazırsın!'});
+  String get onboardingPage4Desc => _t({
+    'en': 'Start managing your tasks like a pro. Your 14-day free Pro trial is already active!',
+    'bg': 'Започни да управляваш задачите си като про. Твоят 14-дневен безплатен Pro пробен период вече е активен!',
+    'de': 'Starte dein Aufgabenmanagement wie ein Profi. Dein 14-taegiger Pro-Test ist bereits aktiv!',
+    'fr': 'Gerez vos taches comme un pro. Votre essai gratuit Pro de 14 jours est deja actif!',
+    'it': 'Gestisci le tue attivita come un professionista. Il periodo di prova Pro da 14 giorni e gia attivo!',
+    'el': 'Ξεκίνα επαγγελματικά. Η δωρεάν δοκιμή Pro 14 ημερών είναι ήδη ενεργή!',
+    'es': 'Gestiona tus tareas como un profesional. Tu prueba Pro de 14 dias ya esta activa!',
+    'pt': 'Gerencie suas tarefas como um profissional. Seu teste Pro de 14 dias ja esta ativo!',
+    'ru': 'Управляй задачами как профессионал. 14-дневный бесплатный Pro период уже активен!',
+    'tr': 'Gorevlerinizi profesyonel gibi yonetin. 14 gunluk ucretsiz Pro denemeniz aktif!',
+  });
 
   String giftTitle(String name) => _t({'en': 'Gift for $name', 'bg': 'Подарък за $name', 'de': 'Geschenk für $name', 'fr': 'Cadeau pour $name', 'it': 'Regalo per $name', 'el': 'Δώρο για $name', 'es': 'Regalo para $name', 'pt': 'Presente para $name', 'ru': 'Подарок для $name', 'tr': '$name için hediye'});
 }

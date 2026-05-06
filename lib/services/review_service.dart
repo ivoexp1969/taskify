@@ -21,7 +21,7 @@ class ReviewService {
   final InAppReview _inAppReview = InAppReview.instance;
 
   // Настройки
-  static const int _minCompletedTasks = 5;
+  static const int _minCompletedTasks = 10;
   static const int _daysBetweenPrompts = 30;
   static const String _lastPromptKey = 'review_last_prompt_date';
   static const String _completedTasksKey = 'review_completed_tasks_count';

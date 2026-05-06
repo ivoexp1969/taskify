@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive/hive.dart';
 import '../models/task.dart';
@@ -51,13 +52,13 @@ class MorningBriefingService {
       payload: 'morning_briefing', // This triggers the dialog
     );
 
-    print('Morning briefing scheduled for ${briefingHour}:${briefingMinute.toString().padLeft(2, '0')}');
+    debugPrint('Morning briefing scheduled for $briefingHour:${briefingMinute.toString().padLeft(2, '0')}');
   }
 
   /// Cancel daily morning briefing
   Future<void> cancelDailyBriefing() async {
     await NotificationService().cancelNotification(999);
-    print('Morning briefing cancelled');
+    debugPrint('Morning briefing cancelled');
   }
 
   /// Check if briefing is currently enabled
@@ -76,29 +77,19 @@ class MorningBriefingService {
     // Get tasks due today or overdue
     final tasksForToday = taskBox.values.where((task) {
       if (task.isCompleted) return false;
-      if (task.dueDate == null) return false;
-      
       final dueDate = DateTime(
-        task.dueDate!.year,
-        task.dueDate!.month,
-        task.dueDate!.day,
+        task.dueDate.year,
+        task.dueDate.month,
+        task.dueDate.day,
       );
-      
-      // Include overdue and today's tasks
       return dueDate.isBefore(tomorrow);
     }).toList();
 
     // Sort by priority (higher first) and then by due date (earlier first)
     tasksForToday.sort((a, b) {
-      // First sort by priority (3 > 2 > 1)
       final priorityCompare = b.priority.compareTo(a.priority);
       if (priorityCompare != 0) return priorityCompare;
-      
-      // Then by due date (earlier first)
-      if (a.dueDate == null && b.dueDate == null) return 0;
-      if (a.dueDate == null) return 1;
-      if (b.dueDate == null) return -1;
-      return a.dueDate!.compareTo(b.dueDate!);
+      return a.dueDate.compareTo(b.dueDate);
     });
 
     // Return top 5 tasks
@@ -121,5 +112,22 @@ class MorningBriefingService {
   String _tapToSee(String lang) {
     const m = {'en': 'Tap to see your tasks for today', 'bg': 'Натисни за преглед на задачите', 'de': 'Tippen, um deine Aufgaben zu sehen', 'fr': 'Appuyez pour voir vos tâches', 'it': 'Tocca per vedere le tue attività', 'el': 'Πατήστε για να δείτε τις εργασίες σας', 'es': 'Toca para ver tus tareas', 'pt': 'Toque para ver suas tarefas', 'ru': 'Нажмите, чтобы увидеть ваши задачи', 'tr': 'Görevlerinizi görmek için dokunun'};
     return m[lang] ?? m['en']!;
+  }
+
+  Future<void> updateBriefingContent() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final enabled = prefs.getBool('morning_briefing_enabled') ?? false;
+      if (!enabled) return;
+
+      final tasks = await getTopTasksForToday();
+      if (tasks.isEmpty) return;
+
+      final top3 = tasks.take(3).toList();
+      final body = top3.map((t) => '• ${t.title}').join('\n');
+      await prefs.setString('alarm_999_body', body);
+    } catch (e) {
+      debugPrint('MorningBriefingService: updateBriefingContent error: $e');
+    }
   }
 }

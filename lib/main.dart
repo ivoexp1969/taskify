@@ -7,10 +7,10 @@ import 'firebase_options.dart';
 import 'models/task.dart';
 import 'models/category.dart';
 import 'screens/home/home_screen.dart';
+import 'screens/onboarding/onboarding_screen.dart';
 import 'utils/localization.dart';
 import 'services/widget_service.dart';
 import 'services/pro_service.dart';
-import 'services/review_service.dart';
 import 'services/ad_service.dart';
 import 'services/task_view_preference.dart';
 import 'services/notification_service.dart';
@@ -27,7 +27,7 @@ Future<void> _checkMorningBriefingOnLaunch() async {
     await prefs.setBool('show_morning_briefing', false); // Clear flag immediately
     Future.delayed(const Duration(seconds: 1), () {
       final context = MyApp.navigatorKey.currentContext;
-      if (context != null) {
+      if (context != null && context.mounted) {
         MorningBriefingDialog.show(context);
       }
     });
@@ -62,12 +62,25 @@ Future<void> main() async {
 
   // Initialize notification service (registers tap handler)
   NotificationService().init();
-  
+
   // Setup morning briefing notification callback
   NotificationService.setMorningBriefingCallback((BuildContext context) {
     MorningBriefingDialog.show(context);
   });
-  
+
+  // Trial countdown notification — schedule once, 3 days before trial end
+  if (!kIsWeb && ProService().isTrial) {
+    final trialEnd = ProService().trialEndDate;
+    if (trialEnd != null) {
+      NotificationService().scheduleTrialCountdownNotification(trialEnd);
+    }
+  }
+
+  // Morning briefing — refresh top 3 tasks on every launch
+  if (!kIsWeb) {
+    MorningBriefingService().updateBriefingContent();
+  }
+
   final languageController = LanguageController(const Locale('en'));
   // Зареждаме системния език при първо стартиране
   final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
@@ -75,12 +88,15 @@ Future<void> main() async {
   
   final themeController = ThemeController(ThemeMode.system);
   await themeController.loadSavedTheme();
-  
+
+  final prefs = await SharedPreferences.getInstance();
+  final onboardingDone = prefs.getBool('onboarding_v1_done') ?? false;
 
   runApp(
     MyApp(
       languageController: languageController,
       themeController: themeController,
+      onboardingDone: onboardingDone,
     ),
   );
   
@@ -95,11 +111,13 @@ class MyApp extends StatelessWidget {
   
   final LanguageController languageController;
   final ThemeController themeController;
+  final bool onboardingDone;
 
   const MyApp({
     super.key,
     required this.languageController,
     required this.themeController,
+    this.onboardingDone = true,
   });
 
   @override
@@ -125,7 +143,7 @@ class MyApp extends StatelessWidget {
               themeMode: themeController.isAmoled ? ThemeMode.dark : themeController.mode,
               theme: _buildLightTheme(),
               darkTheme: themeController.isAmoled ? _buildAmoledTheme() : _buildDarkTheme(),
-              home: const HomeScreen(),
+              home: onboardingDone ? const HomeScreen() : const OnboardingScreen(),
             );
           },
         ),
