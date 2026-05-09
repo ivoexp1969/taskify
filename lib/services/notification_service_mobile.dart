@@ -2,7 +2,6 @@ import 'dart:io' show Platform;
 import 'dart:math';
 import 'package:flutter/material.dart';
 
-import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,7 +18,8 @@ Future<void> _onNotificationActionBackground(NotificationResponse details) async
 
   final plugin = FlutterLocalNotificationsPlugin();
   const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-  await plugin.initialize(const InitializationSettings(android: androidInit));
+  const iosInit = DarwinInitializationSettings();
+  await plugin.initialize(const InitializationSettings(android: androidInit, iOS: iosInit));
 
   tz_data.initializeTimeZones();
   try {
@@ -33,11 +33,24 @@ Future<void> _onNotificationActionBackground(NotificationResponse details) async
   final lang = prefs.getString('app_language') ?? 'en';
   final id = details.id ?? 0;
 
-  const fallbackTitle = {'en': 'Reminder', 'bg': 'Напомняне', 'de': 'Erinnerung', 'fr': 'Rappel', 'it': 'Promemoria', 'el': 'Υπενθύμιση', 'es': 'Recordatorio', 'pt': 'Lembrete', 'ru': 'Напоминание', 'tr': 'Hatırlatıcı'};
+  const fallbackTitle = {
+    'en': 'Reminder', 'bg': 'Напомняне', 'de': 'Erinnerung', 'fr': 'Rappel',
+    'it': 'Promemoria', 'el': 'Υπενθύμιση', 'es': 'Recordatorio',
+    'pt': 'Lembrete', 'ru': 'Напоминание', 'tr': 'Hatırlatıcı',
+  };
   final title = prefs.getString('alarm_${id}_title') ?? (fallbackTitle[lang] ?? fallbackTitle['en']!);
 
-  const snoozeBody = {'en': 'Snoozed • 30 minutes', 'bg': 'Отложено • 30 минути', 'de': 'Verschoben • 30 Minuten', 'fr': 'Reporté • 30 minutes', 'it': 'Posticipato • 30 minuti', 'el': 'Αναβλήθηκε • 30 λεπτά', 'es': 'Pospuesto • 30 minutos', 'pt': 'Adiado • 30 minutos', 'ru': 'Отложено • 30 минут', 'tr': 'Ertelendi • 30 dakika'};
-  const snoozeLabel = {'en': '⏰ +30 min', 'bg': '⏰ +30 мин', 'de': '⏰ +30 Min', 'fr': '⏰ +30 min', 'it': '⏰ +30 min', 'el': '⏰ +30 λεπτά', 'es': '⏰ +30 min', 'pt': '⏰ +30 min', 'ru': '⏰ +30 мин', 'tr': '⏰ +30 dk'};
+  const snoozeBody = {
+    'en': 'Snoozed • 30 minutes', 'bg': 'Отложено • 30 минути', 'de': 'Verschoben • 30 Minuten',
+    'fr': 'Reporté • 30 minutes', 'it': 'Posticipato • 30 minuti', 'el': 'Αναβλήθηκε • 30 λεπτά',
+    'es': 'Pospuesto • 30 minutos', 'pt': 'Adiado • 30 minutos',
+    'ru': 'Отложено • 30 минут', 'tr': 'Ertelendi • 30 dakika',
+  };
+  const snoozeLabel = {
+    'en': '⏰ +30 min', 'bg': '⏰ +30 мин', 'de': '⏰ +30 Min', 'fr': '⏰ +30 min',
+    'it': '⏰ +30 min', 'el': '⏰ +30 λεπτά', 'es': '⏰ +30 min',
+    'pt': '⏰ +30 min', 'ru': '⏰ +30 мин', 'tr': '⏰ +30 dk',
+  };
 
   final newId = (id + 5000) & 0x7FFFFFFF;
   await prefs.setString('alarm_${newId}_title', title);
@@ -56,75 +69,21 @@ Future<void> _onNotificationActionBackground(NotificationResponse details) async
       AndroidNotificationAction('snooze', snoozeLabel[lang] ?? snoozeLabel['en']!, cancelNotification: true),
     ],
   );
+  const iosDetails = DarwinNotificationDetails(
+    presentAlert: true,
+    presentBadge: true,
+    presentSound: true,
+  );
 
   await plugin.zonedSchedule(
     newId,
     title,
     snoozeBody[lang] ?? snoozeBody['en']!,
     scheduled,
-    NotificationDetails(android: androidDetails),
+    NotificationDetails(android: androidDetails, iOS: iosDetails),
     androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
   );
-}
-
-// Top-level функция за alarm callback (Android only)
-@pragma('vm:entry-point')
-Future<void> _alarmCallback(int id) async {
-  final plugin = FlutterLocalNotificationsPlugin();
-
-  const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-  const initSettings = InitializationSettings(android: androidInit);
-  await plugin.initialize(
-    initSettings,
-    onDidReceiveBackgroundNotificationResponse: _onNotificationActionBackground,
-  );
-
-  final prefs = await SharedPreferences.getInstance();
-  final lang = prefs.getString('app_language') ?? 'en';
-
-  const fallbackTitle = {'en': 'Reminder', 'bg': 'Напомняне', 'de': 'Erinnerung', 'fr': 'Rappel', 'it': 'Promemoria', 'el': 'Υπενθύμιση', 'es': 'Recordatorio', 'pt': 'Lembrete', 'ru': 'Напоминание', 'tr': 'Hatırlatıcı'};
-  const fallbackBody = {'en': 'You have a task to complete', 'bg': 'Имаш задача за изпълнение', 'de': 'Du hast eine Aufgabe zu erledigen', 'fr': 'Vous avez une tâche à accomplir', 'it': 'Hai un\'attività da completare', 'el': 'Έχετε μια εργασία να ολοκληρώσετε', 'es': 'Tienes una tarea por completar', 'pt': 'Você tem uma tarefa para concluir', 'ru': 'У вас есть задача для выполнения', 'tr': 'Tamamlamanız gereken bir görev var'};
-
-  final title = prefs.getString('alarm_${id}_title') ?? (fallbackTitle[lang] ?? fallbackTitle['en']!);
-  final body = prefs.getString('alarm_${id}_body') ?? (fallbackBody[lang] ?? fallbackBody['en']!);
-  final payload = prefs.getString('alarm_${id}_payload');
-
-  const snoozeLabel = {'en': '⏰ +30 min', 'bg': '⏰ +30 мин', 'de': '⏰ +30 Min', 'fr': '⏰ +30 min', 'it': '⏰ +30 min', 'el': '⏰ +30 λεπτά', 'es': '⏰ +30 min', 'pt': '⏰ +30 min', 'ru': '⏰ +30 мин', 'tr': '⏰ +30 dk'};
-  final isMorningBriefing = payload == 'morning_briefing';
-
-  final androidDetails = AndroidNotificationDetails(
-    'task_reminders',
-    'Task reminders',
-    channelDescription: 'Reminders for your tasks',
-    importance: Importance.max,
-    priority: Priority.max,
-    visibility: NotificationVisibility.public,
-    enableVibration: true,
-    playSound: true,
-    category: AndroidNotificationCategory.reminder,
-    actions: isMorningBriefing ? const [] : [
-      AndroidNotificationAction(
-        'snooze',
-        snoozeLabel[lang] ?? snoozeLabel['en']!,
-        cancelNotification: true,
-      ),
-    ],
-  );
-
-  final platformDetails = NotificationDetails(android: androidDetails);
-
-  await plugin.show(id, title, body, platformDetails, payload: payload);
-
-  if (isMorningBriefing) {
-    await prefs.setBool('show_morning_briefing', true);
-  }
-
-  if (!isMorningBriefing) {
-    await prefs.remove('alarm_${id}_title');
-    await prefs.remove('alarm_${id}_body');
-    await prefs.remove('alarm_${id}_payload');
-  }
 }
 
 class NotificationService {
@@ -134,8 +93,7 @@ class NotificationService {
 
   factory NotificationService() => _instance;
 
-  final FlutterLocalNotificationsPlugin _plugin =
-      FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
 
@@ -162,10 +120,6 @@ class NotificationService {
       tz.setLocalLocation(tz.UTC);
     }
 
-    if (Platform.isAndroid) {
-      await AndroidAlarmManager.initialize();
-    }
-
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosInit = DarwinInitializationSettings(
       requestAlertPermission: true,
@@ -173,10 +127,7 @@ class NotificationService {
       requestSoundPermission: true,
     );
 
-    const initSettings = InitializationSettings(
-      android: androidInit,
-      iOS: iosInit,
-    );
+    const initSettings = InitializationSettings(android: androidInit, iOS: iosInit);
 
     await _plugin.initialize(
       initSettings,
@@ -253,13 +204,24 @@ class NotificationService {
       'minus_1d': {'en': 'Tomorrow', 'bg': 'Утре', 'de': 'Morgen', 'fr': 'Demain', 'it': 'Domani', 'el': 'Αύριο', 'es': 'Mañana', 'pt': 'Amanhã', 'ru': 'Завтра', 'tr': 'Yarın'},
       'same_day_8': {'en': 'Today', 'bg': 'Днес', 'de': 'Heute', 'fr': "Aujourd'hui", 'it': 'Oggi', 'el': 'Σήμερα', 'es': 'Hoy', 'pt': 'Hoje', 'ru': 'Сегодня', 'tr': 'Bugün'},
     };
-    const defaultLabel = {'en': 'Reminder', 'bg': 'Напомняне', 'de': 'Erinnerung', 'fr': 'Rappel', 'it': 'Promemoria', 'el': 'Υπενθύμιση', 'es': 'Recordatorio', 'pt': 'Lembrete', 'ru': 'Напоминание', 'tr': 'Hatırlatıcı'};
+    const defaultLabel = {
+      'en': 'Reminder', 'bg': 'Напомняне', 'de': 'Erinnerung', 'fr': 'Rappel',
+      'it': 'Promemoria', 'el': 'Υπενθύμιση', 'es': 'Recordatorio',
+      'pt': 'Lembrete', 'ru': 'Напоминание', 'tr': 'Hatırlatıcı',
+    };
     final map = labels[reminderType] ?? defaultLabel;
     return map[lang] ?? map['en'] ?? 'Reminder';
   }
 
-  NotificationDetails _buildNotificationDetails(String title) {
-    const androidDetails = AndroidNotificationDetails(
+  NotificationDetails _buildNotificationDetails({String? lang}) {
+    const snoozeLabels = {
+      'en': '⏰ +30 min', 'bg': '⏰ +30 мин', 'de': '⏰ +30 Min', 'fr': '⏰ +30 min',
+      'it': '⏰ +30 min', 'el': '⏰ +30 λεπτά', 'es': '⏰ +30 min',
+      'pt': '⏰ +30 min', 'ru': '⏰ +30 мин', 'tr': '⏰ +30 dk',
+    };
+    final snoozeLabel = snoozeLabels[lang ?? 'en'] ?? snoozeLabels['en']!;
+
+    final androidDetails = AndroidNotificationDetails(
       'task_reminders',
       'Task reminders',
       channelDescription: 'Reminders for your tasks',
@@ -269,13 +231,16 @@ class NotificationService {
       enableVibration: true,
       playSound: true,
       category: AndroidNotificationCategory.reminder,
+      actions: [
+        AndroidNotificationAction('snooze', snoozeLabel, cancelNotification: true),
+      ],
     );
     const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
     );
-    return const NotificationDetails(android: androidDetails, iOS: iosDetails);
+    return NotificationDetails(android: androidDetails, iOS: iosDetails);
   }
 
   Future<void> cancelForTask(Task task) async {
@@ -284,20 +249,20 @@ class NotificationService {
 
       if (task.notificationIds != null) {
         for (final id in task.notificationIds!) {
-          if (Platform.isAndroid) await AndroidAlarmManager.cancel(id);
           await _plugin.cancel(id);
         }
         task.notificationIds = null;
       }
 
       if (task.notificationId != null) {
-        if (Platform.isAndroid) await AndroidAlarmManager.cancel(task.notificationId!);
         await _plugin.cancel(task.notificationId!);
         task.notificationId = null;
       }
 
       await task.save();
-    } catch (e) { debugPrint('NotificationService error: $e'); }
+    } catch (e) {
+      debugPrint('NotificationService cancelForTask error: $e');
+    }
   }
 
   Future<void> scheduleForTask(Task task) async {
@@ -309,6 +274,7 @@ class NotificationService {
       if (remindersList.isEmpty) return;
 
       final prefs = await SharedPreferences.getInstance();
+      final lang = prefs.getString('app_language') ?? 'en';
       final newIds = <int>[];
 
       for (final reminderType in remindersList) {
@@ -316,44 +282,32 @@ class NotificationService {
         if (scheduled == null) continue;
 
         final id = Random().nextInt(0x7FFFFFFF);
-        final label = _reminderLabel(reminderType, prefs.getString('app_language') ?? 'en');
+        final label = _reminderLabel(reminderType, lang);
 
-        if (Platform.isAndroid) {
-          await prefs.setString('alarm_${id}_title', task.title);
-          await prefs.setString('alarm_${id}_body', label);
+        // Запазваме заглавието за snooze handler
+        await prefs.setString('alarm_${id}_title', task.title);
 
-          final success = await AndroidAlarmManager.oneShotAt(
-            scheduled,
-            id,
-            _alarmCallback,
-            exact: true,
-            wakeup: true,
-            rescheduleOnReboot: true,
-          );
-
-          if (success) newIds.add(id);
-        } else {
-          // iOS: use flutter_local_notifications zonedSchedule
-          final tzScheduled = tz.TZDateTime.from(scheduled, tz.local);
-          await _plugin.zonedSchedule(
-            id,
-            task.title,
-            label,
-            tzScheduled,
-            _buildNotificationDetails(task.title),
-            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-            uiLocalNotificationDateInterpretation:
-                UILocalNotificationDateInterpretation.absoluteTime,
-          );
-          newIds.add(id);
-        }
+        final tzScheduled = tz.TZDateTime.from(scheduled, tz.local);
+        await _plugin.zonedSchedule(
+          id,
+          task.title,
+          label,
+          tzScheduled,
+          _buildNotificationDetails(lang: lang),
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+        );
+        newIds.add(id);
       }
 
       if (newIds.isNotEmpty) {
         task.notificationIds = newIds;
         await task.save();
       }
-    } catch (e) { debugPrint('NotificationService error: $e'); }
+    } catch (e) {
+      debugPrint('NotificationService scheduleForTask error: $e');
+    }
   }
 
   Future<void> scheduleNotification({
@@ -367,70 +321,39 @@ class NotificationService {
     try {
       await _initIfNeeded();
 
-      if (Platform.isAndroid) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('alarm_${id}_title', title);
-        await prefs.setString('alarm_${id}_body', body);
-        if (payload != null) await prefs.setString('alarm_${id}_payload', payload);
+      final tzScheduled = tz.TZDateTime.from(scheduledDate, tz.local);
 
-        if (isDaily) {
-          await AndroidAlarmManager.periodic(
-            const Duration(days: 1),
-            id,
-            _alarmCallback,
-            exact: true,
-            wakeup: true,
-            rescheduleOnReboot: true,
-            startAt: scheduledDate,
-          );
-        } else {
-          await AndroidAlarmManager.oneShotAt(
-            scheduledDate,
-            id,
-            _alarmCallback,
-            exact: true,
-            wakeup: true,
-            rescheduleOnReboot: true,
-          );
-        }
-      } else {
-        // iOS
-        final tzScheduled = tz.TZDateTime.from(scheduledDate, tz.local);
-        const iosDetails = DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        );
-        const details = NotificationDetails(iOS: iosDetails);
+      const androidDetails = AndroidNotificationDetails(
+        'task_reminders',
+        'Task reminders',
+        channelDescription: 'Reminders for your tasks',
+        importance: Importance.max,
+        priority: Priority.max,
+        enableVibration: true,
+        playSound: true,
+      );
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+      const details = NotificationDetails(android: androidDetails, iOS: iosDetails);
 
-        if (isDaily) {
-          await _plugin.zonedSchedule(
-            id,
-            title,
-            body,
-            tzScheduled,
-            details,
-            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-            uiLocalNotificationDateInterpretation:
-                UILocalNotificationDateInterpretation.absoluteTime,
-            matchDateTimeComponents: DateTimeComponents.time,
-            payload: payload,
-          );
-        } else {
-          await _plugin.zonedSchedule(
-            id,
-            title,
-            body,
-            tzScheduled,
-            details,
-            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-            uiLocalNotificationDateInterpretation:
-                UILocalNotificationDateInterpretation.absoluteTime,
-            payload: payload,
-          );
-        }
-      }
-    } catch (e) { debugPrint('NotificationService error: $e'); }
+      await _plugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tzScheduled,
+        details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: isDaily ? DateTimeComponents.time : null,
+        payload: payload,
+      );
+    } catch (e) {
+      debugPrint('NotificationService scheduleNotification error: $e');
+    }
   }
 
   void _handleMorningBriefingTap() {
@@ -520,15 +443,14 @@ class NotificationService {
   Future<void> cancelNotification(int id) async {
     try {
       await _initIfNeeded();
-      if (Platform.isAndroid) await AndroidAlarmManager.cancel(id);
       await _plugin.cancel(id);
 
-      if (Platform.isAndroid) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove('alarm_${id}_title');
-        await prefs.remove('alarm_${id}_body');
-        await prefs.remove('alarm_${id}_payload');
-      }
-    } catch (e) { debugPrint('NotificationService error: $e'); }
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('alarm_${id}_title');
+      await prefs.remove('alarm_${id}_body');
+      await prefs.remove('alarm_${id}_payload');
+    } catch (e) {
+      debugPrint('NotificationService cancelNotification error: $e');
+    }
   }
 }

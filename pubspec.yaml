@@ -19,7 +19,6 @@ dependencies:
   flutter_local_notifications: ^18.0.1
   timezone: ^0.9.3
   flutter_timezone: ^3.0.0
-  android_alarm_manager_plus: ^4.0.4
   share_plus: ^10.0.0
   path_provider: ^2.1.2
   file_picker: ^10.3.7
