@@ -89,7 +89,7 @@
 
 	<!-- Google Mobile Ads — замени с реалния iOS App ID от AdMob конзолата -->
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>ca-app-pub-4385157735120275~7880643999</string>
 
 	<!-- ATT — App Tracking Transparency (изисква се от iOS 14+ за персонализирани реклами) -->
 	<key>NSUserTrackingUsageDescription</key>
