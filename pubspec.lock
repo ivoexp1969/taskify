@@ -145,30 +145,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.2"
-  cloud_firestore:
-    dependency: "direct main"
-    description:
-      name: cloud_firestore
-      sha256: "2d33da4465bdb81b6685c41b535895065adcb16261beb398f5f3bbc623979e9c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.6.12"
-  cloud_firestore_platform_interface:
-    dependency: transitive
-    description:
-      name: cloud_firestore_platform_interface
-      sha256: "413c4e01895cf9cb3de36fa5c219479e06cd4722876274ace5dfc9f13ab2e39b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.6.12"
-  cloud_firestore_web:
-    dependency: transitive
-    description:
-      name: cloud_firestore_web
-      sha256: c1e30fc4a0fcedb08723fb4b1f12ee4e56d937cbf9deae1bda43cbb6367bb4cf
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.4.12"
   code_builder:
     dependency: transitive
     description:
@@ -765,14 +741,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
-  pedantic:
-    dependency: transitive
-    description:
-      name: pedantic
-      sha256: "67fc27ed9639506c856c840ccce7594d0bdcd91bc8d53d6e52359449a1d50602"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.11.1"
   petitparser:
     dependency: transitive
     description:
@@ -954,30 +922,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.10.0"
-  speech_to_text:
-    dependency: "direct main"
-    description:
-      name: speech_to_text
-      sha256: c07557664974afa061f221d0d4186935bea4220728ea9446702825e8b988db04
-      url: "https://pub.dev"
-    source: hosted
-    version: "7.3.0"
-  speech_to_text_platform_interface:
-    dependency: transitive
-    description:
-      name: speech_to_text_platform_interface
-      sha256: a1935847704e41ee468aad83181ddd2423d0833abe55d769c59afca07adb5114
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.0"
-  speech_to_text_windows:
-    dependency: transitive
-    description:
-      name: speech_to_text_windows
-      sha256: "2c9846d18253c7bbe059a276297ef9f27e8a2745dead32192525beb208195072"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0+beta.8"
   stack_trace:
     dependency: transitive
     description:

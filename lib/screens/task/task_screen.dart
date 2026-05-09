@@ -6,7 +6,6 @@ import '../../services/google_calendar_service.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 import '../../models/task.dart';
 import '../../models/category.dart';
@@ -66,7 +65,6 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
   late AnimationController _listAnimationController;
 
   // Speech to text
-  final stt.SpeechToText _speech = stt.SpeechToText();
 
   @override
   void initState() {
@@ -843,102 +841,6 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                               prefixIcon: Icon(
                                 Icons.title_rounded,
                                 color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  Icons.mic_rounded,
-                                  color: categoryColor,
-                                ),
-                                onPressed: () async {
-                                  final available = await _speech.initialize(
-                                    onError: (error) => print('Speech error: $error'),
-                                  );
-                                  if (!available) {
-                                    if (innerContext.mounted) {
-                                      ScaffoldMessenger.of(innerContext).showSnackBar(
-                                        SnackBar(
-                                          content: Text(t.speechNotAvailable),
-                                          backgroundColor: Colors.redAccent,
-                                        ),
-                                      );
-                                    }
-                                    return;
-                                  }
-                                  
-                                  // Показваме диалог за слушане
-                                  showDialog(
-                                    context: innerContext,
-                                    barrierDismissible: false,
-                                    builder: (dialogContext) {
-                                      String recognizedText = '';
-                                      bool isListening = true;
-                                      
-                                      _speech.listen(
-                                        onResult: (result) {
-                                          recognizedText = result.recognizedWords;
-                                          if (result.finalResult) {
-                                            _titleController.text = recognizedText;
-                                            Navigator.pop(dialogContext);
-                                            setSheetState(() {});
-                                          }
-                                        },
-                                        localeId: voiceLocale,
-                                        listenFor: const Duration(seconds: 10),
-                                        pauseFor: const Duration(seconds: 3),
-                                      );
-                                      
-                                      return StatefulBuilder(
-                                        builder: (ctx, setDialogState) {
-                                          return AlertDialog(
-                                            content: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Container(
-                                                  width: 80,
-                                                  height: 80,
-                                                  decoration: BoxDecoration(
-                                                    color: categoryColor.withValues(alpha: 0.1),
-                                                    shape: BoxShape.circle,
-                                                  ),
-                                                  child: Icon(
-                                                    Icons.mic_rounded,
-                                                    size: 40,
-                                                    color: categoryColor,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16),
-                                                Text(
-                                                  t.listening,
-                                                  style: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: theme.colorScheme.onSurface,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 8),
-                                                Text(
-                                                  t.speakNow,
-                                                  style: TextStyle(
-                                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () {
-                                                  _speech.stop();
-                                                  Navigator.pop(dialogContext);
-                                                },
-                                                child: Text(t.cancel),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                    },
-                                  );
-                                },
                               ),
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 20,

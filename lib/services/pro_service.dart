@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 // Условен import - stub за web, реален пакет за mobile
@@ -204,99 +203,11 @@ class ProService extends ChangeNotifier {
     }
   }
 
-  /// Прилага промо код
+  /// Прилага промо код (cloud_firestore временно изключен за iOS)
   Future<({bool success, String message})> applyPromoCode(String code) async {
-    if (kIsWeb) {
-      return (success: false, message: _pm('notAvailableWeb', 'en'));
-    }
-    
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final lang = prefs.getString('app_language') ?? 'en';
-      final codeUpper = code.toUpperCase().trim();
-
-      final docRef = FirebaseFirestore.instance.collection('promo_codes').doc(codeUpper);
-      final doc = await docRef.get();
-
-      if (!doc.exists) {
-        return (success: false, message: _pm('invalidCode', lang));
-      }
-
-      final data = doc.data()!;
-
-      if (data['isActive'] != true) {
-        return (success: false, message: _pm('codeInactive', lang));
-      }
-
-      if (data['expiresAt'] != null) {
-        final expiresAt = (data['expiresAt'] as Timestamp).toDate();
-        if (DateTime.now().isAfter(expiresAt)) {
-          return (success: false, message: _pm('codeExpired', lang));
-        }
-      }
-
-      final maxUses = data['maxUses'] as int? ?? 0;
-      final usedCount = data['usedCount'] as int? ?? 0;
-      if (maxUses > 0 && usedCount >= maxUses) {
-        return (success: false, message: _pm('codeUsedUp', lang));
-      }
-
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      final usedBy = List<String>.from(data['usedBy'] ?? []);
-      final type = data['type'] as String;
-      
-      // За lifetime кодове - позволяваме повторна активация (след преинсталация)
-      if (userId != null && usedBy.contains(userId)) {
-        if (type == 'lifetime') {
-          await prefs.setString('applied_promo_code', codeUpper);
-          await prefs.setString('promo_type', 'lifetime');
-          await prefs.remove('promo_end_date');
-          _isPromoCode = true;
-          _promoEndDate = null;
-          _appliedPromoCode = codeUpper;
-          notifyListeners();
-          return (success: true, message: _pm('proReactivated', lang));
-        }
-        return (success: false, message: _pm('alreadyUsed', lang));
-      }
-      
-
-      final days = data['days'] as int? ?? 0;
-
-      await prefs.setString('applied_promo_code', codeUpper);
-      await prefs.setString('promo_type', type);
-
-      if (type == 'lifetime') {
-        _isPromoCode = true;
-        _promoEndDate = null;
-        await prefs.remove('promo_end_date');
-      } else if (type == 'days' && days > 0) {
-        final endDate = DateTime.now().add(Duration(days: days));
-        _promoEndDate = endDate;
-        _isPromoCode = true;
-        await prefs.setString('promo_end_date', endDate.toIso8601String());
-      }
-
-      _appliedPromoCode = codeUpper;
-
-      await docRef.update({
-        'usedCount': FieldValue.increment(1),
-        if (userId != null) 'usedBy': FieldValue.arrayUnion([userId]),
-      });
-
-      notifyListeners();
-
-      if (type == 'lifetime') {
-        return (success: true, message: _pm('proLifetime', lang));
-      } else {
-        return (success: true, message: _proForDays(days, lang));
-      }
-    } catch (e) {
-      debugPrint('Apply promo code error: $e');
-      final prefs = await SharedPreferences.getInstance();
-      final lang = prefs.getString('app_language') ?? 'en';
-      return (success: false, message: '${_pm('error', lang)}: $e');
-    }
+    final prefs = await SharedPreferences.getInstance();
+    final lang = prefs.getString('app_language') ?? 'en';
+    return (success: false, message: _pm('notAvailableWeb', lang));
   }
 
   void _updateProStatus(CustomerInfo customerInfo) {
