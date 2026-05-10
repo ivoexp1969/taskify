@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/task.dart';
 
@@ -12,67 +11,61 @@ class GoogleCalendarService {
   factory GoogleCalendarService() => _instance;
   GoogleCalendarService._internal();
 
-  GoogleSignIn? _googleSignIn;
+  bool _initialized = false;
+  GoogleSignInAccount? _currentAccount;
   bool _isConnected = false;
 
-  // Scopes за Calendar Events и Tasks
   static const List<String> scopes = [
     'https://www.googleapis.com/auth/calendar',
-    'https://www.googleapis.com/auth/tasks.readonly', // За Google Tasks
+    'https://www.googleapis.com/auth/tasks.readonly',
   ];
 
   bool get isConnected => _isConnected;
 
-  GoogleSignIn _getGoogleSignIn() {
-    _googleSignIn ??= GoogleSignIn(
-      scopes: scopes,
-      // Web използва Web Client ID; mobile — четат от google-services.json / GoogleService-Info.plist
+  Future<void> _ensureInitialized() async {
+    if (_initialized) return;
+    await GoogleSignIn.instance.initialize(
+      clientId: kIsWeb
+          ? null
+          : '929046134968-g21i568en2jccqqvlkj4e2reqks9kuij.apps.googleusercontent.com',
       serverClientId: kIsWeb
           ? '929046134968-m6ffgsd8dsotabi7ivkjdsqfnlm041n.apps.googleusercontent.com'
           : null,
     );
-    return _googleSignIn!;
+    _initialized = true;
   }
 
-  /// Опитва silent reconnect при стартиране на app-а
   Future<void> tryReconnect() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final wasConnected = prefs.getBool('google_calendar_connected') ?? false;
       if (!wasConnected) return;
 
-      final gsi = _getGoogleSignIn();
-      final account = await gsi.signInSilently();
+      await _ensureInitialized();
+      final future = GoogleSignIn.instance.attemptLightweightAuthentication();
+      if (future == null) return;
+
+      final account = await future;
       if (account != null) {
-        final auth = await gsi.authenticatedClient();
-        if (auth != null) {
-          _isConnected = true;
-          debugPrint('Google Calendar reconnected silently');
-          return;
-        }
+        _currentAccount = account;
+        _isConnected = true;
+        debugPrint('Google Calendar reconnected silently');
+      } else {
+        _isConnected = false;
       }
-      // Silent fail — само in-memory, не трием prefs (може да е временна мрежова грешка)
-      _isConnected = false;
     } catch (e) {
       debugPrint('Silent reconnect failed: $e');
       _isConnected = false;
     }
   }
 
-  /// Свързваме се с Google Calendar чрез Google Sign In
   Future<bool> connect() async {
     try {
-      final gsi = _getGoogleSignIn();
-      final account = await gsi.signIn();
-      if (account == null) {
-        return false;
-      }
-
-      final auth = await gsi.authenticatedClient();
-      if (auth == null) {
-        return false;
-      }
-
+      await _ensureInitialized();
+      final account = await GoogleSignIn.instance.authenticate(
+        scopeHint: scopes,
+      );
+      _currentAccount = account;
       _isConnected = true;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('google_calendar_connected', true);
@@ -84,10 +77,11 @@ class GoogleCalendarService {
     }
   }
 
-  /// Разкачаме Google Calendar
   Future<void> disconnect() async {
     try {
-      await _googleSignIn?.signOut();
+      await _ensureInitialized();
+      await GoogleSignIn.instance.signOut();
+      _currentAccount = null;
       _isConnected = false;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('google_calendar_connected', false);
@@ -96,33 +90,24 @@ class GoogleCalendarService {
     }
   }
 
-  /// Взимаме access token за API заявки
   Future<String?> _getAccessToken() async {
     try {
-      final auth = await _googleSignIn?.authenticatedClient();
-      if (auth == null) {
-        return null;
-      }
+      await _ensureInitialized();
 
-      // Вземаме credentials
-      var account = _googleSignIn?.currentUser;
-      if (account == null) {
-        // Опитваме silent sign-in ако токенът е изтекъл
-        account = await _googleSignIn?.signInSilently();
+      if (_currentAccount == null) {
+        final future = GoogleSignIn.instance.attemptLightweightAuthentication();
+        if (future == null) return null;
+        final account = await future;
         if (account == null) {
           _isConnected = false;
           return null;
         }
+        _currentAccount = account;
       }
 
-      final authHeaders = await account.authHeaders;
-      final authorization = authHeaders['Authorization'];
-      if (authorization == null) {
-        return null;
-      }
-
-      // Authorization header е във формат "Bearer TOKEN"
-      return authorization.replaceFirst('Bearer ', '');
+      final authorizationClient = _currentAccount!.authorizationClient;
+      final authorization = await authorizationClient.authorizeScopes(scopes);
+      return authorization.accessToken;
     } catch (e) {
       debugPrint('Error getting access token: $e');
       return null;
@@ -131,7 +116,6 @@ class GoogleCalendarService {
 
   /// === CALENDAR EVENTS API ===
 
-  /// Взима предстоящите събития от Calendar
   Future<List<Map<String, dynamic>>> getUpcomingEvents({int days = 30}) async {
     try {
       final token = await _getAccessToken();
@@ -176,7 +160,7 @@ class GoogleCalendarService {
             'summary': item['summary'],
             'description': item['description'],
             'startDateTime': startDateTime,
-            'eventType': item['eventType'], // birthday, default, etc.
+            'eventType': item['eventType'],
           };
         }).toList();
       } else {
@@ -189,7 +173,6 @@ class GoogleCalendarService {
     }
   }
 
-  /// Взима конкретно събитие по ID
   Future<Map<String, dynamic>?> getCalendarEvent(String eventId) async {
     try {
       final token = await _getAccessToken();
@@ -233,7 +216,6 @@ class GoogleCalendarService {
     }
   }
 
-  /// Добавя задача към Calendar като събитие
   Future<String?> addTaskToCalendar(Task task) async {
     try {
       final token = await _getAccessToken();
@@ -278,7 +260,6 @@ class GoogleCalendarService {
     }
   }
 
-  /// Изтрива събитие от Calendar
   Future<bool> deleteCalendarEvent(String eventId) async {
     try {
       final token = await _getAccessToken();
@@ -304,7 +285,6 @@ class GoogleCalendarService {
 
   /// === GOOGLE TASKS API ===
 
-  /// Взима всички task lists на потребителя
   Future<List<Map<String, dynamic>>> getTaskLists() async {
     try {
       final token = await _getAccessToken();
@@ -328,7 +308,6 @@ class GoogleCalendarService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final items = data['items'] as List? ?? [];
-        
         return items.map((item) => {
           'id': item['id'],
           'title': item['title'],
@@ -343,7 +322,6 @@ class GoogleCalendarService {
     }
   }
 
-  /// Взима tasks от конкретен list
   Future<List<Map<String, dynamic>>> getTasksFromList(String listId) async {
     try {
       final token = await _getAccessToken();
@@ -370,8 +348,8 @@ class GoogleCalendarService {
             'id': item['id'],
             'title': item['title'],
             'notes': item['notes'],
-            'due': item['due'], // ISO 8601 format or null
-            'status': item['status'], // "needsAction" or "completed"
+            'due': item['due'],
+            'status': item['status'],
             'updated': item['updated'],
           };
         }).toList();
@@ -385,7 +363,6 @@ class GoogleCalendarService {
     }
   }
 
-  /// Взима всички Google Tasks от всички lists
   Future<List<Map<String, dynamic>>> getAllGoogleTasks() async {
     try {
       final taskLists = await getTaskLists();
@@ -395,12 +372,11 @@ class GoogleCalendarService {
       }
 
       final allTasks = <Map<String, dynamic>>[];
-      
+
       for (final taskList in taskLists) {
         final listId = taskList['id'] as String;
         final tasks = await getTasksFromList(listId);
-        
-        // Добавяме listTitle към всеки task за reference
+
         for (final task in tasks) {
           task['listTitle'] = taskList['title'];
           allTasks.add(task);
@@ -414,4 +390,3 @@ class GoogleCalendarService {
     }
   }
 }
-
