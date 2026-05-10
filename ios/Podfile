@@ -38,6 +38,14 @@ target 'Runner' do
 end
 
 pre_install do |installer|
+  # Patch device_calendar to use non-modular Swift header import
+  plugin_m = File.join(File.dirname(__FILE__), '../.pub-cache/hosted/pub.dev/device_calendar-4.3.3/ios/Classes/DeviceCalendarPlugin.m')
+  if File.exist?(plugin_m)
+    content = File.read(plugin_m)
+    patched = content.gsub('#import <device_calendar/device_calendar-Swift.h>', '#import "device_calendar-Swift.h"')
+    File.write(plugin_m, patched)
+  end
+
   installer.pod_targets.each do |pod|
     if ['gRPC-C++', 'gRPC-Core', 'Abseil', 'BoringSSL-GRPC', 'openssl_grpc', 'leveldb-library'].include?(pod.name)
       def pod.build_type
@@ -54,6 +62,11 @@ post_install do |installer|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
       if target.name == 'speech_to_text'
         config.build_settings['DEFINES_MODULE'] = 'NO'
+      end
+      if target.name == 'device_calendar'
+        config.build_settings['DEFINES_MODULE'] = 'YES'
+        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+        config.build_settings['SWIFT_INCLUDE_PATHS'] = '$(PODS_BUILD_DIR)/Build/Products/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/device_calendar'
       end
       if ['gRPC-C++', 'gRPC-Core'].include?(target.name)
         config.build_settings['CLANG_WARN_STRICT_PROTOTYPES'] = 'NO'

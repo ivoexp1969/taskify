@@ -58,9 +58,11 @@
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Taskify uses speech recognition to convert your voice to task titles.</string>
 	<key>NSCalendarsUsageDescription</key>
-	<string>Taskify can sync your tasks with Google Calendar.</string>
+	<string>Taskify needs calendar access to sync your tasks with Google Calendar and Apple Calendar.</string>
 	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
-	<string>Taskify can add your tasks to Google Calendar.</string>
+	<string>Taskify needs calendar access to add your tasks to Apple Calendar.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Taskify needs full calendar access to sync your tasks with Apple Calendar.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Taskify needs access to your photo library to import files.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

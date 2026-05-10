@@ -18,6 +18,7 @@ import 'statistics_screen.dart';
 import '../../services/task_view_preference.dart';
 import '../home/home_screen.dart';
 import '../../services/google_calendar_service.dart';
+import '../../services/ios_calendar_service.dart';
 import '../../services/morning_briefing_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -35,6 +36,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isSyncing = false;
   bool _isCalendarConnected = false;
   final _calendarService = GoogleCalendarService();
+  final _iosCalendarService = IosCalendarService();
+  bool _isIosCalendarGranted = false;
   final _morningBriefingService = MorningBriefingService();
   bool _isMorningBriefingEnabled = false;
   int _briefingHour = 8;
@@ -46,6 +49,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadBriefingTime();
     _loadMorningBriefingSetting();
     _checkCalendarConnection();
+    if (Platform.isIOS) _checkIosCalendarPermission();
   }
 
   Future<void> _loadMorningBriefingSetting() async {
@@ -65,6 +69,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _isCalendarConnected = isConnected;
     });
+  }
+
+  Future<void> _checkIosCalendarPermission() async {
+    final granted = await _iosCalendarService.hasPermission();
+    if (mounted) setState(() => _isIosCalendarGranted = granted);
   }
 
   // Списък с предефинирани цветове за color picker
@@ -1717,6 +1726,90 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
             ),
           ),
+          // iOS Calendar
+          if (Platform.isIOS) ...[
+            const SizedBox(height: 24),
+            Text(
+              'Apple Calendar',
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Card(
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: _isIosCalendarGranted
+                            ? Colors.green.withValues(alpha: 0.1)
+                            : Colors.grey.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.calendar_month,
+                        color: _isIosCalendarGranted ? Colors.green : Colors.grey,
+                      ),
+                    ),
+                    title: Text(_isIosCalendarGranted ? 'Apple Calendar свързан' : 'Apple Calendar'),
+                    subtitle: Text(
+                      _isIosCalendarGranted
+                          ? 'Можеш да експортираш задачи в Apple Calendar'
+                          : 'Разреши достъп до Apple Calendar',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                    trailing: TextButton(
+                      onPressed: () async {
+                        if (_isIosCalendarGranted) {
+                          setState(() => _isIosCalendarGranted = false);
+                        } else {
+                          final granted = await _iosCalendarService.requestPermission();
+                          setState(() => _isIosCalendarGranted = granted);
+                          if (!granted && mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Достъпът до Calendar е отказан')),
+                            );
+                          }
+                        }
+                      },
+                      child: Text(_isIosCalendarGranted ? t.disconnect : t.connect),
+                    ),
+                  ),
+                  if (_isIosCalendarGranted) ...[
+                    const Divider(height: 0),
+                    ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.upload, color: Colors.blue),
+                      ),
+                      title: const Text('Експортирай задачи'),
+                      subtitle: const Text(
+                        'Добавя активните задачи в Apple Calendar',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () async {
+                        final taskBox = Hive.box<Task>('tasks');
+                        final tasks = taskBox.values
+                            .where((t) => !t.isCompleted && !t.isArchived)
+                            .toList();
+                        final count = await _iosCalendarService.exportAllTasks(tasks);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('$count задачи добавени в Apple Calendar')),
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
           // Тема
           Text(
             t.theme,
