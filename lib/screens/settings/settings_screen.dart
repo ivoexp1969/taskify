@@ -1289,7 +1289,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _isCalendarConnected ? t.calendarSyncEnabled : t.connectForSync,
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
-                  trailing: TextButton(
+                  trailing: Platform.isIOS && !_isCalendarConnected
+                      ? null
+                      : TextButton(
                     onPressed: () async {
                       if (_isCalendarConnected) {
                         await _calendarService.disconnect();

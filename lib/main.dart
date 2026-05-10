@@ -61,7 +61,7 @@ Future<void> main() async {
   GoogleCalendarService().tryReconnect();
 
   // Initialize notification service (registers tap handler)
-  NotificationService().init();
+  await NotificationService().init();
 
   // Setup morning briefing notification callback
   NotificationService.setMorningBriefingCallback((BuildContext context) {
