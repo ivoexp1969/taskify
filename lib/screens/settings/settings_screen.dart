@@ -1767,7 +1767,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           setState(() => _isIosCalendarGranted = granted);
                           if (!granted && mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Достъпът до Calendar е отказан')),
+                              SnackBar(content: Text(t.calendarAccessDenied)),
                             );
                           }
                         }
@@ -1786,10 +1786,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         child: const Icon(Icons.upload, color: Colors.blue),
                       ),
-                      title: const Text('Експортирай задачи'),
-                      subtitle: const Text(
-                        'Добавя активните задачи в Apple Calendar',
-                        style: TextStyle(fontSize: 12),
+                      title: Text(t.exportTasks),
+                      subtitle: Text(
+                        t.exportTasksDesc,
+                        style: const TextStyle(fontSize: 12),
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () async {
@@ -1800,7 +1800,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         final count = await _iosCalendarService.exportAllTasks(tasks);
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('$count задачи добавени в Apple Calendar')),
+                            SnackBar(content: Text(t.tasksAddedToAppleCalendar(count))),
                           );
                         }
                       },

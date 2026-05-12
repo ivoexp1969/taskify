@@ -4,5 +4,13 @@ class L10n {
   static final all = [
     const Locale('en'),
     const Locale('bg'),
+    const Locale('de'),
+    const Locale('fr'),
+    const Locale('it'),
+    const Locale('el'),
+    const Locale('es'),
+    const Locale('pt'),
+    const Locale('ru'),
+    const Locale('tr'),
   ];
 }
