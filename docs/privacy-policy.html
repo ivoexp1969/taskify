@@ -1,58 +1,164 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - Taskify</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
-        h1 { color: #333; }
-        h2 { color: #555; margin-top: 30px; }
-        p { color: #666; }
-        .updated { color: #999; font-size: 14px; }
-    </style>
-</head>
-<body>
-    <h1>Privacy Policy for Taskify</h1>
-    <p class="updated">Last updated: January 10, 2026</p>
-    
-    <h2>Introduction</h2>
-    <p>Taskify ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our mobile application.</p>
-    
-    <h2>Information We Collect</h2>
-    <p><strong>Account Information:</strong> When you create an account, we collect your email address for authentication purposes.</p>
-    <p><strong>Task Data:</strong> We store the tasks, categories, and reminders you create within the app.</p>
-    <p><strong>Device Information:</strong> We may collect device identifiers for analytics and crash reporting.</p>
-    
-    <h2>How We Use Your Information</h2>
-    <p>We use your information to:</p>
-    <p>- Provide and maintain the app functionality</p>
-    <p>- Sync your data across devices (if you enable cloud sync)</p>
-    <p>- Send you task reminders and notifications</p>
-    <p>- Improve our services</p>
-    
-    <h2>Data Storage</h2>
-    <p>Your task data is stored locally on your device. If you enable cloud sync, your data is securely stored in Firebase Cloud services.</p>
-    
-    <h2>Third-Party Services</h2>
-    <p>We use the following third-party services:</p>
-    <p>- Firebase (Authentication and Cloud Storage)</p>
-    <p>- RevenueCat (Subscription management)</p>
-    <p>- Google Play Billing (In-app purchases)</p>
-    
-    <h2>Data Security</h2>
-    <p>We implement appropriate security measures to protect your personal information. However, no method of transmission over the Internet is 100% secure.</p>
-    
-    <h2>Your Rights</h2>
-    <p>You can delete your account and all associated data at any time from within the app settings.</p>
-    
-    <h2>Children's Privacy</h2>
-    <p>Our app does not knowingly collect personal information from children under 13.</p>
-    
-    <h2>Changes to This Policy</h2>
-    <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page.</p>
-    
-    <h2>Contact Us</h2>
-    <p>If you have questions about this Privacy Policy, please contact us at: ivoexp@yahoo.com</p>
-</body>
-</html>
+Last Updated: May 11, 2026
+
+This Privacy Policy describes how Taskify ("we", "our", or "the app") collects, uses, and protects your information when you use our mobile application on iOS and Android platforms. By using Taskify, you agree to the collection and use of information in accordance with this policy.
+
+Data Controller
+Name: Ivaylo Mihaylov
+
+Country: Bulgaria
+
+Contact email: ivoexp@gmail.com
+
+1. Information We Collect
+1.1 Information You Provide
+Task Data: Tasks, descriptions, due dates, priority levels, and categories you create within the app
+Account Information: Email address used for subscription management and app authentication
+Voice Input: When you use voice input features, audio is processed on-device and not stored
+1.2 Google Calendar Data
+When you choose to enable Google Calendar synchronization, we access and use the following:
+
+Calendar Events: We read and write calendar events to synchronize your tasks with your Google Calendar
+OAuth Scope Used: https://www.googleapis.com/auth/calendar.events
+How We Use Google Calendar Data:
+Create calendar events when you add tasks with due dates
+Update calendar events when you modify tasks
+Delete calendar events when you delete tasks
+Provide bi-directional synchronization between tasks and calendar
+Important: Your Google Calendar data is used solely for providing the synchronization feature. We do not share, sell, or use your calendar data for any other purpose.
+
+1.3 Automatically Collected Information
+Device Information: Device model, operating system version, app version, language, timezone
+Usage Data: App features you use, screens viewed, session length
+Crash Reports and Diagnostics: Collected via Firebase Crashlytics for app stability
+Advertising ID: For serving personalized ads in the free version (can be reset in device settings)
+Push Notification Tokens: Delivered via Apple Push Notification Service (APNs) on iOS and Firebase Cloud Messaging (FCM) on Android, used to deliver reminders and notifications
+1.4 App Tracking Transparency (iOS)
+On iOS, before any tracking for advertising purposes occurs, the app requests your explicit permission via Apple's App Tracking Transparency (ATT) framework. You will see a system prompt asking whether you allow Taskify to track your activity across other companies' apps and websites.
+
+You may decline; doing so will not prevent you from using core app features. If you decline, Google AdMob will serve non-personalized ads based only on contextual signals.
+
+2. How We Use Your Information
+We use the collected information for the following purposes:
+
+Provide App Functionality: Store and manage your tasks, enable reminders, sync with Google Calendar
+Improve User Experience: Analyze app usage to improve features and fix bugs
+Subscription Management: Process and manage Pro subscription purchases via Apple App Store, Google Play Billing, and RevenueCat
+Advertising: Display relevant ads in the free version of the app
+Push Notifications: Deliver task reminders, snooze notifications, and important app updates
+Communication: Send important updates about the app or your subscription
+3. Google API Services User Data Policy Compliance
+Taskify's use of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements.
+
+Limited Use Disclosure:
+Taskify's use and transfer of information received from Google APIs to any other app will adhere to Google API Services User Data Policy, including the Limited Use requirements.
+
+Specifically:
+
+We only request the minimum necessary calendar permissions (calendar.events scope)
+We do not use Google user data for advertising purposes
+We do not transfer Google user data to third parties
+We do not use Google user data for purposes unrelated to the core task management and calendar synchronization functionality
+4. Data Storage and Security
+4.1 Local Storage
+Task data is stored locally on your device using secure local database (Hive). This data remains on your device and is not automatically uploaded to our servers.
+
+4.2 Cloud Storage
+We use Firebase Firestore to store:
+
+Promotional code validations
+Subscription status information
+User preferences for cloud backup (if enabled)
+4.3 Security Measures
+All data transmissions use HTTPS encryption
+Google Calendar authentication uses OAuth 2.0 secure protocol
+We do not store your Google account password
+Subscription data is handled securely through RevenueCat, Apple App Store, and Google Play Billing
+5. Third-Party Services
+Taskify integrates with the following third-party services. Each operates under its own privacy policy:
+
+5.1 Google Services
+Google Calendar API: For task-calendar synchronization
+Google Play Services: For Android app distribution and updates
+Firebase (Analytics, Crashlytics, Cloud Messaging): For analytics, crash reporting, and push notifications — Privacy Policy
+5.2 Apple Services
+Apple App Store: For iOS app distribution and updates
+Apple In-App Purchase: For processing iOS subscription purchases
+Apple Push Notification Service (APNs): For delivering push notifications on iOS
+Apple Privacy Policy
+5.3 RevenueCat
+We use RevenueCat to manage in-app subscriptions across iOS and Android. RevenueCat processes subscription purchases and provides subscription status information. Review their privacy policy at: https://www.revenuecat.com/privacy
+
+5.4 Google AdMob
+The free version of Taskify displays advertisements through Google AdMob. AdMob may collect and use device information and advertising identifiers to provide relevant ads. You can opt out of personalized advertising in your device settings, or by declining the iOS App Tracking Transparency prompt. Review AdMob's privacy policy at: https://support.google.com/admob/answer/6128543
+
+6. Data Sharing and Disclosure
+We do not sell, trade, or rent your personal information to third parties. We may share your information only in the following circumstances:
+
+With Your Consent: When you explicitly authorize data sharing (e.g., Google Calendar sync, ATT prompt on iOS)
+Service Providers: With trusted third-party services that help us operate the app (RevenueCat, Firebase, AdMob, Apple, Google)
+Legal Requirements: If required by law or to protect our rights and users' safety
+7. Your Rights and Choices
+7.1 Access and Control
+Disconnect Google Calendar: You can revoke calendar access at any time through app settings or Google account settings (myaccount.google.com/permissions)
+Delete Data: You can delete your tasks and app data by uninstalling the app
+Opt-out of Ads: Upgrade to Taskify Pro to remove all advertisements
+Manage Subscriptions: iOS subscriptions can be managed in Settings → Apple ID → Subscriptions. Android subscriptions in Google Play → Subscriptions.
+7.2 GDPR Rights (EEA/UK/Switzerland Users)
+You may have the following rights regarding your personal data:
+
+Access — request a copy of your data
+Rectification — request correction of inaccurate data
+Erasure — request deletion ("right to be forgotten")
+Restriction — request limitation of processing
+Portability — receive your data in a machine-readable format
+Objection — object to processing based on legitimate interests
+Withdraw consent — for processing based on consent
+Lodge a complaint — with your local data protection authority (in Bulgaria: Commission for Personal Data Protection)
+To exercise these rights, contact us at ivoexp@gmail.com.
+
+7.3 Data Portability
+You can export your task data at any time through the app's export functionality.
+
+8. Children's Privacy
+Taskify is not intended for use by children under 13 years of age. We do not knowingly collect personal information from children under 13. If you become aware that a child has provided us with personal information, please contact us, and we will take steps to delete such information.
+
+9. Data Retention
+Task Data: Stored locally on your device until you delete it or uninstall the app
+Subscription Data: Retained by RevenueCat, Apple, and Google as long as your subscription is active and for legal/accounting purposes thereafter
+Google Calendar Access: Access tokens are stored securely and can be revoked at any time
+Analytics and Crash Data: Retained by Firebase per Firebase retention policies (typically up to 14 months for analytics)
+10. International Data Transfers
+Your information may be transferred to and processed in countries other than your own, including the United States, where Google, Apple, RevenueCat, and Firebase operate. These providers implement appropriate safeguards such as Standard Contractual Clauses (SCCs) approved by the European Commission to ensure adequate protection of your data. By using Taskify, you consent to the transfer of your information to these countries.
+
+11. Changes to This Privacy Policy
+We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date. You are advised to review this Privacy Policy periodically for any changes.
+
+12. Contact Us
+If you have any questions about this Privacy Policy or how we handle your data, please contact us:
+
+Email: ivoexp@gmail.com
+App Name: Taskify - Smart To-Do List
+Developer: Ivaylo Mihaylov, Bulgaria
+13. Legal Basis for Processing (GDPR)
+If you are in the European Economic Area (EEA), United Kingdom, or Switzerland, our legal basis for collecting and using your personal information includes (GDPR Art. 6):
+
+Consent: You have given us permission to use your data (e.g., Google Calendar sync, iOS App Tracking Transparency prompt)
+Contract: Processing is necessary to provide the service you requested (task management, subscriptions)
+Legitimate Interests: Processing is necessary for our legitimate interests (e.g., improving the app, fraud prevention, analytics)
+Legal Obligations: To comply with applicable laws
+14. Google Calendar Data - Additional Disclosures
+Transparency Commitment:
+
+Taskify accesses your Google Calendar data exclusively to provide task-to-calendar synchronization. This feature allows you to:
+
+Automatically create calendar events when you add tasks with due dates
+Keep your tasks and calendar in sync
+View your task schedule alongside other calendar events
+We guarantee that:
+
+Calendar data is processed only on your device and through Google's secure APIs
+We do not store your calendar data on our servers
+We do not analyze or mine your calendar data for any purpose other than synchronization
+We do not share your calendar data with any third parties
+You can disconnect calendar access at any time without losing your task data
+← Back to Homepage
