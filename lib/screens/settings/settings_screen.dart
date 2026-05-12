@@ -1751,11 +1751,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         color: _isIosCalendarGranted ? Colors.green : Colors.grey,
                       ),
                     ),
-                    title: Text(_isIosCalendarGranted ? 'Apple Calendar свързан' : 'Apple Calendar'),
+                    title: Text(_isIosCalendarGranted ? t.appleCalendarConnected : 'Apple Calendar'),
                     subtitle: Text(
                       _isIosCalendarGranted
-                          ? 'Можеш да експортираш задачи в Apple Calendar'
-                          : 'Разреши достъп до Apple Calendar',
+                          ? t.appleCalendarConnectedDesc
+                          : t.appleCalendarPermission,
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                     trailing: TextButton(
