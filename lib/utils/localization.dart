@@ -1057,6 +1057,7 @@ class AppText {
   });
 
   String giftTitle(String name) => _t({'en': 'Gift for $name', 'bg': 'Подарък за $name', 'de': 'Geschenk für $name', 'fr': 'Cadeau pour $name', 'it': 'Regalo per $name', 'el': 'Δώρο για $name', 'es': 'Regalo para $name', 'pt': 'Presente para $name', 'ru': 'Подарок для $name', 'tr': '$name için hediye'});
+  String birthdayTitle(String name) => _t({'en': "$name's birthday", 'bg': 'Рожден ден на $name', 'de': 'Geburtstag von $name', 'fr': 'Anniversaire de $name', 'it': 'Compleanno di $name', 'el': 'Γενέθλια του $name', 'es': 'Cumpleaños de $name', 'pt': 'Aniversário de $name', 'ru': 'День рождения $name', 'tr': '$name doğum günü'});
 
   // ==================== PRODUCTIVITY ====================
   String get streakDays => _t({'en': 'day streak', 'bg': 'дни поред', 'de': 'Tage-Serie', 'fr': 'jours consécutifs', 'it': 'giorni di fila', 'el': 'μέρες σερί', 'es': 'días seguidos', 'pt': 'dias seguidos', 'ru': 'дней подряд', 'tr': 'günlük seri'});

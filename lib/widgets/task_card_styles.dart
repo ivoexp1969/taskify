@@ -100,7 +100,7 @@ class GlassTaskCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                task.template == 'meeting' ? '${t.meetingTitle(task.title)}' : task.template == 'travel' ? '${t.travelTitle(task.title)}' : task.template == 'gift' ? '${t.giftTitle(task.title)}' : task.title,
+                                task.template == 'meeting' ? '${t.meetingTitle(task.title)}' : task.template == 'travel' ? '${t.travelTitle(task.title)}' : task.template == 'gift' ? '${t.giftTitle(task.title)}' : task.template == 'birthday' ? '${t.birthdayTitle(task.title)}' : task.title,
                                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, decoration: isCompleted ? TextDecoration.lineThrough : null, color: theme.colorScheme.onSurface),
                                 maxLines: 2, overflow: TextOverflow.ellipsis,
                               ),
@@ -250,7 +250,7 @@ class ExpandableTaskCard extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  task.template == 'meeting' ? '${t.meetingTitle(task.title)}' : task.template == 'travel' ? '${t.travelTitle(task.title)}' : task.template == 'gift' ? '${t.giftTitle(task.title)}' : task.title,
+                                  task.template == 'meeting' ? '${t.meetingTitle(task.title)}' : task.template == 'travel' ? '${t.travelTitle(task.title)}' : task.template == 'gift' ? '${t.giftTitle(task.title)}' : task.template == 'birthday' ? '${t.birthdayTitle(task.title)}' : task.title,
                                   style: TextStyle(
                                     fontSize: isExpanded ? 14.5 : 13.5,
                                     fontWeight: FontWeight.w600,

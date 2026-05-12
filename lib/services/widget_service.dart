@@ -10,8 +10,14 @@ class WidgetService {
 
   static bool get _isAndroid =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+  static bool get _isIOS =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
 
   static Future<void> updateWidget() async {
+    if (_isIOS) {
+      await _syncTasksToAppGroup();
+      return;
+    }
     if (!_isAndroid) return;
     try {
       await _syncTasksToPrefs();
@@ -59,6 +65,40 @@ class WidgetService {
     }
   }
 
+  static Future<void> _syncTasksToAppGroup() async {
+    try {
+      final taskBox = Hive.box<Task>('tasks');
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final tomorrow = today.add(const Duration(days: 1));
+      final todayTasks = taskBox.values.where((t) {
+        if (t.isCompleted) return false;
+        final d = DateTime(t.dueDate.year, t.dueDate.month, t.dueDate.day);
+        return !d.isBefore(today) && d.isBefore(tomorrow);
+      }).toList();
+      todayTasks.sort((a, b) {
+        final aOv = a.dueDate.isBefore(now), bOv = b.dueDate.isBefore(now);
+        if (aOv && !bOv) return -1;
+        if (!aOv && bOv) return 1;
+        return b.priority.compareTo(a.priority);
+      });
+      final prefs = await SharedPreferences.getInstance();
+      final lang = prefs.getString('app_language') ?? 'en';
+      final tasksJson = todayTasks.map((t) => {
+        'key': t.key, 'title': t.title,
+        'isCompleted': t.isCompleted, 'priority': t.priority,
+        'dueDate': t.dueDate.toIso8601String(),
+        if (t.template != null) 'template': t.template,
+      }).toList();
+      await _channel.invokeMethod('syncToAppGroup', {
+        'tasks': jsonEncode(tasksJson),
+        'language': lang,
+      });
+    } catch (e) {
+      debugPrint('iOS widget sync error: $e');
+    }
+  }
+
   static Future<void> requestPinWidget() async {
     if (!_isAndroid) return;
     try {
@@ -69,7 +109,7 @@ class WidgetService {
   }
 
   static void setupWidgetListener() {
-    if (!_isAndroid) return;
+    if (!_isAndroid && !_isIOS) return;
     final taskBox = Hive.box<Task>('tasks');
     taskBox.watch().listen((_) {
       updateWidget();
