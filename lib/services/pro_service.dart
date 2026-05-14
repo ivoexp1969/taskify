@@ -113,7 +113,7 @@ class ProService extends ChangeNotifier {
     try {
       // RevenueCat API ключове — различни за Android и iOS
       const _rcAndroidKey = 'goog_OgZMwPkNQbGIxgAGLLDTUmaLTqT';
-      const _rcIosKey = 'appl_REPLACE_WITH_IOS_KEY'; // TODO: вземи от RevenueCat Dashboard → App Settings → iOS
+      const _rcIosKey = 'appl_heswwmmvxFfwDEtUhxkdArbHupS';
       final rcKey = (defaultTargetPlatform == TargetPlatform.iOS) ? _rcIosKey : _rcAndroidKey;
       await Purchases.configure(PurchasesConfiguration(rcKey));
 
