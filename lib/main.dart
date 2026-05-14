@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -156,6 +157,7 @@ class MyApp extends StatelessWidget {
       useMaterial3: true,
       colorSchemeSeed: const Color(0xFF4F46E5),
       brightness: Brightness.light,
+      textTheme: GoogleFonts.poppinsTextTheme(),
     );
     return base.copyWith(
       scaffoldBackgroundColor: const Color(0xFFF4F4F7),
@@ -187,6 +189,7 @@ class MyApp extends StatelessWidget {
       useMaterial3: true,
       colorSchemeSeed: const Color(0xFF4F46E5),
       brightness: Brightness.dark,
+      textTheme: GoogleFonts.poppinsTextTheme(ThemeData(brightness: Brightness.dark).textTheme),
     );
     return base.copyWith(
       scaffoldBackgroundColor: const Color(0xFF020617),
@@ -220,6 +223,7 @@ class MyApp extends StatelessWidget {
       useMaterial3: true,
       colorSchemeSeed: const Color(0xFF4F46E5),
       brightness: Brightness.dark,
+      textTheme: GoogleFonts.poppinsTextTheme(ThemeData(brightness: Brightness.dark).textTheme),
     );
     return base.copyWith(
       scaffoldBackgroundColor: Colors.black,

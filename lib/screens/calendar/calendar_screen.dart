@@ -472,7 +472,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             builder: (innerContext, setState) {
               return SizedBox(
                 width: 320,
-                height: 320,
+                height: 370,
                 child: Column(
                   children: [
                     Text(
