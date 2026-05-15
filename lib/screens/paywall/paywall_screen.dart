@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/pro_service.dart';
 import '../../utils/localization.dart';
@@ -40,6 +41,8 @@ const _p = {
   'save50': {'en': 'Save 50%', 'bg': 'Спестяваш 50%', 'de': '50% sparen', 'fr': 'Économisez 50%', 'it': 'Risparmia il 50%', 'el': 'Εξοικονομήστε 50%', 'es': 'Ahorra 50%', 'pt': 'Economize 50%', 'ru': 'Скидка 50%', 'tr': '%50 tasarruf'},
   'cancelAnytime': {'en': 'Cancel anytime', 'bg': 'Отказ по всяко време', 'de': 'Jederzeit kündbar', 'fr': "Annulez à tout moment", 'it': 'Annulla in qualsiasi momento', 'el': 'Ακύρωση οποτεδήποτε', 'es': 'Cancela en cualquier momento', 'pt': 'Cancele a qualquer momento', 'ru': 'Отмена в любое время', 'tr': 'İstediğiniz zaman iptal edin'},
   'popular': {'en': 'Popular', 'bg': 'Популярен', 'de': 'Beliebt', 'fr': 'Populaire', 'it': 'Popolare', 'el': 'Δημοφιλές', 'es': 'Popular', 'pt': 'Popular', 'ru': 'Популярный', 'tr': 'Popüler'},
+  'termsOfUse': {'en': 'Terms of Use', 'bg': 'Условия за ползване', 'de': 'Nutzungsbedingungen', 'fr': "Conditions d'utilisation", 'it': 'Termini di utilizzo', 'el': 'Όροι Χρήσης', 'es': 'Términos de uso', 'pt': 'Termos de uso', 'ru': 'Условия использования', 'tr': 'Kullanım Koşulları'},
+  'privacyPolicy': {'en': 'Privacy Policy', 'bg': 'Политика за поверителност', 'de': 'Datenschutzerklärung', 'fr': 'Politique de confidentialité', 'it': 'Informativa sulla privacy', 'el': 'Πολιτική Απορρήτου', 'es': 'Política de Privacidad', 'pt': 'Política de Privacidade', 'ru': 'Политика конфиденциальности', 'tr': 'Gizlilik Politikası'},
 };
 
 String _pt(String key, String lang) => _p[key]?[lang] ?? _p[key]?['en'] ?? '';
@@ -440,6 +443,34 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             child: CircularProgressIndicator(),
                           ),
                         ),
+
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextButton(
+                              onPressed: () async {
+                                final uri = Uri.parse('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/');
+                                if (await canLaunchUrl(uri)) {
+                                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                }
+                              },
+                              child: Text(_pt('termsOfUse', lang)),
+                            ),
+                            const Text(' • '),
+                            TextButton(
+                              onPressed: () async {
+                                final uri = Uri.parse('https://ivoexp1969.github.io/taskify/privacy-policy.html');
+                                if (await canLaunchUrl(uri)) {
+                                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                }
+                              },
+                              child: Text(_pt('privacyPolicy', lang)),
+                            ),
+                          ],
+                        ),
+                      ),
 
                       const SizedBox(height: 24),
                     ],

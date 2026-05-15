@@ -1,7 +1,7 @@
 name: task_manager
 description: A simple local task manager app.
 publish_to: 'none'
-version: 1.0.27+29
+version: 1.0.28+30
 environment:
   sdk: ">=3.4.0 <4.0.0"
   flutter: ">=3.22.0"
@@ -39,6 +39,7 @@ dependencies:
   extension_google_sign_in_as_googleapis_auth: ^3.0.0
   device_calendar: ^4.3.3
   google_fonts: ^6.2.1
+  url_launcher: ^6.3.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
