@@ -15,6 +15,7 @@ import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../auth/login_screen.dart';
 import 'statistics_screen.dart';
+import 'delete_account_flow.dart';
 import '../../services/task_view_preference.dart';
 import '../home/home_screen.dart';
 import '../../services/google_calendar_service.dart';
@@ -2006,6 +2007,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
+
+          // Delete Account (само ако е логнат)
+          if (user != null) ...[
+            const SizedBox(height: 24),
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Text(
+                t.account.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.delete_forever, color: Colors.red),
+                title: Text(
+                  t.deleteAccount,
+                  style: const TextStyle(
+                      color: Colors.red, fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  t.deleteAccountSubtitle,
+                  style: const TextStyle(fontSize: 12),
+                ),
+                onTap: () => DeleteAccountFlow.start(context),
+              ),
+            ),
+            const SizedBox(height: 32),
+          ],
         ],
       ),
     );

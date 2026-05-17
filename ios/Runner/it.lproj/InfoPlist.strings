@@ -1,0 +1,9 @@
+/* InfoPlist.strings — Italian */
+NSMicrophoneUsageDescription = "Taskify usa il microfono per permetterti di aggiungere attività con la voce.";
+NSSpeechRecognitionUsageDescription = "Taskify usa il riconoscimento vocale per convertire la tua voce in titoli di attività.";
+NSCalendarsUsageDescription = "Taskify ha bisogno dell'accesso al calendario per sincronizzare le tue attività con Google Calendar e il Calendario Apple.";
+NSCalendarsWriteOnlyAccessUsageDescription = "Taskify ha bisogno dell'accesso al calendario per aggiungere le tue attività al Calendario Apple.";
+NSCalendarsFullAccessUsageDescription = "Taskify ha bisogno dell'accesso completo al calendario per sincronizzare le tue attività con il Calendario Apple.";
+NSPhotoLibraryUsageDescription = "Taskify ha bisogno dell'accesso alla tua libreria foto per importare file.";
+NSPhotoLibraryAddUsageDescription = "Taskify ha bisogno del permesso per salvare i file esportati nella tua libreria foto.";
+NSUserTrackingUsageDescription = "Taskify usa identificatori pubblicitari per mostrarti annunci pertinenti e misurarne l'efficacia.";

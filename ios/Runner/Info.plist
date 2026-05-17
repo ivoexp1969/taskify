@@ -97,6 +97,10 @@
 	<key>NSUserTrackingUsageDescription</key>
 	<string>Taskify uses advertising identifiers to show you relevant ads and measure their effectiveness.</string>
 
+	<!-- Encryption compliance — app does NOT use non-exempt encryption -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+
 	<!-- SKAdNetwork items за AdMob measurement -->
 	<key>SKAdNetworkItems</key>
 	<array>

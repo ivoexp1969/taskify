@@ -1,0 +1,9 @@
+/* InfoPlist.strings — Greek */
+NSMicrophoneUsageDescription = "Το Taskify χρησιμοποιεί το μικρόφωνο για να σας επιτρέπει να προσθέτετε εργασίες με τη φωνή.";
+NSSpeechRecognitionUsageDescription = "Το Taskify χρησιμοποιεί αναγνώριση ομιλίας για να μετατρέπει τη φωνή σας σε τίτλους εργασιών.";
+NSCalendarsUsageDescription = "Το Taskify χρειάζεται πρόσβαση στο ημερολόγιο για να συγχρονίσει τις εργασίες σας με το Google Calendar και το Ημερολόγιο Apple.";
+NSCalendarsWriteOnlyAccessUsageDescription = "Το Taskify χρειάζεται πρόσβαση στο ημερολόγιο για να προσθέσει τις εργασίες σας στο Ημερολόγιο Apple.";
+NSCalendarsFullAccessUsageDescription = "Το Taskify χρειάζεται πλήρη πρόσβαση στο ημερολόγιο για να συγχρονίσει τις εργασίες σας με το Ημερολόγιο Apple.";
+NSPhotoLibraryUsageDescription = "Το Taskify χρειάζεται πρόσβαση στη βιβλιοθήκη φωτογραφιών σας για να εισάγει αρχεία.";
+NSPhotoLibraryAddUsageDescription = "Το Taskify χρειάζεται άδεια για να αποθηκεύει εξαγόμενα αρχεία στη βιβλιοθήκη φωτογραφιών σας.";
+NSUserTrackingUsageDescription = "Το Taskify χρησιμοποιεί αναγνωριστικά διαφημίσεων για να σας εμφανίζει σχετικές διαφημίσεις και να μετρά την αποτελεσματικότητά τους.";

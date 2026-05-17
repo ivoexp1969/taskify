@@ -1,0 +1,9 @@
+/* InfoPlist.strings — Turkish */
+NSMicrophoneUsageDescription = "Taskify, görevleri sesle ekleyebilmeniz için mikrofonu kullanır.";
+NSSpeechRecognitionUsageDescription = "Taskify, sesinizi görev başlıklarına dönüştürmek için konuşma tanımayı kullanır.";
+NSCalendarsUsageDescription = "Taskify, görevlerinizi Google Takvim ve Apple Takvim ile senkronize etmek için takvim erişimine ihtiyaç duyar.";
+NSCalendarsWriteOnlyAccessUsageDescription = "Taskify, görevlerinizi Apple Takvim'e eklemek için takvim erişimine ihtiyaç duyar.";
+NSCalendarsFullAccessUsageDescription = "Taskify, görevlerinizi Apple Takvim ile senkronize etmek için tam takvim erişimine ihtiyaç duyar.";
+NSPhotoLibraryUsageDescription = "Taskify, dosyaları içe aktarmak için fotoğraf kütüphanenize erişime ihtiyaç duyar.";
+NSPhotoLibraryAddUsageDescription = "Taskify, dışa aktarılan dosyaları fotoğraf kütüphanenize kaydetmek için izne ihtiyaç duyar.";
+NSUserTrackingUsageDescription = "Taskify, size alakalı reklamlar göstermek ve etkinliklerini ölçmek için reklam tanımlayıcılarını kullanır.";

@@ -1,0 +1,9 @@
+/* InfoPlist.strings — Bulgarian */
+NSMicrophoneUsageDescription = "Taskify използва микрофона, за да добавяте задачи с глас.";
+NSSpeechRecognitionUsageDescription = "Taskify използва разпознаване на реч, за да преобразува гласа ви в заглавия на задачи.";
+NSCalendarsUsageDescription = "Taskify се нуждае от достъп до календара, за да синхронизира задачите ви с Google Календар и Apple Календар.";
+NSCalendarsWriteOnlyAccessUsageDescription = "Taskify се нуждае от достъп до календара, за да добавя задачите ви в Apple Календар.";
+NSCalendarsFullAccessUsageDescription = "Taskify се нуждае от пълен достъп до календара, за да синхронизира задачите ви с Apple Календар.";
+NSPhotoLibraryUsageDescription = "Taskify се нуждае от достъп до библиотеката ви със снимки, за да импортира файлове.";
+NSPhotoLibraryAddUsageDescription = "Taskify се нуждае от разрешение, за да запазва експортираните файлове в библиотеката ви със снимки.";
+NSUserTrackingUsageDescription = "Taskify използва рекламни идентификатори, за да ви показва подходящи реклами и да измерва тяхната ефективност.";
