@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../utils/localization.dart';
-import '../auth/login_screen.dart';
+import '../home/home_screen.dart';
 
 class DeleteAccountFlow {
   static Future<void> start(BuildContext context) async {
@@ -66,11 +66,13 @@ class DeleteAccountFlow {
       // Delete Firebase Auth user
       await user.delete();
 
-      // Close progress + navigate to login (remove all routes)
+      // Close progress + navigate to HomeScreen (root) — remove all routes.
+      // НЕ навигираме към LoginScreen, защото тя прави pop() при успешен login,
+      // което би оставило празен стек → черен екран.
       if (context.mounted) {
         Navigator.of(context).pop();
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
           (route) => false,
         );
       }
