@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text;
 
     if (_isLogin) {
-      final result = await _authService.login(email: email, password: password);
+      final result = await _authService.login(email: email, password: password, languageCode: _lang);
       
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -105,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() => _errorMessage = result.error);
       }
     } else {
-      final result = await _authService.register(email: email, password: password);
+      final result = await _authService.register(email: email, password: password, languageCode: _lang);
       
       if (!mounted) return;
       setState(() => _isLoading = false);
