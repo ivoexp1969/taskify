@@ -1456,7 +1456,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ],
                 ),
                 SizedBox(
-                  height: 195,
+                  height: 225,
                   child: TableCalendar<Task>(
                     firstDay: DateTime(2020, 1, 1),
                     lastDay: DateTime(2100, 12, 31),
@@ -1464,7 +1464,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     selectedDayPredicate: (day) =>
                         isSameDay(_selectedDay, day),
                     startingDayOfWeek: StartingDayOfWeek.monday,
-                    rowHeight: 28,
+                    rowHeight: 34,
                     calendarFormat: _calendarFormat,
                     onFormatChanged: (format) {
                       setState(() {

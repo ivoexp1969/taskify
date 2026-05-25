@@ -356,6 +356,7 @@ class _ShoppingSettingsSheetState extends State<_ShoppingSettingsSheet> {
   late DateTime _date;
   TimeOfDay? _time;
   late List<String> _reminders;
+  late String _recurrence;
 
   @override
   void initState() {
@@ -367,6 +368,7 @@ class _ShoppingSettingsSheetState extends State<_ShoppingSettingsSheet> {
         ? TimeOfDay(hour: due.hour, minute: due.minute)
         : null;
     _reminders = List<String>.from(widget.task.remindersList);
+    _recurrence = widget.task.recurrence ?? 'none';
   }
 
   @override
@@ -476,6 +478,16 @@ class _ShoppingSettingsSheetState extends State<_ShoppingSettingsSheet> {
                   : null,
               theme: theme,
             ),
+            const SizedBox(height: 16),
+            Text(t.repeat, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 10),
+            Wrap(spacing: 8, runSpacing: 6, children: [
+              _RecurrenceChip(label: t.none2,   value: 'none',    selected: _recurrence == 'none',    accent: theme.colorScheme.primary, onTap: () => setState(() => _recurrence = 'none')),
+              _RecurrenceChip(label: t.daily,   value: 'daily',   selected: _recurrence == 'daily',   accent: theme.colorScheme.primary, onTap: () => setState(() => _recurrence = 'daily')),
+              _RecurrenceChip(label: t.weekly,  value: 'weekly',  selected: _recurrence == 'weekly',  accent: theme.colorScheme.primary, onTap: () => setState(() => _recurrence = 'weekly')),
+              _RecurrenceChip(label: t.monthly, value: 'monthly', selected: _recurrence == 'monthly', accent: theme.colorScheme.primary, onTap: () => setState(() => _recurrence = 'monthly')),
+              _RecurrenceChip(label: t.yearly,  value: 'yearly',  selected: _recurrence == 'yearly',  accent: theme.colorScheme.primary, onTap: () => setState(() => _recurrence = 'yearly')),
+            ]),
             const SizedBox(height: 20),
 
             // Напомняния
@@ -507,6 +519,7 @@ class _ShoppingSettingsSheetState extends State<_ShoppingSettingsSheet> {
                   widget.task.title = title;
                   widget.task.dueDate = newDate;
                   widget.task.setReminders(_reminders);
+                  widget.task.recurrence = _recurrence == 'none' ? null : _recurrence;
                   final nav = Navigator.of(context);
                   await widget.task.save();
                   await NotificationService().scheduleForTask(widget.task);
@@ -579,4 +592,17 @@ class _Row extends StatelessWidget {
       ),
     );
   }
+}
+
+class _RecurrenceChip extends StatelessWidget {
+  final String label, value; final bool selected; final Color accent; final VoidCallback onTap;
+  const _RecurrenceChip({required this.label, required this.value, required this.selected, required this.accent, required this.onTap});
+  @override
+  Widget build(BuildContext context) => GestureDetector(onTap: onTap,
+    child: Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(color: selected ? accent.withValues(alpha: 0.15) : Colors.transparent,
+        border: Border.all(color: selected ? accent : Colors.grey.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(20)),
+      child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500,
+        color: selected ? accent : Colors.grey))));
 }

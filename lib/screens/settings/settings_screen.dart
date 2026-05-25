@@ -1298,7 +1298,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       color: _isCalendarConnected ? Colors.green : Colors.grey,
                     ),
                   ),
-                  title: Text(_isCalendarConnected ? t.calendarConnected : t.calendarNotConnected),
+                  title: Text(_isCalendarConnected ? t.calendarConnected : t.calendarNotConnected,
+                    style: const TextStyle(fontSize: 13)),
                   subtitle: Text(
                     _isCalendarConnected ? t.calendarSyncEnabled : t.connectForSync,
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
