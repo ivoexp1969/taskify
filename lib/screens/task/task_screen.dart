@@ -1774,12 +1774,12 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
           decoration: BoxDecoration(
-            color: selected 
-                ? color.withValues(alpha: 0.15) 
+            color: selected
+                ? color.withValues(alpha: 0.15)
                 : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: selected ? color.withValues(alpha: 0.5) : Colors.transparent,
               width: 1.5,
@@ -1787,26 +1787,29 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
             boxShadow: selected ? [
               BoxShadow(
                 color: color.withValues(alpha: 0.2),
-                blurRadius: 8,
+                blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
             ] : null,
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                size: 18,
-                color: selected ? color : theme.colorScheme.onSurface.withValues(alpha: 0.4),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value.toString(),
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: selected ? color : theme.colorScheme.onSurface,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, size: 13, color: selected ? color : theme.colorScheme.onSurface.withValues(alpha: 0.4)),
+                  const SizedBox(width: 4),
+                  Text(
+                    value.toString(),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: selected ? color : theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 2),
               FittedBox(
@@ -1996,7 +1999,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
 
             // Статистика - нов дизайн
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+              padding: const EdgeInsets.fromLTRB(12, 6, 12, 4),
               child: Row(
                 children: [
                   _buildStatCard(
@@ -2635,8 +2638,8 @@ class _ProductivityBannerState extends State<_ProductivityBanner> {
         MaterialPageRoute(builder: (_) => const StatisticsScreen()),
       ),
       child: Container(
-        margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+        margin: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.centerLeft,
@@ -2661,7 +2664,7 @@ class _ProductivityBannerState extends State<_ProductivityBanner> {
                   children: [
                     Text(
                       streak > 0 ? '🔥' : '💤',
-                      style: const TextStyle(fontSize: 20),
+                      style: const TextStyle(fontSize: 16),
                     ),
                     const SizedBox(width: 5),
                     Text(
@@ -2687,7 +2690,7 @@ class _ProductivityBannerState extends State<_ProductivityBanner> {
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16),
               width: 1,
-              height: 34,
+              height: 24,
               color: theme.colorScheme.outline.withValues(alpha: 0.12),
             ),
 
