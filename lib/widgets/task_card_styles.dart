@@ -188,15 +188,22 @@ class ExpandableTaskCard extends StatelessWidget {
           duration: const Duration(milliseconds: 280),
           curve: Curves.easeOutCubic,
           decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(isExpanded ? 16 : 12),
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: const Alignment(0.8, 0),
+              colors: [
+                (isOverdue && !isCompleted ? Colors.redAccent : accentColor).withValues(alpha: isDark ? 0.14 : 0.09),
+                bgColor,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: isExpanded
-                  ? accentColor.withValues(alpha: 0.35)
+                  ? accentColor.withValues(alpha: 0.3)
                   : (isOverdue && !isCompleted
-                      ? Colors.red.withValues(alpha: 0.2)
-                      : theme.colorScheme.outline.withValues(alpha: 0.08)),
-              width: isExpanded ? 1.5 : 1,
+                      ? Colors.red.withValues(alpha: 0.15)
+                      : theme.colorScheme.outline.withValues(alpha: 0.07)),
+              width: isExpanded ? 1.5 : 0.8,
             ),
             boxShadow: [
               if (isExpanded)
@@ -206,15 +213,15 @@ class ExpandableTaskCard extends StatelessWidget {
                 )
               else
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-                  blurRadius: 6, offset: const Offset(0, 1),
+                  color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.05),
+                  blurRadius: 8, offset: const Offset(0, 2),
                 ),
             ],
           ),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              borderRadius: BorderRadius.circular(isExpanded ? 16 : 12),
+              borderRadius: BorderRadius.circular(18),
               onTap: onToggleExpand,
               child: AnimatedSize(
                 duration: const Duration(milliseconds: 280),
@@ -224,26 +231,13 @@ class ExpandableTaskCard extends StatelessWidget {
                   children: [
                     // ═══ HEADER ═══
                     Padding(
-                      padding: EdgeInsets.fromLTRB(4, isExpanded ? 12 : 8, 10, isExpanded ? 10 : 8),
+                      padding: EdgeInsets.fromLTRB(14, isExpanded ? 10 : 8, 10, isExpanded ? 10 : 8),
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // Акцентна линия
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 280),
-                            width: 3.5,
-                            height: isExpanded ? 42 : 34,
-                            decoration: BoxDecoration(
-                              color: isOverdue && !isCompleted ? Colors.redAccent : accentColor,
-                              borderRadius: BorderRadius.circular(2),
-                              boxShadow: isOverdue && !isCompleted
-                                  ? [BoxShadow(color: Colors.redAccent.withValues(alpha: 0.5), blurRadius: 6, spreadRadius: -1)]
-                                  : null,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
                           // Чекбокс
                           _ModernCheckbox(isChecked: isCompleted, color: accentColor, onTap: onToggleComplete),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 12),
                           // Заглавие + мета
                           Expanded(
                             child: Column(
@@ -256,25 +250,23 @@ class ExpandableTaskCard extends StatelessWidget {
                                     fontWeight: FontWeight.w600,
                                     decoration: isCompleted ? TextDecoration.lineThrough : null,
                                     decorationColor: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                                    color: isCompleted ? theme.colorScheme.onSurface : (task.template != null || task.googleCalendarEventId != null ? accentColor : theme.colorScheme.onSurface),
+                                    color: isCompleted ? theme.colorScheme.onSurface.withValues(alpha: 0.5) : theme.colorScheme.onSurface,
                                     height: 1.3,
                                   ),
                                   maxLines: isExpanded ? 3 : 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                // Collapsed мета ред
                                 if (!isExpanded) ...[
                                   const SizedBox(height: 3),
                                   Row(
                                     children: [
-                                      _MiniPill(
-                                        icon: Icons.schedule_rounded,
-                                        text: dateTimeStr,
-                                        color: isOverdue ? Colors.redAccent : theme.colorScheme.onSurface.withValues(alpha: 0.45),
-                                        bold: isOverdue,
-                                      ),
-                                      if (task.totalSubtasksCount > 0) ...[
+                                      if (categoryName.isNotEmpty) ...[
+                                        Container(width: 6, height: 6, decoration: BoxDecoration(color: accentColor, shape: BoxShape.circle)),
+                                        const SizedBox(width: 4),
+                                        Text(categoryName, style: TextStyle(fontSize: 10, color: accentColor, fontWeight: FontWeight.w500)),
                                         const SizedBox(width: 8),
+                                      ],
+                                      if (task.totalSubtasksCount > 0) ...[
                                         _MiniPill(
                                           icon: Icons.checklist_rounded,
                                           text: '${task.completedSubtasksCount}/${task.totalSubtasksCount}',
@@ -282,18 +274,20 @@ class ExpandableTaskCard extends StatelessWidget {
                                               ? Colors.green
                                               : theme.colorScheme.primary.withValues(alpha: 0.6),
                                         ),
-                                      ],
-                                      if (task.hasNotes) ...[
                                         const SizedBox(width: 6),
-                                        Icon(Icons.sticky_note_2_outlined, size: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
                                       ],
+                                      if (task.hasNotes) Icon(Icons.sticky_note_2_outlined, size: 11, color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
                                       if (task.hasReminders) ...[
-                                        const SizedBox(width: 6),
-                                        Icon(Icons.notifications_active_rounded, size: 12, color: Colors.amber.withValues(alpha: 0.7)),
+                                        const SizedBox(width: 5),
+                                        Icon(Icons.notifications_active_rounded, size: 11, color: Colors.amber.withValues(alpha: 0.7)),
                                       ],
                                       if (task.googleCalendarEventId != null) ...[
-                                        const SizedBox(width: 6),
-                                        Icon(Icons.event_rounded, size: 12, color: Colors.blue.withValues(alpha: 0.5)),
+                                        const SizedBox(width: 5),
+                                        Icon(Icons.event_rounded, size: 11, color: Colors.blue.withValues(alpha: 0.5)),
+                                      ],
+                                      if (recurrenceText != null && recurrenceText!.isNotEmpty) ...[
+                                        const SizedBox(width: 5),
+                                        Icon(Icons.repeat_rounded, size: 11, color: accentColor.withValues(alpha: 0.55)),
                                       ],
                                     ],
                                   ),
@@ -301,30 +295,49 @@ class ExpandableTaskCard extends StatelessWidget {
                               ],
                             ),
                           ),
-                          const SizedBox(width: 4),
-                          // Приоритет точка (collapsed)
-                          if (!isExpanded) ...[
-                            Container(
-                              width: 8, height: 8,
-                              decoration: BoxDecoration(
-                                color: priorityColor,
-                                shape: BoxShape.circle,
-                                boxShadow: task.priority == 2
-                                    ? [BoxShadow(color: priorityColor.withValues(alpha: 0.5), blurRadius: 4)]
-                                    : null,
+                          const SizedBox(width: 8),
+                          // Дясна секция: час badge + приоритет + стрелка
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: (isOverdue && !isCompleted ? Colors.redAccent : accentColor).withValues(alpha: isDark ? 0.2 : 0.12),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  dateTimeStr,
+                                  style: TextStyle(
+                                    fontSize: 10.5, fontWeight: FontWeight.w600,
+                                    color: isOverdue && !isCompleted ? Colors.redAccent : accentColor,
+                                  ),
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 6),
-                          ],
-                          // Стрелка
-                          AnimatedRotation(
-                            turns: isExpanded ? 0.5 : 0,
-                            duration: const Duration(milliseconds: 280),
-                            child: Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              size: 20,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                            ),
+                              const SizedBox(height: 4),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 7, height: 7,
+                                    decoration: BoxDecoration(
+                                      color: priorityColor,
+                                      shape: BoxShape.circle,
+                                      boxShadow: task.priority == 2
+                                          ? [BoxShadow(color: priorityColor.withValues(alpha: 0.5), blurRadius: 4)]
+                                          : null,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  AnimatedRotation(
+                                    turns: isExpanded ? 0.5 : 0,
+                                    duration: const Duration(milliseconds: 280),
+                                    child: Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -423,7 +436,7 @@ class ExpandableTaskCard extends StatelessWidget {
                                 ),
                                 if (categoryName.isNotEmpty)
                                   _DetailChip(icon: Icons.circle, iconSize: 8, label: categoryName, color: accentColor),
-                                if (recurrenceText != null)
+                                if (recurrenceText != null && recurrenceText!.isNotEmpty)
                                   _DetailChip(icon: Icons.repeat_rounded, label: recurrenceText!),
                                 if (task.hasReminders)
                                   _DetailChip(icon: Icons.notifications_active_rounded, label: t.reminder, color: Colors.amber.shade700),

@@ -1,4 +1,4 @@
-import 'dart:math';
+﻿import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -291,13 +291,41 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     return '$h:$m';
   }
 
-  String _formatDateTime(DateTime d) {
-    final dateStr = _formatDate(d);
-    if (d.hour == 0 && d.minute == 0) {
-      return dateStr;
+  String _smartDateStr(BuildContext ctx, DateTime d) {
+    final lang = Localizations.localeOf(ctx).languageCode;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final taskDay = DateTime(d.year, d.month, d.day);
+    final diff = taskDay.difference(today).inDays;
+    final timeStr = (d.hour != 0 || d.minute != 0)
+        ? ' · ${_formatTime(TimeOfDay.fromDateTime(d))}'
+        : '';
+    if (diff == 0) {
+      const m = {'en': 'Today', 'bg': 'Днес', 'de': 'Heute', 'fr': 'Auj.', 'it': 'Oggi', 'el': 'Σήμερα', 'es': 'Hoy', 'pt': 'Hoje', 'ru': 'Сегодня', 'tr': 'Bugün'};
+      return '${m[lang] ?? m['en']!}$timeStr';
     }
-    final timeStr = _formatTime(TimeOfDay.fromDateTime(d));
-    return '$dateStr · $timeStr';
+    if (diff == 1) {
+      const m = {'en': 'Tomorrow', 'bg': 'Утре', 'de': 'Morgen', 'fr': 'Demain', 'it': 'Domani', 'el': 'Αύριο', 'es': 'Mañana', 'pt': 'Amanhã', 'ru': 'Завтра', 'tr': 'Yarın'};
+      return '${m[lang] ?? m['en']!}$timeStr';
+    }
+    if (diff > 1 && diff < 7) {
+      const wd = <String, List<String>>{
+        'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        'bg': ['Пон', 'Вт', 'Ср', 'Чет', 'Пет', 'Съб', 'Нед'],
+        'de': ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
+        'fr': ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+        'it': ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'],
+        'el': ['Δευ', 'Τρι', 'Τετ', 'Πεμ', 'Παρ', 'Σαβ', 'Κυρ'],
+        'es': ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+        'pt': ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+        'ru': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+        'tr': ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
+      };
+      return '${(wd[lang] ?? wd['en']!)[d.weekday - 1]}$timeStr';
+    }
+    final day = d.day.toString().padLeft(2, '0');
+    final month = d.month.toString().padLeft(2, '0');
+    return '$day.$month$timeStr';
   }
 
   /// Проверява дали датата е днес
@@ -2097,11 +2125,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                             _priorityColor(task.priority);
                         final priorityText =
                             _priorityLabel(task.priority, t);
-                        final recurrenceText = task.recurrence == null
-                            ? ''
-                            : ' · ${_recurrenceLabel(task.recurrence, t)}';
-                        final dateTimeStr =
-                            _formatDateTime(task.dueDate);
+                        final dateTimeStr = _smartDateStr(context, task.dueDate);
 
                         final isOverdue = _isTaskOverdue(task);
                         final isCompleted = task.isCompleted;
