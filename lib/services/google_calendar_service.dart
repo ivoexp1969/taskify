@@ -41,21 +41,24 @@ class GoogleCalendarService {
       final wasConnected = prefs.getBool('google_calendar_connected') ?? false;
       if (!wasConnected) return;
 
+      // Restore last known state immediately — don't wait for network
+      _isConnected = true;
+
       await _ensureInitialized();
       final future = GoogleSignIn.instance.attemptLightweightAuthentication();
-      if (future == null) return;
+      if (future == null) return; // platform doesn't support silent auth; stay connected
 
       final account = await future;
       if (account != null) {
         _currentAccount = account;
-        _isConnected = true;
         debugPrint('Google Calendar reconnected silently');
-      } else {
-        _isConnected = false;
       }
+      // If account == null: silent auth temporarily unavailable (no network, cold start).
+      // DO NOT set _isConnected = false — that causes spurious auto-disconnect.
+      // _getAccessToken() will retry on the next actual API call.
     } catch (e) {
       debugPrint('Silent reconnect failed: $e');
-      _isConnected = false;
+      // Do not change _isConnected — error may be transient.
     }
   }
 
@@ -98,10 +101,7 @@ class GoogleCalendarService {
         final future = GoogleSignIn.instance.attemptLightweightAuthentication();
         if (future == null) return null;
         final account = await future;
-        if (account == null) {
-          _isConnected = false;
-          return null;
-        }
+        if (account == null) return null; // transient — don't disconnect
         _currentAccount = account;
       }
 
@@ -110,8 +110,17 @@ class GoogleCalendarService {
       return authorization.accessToken;
     } catch (e) {
       debugPrint('Error getting access token: $e');
-      return null;
+      return null; // transient error — don't disconnect
     }
+  }
+
+  /// Called only when Google API returns 401 — the token is genuinely revoked.
+  Future<void> _disconnectOnAuthError() async {
+    _isConnected = false;
+    _currentAccount = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('google_calendar_connected', false);
+    debugPrint('Google Calendar: disconnected — token revoked (401)');
   }
 
   /// === CALENDAR EVENTS API ===
@@ -163,6 +172,9 @@ class GoogleCalendarService {
             'eventType': item['eventType'],
           };
         }).toList();
+      } else if (response.statusCode == 401) {
+        await _disconnectOnAuthError();
+        return [];
       } else {
         debugPrint('Get events error: ${response.body}');
         return [];
@@ -250,6 +262,9 @@ class GoogleCalendarService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         return data['id'];
+      } else if (response.statusCode == 401) {
+        await _disconnectOnAuthError();
+        return null;
       }
 
       debugPrint('Error adding event: ${response.body}');
@@ -276,6 +291,10 @@ class GoogleCalendarService {
         },
       );
 
+      if (response.statusCode == 401) {
+        await _disconnectOnAuthError();
+        return false;
+      }
       return response.statusCode == 204 || response.statusCode == 200;
     } catch (e) {
       debugPrint('Error deleting event: $e');
@@ -312,6 +331,9 @@ class GoogleCalendarService {
           'id': item['id'],
           'title': item['title'],
         }).toList();
+      } else if (response.statusCode == 401) {
+        await _disconnectOnAuthError();
+        return [];
       } else {
         debugPrint('Get task lists error: ${response.body}');
         return [];

@@ -66,10 +66,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _checkCalendarConnection() async {
-    final isConnected = _calendarService.isConnected;
-    setState(() {
-      _isCalendarConnected = isConnected;
-    });
+    // isConnected reflects in-memory state (set by tryReconnect at startup).
+    // Fallback to prefs in case tryReconnect() is still in progress (race condition).
+    bool connected = _calendarService.isConnected;
+    if (!connected) {
+      final prefs = await SharedPreferences.getInstance();
+      connected = prefs.getBool('google_calendar_connected') ?? false;
+    }
+    if (mounted) setState(() { _isCalendarConnected = connected; });
   }
 
   Future<void> _checkIosCalendarPermission() async {
