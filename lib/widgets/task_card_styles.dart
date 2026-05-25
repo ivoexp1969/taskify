@@ -191,10 +191,9 @@ class ExpandableTaskCard extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.centerLeft,
               end: const Alignment(0.8, 0),
-              colors: [
-                (isOverdue && !isCompleted ? Colors.redAccent : accentColor).withValues(alpha: isDark ? 0.14 : 0.09),
-                bgColor,
-              ],
+              colors: isCompleted
+                  ? [theme.colorScheme.outline.withValues(alpha: isDark ? 0.07 : 0.04), bgColor]
+                  : [(isOverdue ? Colors.redAccent : accentColor).withValues(alpha: isDark ? 0.14 : 0.09), bgColor],
             ),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
@@ -319,17 +318,13 @@ class ExpandableTaskCard extends StatelessWidget {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Container(
-                                    width: 7, height: 7,
-                                    decoration: BoxDecoration(
-                                      color: priorityColor,
-                                      shape: BoxShape.circle,
-                                      boxShadow: task.priority == 2
-                                          ? [BoxShadow(color: priorityColor.withValues(alpha: 0.5), blurRadius: 4)]
-                                          : null,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
+                                  if (task.priority == 2) ...[
+                                    Icon(Icons.local_fire_department_rounded, size: 14, color: priorityColor),
+                                    const SizedBox(width: 3),
+                                  ] else if (task.priority == 1) ...[
+                                    Icon(Icons.flag_rounded, size: 13, color: priorityColor),
+                                    const SizedBox(width: 3),
+                                  ],
                                   AnimatedRotation(
                                     turns: isExpanded ? 0.5 : 0,
                                     duration: const Duration(milliseconds: 280),
@@ -350,8 +345,18 @@ class ExpandableTaskCard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Divider(height: 1, color: theme.colorScheme.outline.withValues(alpha: 0.1)),
-                            const SizedBox(height: 10),
+                            Container(
+                              height: 1,
+                              margin: const EdgeInsets.only(bottom: 10),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    (isOverdue && !isCompleted ? Colors.redAccent : accentColor).withValues(alpha: isDark ? 0.35 : 0.2),
+                                    accentColor.withValues(alpha: 0.0),
+                                  ],
+                                ),
+                              ),
+                            ),
 
                             // Бележки preview
                             if (task.hasNotes) ...[
@@ -456,17 +461,16 @@ class ExpandableTaskCard extends StatelessWidget {
                             ],
 
                             // Бутони
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 10),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 if (onStartPomodoro != null && !isCompleted) ...[
-                                  _ActionButton(icon: Icons.timer_outlined, label: t.pomodoroFocus, color: Colors.deepOrange, onTap: onStartPomodoro!),
+                                  Expanded(child: _ActionButton(icon: Icons.timer_outlined, label: t.pomodoroFocus, color: Colors.deepOrange, onTap: onStartPomodoro!, expand: true)),
                                   const SizedBox(width: 6),
                                 ],
-                                _ActionButton(icon: Icons.edit_outlined, label: t.edit, color: theme.colorScheme.primary, onTap: onEdit),
+                                Expanded(child: _ActionButton(icon: Icons.edit_outlined, label: t.edit, color: theme.colorScheme.primary, onTap: onEdit, expand: true)),
                                 const SizedBox(width: 6),
-                                _ActionButton(icon: Icons.delete_outline_rounded, label: t.delete, color: Colors.redAccent, onTap: onDelete),
+                                Expanded(child: _ActionButton(icon: Icons.delete_outline_rounded, label: t.delete, color: Colors.redAccent, onTap: onDelete, expand: true)),
                               ],
                             ),
                           ],
@@ -608,27 +612,30 @@ class _ActionButton extends StatelessWidget {
   final String label;
   final Color color;
   final VoidCallback onTap;
-  const _ActionButton({required this.icon, required this.label, required this.color, required this.onTap});
+  final bool expand;
+  const _ActionButton({required this.icon, required this.label, required this.color, required this.onTap, this.expand = false});
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(8),
+            color: color.withValues(alpha: 0.07),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: color.withValues(alpha: 0.15), width: 0.5),
           ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, size: 15, color: color),
               const SizedBox(width: 5),
-              Text(label, style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w500)),
+              Text(label, style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w600)),
             ],
           ),
         ),

@@ -2157,29 +2157,37 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                           key: Key(task.key.toString()),
                           // Swipe надясно - завършване
                           background: Container(
-                            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+                            margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 4),
                             decoration: BoxDecoration(
-                              color: Colors.green,
-                              borderRadius: BorderRadius.circular(16),
+                              gradient: LinearGradient(
+                                colors: isCompleted
+                                    ? [Colors.blueGrey.shade400, Colors.blueGrey.shade600]
+                                    : [Colors.green.shade400, Colors.green.shade600],
+                              ),
+                              borderRadius: BorderRadius.circular(18),
                             ),
                             alignment: Alignment.centerLeft,
-                            padding: const EdgeInsets.only(left: 24),
+                            padding: const EdgeInsets.only(left: 20),
                             child: Row(
                               children: [
-                                const Icon(
-                                  Icons.check_circle_rounded,
-                                  color: Colors.white,
-                                  size: 28,
+                                Container(
+                                  padding: const EdgeInsets.all(7),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    isCompleted ? Icons.undo_rounded : Icons.check_rounded,
+                                    color: Colors.white, size: 20,
+                                  ),
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 12),
                                 Text(
-                                  isCompleted 
-                                      ? (t.restore)
-                                      : (t.done),
+                                  isCompleted ? t.restore : t.done,
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
                                   ),
                                 ),
                               ],
@@ -2187,13 +2195,15 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                           ),
                           // Swipe наляво - изтриване
                           secondaryBackground: Container(
-                            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+                            margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 4),
                             decoration: BoxDecoration(
-                              color: Colors.redAccent,
-                              borderRadius: BorderRadius.circular(16),
+                              gradient: LinearGradient(
+                                colors: [Colors.red.shade400, Colors.red.shade700],
+                              ),
+                              borderRadius: BorderRadius.circular(18),
                             ),
                             alignment: Alignment.centerRight,
-                            padding: const EdgeInsets.only(right: 24),
+                            padding: const EdgeInsets.only(right: 20),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
@@ -2201,15 +2211,18 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                   t.delete,
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                const Icon(
-                                  Icons.delete_rounded,
-                                  color: Colors.white,
-                                  size: 28,
+                                const SizedBox(width: 12),
+                                Container(
+                                  padding: const EdgeInsets.all(7),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.delete_rounded, color: Colors.white, size: 20),
                                 ),
                               ],
                             ),
