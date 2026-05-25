@@ -32,6 +32,7 @@ class WorkoutDialog {
         ? TimeOfDay.fromDateTime(existing.dueDate)
         : TimeOfDay.now();
     List<String> reminders = List.from(existing?.remindersList ?? ['minus_1h']);
+    String selectedRecurrence = existing?.recurrence ?? 'none';
 
     await showModalBottomSheet(
       context: context,
@@ -118,6 +119,17 @@ class WorkoutDialog {
                       const SizedBox(height: 6),
                       _Field(controller: durationCtrl, hint: t.workoutDurationHint, theme: theme, isDark: isDark),
                       const SizedBox(height: 16),
+                      Text(t.repeat, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
+                      const SizedBox(height: 8),
+                      Wrap(spacing: 8, runSpacing: 6, children: [
+                        _RecurrenceChip(label: t.none2,   value: 'none',    selected: selectedRecurrence == 'none',    accent: accent, onTap: () => setState(() => selectedRecurrence = 'none')),
+                        _RecurrenceChip(label: t.daily,   value: 'daily',   selected: selectedRecurrence == 'daily',   accent: accent, onTap: () => setState(() => selectedRecurrence = 'daily')),
+                        _RecurrenceChip(label: t.weekly,  value: 'weekly',  selected: selectedRecurrence == 'weekly',  accent: accent, onTap: () => setState(() => selectedRecurrence = 'weekly')),
+                        _RecurrenceChip(label: t.monthly, value: 'monthly', selected: selectedRecurrence == 'monthly', accent: accent, onTap: () => setState(() => selectedRecurrence = 'monthly')),
+                        _RecurrenceChip(label: t.yearly,  value: 'yearly',  selected: selectedRecurrence == 'yearly',  accent: accent, onTap: () => setState(() => selectedRecurrence = 'yearly')),
+                      ]),
+                      const SizedBox(height: 16),
                       Text(t.reminders, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                       const SizedBox(height: 8),
@@ -145,13 +157,15 @@ class WorkoutDialog {
                               if (durationCtrl.text.trim().isNotEmpty) 'duration:${durationCtrl.text.trim()}',
                             ].join('\n');
                             if (existing != null) {
-                              existing..title = wType..dueDate = dueDate..template = 'workout'..notes = notesStr;
+                              existing..title = wType..dueDate = dueDate..template = 'workout'..notes = notesStr
+                                ..recurrence = selectedRecurrence == 'none' ? null : selectedRecurrence;
                               existing.setReminders(reminders);
                               await existing.save();
                               await NotificationService().scheduleForTask(existing);
                             } else {
                               final task = Task(title: wType, dueDate: dueDate, categoryId: defaultCategoryId,
                                 priority: 1, template: 'workout', notes: notesStr,
+                                recurrence: selectedRecurrence == 'none' ? null : selectedRecurrence,
                                 reminders: reminders.isEmpty ? null : reminders);
                               await taskBox.add(task);
                               await NotificationService().scheduleForTask(task);
@@ -213,6 +227,19 @@ class _DateChip extends StatelessWidget {
 class _ReminderChip extends StatelessWidget {
   final String label, value; final bool selected; final Color accent; final VoidCallback onTap;
   const _ReminderChip({required this.label, required this.value, required this.selected, required this.accent, required this.onTap});
+  @override
+  Widget build(BuildContext context) => GestureDetector(onTap: onTap,
+    child: Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(color: selected ? accent.withValues(alpha: 0.15) : Colors.transparent,
+        border: Border.all(color: selected ? accent : Colors.grey.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(20)),
+      child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500,
+        color: selected ? accent : Colors.grey))));
+}
+
+class _RecurrenceChip extends StatelessWidget {
+  final String label, value; final bool selected; final Color accent; final VoidCallback onTap;
+  const _RecurrenceChip({required this.label, required this.value, required this.selected, required this.accent, required this.onTap});
   @override
   Widget build(BuildContext context) => GestureDetector(onTap: onTap,
     child: Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),

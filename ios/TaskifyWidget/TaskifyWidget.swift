@@ -161,11 +161,11 @@ struct TaskRowView: View {
             }
             if task.priority > 0 {
                 Text("●")
-                    .font(.system(size: 7))
+                    .font(.system(size: 8))
                     .foregroundColor(dotColor(task.priority))
             }
             Text(task.displayTitle(lang: lang))
-                .font(.system(size: 11, weight: .regular))
+                .font(.system(size: 14, weight: .regular))
                 .foregroundColor(.white)
                 .lineLimit(1)
             Spacer()
@@ -213,9 +213,9 @@ struct TaskifyWidgetEntryView: View {
             HStack(spacing: 5) {
                 Image(systemName: "checkmark.square.fill")
                     .foregroundColor(Color(red: 0.20, green: 0.72, blue: 0.47))
-                    .font(.system(size: 13))
+                    .font(.system(size: 15))
                 Text("Taskify")
-                    .font(.system(size: 11, weight: .bold))
+                    .font(.system(size: 13, weight: .bold))
                     .foregroundColor(.white)
                 Spacer()
             }
@@ -224,7 +224,7 @@ struct TaskifyWidgetEntryView: View {
             if entry.tasks.isEmpty {
                 Spacer()
                 Text(emptyMsg)
-                    .font(.system(size: 10))
+                    .font(.system(size: 12))
                     .foregroundColor(.white.opacity(0.5))
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
