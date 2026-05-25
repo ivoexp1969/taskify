@@ -13,7 +13,7 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _currentPage = 0;
-  static const int _totalPages = 4;
+  static const int _totalPages = 5;
 
   @override
   void dispose() {
@@ -90,6 +90,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     title: t.onboardingPage3Title,
                     description: t.onboardingPage3Desc,
                   ),
+                  _FeaturesOnboardingPage(),
                   _OnboardingPage(
                     icon: Icons.rocket_launch_rounded,
                     color: Colors.deepPurple,
@@ -196,6 +197,79 @@ class _OnboardingPage extends StatelessWidget {
               height: 1.5,
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FeaturesOnboardingPage extends StatelessWidget {
+  const _FeaturesOnboardingPage();
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppText.of(context);
+    final theme = Theme.of(context);
+    const accentColor = Colors.amber;
+
+    final features = [
+      (emoji: '🍅', text: t.onboardingFeaturePomodoro, color: Colors.deepOrange),
+      (emoji: '🔥', text: t.onboardingFeatureStreak, color: Colors.orange),
+      (emoji: '📅', text: t.onboardingFeatureNlp, color: Colors.blue),
+      (emoji: '⚡', text: t.onboardingFeatureQuickAdd, color: Colors.purple),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              color: accentColor.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.auto_awesome_rounded, size: 52, color: accentColor),
+          ),
+          const SizedBox(height: 28),
+          Text(
+            t.onboardingFeaturesTitle,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 24),
+          ...features.map((f) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: f.color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Center(
+                    child: Text(f.emoji, style: const TextStyle(fontSize: 24)),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    f.text,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )),
         ],
       ),
     );

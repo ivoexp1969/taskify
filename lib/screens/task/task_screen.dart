@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/google_calendar_service.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -27,6 +28,9 @@ import 'gift_dialog.dart';
 import '../../widgets/task_card_styles.dart';
 import '../../widgets/pomodoro_timer_sheet.dart';
 import '../settings/statistics_screen.dart';
+import '../../utils/natural_language_parser.dart';
+import '../paywall/paywall_screen.dart';
+import '../../services/pro_service.dart';
 
 enum TaskFilter { all, active, completed, overdue, upcoming, archived }
 enum TaskSort { date, priority, name, category }
@@ -38,7 +42,7 @@ class TaskScreen extends StatefulWidget {
   State<TaskScreen> createState() => _TaskScreenState();
 }
 
-class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
+class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, WidgetsBindingObserver {
   late Box<Task> taskBox;
   late Box<Category> categoryBox;
 
@@ -66,6 +70,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
 
   // Speech to text
 
+  // Search
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -86,6 +94,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     }
 
     _selectedCategoryId = categoryBox.isEmpty ? '' : categoryBox.values.first.id;
+
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkPendingQuickAdd());
   }
 
   @override
@@ -129,11 +140,111 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _listAnimationController.dispose();
     _titleController.dispose();
+    _searchController.dispose();
     taskBox.listenable().removeListener(_onTasksChanged);
     super.dispose();
   }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _checkPendingQuickAdd();
+  }
+
+  Future<void> _checkPendingQuickAdd() async {
+    final prefs = await SharedPreferences.getInstance();
+    final title = prefs.getString('quick_add_pending_title')?.trim();
+    if (title == null || title.isEmpty) return;
+    await prefs.remove('quick_add_pending_title');
+    if (!mounted) return;
+
+    final lang = LanguageScope.of(context).locale.languageCode;
+    final nlp = NaturalLanguageParser.parse(title, lang);
+    final now = DateTime.now();
+    final date = nlp?.date ?? DateTime(now.year, now.month, now.day);
+    final finalDate = nlp?.time != null
+        ? DateTime(date.year, date.month, date.day, nlp!.time!.hour, nlp.time!.minute)
+        : date;
+
+    final categoryId = categoryBox.isEmpty ? '' : categoryBox.values.first.id;
+    final task = Task(
+      title: title,
+      dueDate: finalDate,
+      categoryId: categoryId,
+      priority: 1,
+      recurrence: 'none',
+      notes: '',
+    );
+    await taskBox.add(task);
+
+    if (mounted) {
+      final t = AppText.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${t.quickAddDone}: $title'),
+          backgroundColor: Colors.green.shade700,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  void _showCategoryFilter() {
+    final t = AppText.of(context);
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 36),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(t.category, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilterChip(
+                  label: Text(t.all),
+                  selected: _categoryFilterId == null,
+                  onSelected: (_) {
+                    setState(() => _categoryFilterId = null);
+                    Navigator.pop(ctx);
+                  },
+                ),
+                ...categoryBox.values.map((c) {
+                  final name = _localizedCategoryName(c, t);
+                  final isSelected = _categoryFilterId == c.id;
+                  final catColor = Color(c.colorValue);
+                  return FilterChip(
+                    label: Text(name),
+                    selected: isSelected,
+                    selectedColor: catColor.withValues(alpha: 0.2),
+                    checkmarkColor: catColor,
+                    side: BorderSide(color: isSelected ? catColor : Colors.transparent),
+                    onSelected: (_) {
+                      setState(() => _categoryFilterId = isSelected ? null : c.id);
+                      Navigator.pop(ctx);
+                    },
+                  );
+                }),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   void _onTasksChanged() {
     if (mounted) setState(() {});
@@ -297,83 +408,50 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     return now.isAfter(endOfDueDay);
   }
 
-  List<Task> _filteredTasks() {
-    final now = DateTime.now();
-    var tasks = taskBox.values.toList();
-    
-    // Сортиране според избрания метод
-    switch (_sortBy) {
-      case TaskSort.date:
-        tasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
-        break;
-      case TaskSort.priority:
-        tasks.sort((a, b) => b.priority.compareTo(a.priority)); // Висок първи
-        break;
-      case TaskSort.name:
-        tasks.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
-        break;
-      case TaskSort.category:
-        tasks.sort((a, b) => a.categoryId.compareTo(b.categoryId));
-        break;
+  ({List<Task> filtered, int total, int completed, int overdue, int upcoming, int archived}) _computeTasks() {
+    final all = taskBox.values.toList();
+
+    // Stats — single pass over all tasks
+    int total = 0, completed = 0, overdue = 0, upcoming = 0, archived = 0;
+    for (final t in all) {
+      if (t.isArchived) { archived++; continue; }
+      total++;
+      if (t.isCompleted) completed++;
+      else if (_isTaskOverdue(t)) overdue++;
+      else upcoming++;
     }
 
-    // филтър по статус
+    // Sort
+    switch (_sortBy) {
+      case TaskSort.date:     all.sort((a, b) => a.dueDate.compareTo(b.dueDate)); break;
+      case TaskSort.priority: all.sort((a, b) => b.priority.compareTo(a.priority)); break;
+      case TaskSort.name:     all.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase())); break;
+      case TaskSort.category: all.sort((a, b) => a.categoryId.compareTo(b.categoryId)); break;
+    }
+
+    // Filter by status
     List<Task> filtered;
     switch (_filter) {
-      case TaskFilter.all:
-        filtered = tasks.where((t) => !t.isArchived).toList();
-        break;
-      case TaskFilter.active:
-        filtered = tasks.where((t) => !t.isCompleted && !t.isArchived).toList();
-        break;
-      case TaskFilter.completed:
-        filtered = tasks.where((t) => t.isCompleted && !t.isArchived).toList();
-        break;
-      case TaskFilter.overdue:
-        filtered = tasks
-            .where((t) => !t.isArchived && _isTaskOverdue(t))
-            .toList();
-        break;
-      case TaskFilter.upcoming:
-        filtered = tasks
-            .where((t) => !t.isCompleted && !t.isArchived && !_isTaskOverdue(t))
-            .toList();
-        break;
-      case TaskFilter.archived:
-        filtered = tasks.where((t) => t.isArchived).toList();
-        break;
+      case TaskFilter.all:       filtered = all.where((t) => !t.isArchived).toList(); break;
+      case TaskFilter.active:    filtered = all.where((t) => !t.isCompleted && !t.isArchived).toList(); break;
+      case TaskFilter.completed: filtered = all.where((t) => t.isCompleted && !t.isArchived).toList(); break;
+      case TaskFilter.overdue:   filtered = all.where((t) => !t.isArchived && _isTaskOverdue(t)).toList(); break;
+      case TaskFilter.upcoming:  filtered = all.where((t) => !t.isCompleted && !t.isArchived && !_isTaskOverdue(t)).toList(); break;
+      case TaskFilter.archived:  filtered = all.where((t) => t.isArchived).toList(); break;
     }
 
-    // филтър по категория
+    // Filter by category
     if (_categoryFilterId != null && _categoryFilterId!.isNotEmpty) {
-      filtered = filtered
-          .where((t) => t.categoryId == _categoryFilterId)
-          .toList();
+      filtered = filtered.where((t) => t.categoryId == _categoryFilterId).toList();
     }
 
-    // търсене по заглавие
+    // Search
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
-      filtered = filtered
-          .where((t) => t.title.toLowerCase().contains(q))
-          .toList();
+      filtered = filtered.where((t) => t.title.toLowerCase().contains(q)).toList();
     }
 
-    return filtered;
-  }
-
-  (int total, int completed, int overdue, int upcoming, int archived) _stats() {
-    final nonArchived = taskBox.values.where((t) => !t.isArchived);
-    final total = nonArchived.length;
-    final completed = nonArchived.where((t) => t.isCompleted).length;
-    final overdue = nonArchived
-        .where((t) => _isTaskOverdue(t))
-        .length;
-    final upcoming = nonArchived
-        .where((t) => !t.isCompleted && !_isTaskOverdue(t))
-        .length;
-    final archived = taskBox.values.where((t) => t.isArchived).length;
-    return (total, completed, overdue, upcoming, archived);
+    return (filtered: filtered, total: total, completed: completed, overdue: overdue, upcoming: upcoming, archived: archived);
   }
 
   static const List<Color> _categoryColors = [
@@ -490,6 +568,11 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                   onPressed: () {
                     final name = controller.text.trim();
                     if (name.isNotEmpty) {
+                      if (!ProService().canAddCategory(categoryBox.length)) {
+                        Navigator.pop(ctx);
+                        showPaywallIfNeeded(context, isFeatureAvailable: false);
+                        return;
+                      }
                       final id = DateTime.now().millisecondsSinceEpoch.toString();
                       final newCat = Category(
                         id: id,
@@ -712,6 +795,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     List<String> tempReminders = List<String>.from(existing?.remindersList ?? []);
     List<Map<String, dynamic>> tempSubtasks = existing?.subtasksList ?? [];
     String tempNotes = existing?.notes ?? '';
+    NlpResult? nlpSuggestion;
 
     _titleController.text = existing?.title ?? '';
 
@@ -847,8 +931,54 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                                 vertical: 18,
                               ),
                             ),
+                            onChanged: (value) {
+                              final result = NaturalLanguageParser.parse(value, langCode);
+                              setSheetState(() {
+                                nlpSuggestion = result;
+                                if (result != null) {
+                                  tempDueDate = DateTime(
+                                    result.date.year, result.date.month, result.date.day,
+                                    result.time?.hour ?? tempDueDate.hour,
+                                    result.time?.minute ?? tempDueDate.minute,
+                                  );
+                                  if (result.time != null) tempTime = result.time;
+                                }
+                              });
+                            },
                           ),
-                          const SizedBox(height: 24),
+                          if (nlpSuggestion != null) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: categoryColor.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: categoryColor.withValues(alpha: 0.3)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.calendar_today_rounded, size: 16, color: categoryColor),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    nlpSuggestion!.label,
+                                    style: TextStyle(
+                                      color: categoryColor,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: () => setSheetState(() => nlpSuggestion = null),
+                                    child: Icon(Icons.close_rounded, size: 16, color: categoryColor.withValues(alpha: 0.7)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                          ] else
+                            const SizedBox(height: 24),
 
                           // Секция: Категория
                           _buildSectionLabel(t.category, Icons.folder_outlined, theme),
@@ -1426,6 +1556,12 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                             await existing.save();
                             await NotificationService().scheduleForTask(existing);
                           } else {
+                            // Paywall check — free limit 50 tasks
+                            if (!ProService().canAddTask(taskBox.length)) {
+                              Navigator.pop(innerContext);
+                              if (context.mounted) showPaywallIfNeeded(context, isFeatureAvailable: false);
+                              return;
+                            }
                             // Auto-detect template от category
                             final String? autoTemplate = tempCategoryId == 'shopping' ? 'shopping' : null;
                             
@@ -1673,12 +1809,11 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     final languageController = LanguageScope.of(context);
     final langCode = languageController.locale.languageCode;
 
-    final tasks = _filteredTasks();
+    final (:filtered, :total, :completed, :overdue, :upcoming, :archived) = _computeTasks();
+    final tasks = filtered;
     final categoriesMap = {
       for (var c in categoryBox.values) c.id: c,
     };
-
-    final (total, completed, overdue, upcoming, archived) = _stats();
 
     final List<Object> items = [];
     if (tasks.isNotEmpty) {
@@ -1707,102 +1842,120 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
 
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          t.tasks,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        actions: [
-          PopupMenuButton<TaskSort>(
-            icon: const Icon(Icons.sort_rounded),
-            tooltip: t.sortBy,
-            onSelected: (sort) => setState(() => _sortBy = sort),
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: TaskSort.date,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_today_rounded,
-                      size: 20,
-                      color: _sortBy == TaskSort.date ? theme.colorScheme.primary : null,
+        centerTitle: !_isSearching,
+        leading: _isSearching
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_rounded),
+                onPressed: () => setState(() {
+                  _isSearching = false;
+                  _searchQuery = '';
+                  _searchController.clear();
+                }),
+              )
+            : null,
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: t.searchTasks,
+                  border: InputBorder.none,
+                  hintStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
+                ),
+                onChanged: (value) => setState(() => _searchQuery = value),
+              )
+            : Text(t.tasks, style: const TextStyle(fontWeight: FontWeight.w600)),
+        actions: _isSearching
+            ? []
+            : [
+                IconButton(
+                  icon: const Icon(Icons.search_rounded),
+                  onPressed: () => setState(() => _isSearching = true),
+                ),
+                IconButton(
+                  icon: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      const Icon(Icons.filter_list_rounded),
+                      if (_categoryFilterId != null)
+                        Positioned(
+                          right: -2,
+                          top: -2,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  onPressed: _showCategoryFilter,
+                ),
+                if (archived > 0)
+                  IconButton(
+                    icon: Badge(
+                      label: Text('$archived'),
+                      isLabelVisible: _filter != TaskFilter.archived,
+                      child: Icon(
+                        Icons.archive_outlined,
+                        color: _filter == TaskFilter.archived ? theme.colorScheme.primary : null,
+                      ),
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      t.date,
-                      style: TextStyle(
-                        fontWeight: _sortBy == TaskSort.date ? FontWeight.bold : null,
-                        color: _sortBy == TaskSort.date ? theme.colorScheme.primary : null,
+                    onPressed: () => setState(() {
+                      _filter = _filter == TaskFilter.archived ? TaskFilter.all : TaskFilter.archived;
+                    }),
+                  ),
+                PopupMenuButton<TaskSort>(
+                  icon: const Icon(Icons.sort_rounded),
+                  tooltip: t.sortBy,
+                  onSelected: (sort) => setState(() => _sortBy = sort),
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: TaskSort.date,
+                      child: Row(
+                        children: [
+                          Icon(Icons.calendar_today_rounded, size: 20, color: _sortBy == TaskSort.date ? theme.colorScheme.primary : null),
+                          const SizedBox(width: 12),
+                          Text(t.date, style: TextStyle(fontWeight: _sortBy == TaskSort.date ? FontWeight.bold : null, color: _sortBy == TaskSort.date ? theme.colorScheme.primary : null)),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: TaskSort.priority,
+                      child: Row(
+                        children: [
+                          Icon(Icons.flag_rounded, size: 20, color: _sortBy == TaskSort.priority ? theme.colorScheme.primary : null),
+                          const SizedBox(width: 12),
+                          Text(t.priority, style: TextStyle(fontWeight: _sortBy == TaskSort.priority ? FontWeight.bold : null, color: _sortBy == TaskSort.priority ? theme.colorScheme.primary : null)),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: TaskSort.name,
+                      child: Row(
+                        children: [
+                          Icon(Icons.sort_by_alpha_rounded, size: 20, color: _sortBy == TaskSort.name ? theme.colorScheme.primary : null),
+                          const SizedBox(width: 12),
+                          Text(t.name, style: TextStyle(fontWeight: _sortBy == TaskSort.name ? FontWeight.bold : null, color: _sortBy == TaskSort.name ? theme.colorScheme.primary : null)),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: TaskSort.category,
+                      child: Row(
+                        children: [
+                          Icon(Icons.folder_rounded, size: 20, color: _sortBy == TaskSort.category ? theme.colorScheme.primary : null),
+                          const SizedBox(width: 12),
+                          Text(t.category, style: TextStyle(fontWeight: _sortBy == TaskSort.category ? FontWeight.bold : null, color: _sortBy == TaskSort.category ? theme.colorScheme.primary : null)),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ),
-              PopupMenuItem(
-                value: TaskSort.priority,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.flag_rounded,
-                      size: 20,
-                      color: _sortBy == TaskSort.priority ? theme.colorScheme.primary : null,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      t.priority,
-                      style: TextStyle(
-                        fontWeight: _sortBy == TaskSort.priority ? FontWeight.bold : null,
-                        color: _sortBy == TaskSort.priority ? theme.colorScheme.primary : null,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: TaskSort.name,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.sort_by_alpha_rounded,
-                      size: 20,
-                      color: _sortBy == TaskSort.name ? theme.colorScheme.primary : null,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      t.name,
-                      style: TextStyle(
-                        fontWeight: _sortBy == TaskSort.name ? FontWeight.bold : null,
-                        color: _sortBy == TaskSort.name ? theme.colorScheme.primary : null,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: TaskSort.category,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.folder_rounded,
-                      size: 20,
-                      color: _sortBy == TaskSort.category ? theme.colorScheme.primary : null,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      t.category,
-                      style: TextStyle(
-                        fontWeight: _sortBy == TaskSort.category ? FontWeight.bold : null,
-                        color: _sortBy == TaskSort.category ? theme.colorScheme.primary : null,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
+              ],
       ),
       body: Stack(
         children: [
@@ -1861,122 +2014,39 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
               ),
             ),
 
-            // търсене + филтър по категория
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: t.searchTasks,
-                        prefixIcon: const Icon(Icons.search, size: 20),
-                        isDense: true,
-                        filled: true,
-                        fillColor: theme.colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.4),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(999),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 8,
-                        ),
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          _searchQuery = value;
-                        });
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
+            // Active category filter chip (само когато е активен)
+            if (_categoryFilterId != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(999),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
                       ),
-                      child: DropdownButton<String>(
-                        isExpanded: true,
-                        underline: const SizedBox.shrink(),
-                        icon: const Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          size: 18,
-                        ),
-                        value: _categoryFilterId ?? 'all',
-                        items: [
-                          DropdownMenuItem(
-                            value: 'all',
-                            child: Text(
-                              t.all,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.filter_list_rounded, size: 13, color: theme.colorScheme.primary),
+                          const SizedBox(width: 5),
+                          Text(
+                            _localizedCategoryName(categoryBox.get(_categoryFilterId), t),
+                            style: TextStyle(color: theme.colorScheme.primary, fontSize: 12, fontWeight: FontWeight.w600),
                           ),
-                          ...categoryBox.values.map((c) {
-                            final name = _localizedCategoryName(c, t);
-                            return DropdownMenuItem(
-                              value: c.id,
-                              child: Text(
-                                name,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            );
-                          }),
+                          const SizedBox(width: 5),
+                          GestureDetector(
+                            onTap: () => setState(() => _categoryFilterId = null),
+                            child: Icon(Icons.close_rounded, size: 13, color: theme.colorScheme.primary),
+                          ),
                         ],
-                        onChanged: (value) {
-                          setState(() {
-                            if (value == 'all') {
-                              _categoryFilterId = null;
-                            } else {
-                              _categoryFilterId = value;
-                            }
-                          });
-                        },
                       ),
                     ),
-                  ),
-                  // Бутон за архивирани
-                  if (archived > 0)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: InkWell(
-                        onTap: () => setState(() {
-                          _filter = _filter == TaskFilter.archived
-                              ? TaskFilter.all
-                              : TaskFilter.archived;
-                        }),
-                        borderRadius: BorderRadius.circular(999),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: _filter == TaskFilter.archived
-                                ? Colors.grey
-                                : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Badge(
-                            label: Text('$archived'),
-                            isLabelVisible: _filter != TaskFilter.archived,
-                            child: Icon(
-                              Icons.archive_outlined,
-                              size: 20,
-                              color: _filter == TaskFilter.archived
-                                  ? Colors.white
-                                  : theme.colorScheme.onSurface,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
             // Списък със задачи (групиран по дата)
             Expanded(
@@ -2464,18 +2534,27 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
 // ══════════════════════════════════════════════════
 // Productivity Banner — streak + today's score
 // ══════════════════════════════════════════════════
-class _ProductivityBanner extends StatelessWidget {
+class _ProductivityBanner extends StatefulWidget {
   final Box<Task> taskBox;
-
   const _ProductivityBanner({required this.taskBox});
+  @override
+  State<_ProductivityBanner> createState() => _ProductivityBannerState();
+}
+
+class _ProductivityBannerState extends State<_ProductivityBanner> {
+  int? _cachedStreak;
+  String? _cacheDate;
 
   int _calculateStreak() {
     final now = DateTime.now();
+    final dateKey = '${now.year}-${now.month}-${now.day}';
+    if (_cacheDate == dateKey && _cachedStreak != null) return _cachedStreak!;
+
     int streak = 0;
     for (int i = 0; i < 365; i++) {
       final day = DateTime(now.year, now.month, now.day).subtract(Duration(days: i));
       final nextDay = day.add(const Duration(days: 1));
-      final completedOnDay = taskBox.values.where((t) {
+      final completedOnDay = widget.taskBox.values.where((t) {
         if (!t.isCompleted) return false;
         final d = t.completedAt ?? t.dueDate;
         return d.isAfter(day) && d.isBefore(nextDay);
@@ -2486,6 +2565,8 @@ class _ProductivityBanner extends StatelessWidget {
         break;
       }
     }
+    _cachedStreak = streak;
+    _cacheDate = dateKey;
     return streak;
   }
 
@@ -2496,7 +2577,7 @@ class _ProductivityBanner extends StatelessWidget {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    final todayTasks = taskBox.values.where((task) {
+    final todayTasks = widget.taskBox.values.where((task) {
       if (task.isArchived) return false;
       final due = DateTime(task.dueDate.year, task.dueDate.month, task.dueDate.day);
       return due == today;

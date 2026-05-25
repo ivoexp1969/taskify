@@ -11,9 +11,37 @@ import 'package:timezone/data/latest.dart' as tz_data;
 import '../models/task.dart';
 import '../main.dart';
 
-// Background handler за notification action buttons (snooze)
+// Background handler за notification action buttons (snooze / quick_add)
 @pragma('vm:entry-point')
 Future<void> _onNotificationActionBackground(NotificationResponse details) async {
+  if (details.actionId == 'quick_add') {
+    // AndroidNotificationActionInput е Android-only — на iOS тази action не се показва
+    if (!Platform.isAndroid) return;
+    final text = details.input?.trim() ?? '';
+    if (text.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('quick_add_pending_title', text);
+
+    final plugin = FlutterLocalNotificationsPlugin();
+    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    await plugin.initialize(const InitializationSettings(android: androidInit));
+    final lang = prefs.getString('app_language') ?? 'en';
+    const confirmTitle = {'en': 'Task added ✓', 'bg': 'Задача добавена ✓', 'de': 'Aufgabe hinzugefügt ✓', 'fr': 'Tâche ajoutée ✓', 'it': 'Attività aggiunta ✓', 'el': 'Εργασία προστέθηκε ✓', 'es': 'Tarea añadida ✓', 'pt': 'Tarefa adicionada ✓', 'ru': 'Задача добавлена ✓', 'tr': 'Görev eklendi ✓'};
+    await plugin.show(
+      99998,
+      confirmTitle[lang] ?? confirmTitle['en']!,
+      text,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'task_reminders', 'Task reminders',
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+        ),
+      ),
+    );
+    return;
+  }
+
   if (details.actionId != 'snooze') return;
 
   final plugin = FlutterLocalNotificationsPlugin();

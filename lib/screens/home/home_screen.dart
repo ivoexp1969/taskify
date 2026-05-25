@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../task/task_screen.dart';
+import '../task/eisenhower_screen.dart';
 import '../calendar/calendar_screen.dart';
 import '../settings/settings_screen.dart';
 import '../../utils/localization.dart';
@@ -24,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   late final List<Widget> _screens = const [
     TaskScreen(),
+    EisenhowerScreen(),
     CalendarScreen(),
     SettingsScreen(),
   ];
@@ -114,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onDestinationSelected(int index) async {
-    if (!kIsWeb && index == 1 && !_proService.canUseCalendar) {
+    if (!kIsWeb && index == 2 && !_proService.canUseCalendar) {
       final languageController = LanguageScope.of(context);
       final lang = languageController.locale.languageCode;
       const calendarName = {'en': 'Calendar', 'bg': 'Календар', 'de': 'Kalender', 'fr': 'Calendrier', 'it': 'Calendario', 'el': 'Ημερολόγιο', 'es': 'Calendario', 'pt': 'Calendário', 'ru': 'Календарь', 'tr': 'Takvim'};
@@ -175,7 +177,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(24),
-            child: NavigationBar(
+            child: Theme(
+              data: theme.copyWith(
+                navigationBarTheme: NavigationBarThemeData(
+                  labelTextStyle: WidgetStateProperty.all(
+                    const TextStyle(
+                      fontSize: 10,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ),
+              child: NavigationBar(
               height: 64,
               backgroundColor: Colors.transparent,
               indicatorColor: theme.colorScheme.primary.withValues(alpha: isDark ? 0.25 : 0.12),
@@ -187,6 +200,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.checklist_rtl_outlined),
                   selectedIcon: const Icon(Icons.checklist_rtl),
                   label: t.tasks,
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.grid_view_outlined),
+                  selectedIcon: const Icon(Icons.grid_view_rounded),
+                  label: t.matrix,
                 ),
                 NavigationDestination(
                   icon: Stack(
@@ -214,6 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
+          ),
           ),
         ),
       ),
