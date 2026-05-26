@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Taskify</string>
-    <string name="widget_description">Показва задачите за днес</string>
+    <string name="widget_description">Shows your tasks for today</string>
     <string name="widget_description_medium">Taskify 4x2</string>
     <string name="widget_description_large">Taskify 3x1</string>
 </resources>

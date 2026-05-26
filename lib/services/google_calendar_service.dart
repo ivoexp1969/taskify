@@ -41,24 +41,13 @@ class GoogleCalendarService {
       final wasConnected = prefs.getBool('google_calendar_connected') ?? false;
       if (!wasConnected) return;
 
-      // Restore last known state immediately — don't wait for network
+      // Restore connection state only — actual auth happens lazily in _getAccessToken().
+      // Calling attemptLightweightAuthentication() here triggers the Android Credential
+      // Manager UI on every cold start, which shows an unwanted account picker dialog.
       _isConnected = true;
-
-      await _ensureInitialized();
-      final future = GoogleSignIn.instance.attemptLightweightAuthentication();
-      if (future == null) return; // platform doesn't support silent auth; stay connected
-
-      final account = await future;
-      if (account != null) {
-        _currentAccount = account;
-        debugPrint('Google Calendar reconnected silently');
-      }
-      // If account == null: silent auth temporarily unavailable (no network, cold start).
-      // DO NOT set _isConnected = false — that causes spurious auto-disconnect.
-      // _getAccessToken() will retry on the next actual API call.
+      debugPrint('Google Calendar: connection state restored (lazy auth)');
     } catch (e) {
       debugPrint('Silent reconnect failed: $e');
-      // Do not change _isConnected — error may be transient.
     }
   }
 
