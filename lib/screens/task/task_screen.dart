@@ -2657,33 +2657,39 @@ class _ProductivityBannerState extends State<_ProductivityBanner> {
         child: Row(
           children: [
             // Streak
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      streak > 0 ? '🔥' : '💤',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      '$streak',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        height: 1,
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        streak > 0 ? '🔥' : '💤',
+                        style: const TextStyle(fontSize: 16),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  t.streakDays,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                      const SizedBox(width: 5),
+                      Text(
+                        '$streak',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          height: 1,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 2),
+                  Text(
+                    t.streakDays,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
 
             // Separator
@@ -2702,12 +2708,17 @@ class _ProductivityBannerState extends State<_ProductivityBanner> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        t.todayScore,
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                      Flexible(
+                        child: Text(
+                          t.todayScore,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      const SizedBox(width: 6),
                       Text(
                         totalToday > 0 ? '$completedToday / $totalToday' : '—',
                         style: theme.textTheme.labelMedium?.copyWith(

@@ -53,13 +53,7 @@ Future<void> main() async {
     WidgetService.updateWidget();
   }
 
-  // Pro и Ad сервизи инициализация
-  await ProService().initialize();
-  await AdService().initialize();
   await TaskViewPreference().initialize();
-  
-  // Try reconnect Google Calendar silently
-  GoogleCalendarService().tryReconnect();
 
   // Initialize notification service (registers tap handler)
   await NotificationService().init();
@@ -69,13 +63,20 @@ Future<void> main() async {
     MorningBriefingDialog.show(context);
   });
 
-  // Trial countdown notification — schedule once, 3 days before trial end
-  if (!kIsWeb && ProService().isTrial) {
-    final trialEnd = ProService().trialEndDate;
-    if (trialEnd != null) {
-      NotificationService().scheduleTrialCountdownNotification(trialEnd);
+  // Pro и Ad сервизи — fire-and-forget, не блокират UI
+  // Trial notification се планира след като ProService завърши инициализацията
+  ProService().initialize().then((_) {
+    if (!kIsWeb && ProService().isTrial) {
+      final trialEnd = ProService().trialEndDate;
+      if (trialEnd != null) {
+        NotificationService().scheduleTrialCountdownNotification(trialEnd);
+      }
     }
-  }
+  });
+  AdService().initialize();
+
+  // Try reconnect Google Calendar silently
+  GoogleCalendarService().tryReconnect();
 
   // Morning briefing — refresh top 3 tasks on every launch
   if (!kIsWeb) {

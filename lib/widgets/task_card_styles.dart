@@ -263,8 +263,12 @@ class ExpandableTaskCard extends StatelessWidget {
                                           Row(
                                             children: [
                                               if (categoryName.isNotEmpty) ...[
-                                                Text(categoryName,
-                                                  style: TextStyle(fontSize: 11, color: blockColor, fontWeight: FontWeight.w600)),
+                                                Flexible(
+                                                  child: Text(categoryName,
+                                                    style: TextStyle(fontSize: 11, color: blockColor, fontWeight: FontWeight.w600),
+                                                    overflow: TextOverflow.ellipsis,
+                                                    maxLines: 1),
+                                                ),
                                                 Padding(
                                                   padding: const EdgeInsets.symmetric(horizontal: 5),
                                                   child: Container(width: 3, height: 3,

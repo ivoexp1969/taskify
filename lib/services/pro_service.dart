@@ -76,6 +76,7 @@ class ProService extends ChangeNotifier {
 
   bool _isPro = false;
   bool _isInitialized = false;
+  bool _isInitializing = false;
   bool _isTrial = false;
   bool _isPromoCode = false;
   String? _activeSubscription;
@@ -100,12 +101,14 @@ class ProService extends ChangeNotifier {
 
   /// Инициализира ProService
   Future<void> initialize() async {
-    if (_isInitialized) return;
+    if (_isInitialized || _isInitializing) return;
+    _isInitializing = true;
 
     // На web - винаги Pro, без инициализация на RevenueCat
     if (kIsWeb) {
       _isPro = true;
       _isInitialized = true;
+      _isInitializing = false;
       notifyListeners();
       return;
     }
@@ -131,6 +134,7 @@ class ProService extends ChangeNotifier {
       await _checkPromoCodeStatus();
 
       _isInitialized = true;
+      _isInitializing = false;
       notifyListeners();
     } catch (e) {
       debugPrint('ProService init error: $e');
@@ -138,6 +142,8 @@ class ProService extends ChangeNotifier {
       await _checkTrialStatus();
       await _checkPromoCodeStatus();
       _isInitialized = true;
+      _isInitializing = false;
+      notifyListeners();
     }
   }
 
