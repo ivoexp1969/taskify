@@ -40,3 +40,9 @@ app.*.map.json
 /android/app/release
 *.hprof
 build/
+
+# Debug / temp screenshots
+debug_log.txt
+*.png
+screen_*.png
+flutter_*.png
