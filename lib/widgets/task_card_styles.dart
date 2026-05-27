@@ -173,269 +173,282 @@ class ExpandableTaskCard extends StatelessWidget {
     final t = AppText.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final blockColor = isOverdue && !isCompleted ? Colors.redAccent : accentColor;
+    final dateColor = isOverdue && !isCompleted
+        ? Colors.redAccent
+        : (isDark ? Colors.white : theme.colorScheme.onSurface).withValues(alpha: 0.5);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 4),
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 250),
         opacity: isCompleted ? 0.55 : 1.0,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 280),
-          curve: Curves.easeOutCubic,
+        child: Container(
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
+            border: isExpanded
+                ? Border.all(color: blockColor.withValues(alpha: 0.45), width: 1.5)
+                : null,
             boxShadow: [
               BoxShadow(
-                color: blockColor.withValues(alpha: isDark ? 0.22 : 0.12),
-                blurRadius: isExpanded ? 20 : 8,
-                offset: const Offset(0, 3),
+                color: blockColor.withValues(alpha: isDark ? 0.18 : 0.10),
+                blurRadius: isExpanded ? 18 : 7,
+                offset: const Offset(0, 2),
                 spreadRadius: isExpanded ? -2 : -1,
               ),
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.04),
+                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
                 blurRadius: 4, offset: const Offset(0, 1),
               ),
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
                 onTap: onToggleExpand,
-                child: IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // ═══ ЛЕВЕН ЦВЕТЕН БЛОК ═══
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 280),
-                        width: 46,
-                        color: blockColor,
-                        child: Center(
-                          child: _ModernCheckbox(
-                            isChecked: isCompleted,
-                            color: Colors.white,
-                            onTap: onToggleComplete,
-                          ),
-                        ),
-                      ),
-                      // ═══ ДЕСЕН СЪДЪРЖАТЕЛЕН БЛОК ═══
-                      Expanded(
-                        child: AnimatedSize(
-                          duration: const Duration(milliseconds: 280),
-                          curve: Curves.easeOutCubic,
-                          alignment: Alignment.topCenter,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // HEADER
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(10, 7, 8, 7),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            task.template == 'meeting' ? t.meetingTitle(task.title)
-                                                : task.template == 'travel' ? t.travelTitle(task.title)
-                                                : task.template == 'gift' ? t.giftTitle(task.title)
-                                                : task.template == 'birthday' ? t.birthdayTitle(task.title)
-                                                : task.title,
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w700,
-                                              decoration: isCompleted ? TextDecoration.lineThrough : null,
-                                              decorationColor: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                                              color: isCompleted
-                                                  ? theme.colorScheme.onSurface.withValues(alpha: 0.45)
-                                                  : theme.colorScheme.onSurface,
-                                              height: 1.3,
-                                            ),
-                                            maxLines: isExpanded ? 3 : 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          const SizedBox(height: 3),
-                                          Row(
-                                            children: [
-                                              if (categoryName.isNotEmpty) ...[
-                                                Flexible(
-                                                  child: Text(categoryName,
-                                                    style: TextStyle(fontSize: 11, color: blockColor, fontWeight: FontWeight.w600),
-                                                    overflow: TextOverflow.ellipsis,
-                                                    maxLines: 1),
-                                                ),
-                                                Padding(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 5),
-                                                  child: Container(width: 3, height: 3,
-                                                    decoration: BoxDecoration(color: theme.colorScheme.onSurface.withValues(alpha: 0.2), shape: BoxShape.circle)),
-                                                ),
-                                              ],
-                                              if (task.priority == 2)
-                                                Icon(Icons.local_fire_department_rounded, size: 12, color: priorityColor)
-                                              else if (task.priority == 1)
-                                                Icon(Icons.flag_rounded, size: 12, color: priorityColor),
-                                              if (task.priority > 0) const SizedBox(width: 5),
-                                              if (task.totalSubtasksCount > 0) ...[
-                                                Icon(Icons.checklist_rounded, size: 12,
-                                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
-                                                const SizedBox(width: 3),
-                                                Text('${task.completedSubtasksCount}/${task.totalSubtasksCount}',
-                                                  style: TextStyle(fontSize: 10.5,
-                                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
-                                                    fontWeight: FontWeight.w500)),
-                                                const SizedBox(width: 5),
-                                              ],
-                                              if (task.hasNotes)
-                                                Icon(Icons.sticky_note_2_outlined, size: 12,
-                                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
-                                              if (task.hasReminders) ...[
-                                                const SizedBox(width: 4),
-                                                Icon(Icons.notifications_active_rounded, size: 12,
-                                                  color: Colors.amber.withValues(alpha: 0.8)),
-                                              ],
-                                              if (task.googleCalendarEventId != null) ...[
-                                                const SizedBox(width: 4),
-                                                Icon(Icons.event_rounded, size: 12, color: Colors.blue.withValues(alpha: 0.6)),
-                                              ],
-                                              if (recurrenceText != null && recurrenceText!.isNotEmpty) ...[
-                                                const SizedBox(width: 4),
-                                                Icon(Icons.repeat_rounded, size: 12, color: blockColor.withValues(alpha: 0.55)),
-                                              ],
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    // Дата + стрелка
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                                          decoration: BoxDecoration(
-                                            color: blockColor.withValues(alpha: isDark ? 0.18 : 0.1),
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          child: Text(dateTimeStr,
-                                            style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: blockColor)),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        AnimatedRotation(
-                                          turns: isExpanded ? 0.5 : 0,
-                                          duration: const Duration(milliseconds: 280),
-                                          child: Icon(Icons.keyboard_arrow_down_rounded, size: 18,
-                                            color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                child: Stack(
+                  children: [
+                    // ═══ ТЪНКА ЛЯВА ЛЕНТА ═══
+                    Positioned(
+                      left: 0, top: 0, bottom: 0,
+                      child: Container(width: 4, color: blockColor),
+                    ),
+                    // ═══ СЪДЪРЖАНИЕ ═══
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 280),
+                      curve: Curves.easeOutCubic,
+                      alignment: Alignment.topCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // ─── HEADER ───
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 1),
+                                  child: _ModernCheckbox(
+                                    isChecked: isCompleted,
+                                    color: blockColor,
+                                    onTap: onToggleComplete,
+                                  ),
                                 ),
-                              ),
-
-                              // EXPANDED CONTENT
-                              if (isExpanded)
-                                Container(
-                                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                                const SizedBox(width: 10),
+                                Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Container(
-                                        height: 1,
-                                        margin: const EdgeInsets.only(bottom: 10),
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [
-                                              blockColor.withValues(alpha: isDark ? 0.35 : 0.2),
-                                              blockColor.withValues(alpha: 0.0),
-                                            ],
-                                          ),
+                                      Text(
+                                        task.template == 'meeting' ? t.meetingTitle(task.title)
+                                            : task.template == 'travel' ? t.travelTitle(task.title)
+                                            : task.template == 'gift' ? t.giftTitle(task.title)
+                                            : task.template == 'birthday' ? t.birthdayTitle(task.title)
+                                            : task.title,
+                                        style: TextStyle(
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.w600,
+                                          decoration: isCompleted ? TextDecoration.lineThrough : null,
+                                          decorationColor: blockColor.withValues(alpha: 0.5),
+                                          color: isCompleted
+                                              ? blockColor.withValues(alpha: 0.4)
+                                              : blockColor,
+                                          height: 1.3,
                                         ),
+                                        maxLines: isExpanded ? 3 : 2,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      if (task.hasNotes) ...[
-                                        Container(
-                                          width: double.infinity,
-                                          padding: const EdgeInsets.all(10),
-                                          decoration: BoxDecoration(
-                                            color: theme.colorScheme.onSurface.withValues(alpha: 0.03),
-                                            borderRadius: BorderRadius.circular(8),
-                                            border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.06)),
-                                          ),
-                                          child: Row(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Icon(Icons.sticky_note_2_outlined, size: 14,
-                                                color: theme.colorScheme.onSurface.withValues(alpha: 0.35)),
-                                              const SizedBox(width: 8),
-                                              Expanded(
-                                                child: Text(
-                                                  _notesPreview(task.notes!, t),
-                                                  style: TextStyle(fontSize: 12,
-                                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.55), height: 1.4),
-                                                  maxLines: 2, overflow: TextOverflow.ellipsis,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(height: 10),
-                                      ],
-                                      Wrap(
-                                        spacing: 6, runSpacing: 6,
-                                        children: [
-                                          _DetailChip(icon: Icons.schedule_rounded, label: dateTimeStr,
-                                            color: isOverdue && !isCompleted ? Colors.redAccent : null),
-                                          _DetailChip(
-                                            icon: task.priority == 2 ? Icons.local_fire_department_rounded
-                                                : task.priority == 1 ? Icons.flag_rounded : Icons.flag_outlined,
-                                            label: priorityText, color: priorityColor,
-                                          ),
-                                          if (categoryName.isNotEmpty)
-                                            _DetailChip(icon: Icons.circle, iconSize: 8, label: categoryName, color: blockColor),
-                                          if (recurrenceText != null && recurrenceText!.isNotEmpty)
-                                            _DetailChip(icon: Icons.repeat_rounded, label: recurrenceText!),
-                                          if (task.hasReminders)
-                                            _DetailChip(icon: Icons.notifications_active_rounded, label: t.reminder,
-                                              color: Colors.amber.shade700),
-                                          if (task.googleCalendarEventId != null)
-                                            _DetailChip(icon: Icons.event_rounded, label: 'Calendar', color: Colors.blue),
-                                        ],
-                                      ),
-                                      if (task.totalSubtasksCount > 0) ...[
-                                        const SizedBox(height: 10),
-                                        _SubtaskProgress(
-                                          completed: task.completedSubtasksCount,
-                                          total: task.totalSubtasksCount,
-                                          color: theme.colorScheme.primary,
-                                        ),
-                                      ],
-                                      const SizedBox(height: 10),
+                                      const SizedBox(height: 4),
                                       Row(
                                         children: [
-                                          if (onStartPomodoro != null && !isCompleted) ...[
-                                            Expanded(child: _IconBtn(icon: Icons.timer_outlined, color: Colors.deepOrange, onTap: onStartPomodoro!)),
-                                            const SizedBox(width: 6),
+                                          Icon(Icons.schedule_rounded, size: 11, color: dateColor),
+                                          const SizedBox(width: 3),
+                                          Flexible(
+                                            child: Text(dateTimeStr,
+                                              style: TextStyle(fontSize: 11, color: dateColor),
+                                              overflow: TextOverflow.ellipsis),
+                                          ),
+                                          if (task.googleCalendarEventId != null) ...[
+                                            const SizedBox(width: 5),
+                                            Icon(Icons.event_rounded, size: 11,
+                                              color: Colors.blue.withValues(alpha: 0.7)),
                                           ],
-                                          Expanded(child: _IconBtn(icon: Icons.edit_outlined, color: theme.colorScheme.primary, onTap: onEdit)),
-                                          const SizedBox(width: 6),
-                                          Expanded(child: _IconBtn(icon: Icons.delete_outline_rounded, color: Colors.redAccent, onTap: onDelete)),
+                                          if (task.hasReminders) ...[
+                                            const SizedBox(width: 4),
+                                            Icon(Icons.notifications_active_rounded, size: 11,
+                                              color: Colors.amber.withValues(alpha: 0.8)),
+                                          ],
+                                          if (recurrenceText != null && recurrenceText!.isNotEmpty) ...[
+                                            const SizedBox(width: 4),
+                                            Icon(Icons.repeat_rounded, size: 11,
+                                              color: blockColor.withValues(alpha: 0.6)),
+                                          ],
+                                          if (task.totalSubtasksCount > 0) ...[
+                                            const SizedBox(width: 4),
+                                            Icon(Icons.checklist_rounded, size: 11,
+                                              color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
+                                            const SizedBox(width: 2),
+                                            Text('${task.completedSubtasksCount}/${task.totalSubtasksCount}',
+                                              style: TextStyle(fontSize: 10,
+                                                color: theme.colorScheme.onSurface.withValues(alpha: 0.4))),
+                                          ],
+                                          if (task.hasNotes) ...[
+                                            const SizedBox(width: 4),
+                                            Icon(Icons.sticky_note_2_outlined, size: 11,
+                                              color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
+                                          ],
                                         ],
                                       ),
                                     ],
                                   ),
                                 ),
+                                const SizedBox(width: 6),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (task.priority > 0) ...[
+                                      Container(
+                                        width: 8, height: 8,
+                                        decoration: BoxDecoration(
+                                          color: priorityColor,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 5),
+                                    ],
+                                    AnimatedRotation(
+                                      turns: isExpanded ? 0.5 : 0,
+                                      duration: const Duration(milliseconds: 280),
+                                      child: Icon(Icons.keyboard_arrow_down_rounded, size: 18,
+                                        color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            // ─── EXPANDED ───
+                            if (isExpanded) ...[
+                              const SizedBox(height: 10),
+                              Container(
+                                height: 1,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      blockColor.withValues(alpha: isDark ? 0.35 : 0.2),
+                                      blockColor.withValues(alpha: 0.0),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              if (task.hasNotes) ...[
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.03),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: theme.colorScheme.outline.withValues(alpha: 0.06)),
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Icon(Icons.sticky_note_2_outlined, size: 14,
+                                        color: theme.colorScheme.onSurface.withValues(alpha: 0.35)),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          _notesPreview(task.notes!, t),
+                                          style: TextStyle(fontSize: 12,
+                                            color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                                            height: 1.4),
+                                          maxLines: 2, overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                              ],
+                              Wrap(
+                                spacing: 6, runSpacing: 6,
+                                children: [
+                                  _DetailChip(
+                                    icon: Icons.schedule_rounded, label: dateTimeStr,
+                                    color: isOverdue && !isCompleted ? Colors.redAccent : null),
+                                  _DetailChip(
+                                    icon: task.priority == 2
+                                        ? Icons.local_fire_department_rounded
+                                        : task.priority == 1 ? Icons.flag_rounded : Icons.flag_outlined,
+                                    label: priorityText, color: priorityColor),
+                                  if (categoryName.isNotEmpty)
+                                    _DetailChip(icon: Icons.circle, iconSize: 8,
+                                      label: categoryName, color: blockColor),
+                                  if (recurrenceText != null && recurrenceText!.isNotEmpty)
+                                    _DetailChip(icon: Icons.repeat_rounded, label: recurrenceText!),
+                                  if (task.hasReminders)
+                                    _DetailChip(icon: Icons.notifications_active_rounded,
+                                      label: t.reminder, color: Colors.amber.shade700),
+                                  if (task.googleCalendarEventId != null)
+                                    _DetailChip(icon: Icons.event_rounded,
+                                      label: 'Calendar', color: Colors.blue),
+                                ],
+                              ),
+                              if (task.totalSubtasksCount > 0) ...[
+                                const SizedBox(height: 10),
+                                _SubtaskProgress(
+                                  completed: task.completedSubtasksCount,
+                                  total: task.totalSubtasksCount,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ],
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  if (onStartPomodoro != null && !isCompleted) ...[
+                                    Expanded(
+                                      child: _ActionButton(
+                                        icon: Icons.timer_outlined,
+                                        label: t.pomodoroFocus,
+                                        color: Colors.deepOrange,
+                                        onTap: onStartPomodoro!,
+                                        expand: true,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                  ],
+                                  Expanded(
+                                    child: _ActionButton(
+                                      icon: Icons.edit_outlined,
+                                      label: t.edit,
+                                      color: theme.colorScheme.primary,
+                                      onTap: onEdit,
+                                      expand: true,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: _ActionButton(
+                                      icon: Icons.delete_outline_rounded,
+                                      label: t.delete,
+                                      color: Colors.redAccent,
+                                      onTap: onDelete,
+                                      expand: true,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
-                          ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),

@@ -1400,7 +1400,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               }
                               if (event['startDateTime'] != null) {
                                 try {
-                                  final newDate = DateTime.parse(event['startDateTime']);
+                                  final rawDt = event['startDateTime'] as String;
+                                  final DateTime newDate;
+                                  if (rawDt.contains('T')) {
+                                    newDate = DateTime.parse(rawDt).toLocal();
+                                  } else {
+                                    final p = rawDt.split('-');
+                                    newDate = DateTime(int.parse(p[0]), int.parse(p[1]), int.parse(p[2]));
+                                  }
                                   if (newDate != task.dueDate) {
                                     task.dueDate = newDate;
                                     changed = true;
@@ -1462,13 +1469,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           .map((t) => t.googleCalendarEventId!)
                           .toSet();
                       
-                      // Title+Date set за duplicate detection
-                      final existingTitleDates = <String>{};
-                      for (final task in taskBox.values.where((t) => t.googleCalendarEventId != null)) {
-                        if (task.dueDate != null) {
-                          final dateKey = '${task.title}_${task.dueDate!.year}-${task.dueDate!.month}-${task.dueDate!.day}';
-                          existingTitleDates.add(dateKey);
-                        }
+                      // Title+Date pairs от вече импортирани задачи — за near-duplicate check (±1 ден)
+                      final importedPairs = taskBox.values
+                          .where((t) => t.googleCalendarEventId != null)
+                          .map((t) => MapEntry(t.title.trim().toLowerCase(), t.dueDate))
+                          .toList();
+
+                      // Helper: идентично заглавие + дата в рамките на ±1 ден
+                      bool isNearDuplicate(String title, DateTime date) {
+                        final key = title.trim().toLowerCase();
+                        return importedPairs.any((e) {
+                          if (e.key != key) return false;
+                          return e.value.difference(date).inDays.abs() <= 1;
+                        });
                       }
                       
                       int imported = 0;
@@ -1532,7 +1545,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             continue;
                           }
                           
-                          dueDate = DateTime.parse(startDateTime).toLocal();
+                          if (startDateTime.contains('T')) {
+                            dueDate = DateTime.parse(startDateTime).toLocal();
+                          } else {
+                            // All-day event: "2026-05-27" — parse директно като локална дата
+                            final p = startDateTime.split('-');
+                            dueDate = DateTime(int.parse(p[0]), int.parse(p[1]), int.parse(p[2]));
+                          }
                           
                           // Apply threshold
                           if (dueDate.isBefore(thresholdDate)) {
@@ -1546,14 +1565,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           continue;
                         }
                         
-                        // Title+Date duplicate check
-                        final dateKey = '${event['summary']}_${dueDate.year}-${dueDate.month}-${dueDate.day}';
-                        if (existingTitleDates.contains(dateKey)) {
-                          print('SKIP duplicate title+date: ${event['summary']} - Date: ${dueDate.year}-${dueDate.month}-${dueDate.day}');
+                        // Near-duplicate check: идентично заглавие ±1 ден
+                        final eventTitle = event['summary'] as String? ?? '';
+                        if (isNearDuplicate(eventTitle, dueDate)) {
+                          print('SKIP near-duplicate: $eventTitle - Date: ${dueDate.year}-${dueDate.month}-${dueDate.day}');
                           skipped++;
                           continue;
                         }
-                        existingTitleDates.add(dateKey);
                         
                         // Category assignment
                         String categoryId;
@@ -1583,6 +1601,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           googleCalendarEventId: eventId,
                         );
                         await taskBox.add(newTask);
+                        importedPairs.add(MapEntry(newTask.title.trim().toLowerCase(), newTask.dueDate));
                         imported++;
                       }
                       
@@ -1604,7 +1623,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           skipped++;
                           continue;
                         }
-                        
+
                         // Status check - skip completed
                         final status = gTask['status'] as String?;
                         if (status == 'completed') {
@@ -1621,10 +1640,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           continue;
                         }
                         
-                        // Parse due date
+                        // Parse due date — Google Tasks 'due' е винаги UTC midnight ("2026-05-27T00:00:00.000Z")
+                        // Парсваме само датата (без конверсия) за да избегнем отместване с 1 ден
                         DateTime dueDate;
                         try {
-                          dueDate = DateTime.parse(dueStr).toLocal();
+                          final dateOnly = dueStr.length >= 10 ? dueStr.substring(0, 10) : dueStr;
+                          final p = dateOnly.split('-');
+                          dueDate = DateTime(int.parse(p[0]), int.parse(p[1]), int.parse(p[2]));
                           
                           // Apply threshold
                           if (dueDate.isBefore(thresholdDate)) {
@@ -1638,14 +1660,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           continue;
                         }
                         
-                        // Title+Date duplicate check
-                        final dateKey = '${gTask['title']}_${dueDate.year}-${dueDate.month}-${dueDate.day}';
-                        if (existingTitleDates.contains(dateKey)) {
-                          print('SKIP duplicate Google Task title+date: ${gTask['title']}');
+                        // Near-duplicate check: идентично заглавие ±1 ден
+                        final gtaskTitle = gTask['title'] as String? ?? '';
+                        if (isNearDuplicate(gtaskTitle, dueDate)) {
+                          print('SKIP near-duplicate Google Task: $gtaskTitle');
                           skipped++;
                           continue;
                         }
-                        existingTitleDates.add(dateKey);
+                        importedPairs.add(MapEntry(gtaskTitle.trim().toLowerCase(), dueDate));
                         
                         // Create task
                         final categoryId = await getOrCreateCat(
