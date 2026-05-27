@@ -25,7 +25,7 @@ class AdService extends ChangeNotifier {
 
   // iOS production ad unit IDs
   // TODO: създай Interstitial ad unit в AdMob конзолата и замени test ID-то
-  static const String _interstitialAdUnitIdIos = 'ca-app-pub-3940256099942544/4411468910'; // Google test ID — замени с реален
+  static const String _interstitialAdUnitIdIos = 'ca-app-pub-4385157735120275/9347161535';
   static const String _bannerAdUnitIdIos = 'ca-app-pub-4385157735120275/7806895919';
 
   // Test ad unit IDs (от Google) — различни за Android и iOS
