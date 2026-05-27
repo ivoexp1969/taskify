@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/google_calendar_service.dart';
+import '../../services/calendar_import_service.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -96,7 +97,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     _selectedCategoryId = categoryBox.isEmpty ? '' : categoryBox.values.first.id;
 
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkPendingQuickAdd());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkPendingQuickAdd();
+      _autoSyncCalendar();
+    });
   }
 
   @override
@@ -189,6 +193,18 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
         ),
       );
     }
+  }
+
+  /// Автоматичен фонов синк с Google Calendar — веднъж на 24ч, без await.
+  Future<void> _autoSyncCalendar() async {
+    if (!await CalendarImportService.shouldAutoSync()) return;
+    await CalendarImportService.markSynced();
+    if (!mounted) return;
+    CalendarImportService.runImport(
+      taskBox,
+      categoryBox,
+      AppText.of(context),
+    ).catchError((_) {}); // тихо — не показваме грешка при фонов синк
   }
 
   void _showCategoryFilter() {
