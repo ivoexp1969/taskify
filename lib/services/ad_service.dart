@@ -23,9 +23,10 @@ class AdService extends ChangeNotifier {
   static const String _interstitialAdUnitIdAndroid = 'ca-app-pub-4385157735120275/2061138507';
   static const String _bannerAdUnitIdAndroid = 'ca-app-pub-4385157735120275/2402990338';
 
-  // iOS production ad unit IDs — TODO: вземи от AdMob конзолата след добавяне на iOS app
-  static const String _interstitialAdUnitIdIos = 'ca-app-pub-4385157735120275/REPLACE_IOS_INTERSTITIAL';
-  static const String _bannerAdUnitIdIos = 'ca-app-pub-4385157735120275/REPLACE_IOS_BANNER';
+  // iOS production ad unit IDs
+  // TODO: създай Interstitial ad unit в AdMob конзолата и замени test ID-то
+  static const String _interstitialAdUnitIdIos = 'ca-app-pub-3940256099942544/4411468910'; // Google test ID — замени с реален
+  static const String _bannerAdUnitIdIos = 'ca-app-pub-4385157735120275/7806895919';
 
   // Test ad unit IDs (от Google) — различни за Android и iOS
   static const String _testInterstitialAndroid = 'ca-app-pub-3940256099942544/1033173712';

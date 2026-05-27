@@ -46,3 +46,8 @@ debug_log.txt
 *.png
 screen_*.png
 flutter_*.png
+
+# Dart backup files
+*.dart.backup*
+*.dart.bak
+*.dart.orig
