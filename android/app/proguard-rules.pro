@@ -21,3 +21,6 @@
 
 -keep class com.google.gson.reflect.TypeToken { *; }
 -keep class * extends com.google.gson.reflect.TypeToken
+
+# android_alarm_manager_plus — prevent R8 from removing broadcast receiver
+-keep class dev.fluttercommunity.plus.androidalarmmanager.** { *; }
