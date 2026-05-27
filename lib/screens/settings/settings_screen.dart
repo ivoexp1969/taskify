@@ -1461,7 +1461,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const catIdOoo = 'cal_ooo';
                       const catIdFocus = 'cal_focus';
                       const catIdLocation = 'cal_location';
-                      const catIdGoogleTasks = 'google_tasks'; // НОВО!
+                      const catIdGoogleTasks = 'google_tasks';
+
+                      // Миграция: стара категория "calendar" → "cal_events"
+                      // Премества всички задачи от стария ID в новия и изтрива старата
+                      final legacyCalIds = ['calendar', 'Calendar', 'calendar events'];
+                      for (final legacyId in legacyCalIds) {
+                        final legacyCat = categoryBox.get(legacyId);
+                        if (legacyCat != null) {
+                          // Уверяваме се че cal_events съществува
+                          if (categoryBox.get(catIdCalendar) == null) {
+                            await categoryBox.put(catIdCalendar, Category(
+                              id: catIdCalendar,
+                              name: t.catCalendarEvents,
+                              colorValue: 0xFF2196F3,
+                            ));
+                          }
+                          // Преместваме задачите
+                          for (final task in taskBox.values.where((task) => task.categoryId == legacyId)) {
+                            task.categoryId = catIdCalendar;
+                            await task.save();
+                          }
+                          // Изтриваме старата категория
+                          await categoryBox.delete(legacyId);
+                        }
+                      }
                       
                       // Вземаме съществуващите IDs (за duplicate check)
                       final existingIds = taskBox.values
