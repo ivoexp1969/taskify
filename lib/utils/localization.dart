@@ -1124,5 +1124,19 @@ class AppText {
   String get matrixNotUrgent => _t({'en': 'Not urgent', 'bg': 'Не спешно', 'de': 'Nicht dringend', 'fr': 'Pas urgent', 'it': 'Non urgente', 'el': 'Μη επείγον', 'es': 'No urgente', 'pt': 'Не срочно', 'ru': 'Не срочно', 'tr': 'Acil değil'});
   String get matrixImportant => _t({'en': 'Important', 'bg': 'Важно', 'de': 'Wichtig', 'fr': 'Important', 'it': 'Importante', 'el': 'Σημαντικό', 'es': 'Importante', 'pt': 'Importante', 'ru': 'Важно', 'tr': 'Önemli'});
   String get matrixNotImportant => _t({'en': 'Not important', 'bg': 'Не важно', 'de': 'Nicht wichtig', 'fr': 'Pas important', 'it': 'Non importante', 'el': 'Μη σημαντικό', 'es': 'No importante', 'pt': 'Não importante', 'ru': 'Не важно', 'tr': 'Önemli değil'});
+
+  // ==================== AI FEATURES ====================
+  String get aiParse => _t({'en': 'AI Parse', 'bg': 'AI парсване', 'de': 'KI-Analyse', 'fr': 'Analyse IA', 'it': 'Analisi IA', 'el': 'Ανάλυση ΑΙ', 'es': 'Análisis IA', 'pt': 'Análise IA', 'ru': 'AI анализ', 'tr': 'AI Analiz'});
+  String get aiBreakdown => _t({'en': 'Breakdown', 'bg': 'Разбий', 'de': 'Aufteilen', 'fr': 'Décomposer', 'it': 'Suddividi', 'el': 'Ανάλυση', 'es': 'Dividir', 'pt': 'Dividir', 'ru': 'Разбить', 'tr': 'Böl'});
+  String get aiParsing => _t({'en': 'Parsing...', 'bg': 'Анализирам...', 'de': 'Analysiere...', 'fr': 'Analyse...', 'it': 'Analisi...', 'el': 'Ανάλυση...', 'es': 'Analizando...', 'pt': 'Analisando...', 'ru': 'Анализирую...', 'tr': 'Analiz ediliyor...'});
+  String get aiBreaking => _t({'en': 'Generating subtasks...', 'bg': 'Генерирам подзадачи...', 'de': 'Unteraufgaben generieren...', 'fr': 'Génération sous-tâches...', 'it': 'Generazione sottotask...', 'el': 'Δημιουργία υποεργασιών...', 'es': 'Generando subtareas...', 'pt': 'Gerando subtarefas...', 'ru': 'Генерирую подзадачи...', 'tr': 'Alt görevler oluşturuluyor...'});
+  String get aiError => _t({'en': 'AI unavailable. Fill manually.', 'bg': 'AI недостъпен. Попълни ръчно.', 'de': 'KI nicht verfügbar. Manuell ausfüllen.', 'fr': 'IA indisponible. Remplissez manuellement.', 'it': 'IA non disponibile. Compilare manualmente.', 'el': 'AI μη διαθέσιμο. Συμπλήρωσε χειροκίνητα.', 'es': 'IA no disponible. Rellena manualmente.', 'pt': 'IA indisponível. Preencha manualmente.', 'ru': 'AI недоступен. Заполните вручную.', 'tr': 'AI kullanılamıyor. Lütfen manuel doldurun.'});
+  String get aiBreakdownTitle => _t({'en': 'AI Subtasks', 'bg': 'AI подзадачи', 'de': 'KI-Unteraufgaben', 'fr': 'Sous-tâches IA', 'it': 'Sottotask IA', 'el': 'Υποεργασίες ΑΙ', 'es': 'Subtareas IA', 'pt': 'Subtarefas IA', 'ru': 'AI подзадачи', 'tr': 'AI Alt Görevler'});
+  String get aiBreakdownApply => _t({'en': 'Apply', 'bg': 'Приложи', 'de': 'Übernehmen', 'fr': 'Appliquer', 'it': 'Applica', 'el': 'Εφαρμογή', 'es': 'Aplicar', 'pt': 'Aplicar', 'ru': 'Применить', 'tr': 'Uygula'});
+
+  // ==================== VOICE INPUT ====================
+  String get voiceListening => _t({'en': 'Listening...', 'bg': 'Слушам...', 'de': 'Höre zu...', 'fr': 'Écoute...', 'it': 'Ascolto...', 'el': 'Ακούω...', 'es': 'Escuchando...', 'pt': 'Ouvindo...', 'ru': 'Слушаю...', 'tr': 'Dinliyorum...'});
+  String get voiceError => _t({'en': 'Microphone unavailable', 'bg': 'Микрофонът е недостъпен', 'de': 'Mikrofon nicht verfügbar', 'fr': 'Micro indisponible', 'it': 'Microfono non disponibile', 'el': 'Μικρόφωνο μη διαθέσιμο', 'es': 'Micrófono no disponible', 'pt': 'Microfone indisponível', 'ru': 'Микрофон недоступен', 'tr': 'Mikrofon kullanılamıyor'});
+
   String get markAsDone => _t({'en': 'Mark as done', 'bg': 'Маркирай като завършена', 'de': 'Als erledigt markieren', 'fr': 'Marquer comme fait', 'it': 'Segna come fatto', 'el': 'Σημείωσε ως ολοκληρωμένο', 'es': 'Marcar como hecho', 'pt': 'Marcar como concluído', 'ru': 'Отметить как выполненное', 'tr': 'Tamamlandı olarak işaretle'});
 }

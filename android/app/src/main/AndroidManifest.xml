@@ -9,6 +9,14 @@
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="com.android.vending.BILLING" />
+
+    <!-- Изисквано от speech_to_text за откриване на гласов разпознавател на Android 11+ -->
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+    </queries>
+
     <application
         android:name="${applicationName}"
         android:label="Taskify"

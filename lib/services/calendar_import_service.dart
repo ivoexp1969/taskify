@@ -26,11 +26,15 @@ class CalendarImportService {
   }
 
   /// Основна логика на импорта. Връща (imported, skipped).
+  ///
+  /// [interactive] = true само при изричен бутон от потребителя (Settings →
+  /// Import). Авто-синкът при старт ползва false → никога не показва auth UI.
   static Future<(int, int)> runImport(
     Box<Task> taskBox,
     Box<Category> categoryBox,
-    AppText t,
-  ) async {
+    AppText t, {
+    bool interactive = false,
+  }) async {
     final calendarService = GoogleCalendarService();
 
     // --- Категория ID константи ---
@@ -98,7 +102,7 @@ class CalendarImportService {
     final thresholdDate = now.subtract(const Duration(days: 30));
 
     // === 1. CALENDAR EVENTS ===
-    final events = await calendarService.getUpcomingEvents(days: 60);
+    final events = await calendarService.getUpcomingEvents(days: 60, interactive: interactive);
 
     for (final event in events) {
       final eventId = event['id'] as String?;
@@ -165,7 +169,7 @@ class CalendarImportService {
     }
 
     // === 2. GOOGLE TASKS ===
-    final googleTasks = await calendarService.getAllGoogleTasks();
+    final googleTasks = await calendarService.getAllGoogleTasks(interactive: interactive);
 
     for (final gTask in googleTasks) {
       final taskId = gTask['id'] as String?;

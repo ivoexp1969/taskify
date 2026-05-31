@@ -30,6 +30,8 @@ import '../../widgets/task_card_styles.dart';
 import '../../widgets/pomodoro_timer_sheet.dart';
 import '../settings/statistics_screen.dart';
 import '../../utils/natural_language_parser.dart';
+import '../../services/ai_service.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 import '../paywall/paywall_screen.dart';
 import '../../services/pro_service.dart';
 
@@ -70,6 +72,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
   late AnimationController _listAnimationController;
 
   // Speech to text
+  late SpeechToText _speech;
+  bool _isListening = false;
 
   // Search
   bool _isSearching = false;
@@ -80,6 +84,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     super.initState();
     taskBox = Hive.box<Task>('tasks');
     categoryBox = Hive.box<Category>('categories');
+    _speech = SpeechToText();
 
     // Слушаме за промени в задачите
     taskBox.listenable().addListener(_onTasksChanged);
@@ -148,6 +153,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     _listAnimationController.dispose();
     _titleController.dispose();
     _searchController.dispose();
+    if (_isListening) _speech.cancel();
     taskBox.listenable().removeListener(_onTasksChanged);
     super.dispose();
   }
@@ -204,7 +210,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
       taskBox,
       categoryBox,
       AppText.of(context),
-    ).catchError((_) {}); // тихо — не показваме грешка при фонов синк
+    ).catchError((_) => (0, 0)); // тихо — не показваме грешка при фонов синк
   }
 
   void _showCategoryFilter() {
@@ -542,6 +548,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                     children: [
                       TextField(
                         controller: controller,
+                        textCapitalization: TextCapitalization.sentences,
                         decoration: InputDecoration(
                           labelText: t.name,
                           border: OutlineInputBorder(
@@ -840,6 +847,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     List<Map<String, dynamic>> tempSubtasks = existing?.subtasksList ?? [];
     String tempNotes = existing?.notes ?? '';
     NlpResult? nlpSuggestion;
+    bool aiLoading = false;
 
     _titleController.text = existing?.title ?? '';
 
@@ -950,6 +958,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                           // Заглавие
                           TextField(
                             controller: _titleController,
+                            textCapitalization: TextCapitalization.sentences,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
@@ -969,6 +978,72 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                               prefixIcon: Icon(
                                 Icons.title_rounded,
                                 color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                              ),
+                              suffixIcon: GestureDetector(
+                                onTap: () async {
+                                  if (_isListening) {
+                                    await _speech.stop();
+                                    setSheetState(() => _isListening = false);
+                                    return;
+                                  }
+                                  final available = await _speech.initialize(
+                                    onError: (_) => setSheetState(() => _isListening = false),
+                                    onStatus: (s) {
+                                      if (s == 'done' || s == 'notListening') {
+                                        setSheetState(() => _isListening = false);
+                                      }
+                                    },
+                                  );
+                                  if (!available) {
+                                    if (innerContext.mounted) {
+                                      ScaffoldMessenger.of(innerContext).showSnackBar(
+                                        SnackBar(content: Text(t.voiceError)),
+                                      );
+                                    }
+                                    return;
+                                  }
+                                  setSheetState(() => _isListening = true);
+                                  await _speech.listen(
+                                    onResult: (result) {
+                                      if (result.finalResult) {
+                                        final words = result.recognizedWords;
+                                        setSheetState(() {
+                                          _isListening = false;
+                                          _titleController.text = words;
+                                          _titleController.selection = TextSelection.collapsed(
+                                            offset: words.length,
+                                          );
+                                          final nlp = NaturalLanguageParser.parse(words, langCode);
+                                          nlpSuggestion = nlp;
+                                          if (nlp != null) {
+                                            tempDueDate = DateTime(
+                                              nlp.date.year, nlp.date.month, nlp.date.day,
+                                              nlp.time?.hour ?? tempDueDate.hour,
+                                              nlp.time?.minute ?? tempDueDate.minute,
+                                            );
+                                            if (nlp.time != null) tempTime = nlp.time;
+                                          }
+                                        });
+                                      } else {
+                                        setSheetState(() {
+                                          _titleController.text = result.recognizedWords;
+                                        });
+                                      }
+                                    },
+                                    localeId: voiceLocale,
+                                    listenFor: const Duration(seconds: 30),
+                                    pauseFor: const Duration(seconds: 3),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Icon(
+                                    _isListening ? Icons.mic : Icons.mic_none_rounded,
+                                    color: _isListening
+                                        ? Colors.redAccent
+                                        : theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                                  ),
+                                ),
                               ),
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 20,
@@ -1022,7 +1097,96 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                             ),
                             const SizedBox(height: 16),
                           ] else
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 8),
+                          // AI Parse button
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: aiLoading
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : GestureDetector(
+                                    onTap: () async {
+                                      final text = _titleController.text.trim();
+                                      if (text.isEmpty) return;
+                                      if (!ProService().isPro) {
+                                        Navigator.pop(innerContext);
+                                        if (context.mounted) showPaywallIfNeeded(context, isFeatureAvailable: false);
+                                        return;
+                                      }
+                                      setSheetState(() => aiLoading = true);
+                                      final catNames = categories.map((c) => c.name).toList();
+                                      final r = await AiService.parseTask(text, catNames);
+                                      if (!innerContext.mounted) return;
+                                      setSheetState(() => aiLoading = false);
+                                      if (r == null) {
+                                        ScaffoldMessenger.of(innerContext).showSnackBar(
+                                            SnackBar(content: Text(t.aiError)));
+                                        return;
+                                      }
+                                      setSheetState(() {
+                                        _titleController.text = r.title;
+                                        tempPriority = r.priority;
+                                        _selectedPriority = r.priority;
+                                        if (r.recurring != null) {
+                                          tempRecurrence = r.recurring!;
+                                          _selectedRecurrence = r.recurring!;
+                                        }
+                                        if (r.categoryName != null) {
+                                          final catNameLower = r.categoryName!.toLowerCase();
+                                          final matched = categories.where(
+                                            (c) => c.name.toLowerCase() == catNameLower,
+                                          );
+                                          if (matched.isNotEmpty) {
+                                            tempCategoryId = matched.first.id;
+                                            _selectedCategoryId = matched.first.id;
+                                          }
+                                        }
+                                        // AI time fallback — само ако NLP не е хванал час
+                                        if (tempTime == null && r.time != null) {
+                                          final parts = r.time!.split(':');
+                                          if (parts.length == 2) {
+                                            final h = int.tryParse(parts[0]);
+                                            final m = int.tryParse(parts[1]);
+                                            if (h != null && m != null && h <= 23 && m <= 59) {
+                                              tempTime = TimeOfDay(hour: h, minute: m);
+                                              tempDueDate = DateTime(
+                                                tempDueDate.year, tempDueDate.month, tempDueDate.day, h, m,
+                                              );
+                                            }
+                                          }
+                                        }
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [Color(0xFF7B2FF7), Color(0xFF2196F3)],
+                                        ),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(Icons.auto_awesome, size: 14, color: Colors.white),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            t.aiParse,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                          ),
+                          const SizedBox(height: 16),
 
                           // Секция: Категория
                           _buildSectionLabel(t.category, Icons.folder_outlined, theme),
@@ -1403,6 +1567,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                   content: TextField(
                                     controller: controller,
                                     autofocus: true,
+                                    textCapitalization: TextCapitalization.sentences,
                                     decoration: InputDecoration(
                                       hintText: t.enterSubtask,
                                     ),
@@ -1479,6 +1644,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                     controller: controller,
                                     maxLines: 6,
                                     autofocus: true,
+                                    textCapitalization: TextCapitalization.sentences,
                                     decoration: InputDecoration(
                                       hintText: t.additionalInfo,
                                       border: OutlineInputBorder(
@@ -1674,6 +1840,204 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     ).then((_) {
       if (mounted) setState(() {});
     });
+  }
+
+  Future<void> _showAiBreakdownSheet(Task task) async {
+    if (!ProService().isPro) {
+      if (mounted) showPaywallIfNeeded(context, isFeatureAvailable: false);
+      return;
+    }
+
+    final t = AppText.of(context);
+    final theme = Theme.of(context);
+    bool callInitiated = false;
+    bool loading = true;
+    bool hasError = false;
+    AiBreakdownResult? result;
+    final Set<int> deselected = {};
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) {
+        return StatefulBuilder(
+          builder: (_, setS) {
+            if (!callInitiated) {
+              callInitiated = true;
+              AiService.breakdownTask(task.title).then((r) {
+                if (!sheetCtx.mounted) return;
+                setS(() {
+                  loading = false;
+                  result = r;
+                  hasError = r == null;
+                });
+              });
+            }
+
+            return Container(
+              padding: EdgeInsets.fromLTRB(
+                24, 20, 24, 24 + MediaQuery.of(sheetCtx).padding.bottom),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 20,
+                    offset: const Offset(0, -4),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF7B2FF7), Color(0xFF2196F3)],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          t.aiBreakdownTitle,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    task.title,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 20),
+                  if (loading)
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Column(
+                          children: [
+                            const CircularProgressIndicator(),
+                            const SizedBox(height: 12),
+                            Text(
+                              t.aiBreaking,
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else if (hasError)
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Text(
+                          t.aiError,
+                          style: const TextStyle(color: Colors.redAccent),
+                        ),
+                      ),
+                    )
+                  else if (result != null) ...[
+                    ...result!.subtasks.asMap().entries.map((e) {
+                      final idx = e.key;
+                      final title = e.value;
+                      final selected = !deselected.contains(idx);
+                      return CheckboxListTile(
+                        value: selected,
+                        onChanged: (v) => setS(() {
+                          if (v == true) {
+                            deselected.remove(idx);
+                          } else {
+                            deselected.add(idx);
+                          }
+                        }),
+                        title: Text(title),
+                        dense: true,
+                        controlAffinity: ListTileControlAffinity.leading,
+                      );
+                    }),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final selected = result!.subtasks
+                              .asMap()
+                              .entries
+                              .where((e) => !deselected.contains(e.key))
+                              .map((e) => e.value)
+                              .toList();
+                          if (selected.isEmpty) {
+                            Navigator.pop(sheetCtx);
+                            return;
+                          }
+                          final current = task.subtasksList;
+                          final newList = [
+                            ...current,
+                            ...selected.map((s) => {'done': false, 'qty': 1, 'text': s}),
+                          ];
+                          task.setSubtasks(newList);
+                          await task.save();
+                          if (mounted) setState(() {});
+                          if (sheetCtx.mounted) Navigator.pop(sheetCtx);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF7B2FF7),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: Text(
+                          t.aiBreakdownApply,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   Widget _buildSectionLabel(String label, IconData icon, ThemeData theme) {
@@ -2526,6 +2890,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                   }
                                 },
                                 onStartPomodoro: () => PomodoroTimerSheet.show(context, task),
+                                onBreakdown: () => _showAiBreakdownSheet(task),
                                 dateTimeStr: dateTimeStr,
                                 priorityText: priorityText,
                                 priorityColor: priorityColor,

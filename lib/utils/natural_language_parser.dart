@@ -19,7 +19,7 @@ class NaturalLanguageParser {
     // ── Time detection (e.g. 15:30 / 15ч / 9h) ──
     TimeOfDay? detectedTime;
     final colonTime = RegExp(r'\b(\d{1,2}):(\d{2})\b').firstMatch(lower);
-    final shortTime = RegExp(r'\b(\d{1,2})\s*(?:ч|h)\b').firstMatch(lower);
+    final shortTime = RegExp(r'\b(\d{1,2})\s*(?:часа?|ч|uhr|h)\b').firstMatch(lower);
     if (colonTime != null) {
       final h = int.tryParse(colonTime.group(1)!);
       final m = int.tryParse(colonTime.group(2)!);

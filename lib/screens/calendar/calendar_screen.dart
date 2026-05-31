@@ -322,6 +322,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     children: [
                       TextField(
                         controller: controller,
+                        textCapitalization: TextCapitalization.sentences,
                         decoration: InputDecoration(
                           labelText: t.name,
                           border: OutlineInputBorder(
@@ -700,6 +701,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           // Заглавие
                           TextField(
                             controller: _titleController,
+                            textCapitalization: TextCapitalization.sentences,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
@@ -1028,6 +1030,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     controller: controller,
                                     maxLines: 6,
                                     autofocus: true,
+                                    textCapitalization: TextCapitalization.sentences,
                                     decoration: InputDecoration(
                                       hintText: t.additionalInfo,
                                       border: OutlineInputBorder(

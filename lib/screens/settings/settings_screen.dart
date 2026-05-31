@@ -1345,10 +1345,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         if (!task.isCompleted && !task.isArchived && task.dueDate.isAfter(today.subtract(const Duration(days: 1)))) {
                           // Ресетваме старото ID ако има
                           if (task.googleCalendarEventId != null) {
-                            await _calendarService.deleteCalendarEvent(task.googleCalendarEventId!);
+                            await _calendarService.deleteCalendarEvent(task.googleCalendarEventId!, interactive: true);
                             task.googleCalendarEventId = null;
                           }
-                          final eventId = await _calendarService.addTaskToCalendar(task);
+                          final eventId = await _calendarService.addTaskToCalendar(task, interactive: true);
                           if (eventId != null) {
                             task.googleCalendarEventId = eventId;
                             await task.save();
@@ -1380,7 +1380,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       int updated = 0;
                       for (final task in taskBox.values) {
                         if (task.googleCalendarEventId != null) {
-                          final event = await _calendarService.getCalendarEvent(task.googleCalendarEventId!);
+                          final event = await _calendarService.getCalendarEvent(task.googleCalendarEventId!, interactive: true);
                           if (event != null) {
                             if (event['deleted'] == true) {
                               // Събитието е изтрито - питаме потребителя
@@ -1447,6 +1447,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       final categoryBox = Hive.box<Category>('categories');
                       final (imported, skipped) = await CalendarImportService.runImport(
                         taskBox, categoryBox, t,
+                        interactive: true,
                       );
                       await CalendarImportService.markSynced();
                       if (mounted) {

@@ -41,11 +41,12 @@ class GoogleCalendarService {
       final wasConnected = prefs.getBool('google_calendar_connected') ?? false;
       if (!wasConnected) return;
 
-      // Restore connection state only — actual auth happens lazily in _getAccessToken().
-      // Calling attemptLightweightAuthentication() here triggers the Android Credential
-      // Manager UI on every cold start, which shows an unwanted account picker dialog.
+      // Restore the connection FLAG only. We deliberately do NOT call any Google
+      // auth method here: attemptLightweightAuthentication() pops the Android
+      // Credential Manager account-picker dialog on every cold start. Real auth
+      // happens lazily and only from explicit user actions (interactive: true).
       _isConnected = true;
-      debugPrint('Google Calendar: connection state restored (lazy auth)');
+      debugPrint('Google Calendar: connection state restored (no startup auth)');
     } catch (e) {
       debugPrint('Silent reconnect failed: $e');
     }
@@ -82,21 +83,35 @@ class GoogleCalendarService {
     }
   }
 
-  Future<String?> _getAccessToken() async {
+  /// Returns an access token for [scopes].
+  ///
+  /// [interactive] == false (default, used by startup auto-sync and any
+  /// background work): NEVER shows UI. If the account isn't already in memory,
+  /// or the scopes aren't already authorized, returns null and the caller skips
+  /// silently. This is what guarantees no auth dialog at app startup.
+  ///
+  /// [interactive] == true (only from explicit user taps): may show the Google
+  /// account picker / consent UI to restore the account and authorize scopes.
+  Future<String?> _getAccessToken({bool interactive = false}) async {
     try {
       await _ensureInitialized();
 
+      // Restore the signed-in account if it isn't in memory (e.g. after a cold
+      // start). Every restore path below can show UI, so it only runs when the
+      // caller explicitly allows interaction.
       if (_currentAccount == null) {
+        if (!interactive) return null; // background — never show UI
         final future = GoogleSignIn.instance.attemptLightweightAuthentication();
-        if (future == null) return null;
-        final account = await future;
-        if (account == null) return null; // transient — don't disconnect
-        _currentAccount = account;
+        if (future != null) _currentAccount = await future;
+        _currentAccount ??=
+            await GoogleSignIn.instance.authenticate(scopeHint: scopes);
       }
 
-      final authorizationClient = _currentAccount!.authorizationClient;
-      final authorization = await authorizationClient.authorizeScopes(scopes);
-      return authorization.accessToken;
+      final client = _currentAccount!.authorizationClient;
+      final GoogleSignInClientAuthorization? authz = interactive
+          ? await client.authorizeScopes(scopes) // may prompt
+          : await client.authorizationForScopes(scopes); // silent, null if none
+      return authz?.accessToken;
     } catch (e) {
       debugPrint('Error getting access token: $e');
       return null; // transient error — don't disconnect
@@ -114,9 +129,9 @@ class GoogleCalendarService {
 
   /// === CALENDAR EVENTS API ===
 
-  Future<List<Map<String, dynamic>>> getUpcomingEvents({int days = 30}) async {
+  Future<List<Map<String, dynamic>>> getUpcomingEvents({int days = 30, bool interactive = false}) async {
     try {
-      final token = await _getAccessToken();
+      final token = await _getAccessToken(interactive: interactive);
       if (token == null) {
         debugPrint('No access token available');
         return [];
@@ -174,9 +189,9 @@ class GoogleCalendarService {
     }
   }
 
-  Future<Map<String, dynamic>?> getCalendarEvent(String eventId) async {
+  Future<Map<String, dynamic>?> getCalendarEvent(String eventId, {bool interactive = false}) async {
     try {
-      final token = await _getAccessToken();
+      final token = await _getAccessToken(interactive: interactive);
       if (token == null) return null;
 
       final url = Uri.parse(
@@ -217,9 +232,9 @@ class GoogleCalendarService {
     }
   }
 
-  Future<String?> addTaskToCalendar(Task task) async {
+  Future<String?> addTaskToCalendar(Task task, {bool interactive = false}) async {
     try {
-      final token = await _getAccessToken();
+      final token = await _getAccessToken(interactive: interactive);
       if (token == null) return null;
 
       final url = Uri.parse(
@@ -264,9 +279,9 @@ class GoogleCalendarService {
     }
   }
 
-  Future<bool> deleteCalendarEvent(String eventId) async {
+  Future<bool> deleteCalendarEvent(String eventId, {bool interactive = false}) async {
     try {
-      final token = await _getAccessToken();
+      final token = await _getAccessToken(interactive: interactive);
       if (token == null) return false;
 
       final url = Uri.parse(
@@ -293,9 +308,9 @@ class GoogleCalendarService {
 
   /// === GOOGLE TASKS API ===
 
-  Future<List<Map<String, dynamic>>> getTaskLists() async {
+  Future<List<Map<String, dynamic>>> getTaskLists({bool interactive = false}) async {
     try {
-      final token = await _getAccessToken();
+      final token = await _getAccessToken(interactive: interactive);
       if (token == null) {
         debugPrint('No access token for tasks');
         return [];
@@ -333,9 +348,9 @@ class GoogleCalendarService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getTasksFromList(String listId) async {
+  Future<List<Map<String, dynamic>>> getTasksFromList(String listId, {bool interactive = false}) async {
     try {
-      final token = await _getAccessToken();
+      final token = await _getAccessToken(interactive: interactive);
       if (token == null) return [];
 
       final url = Uri.parse(
@@ -374,9 +389,9 @@ class GoogleCalendarService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getAllGoogleTasks() async {
+  Future<List<Map<String, dynamic>>> getAllGoogleTasks({bool interactive = false}) async {
     try {
-      final taskLists = await getTaskLists();
+      final taskLists = await getTaskLists(interactive: interactive);
       if (taskLists.isEmpty) {
         debugPrint('No task lists found');
         return [];
@@ -386,7 +401,7 @@ class GoogleCalendarService {
 
       for (final taskList in taskLists) {
         final listId = taskList['id'] as String;
-        final tasks = await getTasksFromList(listId);
+        final tasks = await getTasksFromList(listId, interactive: interactive);
 
         for (final task in tasks) {
           task['listTitle'] = taskList['title'];
