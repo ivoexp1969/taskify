@@ -424,7 +424,7 @@ class ExpandableTaskCard extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 6),
                                   ],
-                                  if (onBreakdown != null && !isCompleted) ...[
+                                  if (onBreakdown != null && !isCompleted && task.totalSubtasksCount == 0) ...[
                                     Expanded(
                                       child: _ActionButton(
                                         icon: Icons.call_split_rounded,

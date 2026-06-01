@@ -1853,8 +1853,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     bool callInitiated = false;
     bool loading = true;
     bool hasError = false;
-    AiBreakdownResult? result;
-    final Set<int> deselected = {};
+    final List<TextEditingController> controllers = [];
 
     await showModalBottomSheet<void>(
       context: context,
@@ -1865,12 +1864,20 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
           builder: (_, setS) {
             if (!callInitiated) {
               callInitiated = true;
-              AiService.breakdownTask(task.title).then((r) {
+              AiService.breakdownTask(
+                task.title,
+                categoryBox.values.map((c) => c.name).toList(),
+              ).then((r) {
                 if (!sheetCtx.mounted) return;
                 setS(() {
                   loading = false;
-                  result = r;
                   hasError = r == null;
+                  if (r != null) {
+                    controllers.clear();
+                    controllers.addAll(
+                      r.subtasks.map((s) => TextEditingController(text: s)),
+                    );
+                  }
                 });
               });
             }
@@ -1968,36 +1975,65 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                         ),
                       ),
                     )
-                  else if (result != null) ...[
-                    ...result!.subtasks.asMap().entries.map((e) {
-                      final idx = e.key;
-                      final title = e.value;
-                      final selected = !deselected.contains(idx);
-                      return CheckboxListTile(
-                        value: selected,
-                        onChanged: (v) => setS(() {
-                          if (v == true) {
-                            deselected.remove(idx);
-                          } else {
-                            deselected.add(idx);
-                          }
-                        }),
-                        title: Text(title),
-                        dense: true,
-                        controlAffinity: ListTileControlAffinity.leading,
-                      );
-                    }),
+                  else if (!hasError) ...[
+                    Flexible(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ...controllers.asMap().entries.map((e) {
+                              final idx = e.key;
+                              final ctrl = e.value;
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.drag_indicator_rounded,
+                                        size: 18,
+                                        color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: TextField(
+                                        controller: ctrl,
+                                        textCapitalization: TextCapitalization.sentences,
+                                        style: const TextStyle(fontSize: 15),
+                                        decoration: InputDecoration(
+                                          isDense: true,
+                                          contentPadding: const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 10),
+                                          filled: true,
+                                          fillColor: theme.colorScheme.outline.withValues(alpha: 0.08),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.close_rounded, size: 20),
+                                      color: Colors.redAccent,
+                                      onPressed: () => setS(() {
+                                        controllers.removeAt(idx).dispose();
+                                      }),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
                         onPressed: () async {
-                          final selected = result!.subtasks
-                              .asMap()
-                              .entries
-                              .where((e) => !deselected.contains(e.key))
-                              .map((e) => e.value)
+                          final selected = controllers
+                              .map((c) => c.text.trim())
+                              .where((s) => s.isNotEmpty)
                               .toList();
                           if (selected.isEmpty) {
                             Navigator.pop(sheetCtx);
@@ -2038,6 +2074,11 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
         );
       },
     );
+
+    // Освобождаваме контролерите след затваряне на sheet-а
+    for (final c in controllers) {
+      c.dispose();
+    }
   }
 
   Widget _buildSectionLabel(String label, IconData icon, ThemeData theme) {

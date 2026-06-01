@@ -49,7 +49,10 @@ class AiService {
     }
   }
 
-  static Future<AiBreakdownResult?> breakdownTask(String taskTitle) async {
+  static Future<AiBreakdownResult?> breakdownTask(
+    String taskTitle, [
+    List<String> categories = const [],
+  ]) async {
     try {
       final response = await http
           .post(
@@ -58,7 +61,7 @@ class AiService {
             body: jsonEncode({
               'text': taskTitle,
               'mode': 'breakdown',
-              'categories': <String>[],
+              'categories': categories,
             }),
           )
           .timeout(const Duration(seconds: 20));
@@ -129,16 +132,24 @@ class AiService {
 
   static AiBreakdownResult? _parseBreakdown(String body) {
     try {
-      final match = RegExp(r'\{[\s\S]*\}').firstMatch(body);
+      // Strip markdown code fences (```json ... ```), if present
+      var cleaned = body.replaceAll(RegExp(r'```[a-zA-Z]*'), '').replaceAll('```', '');
+
+      // Extract the JSON object spanning the first '{' to the last '}'
+      final match = RegExp(r'\{[\s\S]*\}').firstMatch(cleaned);
       if (match == null) return null;
       final data = jsonDecode(match.group(0)!) as Map<String, dynamic>;
 
       final raw = data['subtasks'];
       if (raw is! List) return null;
 
+      // Llama may return either ["A","B"] or [{"title":"A"},{"title":"B"}]
       final subtasks = raw
-          .whereType<Map<String, dynamic>>()
-          .map((s) => (s['title'] as String?) ?? '')
+          .map((s) {
+            if (s is String) return s.trim();
+            if (s is Map) return ((s['title'] ?? s['text']) as String?)?.trim() ?? '';
+            return '';
+          })
           .where((s) => s.isNotEmpty)
           .toList();
 
