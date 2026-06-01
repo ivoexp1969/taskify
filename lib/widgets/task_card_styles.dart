@@ -410,6 +410,19 @@ class ExpandableTaskCard extends StatelessWidget {
                                 ),
                               ],
                               const SizedBox(height: 10),
+                              if (onBreakdown != null && !isCompleted && task.totalSubtasksCount == 0) ...[
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: _ActionButton(
+                                    icon: Icons.auto_awesome,
+                                    label: t.aiBreakdownAction,
+                                    color: Colors.deepPurple,
+                                    onTap: onBreakdown!,
+                                    expand: true,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                              ],
                               Row(
                                 children: [
                                   if (onStartPomodoro != null && !isCompleted) ...[
@@ -419,18 +432,6 @@ class ExpandableTaskCard extends StatelessWidget {
                                         label: t.pomodoroFocus,
                                         color: Colors.deepOrange,
                                         onTap: onStartPomodoro!,
-                                        expand: true,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                  ],
-                                  if (onBreakdown != null && !isCompleted && task.totalSubtasksCount == 0) ...[
-                                    Expanded(
-                                      child: _ActionButton(
-                                        icon: Icons.call_split_rounded,
-                                        label: t.aiBreakdown,
-                                        color: Colors.deepPurple,
-                                        onTap: onBreakdown!,
                                         expand: true,
                                       ),
                                     ),
