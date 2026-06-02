@@ -1135,6 +1135,28 @@ class AppText {
   String get aiBreakdownTitle => _t({'en': 'AI Subtasks', 'bg': 'AI подзадачи', 'de': 'KI-Unteraufgaben', 'fr': 'Sous-tâches IA', 'it': 'Sottotask IA', 'el': 'Υποεργασίες ΑΙ', 'es': 'Subtareas IA', 'pt': 'Subtarefas IA', 'ru': 'AI подзадачи', 'tr': 'AI Alt Görevler'});
   String get aiBreakdownApply => _t({'en': 'Apply', 'bg': 'Приложи', 'de': 'Übernehmen', 'fr': 'Appliquer', 'it': 'Applica', 'el': 'Εφαρμογή', 'es': 'Aplicar', 'pt': 'Aplicar', 'ru': 'Применить', 'tr': 'Uygula'});
 
+  // ----- AI настройки + rate limit -----
+  String get aiSettings => _t({'en': 'AI Settings', 'bg': 'AI настройки', 'de': 'KI-Einstellungen', 'fr': 'Paramètres IA', 'it': 'Impostazioni IA', 'el': 'Ρυθμίσεις AI', 'es': 'Ajustes de IA', 'pt': 'Configurações de IA', 'ru': 'Настройки AI', 'tr': 'AI Ayarları'});
+  String get aiSettingsSubtitle => _t({'en': 'Parsing, voice, daily usage', 'bg': 'Парсване, глас, дневна употреба', 'de': 'Analyse, Sprache, Tagesnutzung', 'fr': 'Analyse, voix, usage quotidien', 'it': 'Analisi, voce, uso giornaliero', 'el': 'Ανάλυση, φωνή, ημερήσια χρήση', 'es': 'Análisis, voz, uso diario', 'pt': 'Análise, voz, uso diário', 'ru': 'Анализ, голос, дневной лимит', 'tr': 'Analiz, ses, günlük kullanım'});
+  String get aiParsingSetting => _t({'en': 'AI parsing', 'bg': 'AI парсване', 'de': 'KI-Analyse', 'fr': 'Analyse IA', 'it': 'Analisi IA', 'el': 'Ανάλυση AI', 'es': 'Análisis IA', 'pt': 'Análise IA', 'ru': 'AI анализ', 'tr': 'AI analiz'});
+  String get aiParsingSettingDesc => _t({'en': 'Auto-fill task details from text', 'bg': 'Авто-попълване на детайли от текста', 'de': 'Aufgabendetails aus Text ausfüllen', 'fr': 'Remplir les détails depuis le texte', 'it': 'Compila i dettagli dal testo', 'el': 'Αυτόματη συμπλήρωση από κείμενο', 'es': 'Rellenar detalles desde el texto', 'pt': 'Preencher detalhes a partir do texto', 'ru': 'Автозаполнение деталей из текста', 'tr': 'Metinden görev detaylarını doldur'});
+  String get voiceInputSetting => _t({'en': 'Voice input', 'bg': 'Гласово въвеждане', 'de': 'Spracheingabe', 'fr': 'Saisie vocale', 'it': 'Input vocale', 'el': 'Φωνητική εισαγωγή', 'es': 'Entrada de voz', 'pt': 'Entrada de voz', 'ru': 'Голосовой ввод', 'tr': 'Sesli giriş'});
+  String get voiceInputSettingDesc => _t({'en': 'Add tasks by speaking', 'bg': 'Добавяй задачи с глас', 'de': 'Aufgaben per Sprache hinzufügen', 'fr': 'Ajouter des tâches en parlant', 'it': 'Aggiungi attività parlando', 'el': 'Προσθήκη εργασιών με φωνή', 'es': 'Añadir tareas hablando', 'pt': 'Adicionar tarefas falando', 'ru': 'Добавляйте задачи голосом', 'tr': 'Konuşarak görev ekle'});
+  String get aiUsageSettingTitle => _t({'en': 'Daily AI usage', 'bg': 'Дневна AI употреба', 'de': 'Tägliche KI-Nutzung', 'fr': 'Usage IA quotidien', 'it': 'Uso IA giornaliero', 'el': 'Ημερήσια χρήση AI', 'es': 'Uso diario de IA', 'pt': 'Uso diário de IA', 'ru': 'Дневной лимит AI', 'tr': 'Günlük AI kullanımı'});
+  String aiUsageToday(int used, int limit) => _t({
+    'en': 'Used today: $used/$limit',
+    'bg': 'Използвани днес: $used/$limit',
+    'de': 'Heute genutzt: $used/$limit',
+    'fr': "Utilisé aujourd'hui : $used/$limit",
+    'it': 'Usato oggi: $used/$limit',
+    'el': 'Χρήση σήμερα: $used/$limit',
+    'es': 'Usado hoy: $used/$limit',
+    'pt': 'Usado hoje: $used/$limit',
+    'ru': 'Использовано сегодня: $used/$limit',
+    'tr': 'Bugün kullanılan: $used/$limit',
+  });
+  String get aiLimitReached => _t({'en': "You've reached today's AI limit, try again tomorrow", 'bg': 'Достигна дневния лимит за AI, опитай утре', 'de': 'Tägliches KI-Limit erreicht, versuche es morgen', 'fr': "Limite IA quotidienne atteinte, réessaie demain", 'it': "Limite IA giornaliero raggiunto, riprova domani", 'el': 'Έφτασες το ημερήσιο όριο AI, δοκίμασε αύριο', 'es': 'Has alcanzado el límite diario de IA, inténtalo mañana', 'pt': 'Atingiste o limite diário de IA, tenta amanhã', 'ru': 'Достигнут дневной лимит AI, попробуйте завтра', 'tr': 'Günlük AI sınırına ulaştın, yarın tekrar dene'});
+
   // ==================== VOICE INPUT ====================
   String get voiceListening => _t({'en': 'Listening...', 'bg': 'Слушам...', 'de': 'Höre zu...', 'fr': 'Écoute...', 'it': 'Ascolto...', 'el': 'Ακούω...', 'es': 'Escuchando...', 'pt': 'Ouvindo...', 'ru': 'Слушаю...', 'tr': 'Dinliyorum...'});
   String get voiceError => _t({'en': 'Microphone unavailable', 'bg': 'Микрофонът е недостъпен', 'de': 'Mikrofon nicht verfügbar', 'fr': 'Micro indisponible', 'it': 'Microfono non disponibile', 'el': 'Μικρόφωνο μη διαθέσιμο', 'es': 'Micrófono no disponible', 'pt': 'Microfone indisponível', 'ru': 'Микрофон недоступен', 'tr': 'Mikrofon kullanılamıyor'});

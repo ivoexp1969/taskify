@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -15,6 +16,7 @@ import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../auth/login_screen.dart';
 import 'statistics_screen.dart';
+import 'ai_settings_screen.dart';
 import 'delete_account_flow.dart';
 import '../../services/task_view_preference.dart';
 import '../home/home_screen.dart';
@@ -51,7 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadBriefingTime();
     _loadMorningBriefingSetting();
     _checkCalendarConnection();
-    if (Platform.isIOS) _checkIosCalendarPermission();
+    if (!kIsWeb && Platform.isIOS) _checkIosCalendarPermission();
   }
 
   Future<void> _loadMorningBriefingSetting() async {
@@ -1132,6 +1134,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 24),
 
+          // AI секция
+          Text(
+            t.aiSettings,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.purple.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.auto_awesome,
+                  color: Colors.purple,
+                ),
+              ),
+              title: Text(t.aiSettings),
+              subtitle: Text(
+                t.aiSettingsSubtitle,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AiSettingsScreen()),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
           // Акаунт секция
           Text(
             t.account,
@@ -1516,7 +1559,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           // iOS Calendar
-          if (Platform.isIOS) ...[
+          if (!kIsWeb && Platform.isIOS) ...[
             const SizedBox(height: 24),
             Text(
               'Apple Calendar',

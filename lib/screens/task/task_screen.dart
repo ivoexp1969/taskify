@@ -31,6 +31,7 @@ import '../../widgets/pomodoro_timer_sheet.dart';
 import '../settings/statistics_screen.dart';
 import '../../utils/natural_language_parser.dart';
 import '../../services/ai_service.dart';
+import '../../services/ai_usage_service.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import '../paywall/paywall_screen.dart';
 import '../../services/pro_service.dart';
@@ -826,7 +827,12 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     }
   }
 
-  void _openTaskDialog({Task? existing}) {
+  Future<void> _openTaskDialog({Task? existing}) async {
+    // Зареждаме AI настройките при всяко отваряне, за да са актуални
+    final aiParsingEnabled = await AiUsageService.instance.isParsingEnabled();
+    final voiceEnabled = await AiUsageService.instance.isVoiceEnabled();
+    if (!mounted) return;
+
     final t = AppText.of(context);
     final theme = Theme.of(context);
     final bool isEditing = existing != null;
@@ -979,7 +985,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                 Icons.title_rounded,
                                 color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                               ),
-                              suffixIcon: GestureDetector(
+                              suffixIcon: !voiceEnabled ? null : GestureDetector(
                                 onTap: () async {
                                   if (_isListening) {
                                     await _speech.stop();
@@ -1099,7 +1105,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                           ] else
                             const SizedBox(height: 8),
                           // AI Parse button
-                          Align(
+                          if (aiParsingEnabled) Align(
                             alignment: Alignment.centerRight,
                             child: aiLoading
                                 ? const SizedBox(
@@ -1116,6 +1122,13 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                         if (context.mounted) showPaywallIfNeeded(context, isFeatureAvailable: false);
                                         return;
                                       }
+                                      if (!await AiUsageService.instance.canUse()) {
+                                        if (innerContext.mounted) {
+                                          ScaffoldMessenger.of(innerContext).showSnackBar(
+                                              SnackBar(content: Text(t.aiLimitReached)));
+                                        }
+                                        return;
+                                      }
                                       setSheetState(() => aiLoading = true);
                                       final catNames = categories.map((c) => c.name).toList();
                                       final r = await AiService.parseTask(text, catNames);
@@ -1126,6 +1139,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                             SnackBar(content: Text(t.aiError)));
                                         return;
                                       }
+                                      await AiUsageService.instance.recordUse();
                                       setSheetState(() {
                                         _titleController.text = r.title;
                                         tempPriority = r.priority;
@@ -1848,6 +1862,14 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
       return;
     }
 
+    if (!await AiUsageService.instance.canUse()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppText.of(context).aiLimitReached)));
+      }
+      return;
+    }
+
     final t = AppText.of(context);
     final theme = Theme.of(context);
     bool callInitiated = false;
@@ -1869,6 +1891,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                 categoryBox.values.map((c) => c.name).toList(),
               ).then((r) {
                 if (!sheetCtx.mounted) return;
+                if (r != null) AiUsageService.instance.recordUse();
                 setS(() {
                   loading = false;
                   hasError = r == null;
