@@ -93,12 +93,16 @@ Future<void> main() async {
 
   final prefs = await SharedPreferences.getInstance();
   final onboardingDone = prefs.getBool('onboarding_v1_done') ?? false;
+  // Съществуващите потребители (минали стария onboarding) трябва да видят
+  // еднократно AI инструкциите при първо стартиране на новата версия.
+  final aiIntroDone = prefs.getBool('ai_intro_done') ?? false;
 
   runApp(
     MyApp(
       languageController: languageController,
       themeController: themeController,
       onboardingDone: onboardingDone,
+      aiIntroDone: aiIntroDone,
     ),
   );
   
@@ -114,12 +118,14 @@ class MyApp extends StatelessWidget {
   final LanguageController languageController;
   final ThemeController themeController;
   final bool onboardingDone;
+  final bool aiIntroDone;
 
   const MyApp({
     super.key,
     required this.languageController,
     required this.themeController,
     this.onboardingDone = true,
+    this.aiIntroDone = true,
   });
 
   @override
@@ -145,7 +151,9 @@ class MyApp extends StatelessWidget {
               themeMode: themeController.isAmoled ? ThemeMode.dark : themeController.mode,
               theme: _buildLightTheme(),
               darkTheme: themeController.isAmoled ? _buildAmoledTheme() : _buildDarkTheme(),
-              home: onboardingDone ? const HomeScreen() : const OnboardingScreen(),
+              home: !onboardingDone
+                  ? const OnboardingScreen()
+                  : (!aiIntroDone ? const AiIntroScreen() : const HomeScreen()),
             );
           },
         ),

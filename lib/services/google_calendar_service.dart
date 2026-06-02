@@ -41,12 +41,28 @@ class GoogleCalendarService {
       final wasConnected = prefs.getBool('google_calendar_connected') ?? false;
       if (!wasConnected) return;
 
-      // Restore the connection FLAG only. We deliberately do NOT call any Google
-      // auth method here: attemptLightweightAuthentication() pops the Android
-      // Credential Manager account-picker dialog on every cold start. Real auth
-      // happens lazily and only from explicit user actions (interactive: true).
+      // Restore the connection FLAG immediately so the UI shows "connected".
       _isConnected = true;
-      debugPrint('Google Calendar: connection state restored (no startup auth)');
+
+      // On Android attemptLightweightAuthentication() pops the Credential Manager
+      // account-picker on every cold start, so we skip it and restore the account
+      // lazily from explicit user actions (interactive: true).
+      //
+      // On iOS lightweight auth is SILENT (restores the session from the keychain
+      // with no UI). Skipping it there left _currentAccount null after every
+      // relaunch, so the first calendar call hit an expired/absent token → 401 →
+      // _disconnectOnAuthError() dropped the connection. Restore it silently here
+      // so the iOS connection actually survives an app restart.
+      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+        try {
+          await _ensureInitialized();
+          final future = GoogleSignIn.instance.attemptLightweightAuthentication();
+          if (future != null) _currentAccount = await future;
+        } catch (e) {
+          debugPrint('iOS silent reconnect failed (will retry lazily): $e');
+        }
+      }
+      debugPrint('Google Calendar: connection state restored');
     } catch (e) {
       debugPrint('Silent reconnect failed: $e');
     }

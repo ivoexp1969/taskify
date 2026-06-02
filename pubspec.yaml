@@ -1,7 +1,7 @@
 name: task_manager
 description: A simple local task manager app.
 publish_to: 'none'
-version: 1.0.31+35
+version: 1.0.32+36
 environment:
   sdk: ">=3.4.0 <4.0.0"
   flutter: ">=3.22.0"
