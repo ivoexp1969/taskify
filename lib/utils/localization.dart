@@ -1160,6 +1160,7 @@ class AppText {
   // ==================== VOICE INPUT ====================
   String get voiceListening => _t({'en': 'Listening...', 'bg': 'Слушам...', 'de': 'Höre zu...', 'fr': 'Écoute...', 'it': 'Ascolto...', 'el': 'Ακούω...', 'es': 'Escuchando...', 'pt': 'Ouvindo...', 'ru': 'Слушаю...', 'tr': 'Dinliyorum...'});
   String get voiceError => _t({'en': 'Microphone unavailable', 'bg': 'Микрофонът е недостъпен', 'de': 'Mikrofon nicht verfügbar', 'fr': 'Micro indisponible', 'it': 'Microfono non disponibile', 'el': 'Μικρόφωνο μη διαθέσιμο', 'es': 'Micrófono no disponible', 'pt': 'Microfone indisponível', 'ru': 'Микрофон недоступен', 'tr': 'Mikrofon kullanılamıyor'});
+  String get voiceNoSpeech => _t({'en': "Didn't catch that, try again", 'bg': 'Не те разбрах, опитай пак', 'de': 'Nicht verstanden, versuche es erneut', 'fr': "Je n'ai pas compris, réessaie", 'it': 'Non ho capito, riprova', 'el': 'Δεν το έπιασα, δοκίμασε ξανά', 'es': 'No te entendí, inténtalo de nuevo', 'pt': 'Não entendi, tenta de novo', 'ru': 'Не расслышал, попробуйте ещё раз', 'tr': 'Anlayamadım, tekrar dene'});
 
   String get markAsDone => _t({'en': 'Mark as done', 'bg': 'Маркирай като завършена', 'de': 'Als erledigt markieren', 'fr': 'Marquer comme fait', 'it': 'Segna come fatto', 'el': 'Σημείωσε ως ολοκληρωμένο', 'es': 'Marcar como hecho', 'pt': 'Marcar como concluído', 'ru': 'Отметить как выполненное', 'tr': 'Tamamlandı olarak işaretle'});
 }

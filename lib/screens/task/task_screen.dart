@@ -75,6 +75,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
   // Speech to text
   late SpeechToText _speech;
   bool _isListening = false;
+  late AnimationController _micPulseController;
 
   // Search
   bool _isSearching = false;
@@ -86,6 +87,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     taskBox = Hive.box<Task>('tasks');
     categoryBox = Hive.box<Category>('categories');
     _speech = SpeechToText();
+    _micPulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
 
     // Слушаме за промени в задачите
     taskBox.listenable().addListener(_onTasksChanged);
@@ -152,6 +157,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _listAnimationController.dispose();
+    _micPulseController.dispose();
     _titleController.dispose();
     _searchController.dispose();
     if (_isListening) _speech.cancel();
@@ -884,6 +890,79 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
             );
             final categoryColor = Color(selectedCat.colorValue);
 
+            void startPulse() => _micPulseController.repeat(reverse: true);
+            void stopPulse() {
+              _micPulseController.stop();
+              _micPulseController.value = 0;
+            }
+
+            // AI parse — преизползвана и от бутона, и от авто-parse след диктовка.
+            // fromVoice=true прави тихо падане към локалния NLP (без paywall/грешки),
+            // за да не прекъсва гласовия поток.
+            Future<void> runAiParse({bool fromVoice = false}) async {
+              final text = _titleController.text.trim();
+              if (text.isEmpty) return;
+              if (!ProService().isPro) {
+                if (fromVoice) return;
+                Navigator.pop(innerContext);
+                if (context.mounted) showPaywallIfNeeded(context, isFeatureAvailable: false);
+                return;
+              }
+              if (!await AiUsageService.instance.canUse()) {
+                if (innerContext.mounted) {
+                  ScaffoldMessenger.of(innerContext).showSnackBar(
+                      SnackBar(content: Text(t.aiLimitReached)));
+                }
+                return;
+              }
+              setSheetState(() => aiLoading = true);
+              final catNames = categories.map((c) => c.name).toList();
+              final r = await AiService.parseTask(text, catNames);
+              if (!innerContext.mounted) return;
+              setSheetState(() => aiLoading = false);
+              if (r == null) {
+                if (!fromVoice) {
+                  ScaffoldMessenger.of(innerContext).showSnackBar(
+                      SnackBar(content: Text(t.aiError)));
+                }
+                return;
+              }
+              await AiUsageService.instance.recordUse();
+              setSheetState(() {
+                _titleController.text = r.title;
+                tempPriority = r.priority;
+                _selectedPriority = r.priority;
+                if (r.recurring != null) {
+                  tempRecurrence = r.recurring!;
+                  _selectedRecurrence = r.recurring!;
+                }
+                if (r.categoryName != null) {
+                  final catNameLower = r.categoryName!.toLowerCase();
+                  final matched = categories.where(
+                    (c) => c.name.toLowerCase() == catNameLower,
+                  );
+                  if (matched.isNotEmpty) {
+                    tempCategoryId = matched.first.id;
+                    _selectedCategoryId = matched.first.id;
+                  }
+                }
+                // AI time fallback — само ако NLP не е хванал час
+                if (tempTime == null && r.time != null) {
+                  final parts = r.time!.split(':');
+                  if (parts.length == 2) {
+                    final h = int.tryParse(parts[0]);
+                    final m = int.tryParse(parts[1]);
+                    if (h != null && m != null && h <= 23 && m <= 59) {
+                      tempTime = TimeOfDay(hour: h, minute: m);
+                      tempDueDate = DateTime(
+                        tempDueDate.year, tempDueDate.month, tempDueDate.day, h, m,
+                      );
+                    }
+                  }
+                }
+              });
+            }
+
             return Container(
               height: MediaQuery.of(innerContext).size.height * 0.85,
               decoration: BoxDecoration(
@@ -989,13 +1068,18 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                 onTap: () async {
                                   if (_isListening) {
                                     await _speech.stop();
+                                    stopPulse();
                                     setSheetState(() => _isListening = false);
                                     return;
                                   }
                                   final available = await _speech.initialize(
-                                    onError: (_) => setSheetState(() => _isListening = false),
+                                    onError: (_) {
+                                      stopPulse();
+                                      setSheetState(() => _isListening = false);
+                                    },
                                     onStatus: (s) {
                                       if (s == 'done' || s == 'notListening') {
+                                        stopPulse();
                                         setSheetState(() => _isListening = false);
                                       }
                                     },
@@ -1009,10 +1093,21 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                     return;
                                   }
                                   setSheetState(() => _isListening = true);
+                                  startPulse();
                                   await _speech.listen(
                                     onResult: (result) {
                                       if (result.finalResult) {
-                                        final words = result.recognizedWords;
+                                        final words = result.recognizedWords.trim();
+                                        stopPulse();
+                                        if (words.isEmpty) {
+                                          setSheetState(() => _isListening = false);
+                                          if (innerContext.mounted) {
+                                            ScaffoldMessenger.of(innerContext).showSnackBar(
+                                              SnackBar(content: Text(t.voiceNoSpeech)),
+                                            );
+                                          }
+                                          return;
+                                        }
                                         setSheetState(() {
                                           _isListening = false;
                                           _titleController.text = words;
@@ -1030,6 +1125,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                             if (nlp.time != null) tempTime = nlp.time;
                                           }
                                         });
+                                        // Авто-parse след диктовка (глас→parse→preview),
+                                        // ако AI парсването е вкл. Тихо пада към локалния NLP по-горе.
+                                        if (aiParsingEnabled) runAiParse(fromVoice: true);
                                       } else {
                                         setSheetState(() {
                                           _titleController.text = result.recognizedWords;
@@ -1043,12 +1141,20 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.all(12),
-                                  child: Icon(
-                                    _isListening ? Icons.mic : Icons.mic_none_rounded,
-                                    color: _isListening
-                                        ? Colors.redAccent
-                                        : theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                                  ),
+                                  child: _isListening
+                                      ? ScaleTransition(
+                                          scale: Tween<double>(begin: 1.0, end: 1.25).animate(
+                                            CurvedAnimation(
+                                              parent: _micPulseController,
+                                              curve: Curves.easeInOut,
+                                            ),
+                                          ),
+                                          child: const Icon(Icons.mic, color: Colors.redAccent),
+                                        )
+                                      : Icon(
+                                          Icons.mic_none_rounded,
+                                          color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                                        ),
                                 ),
                               ),
                               contentPadding: const EdgeInsets.symmetric(
@@ -1114,66 +1220,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                     child: CircularProgressIndicator(strokeWidth: 2),
                                   )
                                 : GestureDetector(
-                                    onTap: () async {
-                                      final text = _titleController.text.trim();
-                                      if (text.isEmpty) return;
-                                      if (!ProService().isPro) {
-                                        Navigator.pop(innerContext);
-                                        if (context.mounted) showPaywallIfNeeded(context, isFeatureAvailable: false);
-                                        return;
-                                      }
-                                      if (!await AiUsageService.instance.canUse()) {
-                                        if (innerContext.mounted) {
-                                          ScaffoldMessenger.of(innerContext).showSnackBar(
-                                              SnackBar(content: Text(t.aiLimitReached)));
-                                        }
-                                        return;
-                                      }
-                                      setSheetState(() => aiLoading = true);
-                                      final catNames = categories.map((c) => c.name).toList();
-                                      final r = await AiService.parseTask(text, catNames);
-                                      if (!innerContext.mounted) return;
-                                      setSheetState(() => aiLoading = false);
-                                      if (r == null) {
-                                        ScaffoldMessenger.of(innerContext).showSnackBar(
-                                            SnackBar(content: Text(t.aiError)));
-                                        return;
-                                      }
-                                      await AiUsageService.instance.recordUse();
-                                      setSheetState(() {
-                                        _titleController.text = r.title;
-                                        tempPriority = r.priority;
-                                        _selectedPriority = r.priority;
-                                        if (r.recurring != null) {
-                                          tempRecurrence = r.recurring!;
-                                          _selectedRecurrence = r.recurring!;
-                                        }
-                                        if (r.categoryName != null) {
-                                          final catNameLower = r.categoryName!.toLowerCase();
-                                          final matched = categories.where(
-                                            (c) => c.name.toLowerCase() == catNameLower,
-                                          );
-                                          if (matched.isNotEmpty) {
-                                            tempCategoryId = matched.first.id;
-                                            _selectedCategoryId = matched.first.id;
-                                          }
-                                        }
-                                        // AI time fallback — само ако NLP не е хванал час
-                                        if (tempTime == null && r.time != null) {
-                                          final parts = r.time!.split(':');
-                                          if (parts.length == 2) {
-                                            final h = int.tryParse(parts[0]);
-                                            final m = int.tryParse(parts[1]);
-                                            if (h != null && m != null && h <= 23 && m <= 59) {
-                                              tempTime = TimeOfDay(hour: h, minute: m);
-                                              tempDueDate = DateTime(
-                                                tempDueDate.year, tempDueDate.month, tempDueDate.day, h, m,
-                                              );
-                                            }
-                                          }
-                                        }
-                                      });
-                                    },
+                                    onTap: () => runAiParse(),
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                       decoration: BoxDecoration(
