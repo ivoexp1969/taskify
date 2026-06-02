@@ -27,8 +27,9 @@ class AiService {
 
   static Future<AiParseResult?> parseTask(
     String text,
-    List<String> categories,
-  ) async {
+    List<String> categories, {
+    String? lang,
+  }) async {
     try {
       final response = await http
           .post(
@@ -38,6 +39,7 @@ class AiService {
               'text': text,
               'mode': 'parse',
               'categories': categories,
+              'lang': lang,
             }),
           )
           .timeout(const Duration(seconds: 15));
@@ -52,6 +54,7 @@ class AiService {
   static Future<AiBreakdownResult?> breakdownTask(
     String taskTitle, [
     List<String> categories = const [],
+    String? lang,
   ]) async {
     try {
       final response = await http
@@ -62,6 +65,7 @@ class AiService {
               'text': taskTitle,
               'mode': 'breakdown',
               'categories': categories,
+              'lang': lang,
             }),
           )
           .timeout(const Duration(seconds: 20));

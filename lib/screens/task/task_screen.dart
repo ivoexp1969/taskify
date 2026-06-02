@@ -917,7 +917,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
               }
               setSheetState(() => aiLoading = true);
               final catNames = categories.map((c) => c.name).toList();
-              final r = await AiService.parseTask(text, catNames);
+              final r = await AiService.parseTask(text, catNames, lang: langCode);
               if (!innerContext.mounted) return;
               setSheetState(() => aiLoading = false);
               if (r == null) {
@@ -1936,6 +1936,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
               AiService.breakdownTask(
                 task.title,
                 categoryBox.values.map((c) => c.name).toList(),
+                t.lang,
               ).then((r) {
                 if (!sheetCtx.mounted) return;
                 if (r != null) AiUsageService.instance.recordUse();
