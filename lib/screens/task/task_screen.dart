@@ -1,6 +1,8 @@
-﻿import 'dart:math';
+﻿import 'dart:io' show Platform;
+import 'dart:math';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/google_calendar_service.dart';
@@ -882,6 +884,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
               'ru': 'ru-RU', 'tr': 'tr-TR',
             };
             final voiceLocale = voiceLocales[langCode] ?? 'en-US';
+            // Apple Speech не поддържа български → скриваме микрофона на iOS за bg.
+            final voiceUnsupported =
+                !kIsWeb && Platform.isIOS && langCode == 'bg';
 
             // Взимаме цвета на избраната категория
             final selectedCat = categories.firstWhere(
@@ -1064,7 +1069,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                 Icons.title_rounded,
                                 color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                               ),
-                              suffixIcon: !voiceEnabled ? null : GestureDetector(
+                              suffixIcon: (!voiceEnabled || voiceUnsupported) ? null : GestureDetector(
                                 onTap: () async {
                                   if (_isListening) {
                                     await _speech.stop();
@@ -1088,6 +1093,24 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                     if (innerContext.mounted) {
                                       ScaffoldMessenger.of(innerContext).showSnackBar(
                                         SnackBar(content: Text(t.voiceError)),
+                                      );
+                                    }
+                                    return;
+                                  }
+                                  // Apple Speech не поддържа всички езици (напр. bg-BG
+                                  // липсва). Ако моделът за текущия език не е наличен,
+                                  // диктовката връща грешен език — затова спираме и
+                                  // информираме, вместо да разпознаваме на грешен език.
+                                  bool localeSupported = true;
+                                  try {
+                                    final installed = await _speech.locales();
+                                    localeSupported = installed.any((l) =>
+                                        l.localeId.replaceAll('_', '-') == voiceLocale);
+                                  } catch (_) {}
+                                  if (!localeSupported) {
+                                    if (innerContext.mounted) {
+                                      ScaffoldMessenger.of(innerContext).showSnackBar(
+                                        SnackBar(content: Text(t.voiceLangUnsupported)),
                                       );
                                     }
                                     return;
