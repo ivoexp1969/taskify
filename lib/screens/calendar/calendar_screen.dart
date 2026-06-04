@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import '../../services/google_calendar_service.dart';
+import '../../services/name_days_service.dart';
+import '../../services/holidays_service.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -42,14 +44,29 @@ class _CalendarScreenState extends State<CalendarScreen> {
   final Set<int> _expandedCards = {};
   bool _needsDefaults = false;
 
+  /// Цвят на слоя „Именни дни" в календара (различен от задачите/празниците).
+  static const Color _nameDayColor = Color(0xFF8E24AA);
+  bool get _nameDaysEnabled => NameDaysService.enabledNotifier.value;
+
+  /// Цвят на слоя „Официални празници" (различен от именните дни).
+  static const Color _holidayColor = Color(HolidaysService.colorValue);
+  bool get _holidaysEnabled => HolidaysService.enabledNotifier.value;
+
   @override
   void initState() {
     super.initState();
     taskBox = Hive.box<Task>('tasks');
     categoryBox = Hive.box<Category>('categories');
-    
+
     // Слушаме за промени в задачите
     taskBox.listenable().addListener(_onTasksChanged);
+
+    _loadNameDays();
+    _loadHolidays();
+    // Реагираме веднага щом toggle-ите се сменят в Настройки.
+    NameDaysService.enabledNotifier.addListener(_onNameDaysToggle);
+    HolidaysService.enabledNotifier.addListener(_onNameDaysToggle);
+    HolidaysService.revision.addListener(_onNameDaysToggle);
 
     if (categoryBox.isEmpty) {
       _needsDefaults = true;
@@ -91,10 +108,33 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void dispose() {
     taskBox.listenable().removeListener(_onTasksChanged);
+    NameDaysService.enabledNotifier.removeListener(_onNameDaysToggle);
+    HolidaysService.enabledNotifier.removeListener(_onNameDaysToggle);
+    HolidaysService.revision.removeListener(_onNameDaysToggle);
     super.dispose();
   }
 
+  void _onNameDaysToggle() {
+    if (mounted) setState(() {});
+  }
+
+  /// Зарежда официалните празници (offline-first) и стойността на toggle-а.
+  Future<void> _loadHolidays() async {
+    await HolidaysService().loadEnabled();
+    if (HolidaysService.enabledNotifier.value) {
+      await HolidaysService().loadForCurrentYears();
+    }
+    if (mounted) setState(() {});
+  }
+
   void _onTasksChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// Зарежда българските именни дни и стойността на toggle-а.
+  Future<void> _loadNameDays() async {
+    await NameDaysService().load();
+    await NameDaysService().loadEnabled();
     if (mounted) setState(() {});
   }
 
@@ -1543,31 +1583,39 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           const EdgeInsets.symmetric(horizontal: 0.8),
                     ),
                     calendarBuilders: CalendarBuilders(
+                      // Кръг около датата за празник (червен) / имен ден (виолетов).
+                      defaultBuilder: (context, day, focusedDay) =>
+                          _ringedDay(context, day),
+                      outsideBuilder: (context, day, focusedDay) =>
+                          _ringedDay(context, day, outside: true),
                       markerBuilder: (context, date, taskList) {
                         if (taskList.isEmpty) return null;
-                        
+
                         // Сортираме по приоритет (високият първи)
                         final sortedTasks = List<Task>.from(taskList)
                           ..sort((a, b) => b.priority.compareTo(a.priority));
-                        
+
                         // Вземаме до 3 точки
                         final markers = sortedTasks.take(3).toList();
-                        
+
                         return Positioned(
                           bottom: 1,
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            children: markers.map((task) {
-                              return Container(
-                                width: 6,
-                                height: 6,
-                                margin: const EdgeInsets.symmetric(horizontal: 1),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: _priorityColor(task.priority),
-                                ),
-                              );
-                            }).toList(),
+                            children: [
+                              ...markers.map((task) {
+                                return Container(
+                                  width: 6,
+                                  height: 6,
+                                  margin:
+                                      const EdgeInsets.symmetric(horizontal: 1),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: _priorityColor(task.priority),
+                                  ),
+                                );
+                              }),
+                            ],
                           ),
                         );
                       },
@@ -1614,6 +1662,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ],
             ),
           ),
+
+          // Read-only слой: официален празник за избрания ден
+          if (_holidaysEnabled) _buildHolidayBanner(context),
+
+          // Read-only слой: имен ден за избрания ден
+          if (_nameDaysEnabled) _buildNameDayBanner(context),
 
           // Заглавие „Задачи"
           Padding(
@@ -1742,6 +1796,166 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       );
                     },
                   ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Огражда датата с кръг, ако е официален празник (червен) и/или имен ден
+  /// (виолетов). При двете — концентрични пръстени. Връща null за обикновен
+  /// ден (тогава TableCalendar рендира по подразбиране).
+  Widget? _ringedDay(BuildContext context, DateTime day, {bool outside = false}) {
+    final hasHoliday =
+        _holidaysEnabled && HolidaysService().forDate(day) != null;
+    final hasNameDay =
+        _nameDaysEnabled && NameDaysService().forDate(day) != null;
+    if (!hasHoliday && !hasNameDay) return null;
+
+    final theme = Theme.of(context);
+    final op = outside ? 0.4 : 1.0;
+    final textColor = outside
+        ? theme.colorScheme.onSurface.withValues(alpha: 0.35)
+        : theme.colorScheme.onSurface;
+    final numberText =
+        Text('${day.day}', style: TextStyle(fontSize: 14, color: textColor));
+
+    Widget core;
+    if (hasHoliday && hasNameDay) {
+      // Концентрични пръстени: външен червен, вътрешен виолетов.
+      core = Container(
+        width: 34,
+        height: 34,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border:
+              Border.all(color: _holidayColor.withValues(alpha: op), width: 1.6),
+        ),
+        child: Container(
+          width: 26,
+          height: 26,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+                color: _nameDayColor.withValues(alpha: op), width: 1.6),
+          ),
+          child: numberText,
+        ),
+      );
+    } else {
+      core = Container(
+        width: 34,
+        height: 34,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: (hasHoliday ? _holidayColor : _nameDayColor)
+                .withValues(alpha: op),
+            width: 1.6,
+          ),
+        ),
+        child: numberText,
+      );
+    }
+    return Center(child: core);
+  }
+
+  /// Read-only банер за официалния празник на избрания ден.
+  /// localName идва от Nager.Date (вече на местния език). Връща празно,
+  /// ако денят не е официален празник.
+  Widget _buildHolidayBanner(BuildContext context) {
+    final name = HolidaysService().forDate(_selectedDay);
+    if (name == null) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: _holidayColor.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _holidayColor.withValues(alpha: 0.30)),
+      ),
+      child: Row(
+        children: [
+          const Text('🎌', style: TextStyle(fontSize: 18)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              name,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: _holidayColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Read-only банер за именния ден на избрания ден.
+  /// Празникът и имената идват от dataset-а (на български); локализира се
+  /// само етикетът „Имен ден". Връща празно, ако денят няма имен ден.
+  Widget _buildNameDayBanner(BuildContext context) {
+    final nameDay = NameDaysService().forDate(_selectedDay);
+    if (nameDay == null) return const SizedBox.shrink();
+
+    final lang = LanguageScope.of(context).locale.languageCode;
+    const label = {
+      'en': 'Name day',
+      'bg': 'Имен ден',
+      'de': 'Namenstag',
+      'fr': 'Fête du prénom',
+      'it': 'Onomastico',
+      'el': 'Ονομαστική εορτή',
+      'es': 'Onomástica',
+      'pt': 'Dia do nome',
+      'ru': 'Именины',
+      'tr': 'İsim günü',
+    };
+    final theme = Theme.of(context);
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: _nameDayColor.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _nameDayColor.withValues(alpha: 0.30)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('🎉', style: TextStyle(fontSize: 18)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${label[lang] ?? label['en']!} · ${nameDay.feast}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: _nameDayColor,
+                  ),
+                ),
+                if (nameDay.names.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    nameDay.names.join(', '),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ],
       ),

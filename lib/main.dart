@@ -19,6 +19,8 @@ import 'widgets/morning_briefing_dialog.dart';
 import 'services/google_calendar_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'services/morning_briefing_service.dart';
+import 'services/name_days_service.dart';
+import 'services/holidays_service.dart';
 
 Future<void> _checkMorningBriefingOnLaunch() async {
   final prefs = await SharedPreferences.getInstance();
@@ -87,6 +89,18 @@ Future<void> main() async {
   // Зареждаме системния език при първо стартиране
   final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
   await languageController.loadSavedLocale(systemLocale);
+
+  // Пренасрочи сутрешните нотификации за именни дни напред (локални данни,
+  // offline, не брои към AI лимита). Уважава toggle-а от настройките.
+  if (!kIsWeb) {
+    NameDaysService()
+        .refreshNotificationsFromPrefs(languageController.locale.languageCode);
+
+    // Официални празници (Nager.Date) — offline-first, зарежда само ако е вкл.
+    HolidaysService().loadEnabled().then((enabled) {
+      if (enabled) HolidaysService().loadForCurrentYears();
+    });
+  }
   
   final themeController = ThemeController(ThemeMode.system);
   await themeController.loadSavedTheme();

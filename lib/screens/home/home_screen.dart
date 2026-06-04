@@ -6,9 +6,11 @@ import '../task/task_screen.dart';
 import '../task/eisenhower_screen.dart';
 import '../calendar/calendar_screen.dart';
 import '../settings/settings_screen.dart';
+import '../bulgaria/bulgaria_screen.dart';
 import '../../utils/localization.dart';
 import '../../widgets/banner_ad_widget.dart';
 import '../../services/pro_service.dart';
+import '../../services/holidays_service.dart';
 import '../paywall/paywall_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -23,12 +25,36 @@ class _HomeScreenState extends State<HomeScreen> {
   final ProService _proService = ProService();
   bool _welcomeChecked = false;
 
-  late final List<Widget> _screens = const [
-    TaskScreen(),
-    EisenhowerScreen(),
-    CalendarScreen(),
-    SettingsScreen(),
-  ];
+  /// Разделът „България" се показва само при български език или устройство
+  /// на територията на България (БЕЗ GPS — само locale).
+  bool get _showBulgaria {
+    final lang = LanguageScope.of(context).locale.languageCode;
+    if (lang == 'bg') return true;
+    final cc = WidgetsBinding.instance.platformDispatcher.locale.countryCode;
+    return cc?.toUpperCase() == 'BG';
+  }
+
+  /// Екраните в долната навигация. „България" се вмъква преди Настройки.
+  List<Widget> get _screens => [
+        const TaskScreen(),
+        const EisenhowerScreen(),
+        const CalendarScreen(),
+        if (_showBulgaria) const BulgariaScreen(),
+        const SettingsScreen(),
+      ];
+
+  /// Индекс на „България" таба (или -1, ако не се показва).
+  int get _bulgariaIndex => _showBulgaria ? 3 : -1;
+
+  String _bulgariaTabLabel(BuildContext context) {
+    final lang = LanguageScope.of(context).locale.languageCode;
+    const m = {
+      'en': 'Bulgaria', 'bg': 'България', 'de': 'Bulgarien', 'fr': 'Bulgarie',
+      'it': 'Bulgaria', 'el': 'Βουλγαρία', 'es': 'Bulgaria', 'pt': 'Bulgária',
+      'ru': 'Болгария', 'tr': 'Bulgaristan',
+    };
+    return m[lang] ?? m['en']!;
+  }
 
   @override
   void initState() {
@@ -36,6 +62,85 @@ class _HomeScreenState extends State<HomeScreen> {
     _proService.addListener(_onProStatusChanged);
     if (!kIsWeb) {
       _initAndShowWelcome();
+      _maybeShowHolidaysPrompt();
+    }
+  }
+
+  /// Еднократно, проактивно одобрение за официалните празници (само BG контекст,
+  /// БЕЗ GPS — държавата идва от device locale). Топъл, личен тон.
+  Future<void> _maybeShowHolidaysPrompt() async {
+    // Изчакваме да минат другите стартови диалози (welcome и т.н.).
+    await Future.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+
+    final lang = LanguageScope.of(context).locale.languageCode;
+    final country = WidgetsBinding.instance.platformDispatcher.locale.countryCode
+        ?.toUpperCase();
+    final isBg = lang == 'bg' || country == 'BG';
+    if (!isBg) return;
+
+    if (await HolidaysService().isPromptShown()) return;
+    if (HolidaysService.enabledNotifier.value) {
+      await HolidaysService().markPromptShown();
+      return;
+    }
+    await HolidaysService().markPromptShown();
+    if (!mounted) return;
+
+    const title = {
+      'en': 'Public holidays', 'bg': 'Официални празници',
+      'de': 'Gesetzliche Feiertage', 'fr': 'Jours fériés',
+      'it': 'Festività ufficiali', 'el': 'Επίσημες αργίες',
+      'es': 'Días festivos', 'pt': 'Feriados oficiais',
+      'ru': 'Официальные праздники', 'tr': 'Resmi tatiller',
+    };
+    const body = {
+      'en': "I see you're in Bulgaria. Want me to show the official holidays in your calendar? 🇧🇬",
+      'bg': 'Виждам, че си в България. Да ти показвам ли официалните празници в календара? 🇧🇬',
+      'de': 'Ich sehe, du bist in Bulgarien. Soll ich die Feiertage in deinem Kalender anzeigen? 🇧🇬',
+      'fr': 'Je vois que tu es en Bulgarie. Je t\'affiche les jours fériés dans le calendrier? 🇧🇬',
+      'it': 'Vedo che sei in Bulgaria. Ti mostro le festività nel calendario? 🇧🇬',
+      'el': 'Βλέπω ότι είσαι στη Βουλγαρία. Να σου δείχνω τις αργίες στο ημερολόγιο; 🇧🇬',
+      'es': 'Veo que estás en Bulgaria. ¿Te muestro los festivos en el calendario? 🇧🇬',
+      'pt': 'Vejo que estás na Bulgária. Mostro os feriados no teu calendário? 🇧🇬',
+      'ru': 'Вижу, что ты в Болгарии. Показывать праздники в календаре? 🇧🇬',
+      'tr': 'Bulgaristan\'da olduğunu görüyorum. Resmi tatilleri takvimde göstereyim mi? 🇧🇬',
+    };
+    const yes = {
+      'en': 'Yes, please', 'bg': 'Да, покажи', 'de': 'Ja, gern',
+      'fr': 'Oui', 'it': 'Sì', 'el': 'Ναι', 'es': 'Sí',
+      'pt': 'Sim', 'ru': 'Да', 'tr': 'Evet',
+    };
+    const no = {
+      'en': 'Not now', 'bg': 'Не сега', 'de': 'Nicht jetzt',
+      'fr': 'Pas maintenant', 'it': 'Non ora', 'el': 'Όχι τώρα',
+      'es': 'Ahora no', 'pt': 'Agora não', 'ru': 'Не сейчас', 'tr': 'Şimdi değil',
+    };
+    String tr(Map<String, String> m) => m[lang] ?? m['en']!;
+
+    final accept = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.flag_rounded,
+            size: 40, color: Color(HolidaysService.colorValue)),
+        title: Text(tr(title)),
+        content: Text(tr(body)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(tr(no)),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(tr(yes)),
+          ),
+        ],
+      ),
+    );
+
+    if (accept == true) {
+      await HolidaysService().setEnabled(true);
+      await HolidaysService().loadForCurrentYears();
     }
   }
 
@@ -120,13 +225,25 @@ class _HomeScreenState extends State<HomeScreen> {
       final languageController = LanguageScope.of(context);
       final lang = languageController.locale.languageCode;
       const calendarName = {'en': 'Calendar', 'bg': 'Календар', 'de': 'Kalender', 'fr': 'Calendrier', 'it': 'Calendario', 'el': 'Ημερολόγιο', 'es': 'Calendario', 'pt': 'Calendário', 'ru': 'Календарь', 'tr': 'Takvim'};
-      
+
       final upgraded = await showPaywallIfNeeded(
         context,
         isFeatureAvailable: false,
         featureName: calendarName[lang] ?? calendarName['en']!,
       );
-      
+
+      if (!upgraded) return;
+    }
+
+    // Раздел „България" е premium функция.
+    if (!kIsWeb && index == _bulgariaIndex && !_proService.isPro) {
+      final lang = LanguageScope.of(context).locale.languageCode;
+      const bgName = {'en': 'Bulgaria', 'bg': 'България', 'de': 'Bulgarien', 'fr': 'Bulgarie', 'it': 'Bulgaria', 'el': 'Βουλγαρία', 'es': 'Bulgaria', 'pt': 'Bulgária', 'ru': 'Болгария', 'tr': 'Bulgaristan'};
+      final upgraded = await showPaywallIfNeeded(
+        context,
+        isFeatureAvailable: false,
+        featureName: bgName[lang] ?? bgName['en']!,
+      );
       if (!upgraded) return;
     }
 
@@ -141,6 +258,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    // Списъкът може да се промени (вкл./изкл. на „България") — пазим индекса валиден.
+    final screens = _screens;
+    final showBulgaria = _showBulgaria;
+    if (_currentIndex >= screens.length) _currentIndex = 0;
+
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       body: SafeArea(
@@ -148,11 +270,11 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             if (!kIsWeb && !_proService.isPaid && !_proService.isPromoCode && _proService.isTrial)
               _buildProBanner(context),
-            
+
             Expanded(
               child: IndexedStack(
                 index: _currentIndex,
-                children: _screens,
+                children: screens,
               ),
             ),
             
@@ -225,6 +347,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   selectedIcon: const Icon(Icons.calendar_today),
                   label: t.calendar,
                 ),
+                if (showBulgaria)
+                  NavigationDestination(
+                    icon: Stack(
+                      children: [
+                        const Icon(Icons.flag_outlined),
+                        if (!kIsWeb && !_proService.isPro)
+                          Positioned(
+                            right: -2,
+                            top: -2,
+                            child: Icon(
+                              Icons.lock,
+                              size: 12,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                      ],
+                    ),
+                    selectedIcon: const Icon(Icons.flag),
+                    label: _bulgariaTabLabel(context),
+                  ),
                 NavigationDestination(
                   icon: const Icon(Icons.settings_outlined),
                   selectedIcon: const Icon(Icons.settings),

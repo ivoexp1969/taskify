@@ -20,8 +20,8 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		A533D2D5A291B517E4D4F24A /* TaskifyWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 49EE2753F63CA40BE88B7643 /* TaskifyWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		BB22CC33DD44EE55FF66AA11 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF66 /* PrivacyInfo.xcprivacy */; };
 		BB1B2C3D4E5F6789ABCD0001 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BB1B2C3D4E5F6789ABCD0F01 /* InfoPlist.strings */; };
+		BB22CC33DD44EE55FF66AA11 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF66 /* PrivacyInfo.xcprivacy */; };
 		C2A50AD404A6EF75E13805B9 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6AE5DCD1D37010A46186276C /* SwiftUI.framework */; };
 /* End PBXBuildFile section */
 
@@ -70,8 +70,8 @@
 		031D4E7FC4BB16ED98364D5E /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
-		206D284651637CA824D444E9 /* TaskifyWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TaskifyWidget.swift; path = TaskifyWidget.swift; sourceTree = "<group>"; };
-		2977AD987178C169ED7DA41E /* TaskifyWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; name = TaskifyWidget.entitlements; path = TaskifyWidget.entitlements; sourceTree = "<group>"; };
+		206D284651637CA824D444E9 /* TaskifyWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TaskifyWidget.swift; sourceTree = "<group>"; };
+		2977AD987178C169ED7DA41E /* TaskifyWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = TaskifyWidget.entitlements; sourceTree = "<group>"; };
 		2DD62D7206AA2EF9DB7E39E3 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = "<group>"; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -95,9 +95,6 @@
 		AA11BB22CC33DD44EE55FF66 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AC23CEDFA82CD231ADC8D36B /* libPods-Runner.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Runner.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2E98278FE94BC85257B183B /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
-		CDF2BE9FAC7173FF50CB2F02 /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
-		E97765D967856E731E852A61 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		F1501C4A1D5FCFC3E6A0B134 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = Info.plist; path = Info.plist; sourceTree = "<group>"; };
 		BB1B2C3D4E5F6789ABCD0101 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		BB1B2C3D4E5F6789ABCD0201 /* bg */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = bg; path = bg.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		BB1B2C3D4E5F6789ABCD0301 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -108,6 +105,9 @@
 		BB1B2C3D4E5F6789ABCD0801 /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = pt.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		BB1B2C3D4E5F6789ABCD0901 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		BB1B2C3D4E5F6789ABCD0A01 /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CDF2BE9FAC7173FF50CB2F02 /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
+		E97765D967856E731E852A61 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		F1501C4A1D5FCFC3E6A0B134 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -166,7 +166,6 @@
 				CDF2BE9FAC7173FF50CB2F02 /* Pods-RunnerTests.release.xcconfig */,
 				670C36BD06AE474EF82D8494 /* Pods-RunnerTests.profile.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -240,7 +239,6 @@
 				F1501C4A1D5FCFC3E6A0B134 /* Info.plist */,
 				2977AD987178C169ED7DA41E /* TaskifyWidget.entitlements */,
 			);
-			name = TaskifyWidget;
 			path = TaskifyWidget;
 			sourceTree = "<group>";
 		};
@@ -510,15 +508,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		AA1B2C3D4E5F6789ABCDEF01 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = F69909A67E677118D49DF75F /* TaskifyWidget */;
-			targetProxy = AA1B2C3D4E5F6789ABCDEF02 /* PBXContainerItemProxy */;
-		};
 		331C8086294A63A400263BE5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
+		};
+		AA1B2C3D4E5F6789ABCDEF01 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F69909A67E677118D49DF75F /* TaskifyWidget */;
+			targetProxy = AA1B2C3D4E5F6789ABCDEF02 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -694,12 +692,12 @@
 				DEVELOPMENT_TEAM = YP2QH7PM93;
 				INFOPLIST_FILE = TaskifyWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.29;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
+				MARKETING_VERSION = 1.0.29;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ivoexp.taskify.widget;
 				PRODUCT_NAME = TaskifyWidget;
 				SDKROOT = iphoneos;
@@ -719,12 +717,12 @@
 				DEVELOPMENT_TEAM = YP2QH7PM93;
 				INFOPLIST_FILE = TaskifyWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.29;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
+				MARKETING_VERSION = 1.0.29;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ivoexp.taskify.widget;
 				PRODUCT_NAME = TaskifyWidget;
 				SDKROOT = iphoneos;
@@ -903,12 +901,12 @@
 				DEVELOPMENT_TEAM = YP2QH7PM93;
 				INFOPLIST_FILE = TaskifyWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.29;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
+				MARKETING_VERSION = 1.0.29;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ivoexp.taskify.widget;
 				PRODUCT_NAME = TaskifyWidget;
 				SDKROOT = iphoneos;

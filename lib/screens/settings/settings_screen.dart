@@ -24,6 +24,10 @@ import '../../services/google_calendar_service.dart';
 import '../../services/calendar_import_service.dart';
 import '../../services/ios_calendar_service.dart';
 import '../../services/morning_briefing_service.dart';
+import '../../services/name_days_service.dart';
+import '../../services/holidays_service.dart';
+import '../../services/pro_service.dart';
+import '../paywall/paywall_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -46,14 +50,274 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isMorningBriefingEnabled = false;
   int _briefingHour = 8;
   int _briefingMinute = 0;
+  bool _nameDaysEnabled = false;
+  bool _holidaysEnabled = false;
+  String _holidaysCountry = 'BG';
 
   @override
   void initState() {
     super.initState();
     _loadBriefingTime();
     _loadMorningBriefingSetting();
+    _loadNameDaysSetting();
+    _loadHolidaysSetting();
     _checkCalendarConnection();
     if (!kIsWeb && Platform.isIOS) _checkIosCalendarPermission();
+  }
+
+  Future<void> _loadHolidaysSetting() async {
+    final enabled = await HolidaysService().loadEnabled();
+    if (!mounted) return;
+    setState(() {
+      _holidaysEnabled = enabled;
+      _holidaysCountry = HolidaysService().country;
+    });
+  }
+
+  Future<void> _loadNameDaysSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _nameDaysEnabled = prefs.getBool('name_days_enabled') ?? false;
+    });
+  }
+
+  /// Разделът „България" се показва само при български език или
+  /// устройство на територията на България (locale countryCode == BG).
+  bool get _isBgContext {
+    final lang = LanguageScope.of(context).locale.languageCode;
+    if (lang == 'bg') return true;
+    final country =
+        WidgetsBinding.instance.platformDispatcher.locale.countryCode;
+    return country?.toUpperCase() == 'BG';
+  }
+
+  /// Секция „България" в Настройки. Празна извън BG контекст.
+  /// Засега съдържа toggle „Именни дни" (premium).
+  List<Widget> _buildBulgariaSection(BuildContext context) {
+    if (!_isBgContext) return const [];
+    final theme = Theme.of(context);
+    final lang = LanguageScope.of(context).locale.languageCode;
+
+    const sectionTitle = {
+      'en': 'Bulgaria', 'bg': 'България', 'de': 'Bulgarien', 'fr': 'Bulgarie',
+      'it': 'Bulgaria', 'el': 'Βουλγαρία', 'es': 'Bulgaria', 'pt': 'Bulgária',
+      'ru': 'Болгария', 'tr': 'Bulgaristan',
+    };
+    const nameDaysTitle = {
+      'en': 'Name days', 'bg': 'Именни дни', 'de': 'Namenstage',
+      'fr': 'Fêtes des prénoms', 'it': 'Onomastici', 'el': 'Ονομαστικές εορτές',
+      'es': 'Onomásticas', 'pt': 'Dias do nome', 'ru': 'Именины',
+      'tr': 'İsim günleri',
+    };
+    const nameDaysSubtitle = {
+      'en': 'Bulgarian name days in the calendar',
+      'bg': 'Български именни дни в календара',
+      'de': 'Bulgarische Namenstage im Kalender',
+      'fr': 'Fêtes des prénoms bulgares dans le calendrier',
+      'it': 'Onomastici bulgari nel calendario',
+      'el': 'Βουλγαρικές ονομαστικές εορτές στο ημερολόγιο',
+      'es': 'Onomásticas búlgaras en el calendario',
+      'pt': 'Dias do nome búlgaros no calendário',
+      'ru': 'Болгарские именины в календаре',
+      'tr': 'Takvimde Bulgarca isim günleri',
+    };
+
+    String tr(Map<String, String> m) => m[lang] ?? m['en']!;
+    final isPro = ProService().isPro;
+
+    return [
+      const SizedBox(height: 24),
+      Text(
+        tr(sectionTitle),
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+      ),
+      const SizedBox(height: 8),
+      Card(
+        child: SwitchListTile(
+          secondary: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF8E24AA).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(Icons.cake_rounded, color: Color(0xFF8E24AA)),
+          ),
+          title: Row(
+            children: [
+              Flexible(child: Text(tr(nameDaysTitle))),
+              if (!isPro) ...[
+                const SizedBox(width: 6),
+                Icon(Icons.lock, size: 14, color: theme.colorScheme.primary),
+              ],
+            ],
+          ),
+          subtitle: Text(
+            tr(nameDaysSubtitle),
+            style: TextStyle(
+              fontSize: 12,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+          value: _nameDaysEnabled,
+          onChanged: (value) async {
+            if (value && !isPro) {
+              final upgraded = await showPaywallIfNeeded(
+                context,
+                isFeatureAvailable: false,
+                featureName: tr(nameDaysTitle),
+              );
+              if (!upgraded) return;
+            }
+            setState(() => _nameDaysEnabled = value);
+            // Записва + обновява глобалния notifier (календарът реагира веднага).
+            await NameDaysService().setEnabled(value);
+            // Сутрешни нотификации за имен ден (вкл./изкл.)
+            if (value) {
+              await NameDaysService().scheduleNotifications(lang: lang);
+            } else {
+              await NameDaysService().cancelNotifications();
+            }
+          },
+        ),
+      ),
+      const SizedBox(height: 8),
+      _buildHolidaysTile(context, lang),
+    ];
+  }
+
+  // Държави за ръчен избор (флаг + име). Auto-detect от locale е по подразбиране.
+  static const List<(String, String)> _holidayCountries = [
+    ('BG', '🇧🇬 България'),
+    ('GB', '🇬🇧 Великобритания'),
+    ('US', '🇺🇸 САЩ'),
+    ('DE', '🇩🇪 Германия'),
+    ('FR', '🇫🇷 Франция'),
+    ('IT', '🇮🇹 Италия'),
+    ('ES', '🇪🇸 Испания'),
+    ('PT', '🇵🇹 Португалия'),
+    ('GR', '🇬🇷 Гърция'),
+    ('RU', '🇷🇺 Русия'),
+    ('TR', '🇹🇷 Турция'),
+    ('RO', '🇷🇴 Румъния'),
+    ('RS', '🇷🇸 Сърбия'),
+    ('MK', '🇲🇰 Северна Македония'),
+    ('NL', '🇳🇱 Нидерландия'),
+    ('AT', '🇦🇹 Австрия'),
+    ('CH', '🇨🇭 Швейцария'),
+    ('PL', '🇵🇱 Полша'),
+    ('CZ', '🇨🇿 Чехия'),
+    ('HU', '🇭🇺 Унгария'),
+    ('UA', '🇺🇦 Украйна'),
+  ];
+
+  Widget _buildHolidaysTile(BuildContext context, String lang) {
+    final theme = Theme.of(context);
+    const title = {
+      'en': 'Public holidays', 'bg': 'Официални празници',
+      'de': 'Gesetzliche Feiertage', 'fr': 'Jours fériés',
+      'it': 'Festività ufficiali', 'el': 'Επίσημες αργίες',
+      'es': 'Días festivos', 'pt': 'Feriados oficiais',
+      'ru': 'Официальные праздники', 'tr': 'Resmi tatiller',
+    };
+    const subtitle = {
+      'en': 'Holidays for your country in the calendar',
+      'bg': 'Празниците на твоята държава в календара',
+      'de': 'Feiertage deines Landes im Kalender',
+      'fr': 'Les jours fériés de ton pays dans le calendrier',
+      'it': 'Le festività del tuo paese nel calendario',
+      'el': 'Οι αργίες της χώρας σου στο ημερολόγιο',
+      'es': 'Los festivos de tu país en el calendario',
+      'pt': 'Os feriados do teu país no calendário',
+      'ru': 'Праздники твоей страны в календаре',
+      'tr': 'Ülkenin tatilleri takvimde',
+    };
+    const countryLabel = {
+      'en': 'Country', 'bg': 'Държава', 'de': 'Land', 'fr': 'Pays',
+      'it': 'Paese', 'el': 'Χώρα', 'es': 'País', 'pt': 'País',
+      'ru': 'Страна', 'tr': 'Ülke',
+    };
+    String tr(Map<String, String> m) => m[lang] ?? m['en']!;
+
+    // Ако текущата държава не е в списъка, добавяме я временно най-отгоре.
+    final items = List<(String, String)>.from(_holidayCountries);
+    if (!items.any((c) => c.$1 == _holidaysCountry)) {
+      items.insert(0, (_holidaysCountry, _holidaysCountry));
+    }
+
+    return Card(
+      child: Column(
+        children: [
+          SwitchListTile(
+            secondary: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(HolidaysService.colorValue)
+                    .withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.flag_rounded,
+                  color: Color(HolidaysService.colorValue)),
+            ),
+            title: Text(tr(title)),
+            subtitle: Text(
+              tr(subtitle),
+              style: TextStyle(
+                fontSize: 12,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+            value: _holidaysEnabled,
+            onChanged: (value) async {
+              setState(() => _holidaysEnabled = value);
+              await HolidaysService().setEnabled(value);
+              if (value) await HolidaysService().loadForCurrentYears();
+            },
+          ),
+          if (_holidaysEnabled) ...[
+            const Divider(height: 0),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+              child: Row(
+                children: [
+                  Text(
+                    tr(countryLabel),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: DropdownButton<String>(
+                      value: _holidaysCountry,
+                      isExpanded: true,
+                      alignment: Alignment.centerRight,
+                      underline: const SizedBox.shrink(),
+                      items: items
+                          .map((c) => DropdownMenuItem(
+                                value: c.$1,
+                                child: Text(c.$2,
+                                    textAlign: TextAlign.right,
+                                    overflow: TextOverflow.ellipsis),
+                              ))
+                          .toList(),
+                      onChanged: (code) async {
+                        if (code == null) return;
+                        setState(() => _holidaysCountry = code);
+                        await HolidaysService().setCountry(code);
+                        await HolidaysService().loadForCurrentYears();
+                        // loadForCurrentYears bump-ва revision → календарът се обновява.
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   Future<void> _loadMorningBriefingSetting() async {
@@ -742,10 +1006,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final file = File('${tempDir.path}/$fileName');
       await file.writeAsString(jsonString);
 
+      // iOS popover anchor: share_plus иска non-zero sharePositionOrigin,
+      // иначе хвърля PlatformException на iPad/iOS. На Android се игнорира.
+      final box = context.findRenderObject() as RenderBox?;
+      final size = MediaQuery.of(context).size;
+      final origin = (box != null && box.hasSize)
+          ? box.localToGlobal(Offset.zero) & box.size
+          : Rect.fromCenter(
+              center: Offset(size.width / 2, size.height / 2),
+              width: 1,
+              height: 1,
+            );
+
       await Share.shareXFiles(
         [XFile(file.path)],
         subject: t.backupSubject,
         text: t.tasksBackup,
+        sharePositionOrigin: origin,
       );
 
     } catch (e) {
@@ -1761,6 +2038,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ],
+
+          // Раздел „България" (само при BG език/локация)
+          ..._buildBulgariaSection(context),
 
           const SizedBox(height: 24),
           // Backup / Restore
