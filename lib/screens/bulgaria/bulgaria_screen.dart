@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../../models/expiring_document.dart';
@@ -370,23 +371,34 @@ class _DocumentEditorState extends State<_DocumentEditor> {
             Text(_tr(_remindersLabel),
                 style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: _reminderOptions.map((d) {
-                final on = _reminders.contains(d);
-                return FilterChip(
-                  label: Text(_tr(_daysBefore).replaceAll('{days}', '$d')),
-                  selected: on,
-                  onSelected: (v) => setState(() {
-                    if (v) {
-                      _reminders.add(d);
-                    } else {
-                      _reminders.remove(d);
-                    }
-                  }),
-                );
-              }).toList(),
-            ),
+            // Web е безплатна lite версия без локални нотификации — показваме
+            // датите, но напомнянията са само в мобилното приложение.
+            if (kIsWeb)
+              Text(
+                _tr(_remindersWebOnly),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              )
+            else
+              Wrap(
+                spacing: 8,
+                children: _reminderOptions.map((d) {
+                  final on = _reminders.contains(d);
+                  return FilterChip(
+                    label: Text(_tr(_daysBefore).replaceAll('{days}', '$d')),
+                    selected: on,
+                    onSelected: (v) => setState(() {
+                      if (v) {
+                        _reminders.add(d);
+                      } else {
+                        _reminders.remove(d);
+                      }
+                    }),
+                  );
+                }).toList(),
+              ),
             const SizedBox(height: 20),
             Row(
               children: [
@@ -476,6 +488,18 @@ const _daysBefore = {
   'it': '{days} giorni prima', 'el': '{days} ημέρες πριν',
   'es': '{days} días antes', 'pt': '{days} dias antes',
   'ru': 'за {days} дней', 'tr': '{days} gün önce',
+};
+const _remindersWebOnly = {
+  'en': 'Reminders work in the mobile app 📱',
+  'bg': 'Напомнянията работят в мобилното приложение 📱',
+  'de': 'Erinnerungen funktionieren in der App 📱',
+  'fr': 'Les rappels fonctionnent dans l\'app mobile 📱',
+  'it': 'I promemoria funzionano nell\'app mobile 📱',
+  'el': 'Οι υπενθυμίσεις λειτουργούν στην εφαρμογή 📱',
+  'es': 'Los recordatorios funcionan en la app móvil 📱',
+  'pt': 'Os lembretes funcionam na app móvel 📱',
+  'ru': 'Напоминания работают в мобильном приложении 📱',
+  'tr': 'Hatırlatmalar mobil uygulamada çalışır 📱',
 };
 const _saveBtn = {
   'en': 'Save', 'bg': 'Запази', 'de': 'Speichern', 'fr': 'Enregistrer',
