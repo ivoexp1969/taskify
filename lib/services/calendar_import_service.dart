@@ -75,6 +75,26 @@ class CalendarImportService {
       }
     }
 
+    // Миграция: старите per-type импорт категории (вкл. нелокализирани като
+    // „Birthdays") → една обща „Календарни". Потребителската категория
+    // „Рождени дни" (id 'birthday') остава непокътната.
+    const oldImportCatIds = [catIdBirthdays, catIdOoo, catIdFocus, catIdLocation, catIdGoogleTasks];
+    for (final oldId in oldImportCatIds) {
+      if (categoryBox.get(oldId) == null) continue;
+      if (categoryBox.get(catIdCalendar) == null) {
+        await categoryBox.put(catIdCalendar, Category(
+          id: catIdCalendar,
+          name: t.catCalendarEvents,
+          colorValue: 0xFF2196F3,
+        ));
+      }
+      for (final task in taskBox.values.where((task) => task.categoryId == oldId)) {
+        task.categoryId = catIdCalendar;
+        await task.save();
+      }
+      await categoryBox.delete(oldId);
+    }
+
     // Съществуващи ID-та (за exact duplicate check)
     final existingIds = taskBox.values
         .where((t) => t.googleCalendarEventId != null)
@@ -136,24 +156,9 @@ class CalendarImportService {
       final eventTitle = event['summary'] as String? ?? '';
       if (isNearDuplicate(eventTitle, dueDate)) { skipped++; continue; }
 
-      // Category
-      String categoryId;
-      switch (eventType) {
-        case 'birthday':
-          categoryId = await getOrCreateCat(catIdBirthdays, t.catBirthdays, 0xFFE91E63);
-          break;
-        case 'outOfOffice':
-          categoryId = await getOrCreateCat(catIdOoo, t.catOutOfOffice, 0xFFFF9800);
-          break;
-        case 'focusTime':
-          categoryId = await getOrCreateCat(catIdFocus, t.catFocusTime, 0xFF9C27B0);
-          break;
-        case 'workingLocation':
-          categoryId = await getOrCreateCat(catIdLocation, t.catWorkLocation, 0xFF4CAF50);
-          break;
-        default:
-          categoryId = await getOrCreateCat(catIdCalendar, t.catCalendarEvents, 0xFF2196F3);
-      }
+      // Всичко импортирано отива в ЕДНА локализирана категория „Календарни"
+      // (без паразитни/нелокализирани категории като „Birthdays")
+      final categoryId = await getOrCreateCat(catIdCalendar, t.catCalendarEvents, 0xFF2196F3);
 
       final newTask = Task(
         title: eventTitle.isEmpty ? t.untitledEvent : eventTitle,
@@ -162,6 +167,7 @@ class CalendarImportService {
         priority: eventType == 'birthday' ? 2 : 1,
         notes: event['description'],
         googleCalendarEventId: eventId,
+        importedFromCalendar: true,
       );
       await taskBox.add(newTask);
       importedPairs.add(MapEntry(newTask.title.trim().toLowerCase(), newTask.dueDate));
@@ -196,7 +202,8 @@ class CalendarImportService {
       if (isNearDuplicate(gtaskTitle, dueDate)) { skipped++; continue; }
       importedPairs.add(MapEntry(gtaskTitle.trim().toLowerCase(), dueDate));
 
-      final categoryId = await getOrCreateCat(catIdGoogleTasks, t.googleTasks, 0xFF4CAF50);
+      // Google Tasks също влизат в общата „Календарни" категория
+      final categoryId = await getOrCreateCat(catIdCalendar, t.catCalendarEvents, 0xFF2196F3);
 
       final newTask = Task(
         title: gtaskTitle.isEmpty ? t.untitledTask : gtaskTitle,
@@ -205,6 +212,7 @@ class CalendarImportService {
         priority: 1,
         notes: gTask['notes'],
         googleCalendarEventId: prefixedId,
+        importedFromCalendar: true,
       );
       await taskBox.add(newTask);
       imported++;

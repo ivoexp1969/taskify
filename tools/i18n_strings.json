@@ -1,0 +1,3193 @@
+{
+  "count_unique": 521,
+  "count_maps_total": 587,
+  "strings": [
+    {
+      "en": "$completed of $total tasks",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "$count events imported",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "$count tasks added to Apple Calendar",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "$count tasks synced",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "$count tasks updated",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "$name's birthday",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "1 day before",
+      "files": [
+        "lib/utils/localization.dart",
+        "lib/widgets/reminder_selector.dart"
+      ]
+    },
+    {
+      "en": "1 hour before",
+      "files": [
+        "lib/utils/localization.dart",
+        "lib/widgets/reminder_selector.dart"
+      ]
+    },
+    {
+      "en": "1 week before",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "15 min before",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "15 minutes before",
+      "files": [
+        "lib/widgets/reminder_selector.dart"
+      ]
+    },
+    {
+      "en": "2 hours before",
+      "files": [
+        "lib/widgets/reminder_selector.dart"
+      ]
+    },
+    {
+      "en": "30 minutes before",
+      "files": [
+        "lib/widgets/reminder_selector.dart"
+      ]
+    },
+    {
+      "en": "5 minutes before",
+      "files": [
+        "lib/widgets/reminder_selector.dart"
+      ]
+    },
+    {
+      "en": "AI Parse",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "AI Settings",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "AI Subtasks",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "AI does the heavy lifting",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "AI parsing",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "AI unavailable. Fill manually.",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "AMOLED Black",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Account",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Active Subscription",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Activity",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Add",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Add Birthday",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Add Category",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Add Gift",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Add Meeting",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Add Payment",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Add Task",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Add Travel",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Add Workout",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Add item...",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Add note...",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Add subtask",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Add tasks by speaking",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Additional information...",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Adds active tasks to Apple Calendar",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Again",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "All",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "All tasks completed!",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "All themes",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Allow access to Apple Calendar",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Already have an account?",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Amount",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Apple Calendar connected",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Apply",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Apr",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "April",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Archive",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Archived",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Are you absolutely sure?",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Are you sure you want to delete \"$name\"?",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Are you sure you want to delete \"$title\"?",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Are you sure you want to delete this?",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Are you sure you want to logout?",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "At due time",
+      "files": [
+        "lib/widgets/reminder_selector.dart"
+      ]
+    },
+    {
+      "en": "At time",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Aug",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "August",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Auto-fill task details from text",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Awesome!",
+      "files": [
+        "lib/screens/home/home_screen.dart"
+      ]
+    },
+    {
+      "en": "Backup tasks to the cloud",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Birth year",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Birthday",
+      "files": [
+        "lib/screens/settings/statistics_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Birthday date",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Birthdays",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Break into steps",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Breakdown",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Briefing Time",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Briefing time set to $time",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Budget",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Bulgaria",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart",
+        "lib/screens/home/home_screen.dart",
+        "lib/screens/settings/settings_screen.dart"
+      ]
+    },
+    {
+      "en": "Bulgarian",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Bulgarian name days in the calendar",
+      "files": [
+        "lib/screens/settings/settings_screen.dart"
+      ]
+    },
+    {
+      "en": "By category",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Calendar",
+      "files": [
+        "lib/screens/home/home_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Calendar Events",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Calendar access denied",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Calendar view",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Cancel",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Cancel anytime",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Car insurance",
+      "files": [
+        "lib/services/documents_service.dart"
+      ]
+    },
+    {
+      "en": "Categories",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Category",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Check Your Email",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Clear done",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Close",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Cloud Sync",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Cloud has $tasks tasks and $cats categories.\\n\\nThis will replace local data. Continue?",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Cloud sync",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Code has expired",
+      "files": [
+        "lib/services/pro_service.dart"
+      ]
+    },
+    {
+      "en": "Code is not active",
+      "files": [
+        "lib/services/pro_service.dart"
+      ]
+    },
+    {
+      "en": "Code is used up",
+      "files": [
+        "lib/services/pro_service.dart"
+      ]
+    },
+    {
+      "en": "Color",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Compact",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Completed",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Completion rate",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Confirm",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Confirm Your Identity",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Confirmation",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Congratulations! You have Pro for DAYS days!",
+      "files": [
+        "lib/services/pro_service.dart"
+      ]
+    },
+    {
+      "en": "Congratulations! You have Pro forever!",
+      "files": [
+        "lib/services/pro_service.dart"
+      ]
+    },
+    {
+      "en": "Connect",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Connect to sync tasks",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Connected",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Connection failed",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Continue",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Could not delete account. Please try again.",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Country",
+      "files": [
+        "lib/screens/settings/settings_screen.dart"
+      ]
+    },
+    {
+      "en": "Create a new account",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Create tasks with categories, priorities and subtasks. Set due dates and recurring reminders.",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Custom categories",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Daily",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Daily AI usage",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Daily Streak — track your productivity momentum",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Daily task summary at $time",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Dark",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Date",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Date & Time",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Day",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Deadline",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Dec",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "December",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Default category",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Default category names cannot be changed",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Delegate",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Delete",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Delete Account",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Delete All Calendar Tasks",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Delete this category?",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Delete this task?",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Delete your account?",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Deleted $count calendar tasks",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Deleting your account...",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Departure",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Destination",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Didn't catch that, try again",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Disconnect",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Do First",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Do you like Taskify?",
+      "files": [
+        "lib/services/review_service.dart"
+      ]
+    },
+    {
+      "en": "Document",
+      "files": [
+        "lib/services/documents_service.dart"
+      ]
+    },
+    {
+      "en": "Don't have an account?",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Done",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Download",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Download from Cloud",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Download tasks from cloud?",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Download the Android app for Pro features and offline access.",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Downloaded $tasks tasks and $cats categories",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Driver's license",
+      "files": [
+        "lib/services/documents_service.dart"
+      ]
+    },
+    {
+      "en": "Due date",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Duration",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Edit",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Edit Birthday",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Edit Category",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Edit Gift",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Edit Meeting",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Edit Payment",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Edit Task",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Edit Travel",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Edit Workout",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Edit, add or delete categories",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Eliminate",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Email",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "English",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Enjoy your day!",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Enter code",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Enter email",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Enter email address",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Enter item...",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Enter password",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Enter subtask...",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Error",
+      "files": [
+        "lib/screens/auth/login_screen.dart",
+        "lib/screens/paywall/paywall_screen.dart",
+        "lib/services/pro_service.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Error: {code}",
+      "files": [
+        "lib/services/auth_service.dart"
+      ]
+    },
+    {
+      "en": "Expanded",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Expired on",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart"
+      ]
+    },
+    {
+      "en": "Expires in {days} days",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart"
+      ]
+    },
+    {
+      "en": "Expires today",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart"
+      ]
+    },
+    {
+      "en": "Expiry date",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart"
+      ]
+    },
+    {
+      "en": "Export Data",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Export error",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Export tasks",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Feb",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "February",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Focus",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Focus Session",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Focus Time",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Focus Timer — 25-min Pomodoro sessions",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "For security, please enter your password.",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "For who",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Forgot password?",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Free",
+      "files": [
+        "lib/services/pro_service.dart"
+      ]
+    },
+    {
+      "en": "Fri",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Friday",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Generating subtasks...",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Get access to all Pro features",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Get started",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Gift",
+      "files": [
+        "lib/screens/settings/statistics_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Gift for $name",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Gifts",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Go to Login",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Good Afternoon! ☀️",
+      "files": [
+        "lib/services/morning_briefing_service.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Good Evening! 🌙",
+      "files": [
+        "lib/services/morning_briefing_service.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Good Morning! 🌅",
+      "files": [
+        "lib/services/morning_briefing_service.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Google Calendar",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Google Tasks",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Got a big task? Open it and tap 'Break into steps' — AI splits it into clear, doable subtasks.",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Got it",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Great job!",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Have a promo code?",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "High",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Holidays for your country in the calendar",
+      "files": [
+        "lib/screens/settings/settings_screen.dart"
+      ]
+    },
+    {
+      "en": "I see you're in Bulgaria. Want me to show the official holidays in your calendar? 🇧🇬",
+      "files": [
+        "lib/screens/home/home_screen.dart"
+      ]
+    },
+    {
+      "en": "ID card",
+      "files": [
+        "lib/services/documents_service.dart"
+      ]
+    },
+    {
+      "en": "If you have an active subscription, it will continue to bill through Apple unless you cancel it separately.",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Import Data",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Import error",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Import from Calendar",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Important",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Important • Not urgent",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Imported $tasks tasks and $cats categories",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Imported: $imported, Skipped: $skipped",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "In 1 hour",
+      "files": [
+        "lib/services/notification_service_mobile.dart"
+      ]
+    },
+    {
+      "en": "In 15 minutes",
+      "files": [
+        "lib/services/notification_service_mobile.dart"
+      ]
+    },
+    {
+      "en": "In 2 hours",
+      "files": [
+        "lib/services/notification_service_mobile.dart"
+      ]
+    },
+    {
+      "en": "In 30 minutes",
+      "files": [
+        "lib/services/notification_service_mobile.dart"
+      ]
+    },
+    {
+      "en": "In 5 minutes",
+      "files": [
+        "lib/services/notification_service_mobile.dart"
+      ]
+    },
+    {
+      "en": "Incorrect email or password",
+      "files": [
+        "lib/services/auth_service.dart"
+      ]
+    },
+    {
+      "en": "Incorrect password",
+      "files": [
+        "lib/services/auth_service.dart"
+      ]
+    },
+    {
+      "en": "Invalid code",
+      "files": [
+        "lib/services/pro_service.dart"
+      ]
+    },
+    {
+      "en": "Invalid email",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Invalid email address",
+      "files": [
+        "lib/services/auth_service.dart"
+      ]
+    },
+    {
+      "en": "Jan",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "January",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Jul",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "July",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Jun",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "June",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Keep your important dates here — documents, holidays, name days. Start by adding your first one.",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart"
+      ]
+    },
+    {
+      "en": "Language",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Last 3 months",
+      "files": [
+        "lib/screens/settings/statistics_screen.dart"
+      ]
+    },
+    {
+      "en": "Last 30 days",
+      "files": [
+        "lib/screens/settings/statistics_screen.dart"
+      ]
+    },
+    {
+      "en": "Last 7 days",
+      "files": [
+        "lib/screens/settings/statistics_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Less space, more tasks",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Lifetime",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Light",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Listening...",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Local Data",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Login",
+      "files": [
+        "lib/screens/auth/login_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Login to sync tasks",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Logout",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Low",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Manage Categories",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Manage Subscriptions",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Mar",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "March",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Mark as done",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Matrix",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "May",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Medium",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Meeting",
+      "files": [
+        "lib/screens/settings/statistics_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Meeting with $name",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Meetings",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Microphone unavailable",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Minimum 6 characters",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Mon",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Monday",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Month",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Monthly",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Morning Briefing",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Multiple reminders",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Name",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Name (optional)",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart"
+      ]
+    },
+    {
+      "en": "Name day",
+      "files": [
+        "lib/screens/calendar/calendar_screen.dart"
+      ]
+    },
+    {
+      "en": "Name day 🎉",
+      "files": [
+        "lib/services/name_days_service.dart"
+      ]
+    },
+    {
+      "en": "Name days",
+      "files": [
+        "lib/screens/settings/settings_screen.dart"
+      ]
+    },
+    {
+      "en": "Needs improvement",
+      "files": [
+        "lib/services/review_service.dart"
+      ]
+    },
+    {
+      "en": "Never forget",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "New",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "New Category",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "New Entry",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "New Subtask",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "New Task",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Next",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "No account found with this email",
+      "files": [
+        "lib/services/auth_service.dart"
+      ]
+    },
+    {
+      "en": "No ads",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "No products available",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "No purchases found",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "No reminder",
+      "files": [
+        "lib/widgets/reminder_selector.dart"
+      ]
+    },
+    {
+      "en": "No repeat",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "No tasks",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "No tasks for this day",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "No tasks for today! ✨",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "None",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Not available on web",
+      "files": [
+        "lib/services/pro_service.dart"
+      ]
+    },
+    {
+      "en": "Not connected",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Not important",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Not logged in",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Not now",
+      "files": [
+        "lib/screens/home/home_screen.dart"
+      ]
+    },
+    {
+      "en": "Not urgent",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Not urgent • Not important",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Notes",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Nov",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "November",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "OK",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Occasion",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Oct",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "October",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "On the day",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "One-time payment",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Other",
+      "files": [
+        "lib/screens/settings/statistics_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Out of Office",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Overdue",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Parsing, voice, daily usage",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Parsing...",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Passport",
+      "files": [
+        "lib/services/documents_service.dart"
+      ]
+    },
+    {
+      "en": "Password",
+      "files": [
+        "lib/screens/auth/login_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Password is too weak (min. 6 characters)",
+      "files": [
+        "lib/services/auth_service.dart"
+      ]
+    },
+    {
+      "en": "Password reset email sent",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Pause",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Payment",
+      "files": [
+        "lib/screens/settings/statistics_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Payments",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Permanently delete your account and all data",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Personal",
+      "files": [
+        "lib/screens/settings/statistics_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Pick a date",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart"
+      ]
+    },
+    {
+      "en": "Place",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Please check your inbox and click the verification link before logging in.\\n\\n⚠️ Check your Spam folder too!",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Please verify your email address",
+      "files": [
+        "lib/services/auth_service.dart"
+      ]
+    },
+    {
+      "en": "Popular",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Power features",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Premium feature · replies in your language · up to 20 AI requests per day.",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Priority",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Privacy Policy",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Pro (paid)",
+      "files": [
+        "lib/services/pro_service.dart"
+      ]
+    },
+    {
+      "en": "Pro (promo - DAYS days)",
+      "files": [
+        "lib/services/pro_service.dart"
+      ]
+    },
+    {
+      "en": "Pro (promo - lifetime)",
+      "files": [
+        "lib/services/pro_service.dart"
+      ]
+    },
+    {
+      "en": "Pro (trial - DAYS days)",
+      "files": [
+        "lib/services/pro_service.dart"
+      ]
+    },
+    {
+      "en": "Pro reactivated!",
+      "files": [
+        "lib/services/pro_service.dart"
+      ]
+    },
+    {
+      "en": "Progress",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Promo: $days days left",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Public holidays",
+      "files": [
+        "lib/screens/home/home_screen.dart",
+        "lib/screens/settings/settings_screen.dart"
+      ]
+    },
+    {
+      "en": "Purchased",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Purchases restored!",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Quick-Add — add tasks directly from notifications",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Recurring tasks",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Register",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Remind me",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart"
+      ]
+    },
+    {
+      "en": "Reminder",
+      "files": [
+        "lib/services/notification_service_mobile.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Reminders",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Reminders work in the mobile app 📱",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart"
+      ]
+    },
+    {
+      "en": "Remove all imported events",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Renewal reminder",
+      "files": [
+        "lib/services/documents_service.dart"
+      ]
+    },
+    {
+      "en": "Repeat",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Replace",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Resend Email",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Restore",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Restore from JSON file",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Restore tasks from cloud",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Restore tasks from file",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Restore tasks from the cloud",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Return",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Same day at 8:00",
+      "files": [
+        "lib/utils/localization.dart",
+        "lib/widgets/reminder_selector.dart"
+      ]
+    },
+    {
+      "en": "Sat",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Saturday",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Save",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Save 50%",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Save Changes",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Save tasks to cloud",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Save tasks to file",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Schedule",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Search tasks",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Sep",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "September",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Session complete!",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Set smart reminders and get notified at the right time. Daily morning briefings keep you on track.",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Settings",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Share backup file",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Shopping",
+      "files": [
+        "lib/screens/settings/statistics_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Shopping List",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Sign in to sync to cloud",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Sign in to your account",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Signed in",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Skip",
+      "files": [
+        "lib/screens/auth/login_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Smart Input — type 'tomorrow' to set the date",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Smart task management in your pocket. Organize your day, meet your goals.",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Snoozed • 30 minutes",
+      "files": [
+        "lib/services/notification_service_mobile.dart"
+      ]
+    },
+    {
+      "en": "Sort by",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Speak now",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Speech recognition not available",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Start",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Start managing your tasks like a pro. Your 14-day free Pro trial is already active!",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Statistics",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Stay organized",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Stop",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Subtasks",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Summary",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Sun",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Sunday",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Sync from Calendar",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Sync now",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Sync successful",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Syncing...",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "System",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Tap the microphone and just speak. Your words turn into a task and are parsed automatically.",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Tap to continue",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Tap to see your tasks for today",
+      "files": [
+        "lib/services/morning_briefing_service.dart"
+      ]
+    },
+    {
+      "en": "Task",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Task View",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Task added",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Task added ✓",
+      "files": [
+        "lib/services/notification_service_mobile.dart"
+      ]
+    },
+    {
+      "en": "Task title",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Taskify Backup",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Tasks",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Tasks backup",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Tasks sync with Google Calendar",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Template",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Terms of Use",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Thank you! You are now Pro!",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Theme",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "This account has been disabled",
+      "files": [
+        "lib/services/auth_service.dart"
+      ]
+    },
+    {
+      "en": "This action is permanent and cannot be undone.",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "This email is already registered",
+      "files": [
+        "lib/services/auth_service.dart"
+      ]
+    },
+    {
+      "en": "This will also delete all tasks in this category",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "This will delete all tasks imported from Google Calendar. This action cannot be undone.",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "This will replace all local data",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Thu",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Thursday",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Time",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Time is now!",
+      "files": [
+        "lib/services/notification_service_mobile.dart"
+      ]
+    },
+    {
+      "en": "Title",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Today",
+      "files": [
+        "lib/screens/task/task_screen.dart",
+        "lib/services/notification_service_mobile.dart",
+        "lib/utils/localization.dart",
+        "lib/utils/natural_language_parser.dart"
+      ]
+    },
+    {
+      "en": "Today {names} celebrate — send your wishes? 🎉",
+      "files": [
+        "lib/services/name_days_service.dart"
+      ]
+    },
+    {
+      "en": "Tomorrow",
+      "files": [
+        "lib/screens/task/task_screen.dart",
+        "lib/services/notification_service_mobile.dart",
+        "lib/utils/natural_language_parser.dart"
+      ]
+    },
+    {
+      "en": "Too many attempts. Please try again later",
+      "files": [
+        "lib/services/auth_service.dart"
+      ]
+    },
+    {
+      "en": "Total",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Total items",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Travel",
+      "files": [
+        "lib/screens/settings/statistics_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Trial: $days days left",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Trip to $name",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Try again",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Tue",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Tuesday",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Type",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart"
+      ]
+    },
+    {
+      "en": "Type naturally — e.g. 'call mom tomorrow at 5pm' — then tap the ✨ AI button. It fills in the date, time, priority and category for you.",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Type of workout",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Unarchive",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Unlimited tasks",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Unlock Full Potential",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Untitled Event",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Untitled Task",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Upcoming",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Upgrade",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Upgrade now to keep all your tasks, reminders and calendar sync.",
+      "files": [
+        "lib/services/notification_service_mobile.dart"
+      ]
+    },
+    {
+      "en": "Upload",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Upload tasks to cloud?",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Upload to Cloud",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Uploaded $tasks tasks and $cats categories",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Urgent",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Urgent • Important",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Urgent • Not important",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Used today: $used/$limit",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Vehicle inspection",
+      "files": [
+        "lib/services/documents_service.dart"
+      ]
+    },
+    {
+      "en": "Verification email sent",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Verify Your Email",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "View your progress",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Vignette",
+      "files": [
+        "lib/services/documents_service.dart"
+      ]
+    },
+    {
+      "en": "Voice input",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Voice input is not available for this language on iOS",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "We sent a verification link to EMAIL.\\n\\nPlease click the link to activate your account.\\n\\n⚠️ Check your Spam folder if you don\\'t see the email!",
+      "files": [
+        "lib/screens/auth/login_screen.dart"
+      ]
+    },
+    {
+      "en": "Web version",
+      "files": [
+        "lib/services/pro_service.dart"
+      ]
+    },
+    {
+      "en": "Web version is free!",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart"
+      ]
+    },
+    {
+      "en": "Wed",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Wednesday",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Week",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Weekly",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Welcome to Taskify",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Welcome!",
+      "files": [
+        "lib/screens/home/home_screen.dart"
+      ]
+    },
+    {
+      "en": "What",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "What needs to be done?",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Will import $tasks tasks and $cats categories.\\n\\nThis will replace all current data. Continue?",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Will upload $tasks tasks and $cats categories.\\n\\nThis will replace cloud data. Continue?",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "With details and badges",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "With who",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Work",
+      "files": [
+        "lib/screens/settings/statistics_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Work Location",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Workout",
+      "files": [
+        "lib/screens/settings/statistics_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Workouts",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Yearly",
+      "files": [
+        "lib/screens/paywall/paywall_screen.dart",
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Yes, I love it!",
+      "files": [
+        "lib/services/review_service.dart"
+      ]
+    },
+    {
+      "en": "Yes, please",
+      "files": [
+        "lib/screens/home/home_screen.dart"
+      ]
+    },
+    {
+      "en": "You already used this code",
+      "files": [
+        "lib/services/pro_service.dart"
+      ]
+    },
+    {
+      "en": "You can export tasks to Apple Calendar",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "You have $tasks tasks and $cats categories that will be deleted permanently.",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "You have 14 days free Pro access!\\n\\nTry all features and see how Taskify can help you be more productive.",
+      "files": [
+        "lib/screens/home/home_screen.dart"
+      ]
+    },
+    {
+      "en": "You have a task to complete",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "You've reached today's AI limit, try again tomorrow",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "You\\'re all set!",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "Your opinion matters to us!",
+      "files": [
+        "lib/services/review_service.dart"
+      ]
+    },
+    {
+      "en": "day streak",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "e.g. 1990",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "e.g. 45 min",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "e.g. 50",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "e.g. 500",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "e.g. Birthday",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "e.g. Ivan",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "e.g. London",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "e.g. Maria",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "e.g. Office",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "e.g. Rent",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "e.g. Running",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "most productive",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "optional",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "reminder",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "task",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "tasks completed\\nthis week",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "turns $age",
+      "files": [
+        "lib/utils/localization.dart"
+      ]
+    },
+    {
+      "en": "{days} days before",
+      "files": [
+        "lib/screens/bulgaria/bulgaria_screen.dart"
+      ]
+    },
+    {
+      "en": "{name} expires in {days} days — time to renew 🔔",
+      "files": [
+        "lib/services/documents_service.dart"
+      ]
+    },
+    {
+      "en": "⏰ +30 min",
+      "files": [
+        "lib/services/notification_service_mobile.dart"
+      ]
+    },
+    {
+      "en": "⏰ Pro trial ends in 3 days",
+      "files": [
+        "lib/services/notification_service_mobile.dart"
+      ]
+    }
+  ],
+  "excluded": [
+    {
+      "file": "lib/screens/task/task_screen.dart",
+      "kind": "locale-codes",
+      "en": "en-US"
+    },
+    {
+      "file": "lib/utils/localization.dart",
+      "kind": "language-names",
+      "en": "English"
+    },
+    {
+      "file": "lib/utils/localization.dart",
+      "kind": "flags",
+      "en": "🇬🇧"
+    }
+  ]
+}

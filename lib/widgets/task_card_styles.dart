@@ -304,6 +304,28 @@ class ExpandableTaskCard extends StatelessWidget {
                                           ],
                                         ],
                                       ),
+                                      // Възраст за рождени дни (видима и на свитата карта)
+                                      if ((task.template == 'birthday' || task.categoryId == 'birthday') &&
+                                          _birthdayAge(task, t) != null) ...[
+                                        const SizedBox(height: 3),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.cake_rounded, size: 11,
+                                              color: blockColor.withValues(alpha: 0.8)),
+                                            const SizedBox(width: 3),
+                                            Flexible(
+                                              child: Text(
+                                                _birthdayAge(task, t)!,
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: blockColor.withValues(alpha: 0.9)),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ],
                                   ),
                                 ),
@@ -365,7 +387,7 @@ class ExpandableTaskCard extends StatelessWidget {
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
-                                          _notesPreview(task.notes!, t),
+                                          _notesPreview(task.notes!, t, task.dueDate.year),
                                           style: TextStyle(fontSize: 12,
                                             color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
                                             height: 1.4),
@@ -473,9 +495,32 @@ class ExpandableTaskCard extends StatelessWidget {
     );
   }
 
-  static String _notesPreview(String notes, AppText t) {
+  /// За рождени дни: връща „Навършва X" спрямо годината на събитието,
+  /// или null ако няма валидна година на раждане в notes.
+  static String? _birthdayAge(Task task, AppText t) {
+    final notes = task.notes;
+    if (notes == null || !notes.startsWith('birthYear:')) return null;
+    final yStr = notes.replaceFirst('birthYear:', '').split('\n').first.trim();
+    final by = int.tryParse(yStr);
+    if (by == null) return null;
+    final age = task.dueDate.year - by;
+    if (age < 0 || age > 130) return null;
+    return t.turnsAge(age);
+  }
+
+  static String _notesPreview(String notes, AppText t, int dueYear) {
     if (notes.startsWith('birthYear:')) {
-      return '${t.birthYear}: ${notes.replaceFirst('birthYear:', '').split('\n').first}';
+      final yStr = notes.replaceFirst('birthYear:', '').split('\n').first.trim();
+      final by = int.tryParse(yStr);
+      if (by != null) {
+        // Възрастта се смята спрямо ГОДИНАТА НА СЪБИТИЕТО (dueYear),
+        // за да се обновява правилно при ежегодното превъртане.
+        final age = dueYear - by;
+        if (age >= 0 && age <= 130) {
+          return '${t.turnsAge(age)} · ${t.birthYear}: $by';
+        }
+      }
+      return '${t.birthYear}: $yStr';
     }
     if (notes.contains('with:') || notes.contains('place:')) {
       final parts = <String>[];

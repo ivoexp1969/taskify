@@ -153,7 +153,7 @@ class NameDaysService {
       'en': 'Name day 🎉', 'bg': 'Имен ден 🎉', 'de': 'Namenstag 🎉',
       'fr': 'Fête du prénom 🎉', 'it': 'Onomastico 🎉',
       'el': 'Ονομαστική εορτή 🎉', 'es': 'Onomástica 🎉',
-      'pt': 'Dia do nome 🎉', 'ru': 'Именины 🎉', 'tr': 'İsim günü 🎉',
+      'pt': 'Dia do nome 🎉', 'ru': 'Именины 🎉', 'tr': 'İsim günü 🎉', 'ja': '聖名祝日 🎉',
     };
     // {names} се заменя с имената; тонът е топъл и личен.
     const bodyTpl = {
@@ -166,7 +166,7 @@ class NameDaysService {
       'es': 'Hoy celebran su santo {names} — ¿felicitas? 🎉',
       'pt': 'Hoje {names} fazem anos do nome — parabeniza? 🎉',
       'ru': 'Сегодня именины у {names} — поздравишь? 🎉',
-      'tr': 'Bugün {names} isim gününü kutluyor — tebrik eder misin? 🎉',
+      'tr': 'Bugün {names} isim gününü kutluyor — tebrik eder misin? 🎉', 'ja': '今日は{names}が聖名祝日です — お祝いを送りますか？🎉',
     };
     final t = title[lang] ?? title['en']!;
     final tpl = bodyTpl[lang] ?? bodyTpl['en']!;

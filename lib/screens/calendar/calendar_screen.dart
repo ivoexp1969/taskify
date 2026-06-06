@@ -1915,7 +1915,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       'es': 'Onomástica',
       'pt': 'Dia do nome',
       'ru': 'Именины',
-      'tr': 'İsim günü',
+      'tr': 'İsim günü', 'ja': '聖名祝日',
     };
     final theme = Theme.of(context);
 

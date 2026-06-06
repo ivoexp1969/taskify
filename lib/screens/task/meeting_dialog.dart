@@ -5,6 +5,7 @@ import '../../models/category.dart';
 import '../../utils/localization.dart';
 import '../../services/notification_service.dart';
 import '../../services/widget_service.dart';
+import '../../widgets/reminder_selector.dart';
 
 class MeetingDialog {
   static Future<void> show(BuildContext context, {Task? existing}) async {
@@ -34,6 +35,7 @@ class MeetingDialog {
         : TimeOfDay.now();
     List<String> reminders = List.from(existing?.remindersList ?? ['minus_15m']);
     String selectedRecurrence = existing?.recurrence ?? 'none';
+    int selectedPriority = existing?.priority ?? 1;
 
     await showModalBottomSheet(
       context: context,
@@ -161,6 +163,17 @@ class MeetingDialog {
                       _Field(controller: placeCtrl, hint: t.meetingPlaceHint, theme: theme, isDark: isDark),
                       const SizedBox(height: 16),
 
+                      // Приоритет
+                      Text(t.priority, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
+                      const SizedBox(height: 8),
+                      Wrap(spacing: 8, runSpacing: 6, children: [
+                        _RecurrenceChip(label: t.low,    value: '0', selected: selectedPriority == 0, accent: accent, onTap: () => setState(() => selectedPriority = 0)),
+                        _RecurrenceChip(label: t.medium, value: '1', selected: selectedPriority == 1, accent: accent, onTap: () => setState(() => selectedPriority = 1)),
+                        _RecurrenceChip(label: t.high,   value: '2', selected: selectedPriority == 2, accent: accent, onTap: () => setState(() => selectedPriority = 2)),
+                      ]),
+                      const SizedBox(height: 16),
+
                       // Повторение
                       Text(t.repeat, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
@@ -177,14 +190,11 @@ class MeetingDialog {
                       // Напомняне
                       Text(t.reminders, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                       const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8, runSpacing: 8,
-                        children: [
-                          _ReminderChip(label: t.atTime, value: 'at_time', selected: reminders.contains('at_time'), accent: accent, onTap: () => setState(() => reminders.contains('at_time') ? reminders.remove('at_time') : reminders.add('at_time'))),
-                          _ReminderChip(label: t.minus15m, value: 'minus_15m', selected: reminders.contains('minus_15m'), accent: accent, onTap: () => setState(() => reminders.contains('minus_15m') ? reminders.remove('minus_15m') : reminders.add('minus_15m'))),
-                          _ReminderChip(label: t.minus1h, value: 'minus_1h', selected: reminders.contains('minus_1h'), accent: accent, onTap: () => setState(() => reminders.contains('minus_1h') ? reminders.remove('minus_1h') : reminders.add('minus_1h'))),
-                          _ReminderChip(label: t.oneDayBefore, value: 'minus_1d', selected: reminders.contains('minus_1d'), accent: accent, onTap: () => setState(() => reminders.contains('minus_1d') ? reminders.remove('minus_1d') : reminders.add('minus_1d'))),
-                        ],
+                      ReminderSelector(
+                        selectedReminders: reminders,
+                        onChanged: (l) => setState(() => reminders = l),
+                        langCode: langCode,
+                        theme: theme,
                       ),
                       const SizedBox(height: 24),
 
@@ -216,6 +226,7 @@ class MeetingDialog {
                                 ..dueDate = dueDate
                                 ..template = 'meeting'
                                 ..notes = notesStr
+                                ..priority = selectedPriority
                                 ..recurrence = selectedRecurrence == 'none' ? null : selectedRecurrence;
                               existing.setReminders(reminders);
                               await existing.save();
@@ -225,7 +236,7 @@ class MeetingDialog {
                                 title: withPerson,
                                 dueDate: dueDate,
                                 categoryId: defaultCategoryId,
-                                priority: 1,
+                                priority: selectedPriority,
                                 template: 'meeting',
                                 notes: notesStr,
                                 recurrence: selectedRecurrence == 'none' ? null : selectedRecurrence,

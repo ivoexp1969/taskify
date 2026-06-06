@@ -66,7 +66,16 @@ class FirestoreService {
           'isCompleted': task.isCompleted,
           'recurrence': task.recurrence,
           'reminder': task.reminder,
+          'reminders': task.reminders,
           'subtasks': task.subtasks,
+          'notes': task.notes,
+          'completedAt': task.completedAt?.toIso8601String(),
+          'isArchived': task.isArchived,
+          'archivedAt': task.archivedAt?.toIso8601String(),
+          'durationMinutes': task.durationMinutes,
+          'template': task.template,
+          'googleCalendarEventId': task.googleCalendarEventId,
+          'importedFromCalendar': task.importedFromCalendar,
           'uploadedAt': FieldValue.serverTimestamp(),
         });
         tasksCount++;
@@ -108,6 +117,8 @@ class FirestoreService {
       final tasksSnapshot = await _tasksRef!.get();
       for (final doc in tasksSnapshot.docs) {
         final data = doc.data();
+        DateTime? parseDate(dynamic v) =>
+            v is String ? DateTime.tryParse(v) : null;
         final task = Task(
           title: data['title'] as String,
           dueDate: DateTime.parse(data['dueDate'] as String),
@@ -115,7 +126,16 @@ class FirestoreService {
           priority: data['priority'] as int? ?? 1,
           recurrence: data['recurrence'] as String?,
           reminder: data['reminder'] as String?,
+          reminders: (data['reminders'] as List<dynamic>?)?.cast<String>(),
           subtasks: (data['subtasks'] as List<dynamic>?)?.cast<String>(),
+          notes: data['notes'] as String?,
+          completedAt: parseDate(data['completedAt']),
+          isArchived: data['isArchived'] as bool? ?? false,
+          archivedAt: parseDate(data['archivedAt']),
+          durationMinutes: data['durationMinutes'] as int?,
+          template: data['template'] as String?,
+          googleCalendarEventId: data['googleCalendarEventId'] as String?,
+          importedFromCalendar: data['importedFromCalendar'] as bool?,
         );
         task.isCompleted = data['isCompleted'] as bool? ?? false;
         await taskBox.add(task);

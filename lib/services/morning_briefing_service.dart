@@ -98,19 +98,19 @@ class MorningBriefingService {
 
   String _greetingForHour(int hour, String lang) {
     if (hour >= 5 && hour < 12) {
-      const m = {'en': 'Good Morning! 🌅', 'bg': 'Добро утро! 🌅', 'de': 'Guten Morgen! 🌅', 'fr': 'Bonjour! 🌅', 'it': 'Buongiorno! 🌅', 'el': 'Καλημέρα! 🌅', 'es': '¡Buenos días! 🌅', 'pt': 'Bom dia! 🌅', 'ru': 'Доброе утро! 🌅', 'tr': 'Günaydın! 🌅'};
+      const m = {'en': 'Good Morning! 🌅', 'bg': 'Добро утро! 🌅', 'de': 'Guten Morgen! 🌅', 'fr': 'Bonjour! 🌅', 'it': 'Buongiorno! 🌅', 'el': 'Καλημέρα! 🌅', 'es': '¡Buenos días! 🌅', 'pt': 'Bom dia! 🌅', 'ru': 'Доброе утро! 🌅', 'tr': 'Günaydın! 🌅', 'ja': 'おはようございます！🌅'};
       return m[lang] ?? m['en']!;
     } else if (hour >= 12 && hour < 18) {
-      const m = {'en': 'Good Afternoon! ☀️', 'bg': 'Добър ден! ☀️', 'de': 'Guten Tag! ☀️', 'fr': 'Bon après-midi! ☀️', 'it': 'Buon pomeriggio! ☀️', 'el': 'Καλό απόγευμα! ☀️', 'es': '¡Buenas tardes! ☀️', 'pt': 'Boa tarde! ☀️', 'ru': 'Добрый день! ☀️', 'tr': 'İyi öğleden sonralar! ☀️'};
+      const m = {'en': 'Good Afternoon! ☀️', 'bg': 'Добър ден! ☀️', 'de': 'Guten Tag! ☀️', 'fr': 'Bon après-midi! ☀️', 'it': 'Buon pomeriggio! ☀️', 'el': 'Καλό απόγευμα! ☀️', 'es': '¡Buenas tardes! ☀️', 'pt': 'Boa tarde! ☀️', 'ru': 'Добрый день! ☀️', 'tr': 'İyi öğleden sonralar! ☀️', 'ja': 'こんにちは！☀️'};
       return m[lang] ?? m['en']!;
     } else {
-      const m = {'en': 'Good Evening! 🌙', 'bg': 'Добър вечер! 🌙', 'de': 'Guten Abend! 🌙', 'fr': 'Bonsoir! 🌙', 'it': 'Buonasera! 🌙', 'el': 'Καλό βράδυ! 🌙', 'es': '¡Buenas noches! 🌙', 'pt': 'Boa noite! 🌙', 'ru': 'Добрый вечер! 🌙', 'tr': 'İyi akşamlar! 🌙'};
+      const m = {'en': 'Good Evening! 🌙', 'bg': 'Добър вечер! 🌙', 'de': 'Guten Abend! 🌙', 'fr': 'Bonsoir! 🌙', 'it': 'Buonasera! 🌙', 'el': 'Καλό βράδυ! 🌙', 'es': '¡Buenas noches! 🌙', 'pt': 'Boa noite! 🌙', 'ru': 'Добрый вечер! 🌙', 'tr': 'İyi akşamlar! 🌙', 'ja': 'こんばんは！🌙'};
       return m[lang] ?? m['en']!;
     }
   }
 
   String _tapToSee(String lang) {
-    const m = {'en': 'Tap to see your tasks for today', 'bg': 'Натисни за преглед на задачите', 'de': 'Tippen, um deine Aufgaben zu sehen', 'fr': 'Appuyez pour voir vos tâches', 'it': 'Tocca per vedere le tue attività', 'el': 'Πατήστε για να δείτε τις εργασίες σας', 'es': 'Toca para ver tus tareas', 'pt': 'Toque para ver suas tarefas', 'ru': 'Нажмите, чтобы увидеть ваши задачи', 'tr': 'Görevlerinizi görmek için dokunun'};
+    const m = {'en': 'Tap to see your tasks for today', 'bg': 'Натисни за преглед на задачите', 'de': 'Tippen, um deine Aufgaben zu sehen', 'fr': 'Appuyez pour voir vos tâches', 'it': 'Tocca per vedere le tue attività', 'el': 'Πατήστε για να δείτε τις εργασίες σας', 'es': 'Toca para ver tus tareas', 'pt': 'Toque para ver suas tarefas', 'ru': 'Нажмите, чтобы увидеть ваши задачи', 'tr': 'Görevlerinizi görmek için dokunun', 'ja': 'タップして今日のタスクを表示'};
     return m[lang] ?? m['en']!;
   }
 

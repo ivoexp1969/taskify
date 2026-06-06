@@ -102,13 +102,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     const sectionTitle = {
       'en': 'Bulgaria', 'bg': 'България', 'de': 'Bulgarien', 'fr': 'Bulgarie',
       'it': 'Bulgaria', 'el': 'Βουλγαρία', 'es': 'Bulgaria', 'pt': 'Bulgária',
-      'ru': 'Болгария', 'tr': 'Bulgaristan',
+      'ru': 'Болгария', 'tr': 'Bulgaristan', 'ja': 'ブルガリア',
     };
     const nameDaysTitle = {
       'en': 'Name days', 'bg': 'Именни дни', 'de': 'Namenstage',
       'fr': 'Fêtes des prénoms', 'it': 'Onomastici', 'el': 'Ονομαστικές εορτές',
       'es': 'Onomásticas', 'pt': 'Dias do nome', 'ru': 'Именины',
-      'tr': 'İsim günleri',
+      'tr': 'İsim günleri', 'ja': '聖名祝日',
     };
     const nameDaysSubtitle = {
       'en': 'Bulgarian name days in the calendar',
@@ -120,7 +120,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'es': 'Onomásticas búlgaras en el calendario',
       'pt': 'Dias do nome búlgaros no calendário',
       'ru': 'Болгарские именины в календаре',
-      'tr': 'Takvimde Bulgarca isim günleri',
+      'tr': 'Takvimde Bulgarca isim günleri', 'ja': 'カレンダーにブルガリアの聖名祝日を表示',
     };
 
     String tr(Map<String, String> m) => m[lang] ?? m['en']!;
@@ -181,34 +181,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
           },
         ),
       ),
-      const SizedBox(height: 8),
-      _buildHolidaysTile(context, lang),
     ];
   }
 
-  // Държави за ръчен избор (флаг + име). Auto-detect от locale е по подразбиране.
+  // Държави за официални празници (флаг + неутрално английско име).
+  // Само поддържани от Nager.Date. Auto-detect от locale е по подразбиране.
+  // Бел.: Индия (IN) не се поддържа от Nager, затова липсва (макар да имаме hi).
   static const List<(String, String)> _holidayCountries = [
-    ('BG', '🇧🇬 България'),
-    ('GB', '🇬🇧 Великобритания'),
-    ('US', '🇺🇸 САЩ'),
-    ('DE', '🇩🇪 Германия'),
-    ('FR', '🇫🇷 Франция'),
-    ('IT', '🇮🇹 Италия'),
-    ('ES', '🇪🇸 Испания'),
-    ('PT', '🇵🇹 Португалия'),
-    ('GR', '🇬🇷 Гърция'),
-    ('RU', '🇷🇺 Русия'),
-    ('TR', '🇹🇷 Турция'),
-    ('RO', '🇷🇴 Румъния'),
-    ('RS', '🇷🇸 Сърбия'),
-    ('MK', '🇲🇰 Северна Македония'),
-    ('NL', '🇳🇱 Нидерландия'),
-    ('AT', '🇦🇹 Австрия'),
-    ('CH', '🇨🇭 Швейцария'),
-    ('PL', '🇵🇱 Полша'),
-    ('CZ', '🇨🇿 Чехия'),
-    ('HU', '🇭🇺 Унгария'),
-    ('UA', '🇺🇦 Украйна'),
+    ('AT', '🇦🇹 Austria'),
+    ('BG', '🇧🇬 Bulgaria'),
+    ('CN', '🇨🇳 China'),
+    ('CZ', '🇨🇿 Czechia'),
+    ('FR', '🇫🇷 France'),
+    ('DE', '🇩🇪 Germany'),
+    ('GR', '🇬🇷 Greece'),
+    ('HU', '🇭🇺 Hungary'),
+    ('ID', '🇮🇩 Indonesia'),
+    ('IT', '🇮🇹 Italy'),
+    ('JP', '🇯🇵 Japan'),
+    ('MK', '🇲🇰 North Macedonia'),
+    ('NL', '🇳🇱 Netherlands'),
+    ('PL', '🇵🇱 Poland'),
+    ('PT', '🇵🇹 Portugal'),
+    ('RO', '🇷🇴 Romania'),
+    ('RU', '🇷🇺 Russia'),
+    ('RS', '🇷🇸 Serbia'),
+    ('KR', '🇰🇷 South Korea'),
+    ('ES', '🇪🇸 Spain'),
+    ('CH', '🇨🇭 Switzerland'),
+    ('TR', '🇹🇷 Turkey'),
+    ('UA', '🇺🇦 Ukraine'),
+    ('GB', '🇬🇧 United Kingdom'),
+    ('US', '🇺🇸 United States'),
   ];
 
   Widget _buildHolidaysTile(BuildContext context, String lang) {
@@ -218,7 +222,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'de': 'Gesetzliche Feiertage', 'fr': 'Jours fériés',
       'it': 'Festività ufficiali', 'el': 'Επίσημες αργίες',
       'es': 'Días festivos', 'pt': 'Feriados oficiais',
-      'ru': 'Официальные праздники', 'tr': 'Resmi tatiller',
+      'ru': 'Официальные праздники', 'tr': 'Resmi tatiller', 'ja': '祝日',
     };
     const subtitle = {
       'en': 'Holidays for your country in the calendar',
@@ -230,12 +234,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'es': 'Los festivos de tu país en el calendario',
       'pt': 'Os feriados do teu país no calendário',
       'ru': 'Праздники твоей страны в календаре',
-      'tr': 'Ülkenin tatilleri takvimde',
+      'tr': 'Ülkenin tatilleri takvimde', 'ja': 'カレンダーにお住まいの国の祝日を表示',
     };
     const countryLabel = {
       'en': 'Country', 'bg': 'Държава', 'de': 'Land', 'fr': 'Pays',
       'it': 'Paese', 'el': 'Χώρα', 'es': 'País', 'pt': 'País',
-      'ru': 'Страна', 'tr': 'Ülke',
+      'ru': 'Страна', 'tr': 'Ülke', 'ja': '国',
     };
     String tr(Map<String, String> m) => m[lang] ?? m['en']!;
 
@@ -1652,103 +1656,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         color: Colors.blue.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.sync, color: Colors.blue),
+                      child: const Icon(Icons.upload, color: Colors.blue),
                     ),
-                    title: Text(t.syncNow),
+                    title: Text(t.exportToCalendar),
+                    subtitle: Text(t.exportToCalendarDesc, style: const TextStyle(fontSize: 12)),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () async {
                       final taskBox = Hive.box<Task>('tasks');
+                      final now = DateTime.now();
+                      final today = DateTime(now.year, now.month, now.day);
                       int synced = 0;
                       for (final task in taskBox.values) {
-                        final now = DateTime.now();
-                        final today = DateTime(now.year, now.month, now.day);
-                        if (!task.isCompleted && !task.isArchived && task.dueDate.isAfter(today.subtract(const Duration(days: 1)))) {
-                          // Ресетваме старото ID ако има
-                          if (task.googleCalendarEventId != null) {
-                            await _calendarService.deleteCalendarEvent(task.googleCalendarEventId!, interactive: true);
-                            task.googleCalendarEventId = null;
-                          }
-                          final eventId = await _calendarService.addTaskToCalendar(task, interactive: true);
-                          if (eventId != null) {
-                            task.googleCalendarEventId = eventId;
-                            await task.save();
-                            synced++;
-                          }
+                        if (task.isCompleted || task.isArchived) continue;
+                        // Не пипаме задачи, импортирани ОТ календара
+                        if (task.importedFromCalendar == true) continue;
+                        if (!task.dueDate.isAfter(today.subtract(const Duration(days: 1)))) continue;
+                        // Ресетваме старото ID ако има (повторен експорт)
+                        if (task.googleCalendarEventId != null) {
+                          await _calendarService.deleteCalendarEvent(task.googleCalendarEventId!, interactive: true);
+                          task.googleCalendarEventId = null;
+                        }
+                        final eventId = await _calendarService.addTaskToCalendar(task, interactive: true);
+                        if (eventId != null) {
+                          task.googleCalendarEventId = eventId;
+                          await task.save();
+                          synced++;
                         }
                       }
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(t.tasksSynced(synced))),
                         );
-                                            }
+                      }
                     },
-                  ),
-                  const Divider(height: 0),
-                  ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.cloud_download, color: Colors.orange),
-                    ),
-                    title: Text(t.syncFromCalendar),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () async {
-                      final taskBox = Hive.box<Task>('tasks');
-                      int updated = 0;
-                      for (final task in taskBox.values) {
-                        if (task.googleCalendarEventId != null) {
-                          final event = await _calendarService.getCalendarEvent(task.googleCalendarEventId!, interactive: true);
-                          if (event != null) {
-                            if (event['deleted'] == true) {
-                              // Събитието е изтрито - питаме потребителя
-                              // Засега само маркираме
-                              task.googleCalendarEventId = null;
-                              await task.save();
-                              updated++;
-                            } else {
-                              // Обновяваме задачата ако има промени
-                              bool changed = false;
-                              if (event['summary'] != null && event['summary'] != task.title) {
-                                task.title = event['summary'];
-                                changed = true;
-                              }
-                              if (event['description'] != null && event['description'] != (task.notes ?? '')) {
-                                task.notes = event['description'].isEmpty ? null : event['description'];
-                                changed = true;
-                              }
-                              if (event['startDateTime'] != null) {
-                                try {
-                                  final rawDt = event['startDateTime'] as String;
-                                  final DateTime newDate;
-                                  if (rawDt.contains('T')) {
-                                    newDate = DateTime.parse(rawDt).toLocal();
-                                  } else {
-                                    final p = rawDt.split('-');
-                                    newDate = DateTime(int.parse(p[0]), int.parse(p[1]), int.parse(p[2]));
-                                  }
-                                  if (newDate != task.dueDate) {
-                                    task.dueDate = newDate;
-                                    changed = true;
-                                  }
-                                } catch (_) {}
-                              }
-                              if (changed) {
-                                await task.save();
-                                updated++;
-                              }
-                            }
-                          }
-                        }
-                      }
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(t.tasksUpdated(updated))),
-                        );
-                      }
-                                        },
                   ),
                   const Divider(height: 0),
                   ListTile(
@@ -1761,6 +1701,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: const Icon(Icons.download, color: Colors.purple),
                     ),
                     title: Text(t.importFromCalendar),
+                    subtitle: Text(t.importFromCalendarDesc, style: const TextStyle(fontSize: 12)),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () async {
                       final taskBox = Hive.box<Task>('tasks');
@@ -1787,43 +1728,101 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       child: const Icon(Icons.delete_forever, color: Colors.red),
                     ),
-                    title: Text(t.deleteAllCalendarTasks),
-                    subtitle: Text(t.removeAllImported, style: const TextStyle(fontSize: 12)),
+                    title: Text(t.deleteImportedTasks),
+                    subtitle: Text(t.deleteImportedDesc, style: const TextStyle(fontSize: 12)),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () async {
-                      // Confirm dialog
                       final confirm = await showDialog<bool>(
                         context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text('${t.deleteAllCalendarTasks}?'),
+                        builder: (ctx) => AlertDialog(
+                          title: Text('${t.deleteImportedTasks}?'),
                           content: Text(t.deleteCalendarTasksConfirm),
                           actions: [
                             TextButton(
-                              onPressed: () => Navigator.pop(context, false),
+                              onPressed: () => Navigator.pop(ctx, false),
                               child: Text(t.cancel),
                             ),
                             TextButton(
-                              onPressed: () => Navigator.pop(context, true),
+                              onPressed: () => Navigator.pop(ctx, true),
                               child: Text(t.delete, style: const TextStyle(color: Colors.red)),
                             ),
                           ],
                         ),
                       );
-                      
+
                       if (confirm == true) {
                         final taskBox = Hive.box<Task>('tasks');
                         final tasksToDelete = taskBox.values
-                            .where((t) => t.googleCalendarEventId != null)
+                            .where((t) => t.importedFromCalendar == true)
                             .toList();
-                        
+
                         for (final task in tasksToDelete) {
                           await task.delete();
                         }
-                        
+
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(t.deletedCalendarTasks(tasksToDelete.length)),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                  const Divider(height: 0),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.event_busy, color: Colors.red),
+                    ),
+                    title: Text(t.deleteExportedTasks),
+                    subtitle: Text(t.deleteExportedDesc, style: const TextStyle(fontSize: 12)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: Text('${t.deleteExportedTasks}?'),
+                          content: Text(t.deleteExportedConfirm),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: Text(t.cancel),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              child: Text(t.delete, style: const TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirm == true) {
+                        final taskBox = Hive.box<Task>('tasks');
+                        final exported = taskBox.values
+                            .where((t) => t.googleCalendarEventId != null && t.importedFromCalendar != true)
+                            .toList();
+
+                        int removed = 0;
+                        for (final task in exported) {
+                          final ok = await _calendarService.deleteCalendarEvent(
+                              task.googleCalendarEventId!, interactive: true);
+                          // Разкачаме връзката независимо от резултата
+                          task.googleCalendarEventId = null;
+                          await task.save();
+                          if (ok) removed++;
+                        }
+
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(t.deletedExportedTasks(removed)),
                               duration: const Duration(seconds: 2),
                             ),
                           );
@@ -1910,6 +1909,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(t.tasksAddedToAppleCalendar(count))),
+                          );
+                        }
+                      },
+                    ),
+                    const Divider(height: 0),
+                    ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.event_busy, color: Colors.red),
+                      ),
+                      title: Text(t.deleteExportedTasks),
+                      subtitle: Text(t.deleteExportedDesc, style: const TextStyle(fontSize: 12)),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: Text('${t.deleteExportedTasks}?'),
+                            content: Text(t.deleteExportedConfirm),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: Text(t.cancel),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: Text(t.delete, style: const TextStyle(color: Colors.red)),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirm != true) return;
+                        final taskBox = Hive.box<Task>('tasks');
+                        final removed = await _iosCalendarService
+                            .deleteAllExportedTasks(taskBox.values.toList());
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(t.deletedExportedTasks(removed))),
                           );
                         }
                       },
@@ -2039,7 +2080,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ],
 
-          // Раздел „България" (само при BG език/локация)
+          // Официални празници — достъпно за всички държави (не само BG).
+          const SizedBox(height: 24),
+          _buildHolidaysTile(
+              context, LanguageScope.of(context).locale.languageCode),
+
+          // Раздел „България" (именни дни) — само при BG език/локация.
           ..._buildBulgariaSection(context),
 
           const SizedBox(height: 24),

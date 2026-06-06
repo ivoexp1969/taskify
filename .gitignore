@@ -51,3 +51,6 @@ flutter_*.png
 *.dart.backup*
 *.dart.bak
 *.dart.orig
+
+# Cloudflare Wrangler local state
+.wrangler/

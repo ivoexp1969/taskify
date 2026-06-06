@@ -51,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const m = {
       'en': 'Bulgaria', 'bg': 'България', 'de': 'Bulgarien', 'fr': 'Bulgarie',
       'it': 'Bulgaria', 'el': 'Βουλγαρία', 'es': 'Bulgaria', 'pt': 'Bulgária',
-      'ru': 'Болгария', 'tr': 'Bulgaristan',
+      'ru': 'Болгария', 'tr': 'Bulgaristan', 'ja': 'ブルガリア',
     };
     return m[lang] ?? m['en']!;
   }
@@ -92,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'de': 'Gesetzliche Feiertage', 'fr': 'Jours fériés',
       'it': 'Festività ufficiali', 'el': 'Επίσημες αργίες',
       'es': 'Días festivos', 'pt': 'Feriados oficiais',
-      'ru': 'Официальные праздники', 'tr': 'Resmi tatiller',
+      'ru': 'Официальные праздники', 'tr': 'Resmi tatiller', 'ja': '祝日',
     };
     const body = {
       'en': "I see you're in Bulgaria. Want me to show the official holidays in your calendar? 🇧🇬",
@@ -104,17 +104,17 @@ class _HomeScreenState extends State<HomeScreen> {
       'es': 'Veo que estás en Bulgaria. ¿Te muestro los festivos en el calendario? 🇧🇬',
       'pt': 'Vejo que estás na Bulgária. Mostro os feriados no teu calendário? 🇧🇬',
       'ru': 'Вижу, что ты в Болгарии. Показывать праздники в календаре? 🇧🇬',
-      'tr': 'Bulgaristan\'da olduğunu görüyorum. Resmi tatilleri takvimde göstereyim mi? 🇧🇬',
+      'tr': 'Bulgaristan\'da olduğunu görüyorum. Resmi tatilleri takvimde göstereyim mi? 🇧🇬', 'ja': 'ブルガリアにいらっしゃるようですね。公式の祝日をカレンダーに表示しますか？🇧🇬',
     };
     const yes = {
       'en': 'Yes, please', 'bg': 'Да, покажи', 'de': 'Ja, gern',
       'fr': 'Oui', 'it': 'Sì', 'el': 'Ναι', 'es': 'Sí',
-      'pt': 'Sim', 'ru': 'Да', 'tr': 'Evet',
+      'pt': 'Sim', 'ru': 'Да', 'tr': 'Evet', 'ja': 'はい、お願いします',
     };
     const no = {
       'en': 'Not now', 'bg': 'Не сега', 'de': 'Nicht jetzt',
       'fr': 'Pas maintenant', 'it': 'Non ora', 'el': 'Όχι τώρα',
-      'es': 'Ahora no', 'pt': 'Agora não', 'ru': 'Не сейчас', 'tr': 'Şimdi değil',
+      'es': 'Ahora no', 'pt': 'Agora não', 'ru': 'Не сейчас', 'tr': 'Şimdi değil', 'ja': '後で',
     };
     String tr(Map<String, String> m) => m[lang] ?? m['en']!;
 
@@ -195,9 +195,9 @@ class _HomeScreenState extends State<HomeScreen> {
         final languageController = LanguageScope.of(context);
         final lang = languageController.locale.languageCode;
         
-        const welcomeTitle = {'en': 'Welcome!', 'bg': 'Добре дошъл!', 'de': 'Willkommen!', 'fr': 'Bienvenue!', 'it': 'Benvenuto!', 'el': 'Καλώς ήρθες!', 'es': '¡Bienvenido!', 'pt': 'Bem-vindo!', 'ru': 'Добро пожаловать!', 'tr': 'Hoş geldin!'};
-        const welcomeBody = {'en': 'You have 14 days free Pro access!\n\nTry all features and see how Taskify can help you be more productive.', 'bg': 'Имаш 14 дни безплатен Pro достъп!\n\nИзползвай всички функции и виж как Taskify ще ти помогне да си по-продуктивен.', 'de': 'Du hast 14 Tage kostenlosen Pro-Zugang!\n\nProbiere alle Funktionen aus.', 'fr': 'Vous avez 14 jours d\'accès Pro gratuit!\n\nEssayez toutes les fonctionnalités.', 'it': 'Hai 14 giorni di accesso Pro gratuito!\n\nProva tutte le funzionalità.', 'el': 'Έχεις 14 ημέρες δωρεάν Pro πρόσβαση!\n\nΔοκίμασε όλες τις λειτουργίες.', 'es': '¡Tienes 14 días de acceso Pro gratis!\n\nPrueba todas las funciones.', 'pt': 'Você tem 14 dias de acesso Pro grátis!\n\nExperimente todos os recursos.', 'ru': 'У вас 14 дней бесплатного Pro доступа!\n\nПопробуйте все функции.', 'tr': '14 gün ücretsiz Pro erişiminiz var!\n\nTüm özellikleri deneyin.'};
-        const welcomeBtn = {'en': 'Awesome!', 'bg': 'Страхотно!', 'de': 'Super!', 'fr': 'Génial!', 'it': 'Fantastico!', 'el': 'Τέλεια!', 'es': '¡Genial!', 'pt': 'Incrível!', 'ru': 'Отлично!', 'tr': 'Harika!'};
+        const welcomeTitle = {'en': 'Welcome!', 'bg': 'Добре дошъл!', 'de': 'Willkommen!', 'fr': 'Bienvenue!', 'it': 'Benvenuto!', 'el': 'Καλώς ήρθες!', 'es': '¡Bienvenido!', 'pt': 'Bem-vindo!', 'ru': 'Добро пожаловать!', 'tr': 'Hoş geldin!', 'ja': 'ようこそ！'};
+        const welcomeBody = {'en': 'You have 14 days free Pro access!\n\nTry all features and see how Taskify can help you be more productive.', 'bg': 'Имаш 14 дни безплатен Pro достъп!\n\nИзползвай всички функции и виж как Taskify ще ти помогне да си по-продуктивен.', 'de': 'Du hast 14 Tage kostenlosen Pro-Zugang!\n\nProbiere alle Funktionen aus.', 'fr': 'Vous avez 14 jours d\'accès Pro gratuit!\n\nEssayez toutes les fonctionnalités.', 'it': 'Hai 14 giorni di accesso Pro gratuito!\n\nProva tutte le funzionalità.', 'el': 'Έχεις 14 ημέρες δωρεάν Pro πρόσβαση!\n\nΔοκίμασε όλες τις λειτουργίες.', 'es': '¡Tienes 14 días de acceso Pro gratis!\n\nPrueba todas las funciones.', 'pt': 'Você tem 14 dias de acesso Pro grátis!\n\nExperimente todos os recursos.', 'ru': 'У вас 14 дней бесплатного Pro доступа!\n\nПопробуйте все функции.', 'tr': '14 gün ücretsiz Pro erişiminiz var!\n\nTüm özellikleri deneyin.', 'ja': '14日間の無料Proアクセスがあります！\n\nすべての機能を試して、Taskifyがどれだけ生産性を高めるか体験してください。'};
+        const welcomeBtn = {'en': 'Awesome!', 'bg': 'Страхотно!', 'de': 'Super!', 'fr': 'Génial!', 'it': 'Fantastico!', 'el': 'Τέλεια!', 'es': '¡Genial!', 'pt': 'Incrível!', 'ru': 'Отлично!', 'tr': 'Harika!', 'ja': '最高！'};
         
         showDialog(
           context: context,
@@ -224,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!kIsWeb && index == 2 && !_proService.canUseCalendar) {
       final languageController = LanguageScope.of(context);
       final lang = languageController.locale.languageCode;
-      const calendarName = {'en': 'Calendar', 'bg': 'Календар', 'de': 'Kalender', 'fr': 'Calendrier', 'it': 'Calendario', 'el': 'Ημερολόγιο', 'es': 'Calendario', 'pt': 'Calendário', 'ru': 'Календарь', 'tr': 'Takvim'};
+      const calendarName = {'en': 'Calendar', 'bg': 'Календар', 'de': 'Kalender', 'fr': 'Calendrier', 'it': 'Calendario', 'el': 'Ημερολόγιο', 'es': 'Calendario', 'pt': 'Calendário', 'ru': 'Календарь', 'tr': 'Takvim', 'ja': 'カレンダー'};
 
       final upgraded = await showPaywallIfNeeded(
         context,
@@ -238,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // Раздел „България" е premium функция.
     if (!kIsWeb && index == _bulgariaIndex && !_proService.isPro) {
       final lang = LanguageScope.of(context).locale.languageCode;
-      const bgName = {'en': 'Bulgaria', 'bg': 'България', 'de': 'Bulgarien', 'fr': 'Bulgarie', 'it': 'Bulgaria', 'el': 'Βουλγαρία', 'es': 'Bulgaria', 'pt': 'Bulgária', 'ru': 'Болгария', 'tr': 'Bulgaristan'};
+      const bgName = {'en': 'Bulgaria', 'bg': 'България', 'de': 'Bulgarien', 'fr': 'Bulgarie', 'it': 'Bulgaria', 'el': 'Βουλγαρία', 'es': 'Bulgaria', 'pt': 'Bulgária', 'ru': 'Болгария', 'tr': 'Bulgaristan', 'ja': 'ブルガリア'};
       final upgraded = await showPaywallIfNeeded(
         context,
         isFeatureAvailable: false,

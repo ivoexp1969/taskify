@@ -6,6 +6,7 @@ import '../../models/category.dart';
 import '../../utils/localization.dart';
 import '../../services/notification_service.dart';
 import '../../services/widget_service.dart';
+import '../../widgets/reminder_selector.dart';
 
 class BirthdayDialog {
   static Future<void> show(BuildContext context, {Task? existing}) async {
@@ -23,14 +24,28 @@ class BirthdayDialog {
 
     DateTime selectedDate = existing?.dueDate ?? DateTime.now();
     int? birthYear;
+    // Запазваме евентуални други бележки (напр. ако задачата е създадена като
+    // обикновена в категория „Рождени дни"), за да не ги изтрием при запис.
+    String extraNotes = '';
 
-    // Парсираме birthYear от notes ако редактираме
-    if (existing?.notes != null && existing!.notes!.startsWith('birthYear:')) {
-      birthYear = int.tryParse(existing.notes!.replaceFirst('birthYear:', '').split('\n').first);
+    // Парсираме birthYear от notes ако редактираме; останалото пазим в extraNotes
+    if (existing?.notes != null) {
+      final kept = <String>[];
+      for (final line in existing!.notes!.split('\n')) {
+        if (line.startsWith('birthYear:')) {
+          birthYear = int.tryParse(line.replaceFirst('birthYear:', '').trim());
+        } else {
+          kept.add(line);
+        }
+      }
+      extraNotes = kept.join('\n').trim();
       yearCtrl.text = birthYear?.toString() ?? '';
     }
 
     List<String> reminders = List.from(existing?.remindersList ?? ['minus_1d']);
+    // Рожденият ден по подразбиране е ежегоден (авто-попълване според категорията)
+    String selectedRecurrence = existing?.recurrence ?? 'yearly';
+    int selectedPriority = existing?.priority ?? 1;
 
     await showModalBottomSheet(
       context: context,
@@ -47,10 +62,11 @@ class BirthdayDialog {
             final bgColor = isDark ? const Color(0xFF13131f) : theme.colorScheme.surface;
             const accent = Color(0xFFD4537E);
 
-            // Правилно изчисление: на колко навършва ТАЗИ календарна година
+            // На колко навършва на ДАТАТА на събитието (за да се обновява
+            // правилно при ежегодното превъртане на повтарящата се задача).
             int? age;
             if (birthYear != null) {
-              age = DateTime.now().year - birthYear!;
+              age = selectedDate.year - birthYear!;
               if (age < 0 || age > 130) age = null;
             }
 
@@ -198,17 +214,36 @@ class BirthdayDialog {
                       ),
                       const SizedBox(height: 16),
 
+                      // Приоритет
+                      Text(t.priority, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
+                      const SizedBox(height: 8),
+                      Wrap(spacing: 8, runSpacing: 6, children: [
+                        _RecurrenceChip(label: t.low,    value: '0', selected: selectedPriority == 0, accent: accent, onTap: () => setState(() => selectedPriority = 0)),
+                        _RecurrenceChip(label: t.medium, value: '1', selected: selectedPriority == 1, accent: accent, onTap: () => setState(() => selectedPriority = 1)),
+                        _RecurrenceChip(label: t.high,   value: '2', selected: selectedPriority == 2, accent: accent, onTap: () => setState(() => selectedPriority = 2)),
+                      ]),
+                      const SizedBox(height: 16),
+
+                      // Повторение
+                      Text(t.repeat, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
+                      const SizedBox(height: 8),
+                      Wrap(spacing: 8, runSpacing: 6, children: [
+                        _RecurrenceChip(label: t.none2,   value: 'none',    selected: selectedRecurrence == 'none',    accent: accent, onTap: () => setState(() => selectedRecurrence = 'none')),
+                        _RecurrenceChip(label: t.daily,   value: 'daily',   selected: selectedRecurrence == 'daily',   accent: accent, onTap: () => setState(() => selectedRecurrence = 'daily')),
+                        _RecurrenceChip(label: t.weekly,  value: 'weekly',  selected: selectedRecurrence == 'weekly',  accent: accent, onTap: () => setState(() => selectedRecurrence = 'weekly')),
+                        _RecurrenceChip(label: t.monthly, value: 'monthly', selected: selectedRecurrence == 'monthly', accent: accent, onTap: () => setState(() => selectedRecurrence = 'monthly')),
+                        _RecurrenceChip(label: t.yearly,  value: 'yearly',  selected: selectedRecurrence == 'yearly',  accent: accent, onTap: () => setState(() => selectedRecurrence = 'yearly')),
+                      ]),
+                      const SizedBox(height: 16),
+
                       // Напомняне
                       Text(t.reminders, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                       const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _ReminderChip(label: t.onDay, value: 'at_time', selected: reminders.contains('at_time'), accent: accent, onTap: () => setState(() => reminders.contains('at_time') ? reminders.remove('at_time') : reminders.add('at_time'))),
-                          _ReminderChip(label: t.oneDayBefore, value: 'minus_1d', selected: reminders.contains('minus_1d'), accent: accent, onTap: () => setState(() => reminders.contains('minus_1d') ? reminders.remove('minus_1d') : reminders.add('minus_1d'))),
-                          _ReminderChip(label: t.sameDayMorning, value: 'same_day_8', selected: reminders.contains('same_day_8'), accent: accent, onTap: () => setState(() => reminders.contains('same_day_8') ? reminders.remove('same_day_8') : reminders.add('same_day_8'))),
-                        ],
+                      ReminderSelector(
+                        selectedReminders: reminders,
+                        onChanged: (l) => setState(() => reminders = l),
+                        langCode: langCode,
+                        theme: theme,
                       ),
                       const SizedBox(height: 24),
 
@@ -225,13 +260,18 @@ class BirthdayDialog {
                           onPressed: () async {
                             final name = nameCtrl.text.trim();
                             if (name.isEmpty) return;
-                            final notesStr = birthYear != null ? 'birthYear:$birthYear' : null;
+                            final noteParts = <String>[
+                              if (birthYear != null) 'birthYear:$birthYear',
+                              if (extraNotes.isNotEmpty) extraNotes,
+                            ];
+                            final notesStr = noteParts.isEmpty ? null : noteParts.join('\n');
 
                             if (existing != null) {
                               existing
                                 ..title = name
                                 ..dueDate = selectedDate
-                                ..recurrence = 'yearly'
+                                ..priority = selectedPriority
+                                ..recurrence = selectedRecurrence == 'none' ? null : selectedRecurrence
                                 ..template = 'birthday'
                                 ..notes = notesStr;
                               existing.setReminders(reminders);
@@ -242,8 +282,8 @@ class BirthdayDialog {
                                 title: name,
                                 dueDate: selectedDate,
                                 categoryId: defaultCategoryId,
-                                priority: 1,
-                                recurrence: 'yearly',
+                                priority: selectedPriority,
+                                recurrence: selectedRecurrence == 'none' ? null : selectedRecurrence,
                                 template: 'birthday',
                                 notes: notesStr,
                                 reminders: reminders.isEmpty ? null : reminders,
@@ -333,4 +373,17 @@ class _ReminderChip extends StatelessWidget {
       ),
     );
   }
+}
+
+class _RecurrenceChip extends StatelessWidget {
+  final String label, value; final bool selected; final Color accent; final VoidCallback onTap;
+  const _RecurrenceChip({required this.label, required this.value, required this.selected, required this.accent, required this.onTap});
+  @override
+  Widget build(BuildContext context) => GestureDetector(onTap: onTap,
+    child: Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(color: selected ? accent.withValues(alpha: 0.15) : Colors.transparent,
+        border: Border.all(color: selected ? accent : Colors.grey.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(20)),
+      child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500,
+        color: selected ? accent : Colors.grey))));
 }

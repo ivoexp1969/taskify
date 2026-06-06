@@ -87,6 +87,12 @@ class Task extends HiveObject with EquatableMixin {
   @HiveField(15)
   String? googleCalendarEventId;
 
+  /// true = задачата е импортирана ОТ календар (Google/Apple);
+  /// false/null = задачата е създадена локално (и евентуално експортирана към календар).
+  /// Различава „изтрий импортнатите" от „изтрий експортнатите".
+  @HiveField(18)
+  bool? importedFromCalendar;
+
   Task({
     required this.title,
     required this.dueDate,
@@ -105,6 +111,7 @@ class Task extends HiveObject with EquatableMixin {
     this.archivedAt,
     this.googleCalendarEventId,    this.durationMinutes,
     this.template,
+    this.importedFromCalendar,
   });
 
   /// Помощен getter - връща reminders или мигрира от старото reminder
@@ -186,6 +193,7 @@ class Task extends HiveObject with EquatableMixin {
         archivedAt,
         googleCalendarEventId,        durationMinutes,
         template,
+        importedFromCalendar,
       ];
 }
 

@@ -105,7 +105,7 @@ class DocumentsService {
       'de': 'Erinnerung zur Verlängerung', 'fr': 'Rappel de renouvellement',
       'it': 'Promemoria di rinnovo', 'el': 'Υπενθύμιση ανανέωσης',
       'es': 'Recordatorio de renovación', 'pt': 'Lembrete de renovação',
-      'ru': 'Напоминание о продлении', 'tr': 'Yenileme hatırlatması',
+      'ru': 'Напоминание о продлении', 'tr': 'Yenileme hatırlatması', 'ja': '更新のリマインダー',
     };
     return m[lang] ?? m['en']!;
   }
@@ -123,7 +123,7 @@ class DocumentsService {
       'es': '{name} caduca en {days} días — hora de renovar 🔔',
       'pt': '{name} expira em {days} dias — hora de renovar 🔔',
       'ru': '{name} истекает через {days} дней — пора продлить 🔔',
-      'tr': '{name} {days} gün içinde doluyor — yenileme zamanı 🔔',
+      'tr': '{name} {days} gün içinde doluyor — yenileme zamanı 🔔', 'ja': '{name}は{days}日後に期限切れ — 更新時期です 🔔',
     };
     final t = tpl[lang] ?? tpl['en']!;
     return t.replaceAll('{name}', name).replaceAll('{days}', '$days');
@@ -150,7 +150,7 @@ String _otherName(String lang) {
   const m = {
     'en': 'Document', 'bg': 'Документ', 'de': 'Dokument', 'fr': 'Document',
     'it': 'Documento', 'el': 'Έγγραφο', 'es': 'Documento', 'pt': 'Documento',
-    'ru': 'Документ', 'tr': 'Belge',
+    'ru': 'Документ', 'tr': 'Belge', 'ja': '書類',
   };
   return m[lang] ?? m['en']!;
 }
@@ -160,38 +160,38 @@ const Map<String, Map<String, String>> _typeNames = {
   'vignette': {
     'en': 'Vignette', 'bg': 'Винетка', 'de': 'Vignette', 'fr': 'Vignette',
     'it': 'Vignetta', 'el': 'Βινιέτα', 'es': 'Viñeta', 'pt': 'Vinheta',
-    'ru': 'Виньетка', 'tr': 'Vinyet',
+    'ru': 'Виньетка', 'tr': 'Vinyet', 'ja': '高速道路ステッカー',
   },
   'insurance': {
     'en': 'Car insurance', 'bg': 'Гражданска отговорност',
     'de': 'Kfz-Haftpflicht', 'fr': 'Assurance auto',
     'it': 'Assicurazione auto', 'el': 'Ασφάλεια αυτοκινήτου',
     'es': 'Seguro del coche', 'pt': 'Seguro do carro',
-    'ru': 'Автостраховка', 'tr': 'Trafik sigortası',
+    'ru': 'Автостраховка', 'tr': 'Trafik sigortası', 'ja': '自動車保険',
   },
   'inspection': {
     'en': 'Vehicle inspection', 'bg': 'Технически преглед',
     'de': 'Hauptuntersuchung', 'fr': 'Contrôle technique',
     'it': 'Revisione auto', 'el': 'Τεχνικός έλεγχος (ΚΤΕΟ)',
     'es': 'Inspección técnica (ITV)', 'pt': 'Inspeção do veículo',
-    'ru': 'Техосмотр', 'tr': 'Araç muayenesi',
+    'ru': 'Техосмотр', 'tr': 'Araç muayenesi', 'ja': '車検',
   },
   'id_card': {
     'en': 'ID card', 'bg': 'Лична карта', 'de': 'Personalausweis',
     'fr': "Carte d'identité", 'it': "Carta d'identità",
     'el': 'Ταυτότητα', 'es': 'DNI', 'pt': 'Cartão de cidadão',
-    'ru': 'Удостоверение личности', 'tr': 'Kimlik kartı',
+    'ru': 'Удостоверение личности', 'tr': 'Kimlik kartı', 'ja': '身分証明書',
   },
   'passport': {
     'en': 'Passport', 'bg': 'Паспорт', 'de': 'Reisepass', 'fr': 'Passeport',
     'it': 'Passaporto', 'el': 'Διαβατήριο', 'es': 'Pasaporte',
-    'pt': 'Passaporte', 'ru': 'Паспорт', 'tr': 'Pasaport',
+    'pt': 'Passaporte', 'ru': 'Паспорт', 'tr': 'Pasaport', 'ja': 'パスポート',
   },
   'license': {
     'en': "Driver's license", 'bg': 'Шофьорска книжка',
     'de': 'Führerschein', 'fr': 'Permis de conduire',
     'it': 'Patente di guida', 'el': 'Δίπλωμα οδήγησης',
     'es': 'Carnet de conducir', 'pt': 'Carta de condução',
-    'ru': 'Водительские права', 'tr': 'Ehliyet',
+    'ru': 'Водительские права', 'tr': 'Ehliyet', 'ja': '運転免許証',
   },
 };

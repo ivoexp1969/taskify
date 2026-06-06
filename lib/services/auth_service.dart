@@ -149,7 +149,7 @@ class AuthService {
       'es': 'Por favor, verifica tu dirección de correo electrónico',
       'pt': 'Por favor, verifique seu endereço de e-mail',
       'ru': 'Пожалуйста, подтвердите ваш адрес электронной почты',
-      'tr': 'Lütfen e-posta adresinizi doğrulayın',
+      'tr': 'Lütfen e-posta adresinizi doğrulayın', 'ja': 'メールアドレスを認証してください',
     },
     'email-already-in-use': {
       'en': 'This email is already registered',
@@ -161,7 +161,7 @@ class AuthService {
       'es': 'Este correo ya está registrado',
       'pt': 'Este e-mail já está registrado',
       'ru': 'Этот email уже зарегистрирован',
-      'tr': 'Bu e-posta zaten kayıtlı',
+      'tr': 'Bu e-posta zaten kayıtlı', 'ja': 'このメールはすでに登録されています',
     },
     'invalid-email': {
       'en': 'Invalid email address',
@@ -173,7 +173,7 @@ class AuthService {
       'es': 'Dirección de correo electrónico inválida',
       'pt': 'Endereço de e-mail inválido',
       'ru': 'Неверный адрес электронной почты',
-      'tr': 'Geçersiz e-posta adresi',
+      'tr': 'Geçersiz e-posta adresi', 'ja': '無効なメールアドレス',
     },
     'weak-password': {
       'en': 'Password is too weak (min. 6 characters)',
@@ -185,7 +185,7 @@ class AuthService {
       'es': 'Contraseña demasiado débil (mín. 6 caracteres)',
       'pt': 'Senha muito fraca (mín. 6 caracteres)',
       'ru': 'Пароль слишком слабый (мин. 6 символов)',
-      'tr': 'Şifre çok zayıf (en az 6 karakter)',
+      'tr': 'Şifre çok zayıf (en az 6 karakter)', 'ja': 'パスワードが弱すぎます（最低6文字）',
     },
     'user-not-found': {
       'en': 'No account found with this email',
@@ -197,7 +197,7 @@ class AuthService {
       'es': 'No se encontró ninguna cuenta con este correo',
       'pt': 'Nenhuma conta encontrada com este e-mail',
       'ru': 'Аккаунт с этим email не найден',
-      'tr': 'Bu e-posta ile hesap bulunamadı',
+      'tr': 'Bu e-posta ile hesap bulunamadı', 'ja': 'このメールのアカウントが見つかりません',
     },
     'wrong-password': {
       'en': 'Incorrect password',
@@ -209,7 +209,7 @@ class AuthService {
       'es': 'Contraseña incorrecta',
       'pt': 'Senha incorreta',
       'ru': 'Неверный пароль',
-      'tr': 'Yanlış şifre',
+      'tr': 'Yanlış şifre', 'ja': 'パスワードが正しくありません',
     },
     'invalid-credential': {
       'en': 'Incorrect email or password',
@@ -221,7 +221,7 @@ class AuthService {
       'es': 'Correo o contraseña incorrectos',
       'pt': 'E-mail ou senha incorretos',
       'ru': 'Неверный email или пароль',
-      'tr': 'Yanlış e-posta veya şifre',
+      'tr': 'Yanlış e-posta veya şifre', 'ja': 'メールアドレスまたはパスワードが正しくありません',
     },
     'too-many-requests': {
       'en': 'Too many attempts. Please try again later',
@@ -233,7 +233,7 @@ class AuthService {
       'es': 'Demasiados intentos. Por favor intenta más tarde',
       'pt': 'Muitas tentativas. Por favor, tente mais tarde',
       'ru': 'Слишком много попыток. Попробуйте позже',
-      'tr': 'Çok fazla deneme. Lütfen daha sonra tekrar deneyin',
+      'tr': 'Çok fazla deneme. Lütfen daha sonra tekrar deneyin', 'ja': '試行回数が多すぎます。後でもう一度お試しください',
     },
     'user-disabled': {
       'en': 'This account has been disabled',
@@ -245,7 +245,7 @@ class AuthService {
       'es': 'Esta cuenta ha sido deshabilitada',
       'pt': 'Esta conta foi desativada',
       'ru': 'Этот аккаунт заблокирован',
-      'tr': 'Bu hesap devre dışı bırakıldı',
+      'tr': 'Bu hesap devre dışı bırakıldı', 'ja': 'このアカウントは無効化されています',
     },
     'default': {
       'en': 'Error: {code}',
@@ -257,7 +257,7 @@ class AuthService {
       'es': 'Error: {code}',
       'pt': 'Erro: {code}',
       'ru': 'Ошибка: {code}',
-      'tr': 'Hata: {code}',
+      'tr': 'Hata: {code}', 'ja': 'エラー: {code}',
     },
   };
 }

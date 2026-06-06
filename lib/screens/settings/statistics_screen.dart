@@ -44,14 +44,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
 
   String _periodTitle(int days, String lang) {
     if (days == 7) {
-      const m = {'en': 'Last 7 days', 'bg': 'Последните 7 дни', 'de': 'Letzte 7 Tage', 'fr': '7 derniers jours', 'it': 'Ultimi 7 giorni', 'el': 'Τελευταίες 7 μέρες', 'es': 'Últimos 7 días', 'pt': 'Últimos 7 dias', 'ru': 'Последние 7 дней', 'tr': 'Son 7 gün'};
+      const m = {'en': 'Last 7 days', 'bg': 'Последните 7 дни', 'de': 'Letzte 7 Tage', 'fr': '7 derniers jours', 'it': 'Ultimi 7 giorni', 'el': 'Τελευταίες 7 μέρες', 'es': 'Últimos 7 días', 'pt': 'Últimos 7 dias', 'ru': 'Последние 7 дней', 'tr': 'Son 7 gün', 'ja': '過去7日'};
       return m[lang] ?? m['en']!;
     }
     if (days == 30) {
-      const m = {'en': 'Last 30 days', 'bg': 'Последните 30 дни', 'de': 'Letzte 30 Tage', 'fr': '30 derniers jours', 'it': 'Ultimi 30 giorni', 'el': 'Τελευταίες 30 μέρες', 'es': 'Últimos 30 días', 'pt': 'Últimos 30 dias', 'ru': 'Последние 30 дней', 'tr': 'Son 30 gün'};
+      const m = {'en': 'Last 30 days', 'bg': 'Последните 30 дни', 'de': 'Letzte 30 Tage', 'fr': '30 derniers jours', 'it': 'Ultimi 30 giorni', 'el': 'Τελευταίες 30 μέρες', 'es': 'Últimos 30 días', 'pt': 'Últimos 30 dias', 'ru': 'Последние 30 дней', 'tr': 'Son 30 gün', 'ja': '過去30日'};
       return m[lang] ?? m['en']!;
     }
-    const m = {'en': 'Last 3 months', 'bg': 'Последните 3 месеца', 'de': 'Letzte 3 Monate', 'fr': '3 derniers mois', 'it': 'Ultimi 3 mesi', 'el': 'Τελευταίοι 3 μήνες', 'es': 'Últimos 3 meses', 'pt': 'Últimos 3 meses', 'ru': 'Последние 3 месяца', 'tr': 'Son 3 ay'};
+    const m = {'en': 'Last 3 months', 'bg': 'Последните 3 месеца', 'de': 'Letzte 3 Monate', 'fr': '3 derniers mois', 'it': 'Ultimi 3 mesi', 'el': 'Τελευταίοι 3 μήνες', 'es': 'Últimos 3 meses', 'pt': 'Últimos 3 meses', 'ru': 'Последние 3 месяца', 'tr': 'Son 3 ay', 'ja': '過去3か月'};
     return m[lang] ?? m['en']!;
   }
 
@@ -320,20 +320,20 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
         'es': 'Otro',
         'pt': 'Outro',
         'ru': 'Другое',
-        'tr': 'Diğer',
+        'tr': 'Diğer', 'ja': 'その他',
       }[lang] ?? 'Other';
     }
     if (c.isDefault) {
       final translations = {
-        'work': {'en': 'Work', 'bg': 'Работа', 'de': 'Arbeit', 'fr': 'Travail', 'it': 'Lavoro', 'el': 'Εργασία', 'es': 'Trabajo', 'pt': 'Trabalho', 'ru': 'Работа', 'tr': 'İş'},
-        'personal': {'en': 'Personal', 'bg': 'Лични', 'de': 'Persönlich', 'fr': 'Personnel', 'it': 'Personale', 'el': 'Προσωπικά', 'es': 'Personal', 'pt': 'Pessoal', 'ru': 'Личное', 'tr': 'Kişisel'},
-        'shopping': {'en': 'Shopping', 'bg': 'Пазаруване', 'de': 'Einkaufen', 'fr': 'Courses', 'it': 'Spesa', 'el': 'Αγορές', 'es': 'Compras', 'pt': 'Compras', 'ru': 'Покупки', 'tr': 'Alışveriş'},
-        'birthday': {'en': 'Birthday', 'bg': 'Рождени дни', 'de': 'Geburtstag', 'fr': 'Anniversaire', 'it': 'Compleanno', 'el': 'Γενέθλια', 'es': 'Cumpleaños', 'pt': 'Aniversário', 'ru': 'День рождения', 'tr': 'Doğum günü'},
-        'meeting': {'en': 'Meeting', 'bg': 'Срещи', 'de': 'Besprechung', 'fr': 'Réunion', 'it': 'Riunione', 'el': 'Συνάντηση', 'es': 'Reunión', 'pt': 'Reunião', 'ru': 'Встреча', 'tr': 'Toplantı'},
-        'workout': {'en': 'Workout', 'bg': 'Тренировка', 'de': 'Training', 'fr': 'Entraînement', 'it': 'Allenamento', 'el': 'Άσκηση', 'es': 'Entrenamiento', 'pt': 'Treino', 'ru': 'Тренировка', 'tr': 'Egzersiz'},
-        'payment': {'en': 'Payment', 'bg': 'Плащания', 'de': 'Zahlung', 'fr': 'Paiement', 'it': 'Pagamento', 'el': 'Πληρωμή', 'es': 'Pago', 'pt': 'Pagamento', 'ru': 'Платёж', 'tr': 'Ödeme'},
-        'travel': {'en': 'Travel', 'bg': 'Пътувания', 'de': 'Reise', 'fr': 'Voyage', 'it': 'Viaggio', 'el': 'Ταξίδι', 'es': 'Viaje', 'pt': 'Viagem', 'ru': 'Путешествие', 'tr': 'Seyahat'},
-        'gift': {'en': 'Gift', 'bg': 'Подаръци', 'de': 'Geschenk', 'fr': 'Cadeau', 'it': 'Regalo', 'el': 'Δώρο', 'es': 'Regalo', 'pt': 'Presente', 'ru': 'Подарок', 'tr': 'Hediye'},
+        'work': {'en': 'Work', 'bg': 'Работа', 'de': 'Arbeit', 'fr': 'Travail', 'it': 'Lavoro', 'el': 'Εργασία', 'es': 'Trabajo', 'pt': 'Trabalho', 'ru': 'Работа', 'tr': 'İş', 'ja': '仕事'},
+        'personal': {'en': 'Personal', 'bg': 'Лични', 'de': 'Persönlich', 'fr': 'Personnel', 'it': 'Personale', 'el': 'Προσωπικά', 'es': 'Personal', 'pt': 'Pessoal', 'ru': 'Личное', 'tr': 'Kişisel', 'ja': '個人'},
+        'shopping': {'en': 'Shopping', 'bg': 'Пазаруване', 'de': 'Einkaufen', 'fr': 'Courses', 'it': 'Spesa', 'el': 'Αγορές', 'es': 'Compras', 'pt': 'Compras', 'ru': 'Покупки', 'tr': 'Alışveriş', 'ja': '買い物'},
+        'birthday': {'en': 'Birthday', 'bg': 'Рождени дни', 'de': 'Geburtstag', 'fr': 'Anniversaire', 'it': 'Compleanno', 'el': 'Γενέθλια', 'es': 'Cumpleaños', 'pt': 'Aniversário', 'ru': 'День рождения', 'tr': 'Doğum günü', 'ja': '誕生日'},
+        'meeting': {'en': 'Meeting', 'bg': 'Срещи', 'de': 'Besprechung', 'fr': 'Réunion', 'it': 'Riunione', 'el': 'Συνάντηση', 'es': 'Reunión', 'pt': 'Reunião', 'ru': 'Встреча', 'tr': 'Toplantı', 'ja': '会議'},
+        'workout': {'en': 'Workout', 'bg': 'Тренировка', 'de': 'Training', 'fr': 'Entraînement', 'it': 'Allenamento', 'el': 'Άσκηση', 'es': 'Entrenamiento', 'pt': 'Treino', 'ru': 'Тренировка', 'tr': 'Egzersiz', 'ja': 'ワークアウト'},
+        'payment': {'en': 'Payment', 'bg': 'Плащания', 'de': 'Zahlung', 'fr': 'Paiement', 'it': 'Pagamento', 'el': 'Πληρωμή', 'es': 'Pago', 'pt': 'Pagamento', 'ru': 'Платёж', 'tr': 'Ödeme', 'ja': '支払い'},
+        'travel': {'en': 'Travel', 'bg': 'Пътувания', 'de': 'Reise', 'fr': 'Voyage', 'it': 'Viaggio', 'el': 'Ταξίδι', 'es': 'Viaje', 'pt': 'Viagem', 'ru': 'Путешествие', 'tr': 'Seyahat', 'ja': '旅行'},
+        'gift': {'en': 'Gift', 'bg': 'Подаръци', 'de': 'Geschenk', 'fr': 'Cadeau', 'it': 'Regalo', 'el': 'Δώρο', 'es': 'Regalo', 'pt': 'Presente', 'ru': 'Подарок', 'tr': 'Hediye', 'ja': 'ギフト'},
       };
       return translations[c.id]?[lang] ?? translations[c.id]?['en'] ?? c.name;
     }

@@ -149,10 +149,10 @@ class _ReviewPreDialog extends StatelessWidget {
     
     final lang = Localizations.localeOf(context).languageCode;
     
-    const titleMap = {'en': 'Do you like Taskify?', 'bg': 'Харесва ли ти Taskify?', 'de': 'Gefällt dir Taskify?', 'fr': 'Tu aimes Taskify?', 'it': 'Ti piace Taskify?', 'el': 'Σου αρέσει το Taskify;', 'es': '¿Te gusta Taskify?', 'pt': 'Gosta do Taskify?', 'ru': 'Нравится Taskify?', 'tr': 'Taskify hoşuna gidiyor mu?'};
-    const subtitleMap = {'en': 'Your opinion matters to us!', 'bg': 'Твоето мнение е важно за нас!', 'de': 'Deine Meinung ist uns wichtig!', 'fr': 'Votre avis compte pour nous!', 'it': 'La tua opinione conta per noi!', 'el': 'Η γνώμη σας μετράει!', 'es': '¡Tu opinión nos importa!', 'pt': 'Sua opinião é importante!', 'ru': 'Ваше мнение важно для нас!', 'tr': 'Görüşünüz bizim için önemli!'};
-    const negMap = {'en': 'Needs improvement', 'bg': 'Има какво да се подобри', 'de': 'Verbesserungsbedarf', 'fr': 'À améliorer', 'it': 'Da migliorare', 'el': 'Χρειάζεται βελτίωση', 'es': 'Necesita mejorar', 'pt': 'Precisa melhorar', 'ru': 'Нужны улучшения', 'tr': 'İyileştirme gerekli'};
-    const posMap = {'en': 'Yes, I love it!', 'bg': 'Да, много!', 'de': 'Ja, ich liebe es!', 'fr': "Oui, j'adore!", 'it': 'Sì, lo adoro!', 'el': 'Ναι, μου αρέσει!', 'es': '¡Sí, me encanta!', 'pt': 'Sim, adoro!', 'ru': 'Да, мне нравится!', 'tr': 'Evet, bayıldım!'};
+    const titleMap = {'en': 'Do you like Taskify?', 'bg': 'Харесва ли ти Taskify?', 'de': 'Gefällt dir Taskify?', 'fr': 'Tu aimes Taskify?', 'it': 'Ti piace Taskify?', 'el': 'Σου αρέσει το Taskify;', 'es': '¿Te gusta Taskify?', 'pt': 'Gosta do Taskify?', 'ru': 'Нравится Taskify?', 'tr': 'Taskify hoşuna gidiyor mu?', 'ja': 'Taskifyは気に入りましたか？'};
+    const subtitleMap = {'en': 'Your opinion matters to us!', 'bg': 'Твоето мнение е важно за нас!', 'de': 'Deine Meinung ist uns wichtig!', 'fr': 'Votre avis compte pour nous!', 'it': 'La tua opinione conta per noi!', 'el': 'Η γνώμη σας μετράει!', 'es': '¡Tu opinión nos importa!', 'pt': 'Sua opinião é importante!', 'ru': 'Ваше мнение важно для нас!', 'tr': 'Görüşünüz bizim için önemli!', 'ja': 'あなたのご意見が大切です！'};
+    const negMap = {'en': 'Needs improvement', 'bg': 'Има какво да се подобри', 'de': 'Verbesserungsbedarf', 'fr': 'À améliorer', 'it': 'Da migliorare', 'el': 'Χρειάζεται βελτίωση', 'es': 'Necesita mejorar', 'pt': 'Precisa melhorar', 'ru': 'Нужны улучшения', 'tr': 'İyileştirme gerekli', 'ja': '改善が必要'};
+    const posMap = {'en': 'Yes, I love it!', 'bg': 'Да, много!', 'de': 'Ja, ich liebe es!', 'fr': "Oui, j'adore!", 'it': 'Sì, lo adoro!', 'el': 'Ναι, μου αρέσει!', 'es': '¡Sí, me encanta!', 'pt': 'Sim, adoro!', 'ru': 'Да, мне нравится!', 'tr': 'Evet, bayıldım!', 'ja': 'はい、大好きです！'};
     
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

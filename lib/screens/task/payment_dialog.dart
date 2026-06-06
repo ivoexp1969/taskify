@@ -6,6 +6,7 @@ import '../../models/category.dart';
 import '../../utils/localization.dart';
 import '../../services/notification_service.dart';
 import '../../services/widget_service.dart';
+import '../../widgets/reminder_selector.dart';
 
 class PaymentDialog {
   static Future<void> show(BuildContext context, {Task? existing}) async {
@@ -19,7 +20,8 @@ class PaymentDialog {
 
     String initialWhat = '';
     String initialAmount = '';
-    String initialRecurrence = 'none';
+    // Авто-попълване: новите плащания са месечни по подразбиране
+    String initialRecurrence = existing == null ? 'monthly' : 'none';
     if (existing?.notes != null) {
       for (final line in existing!.notes!.split('\n')) {
         if (line.startsWith('what:')) initialWhat = line.replaceFirst('what:', '');
@@ -33,6 +35,7 @@ class PaymentDialog {
     DateTime selectedDate = existing?.dueDate ?? DateTime.now();
     String selectedRecurrence = initialRecurrence;
     List<String> reminders = List.from(existing?.remindersList ?? ['minus_1d']);
+    int selectedPriority = existing?.priority ?? 1;
 
     await showModalBottomSheet(
       context: context,
@@ -124,6 +127,15 @@ class PaymentDialog {
                         ])),
                       ]),
                       const SizedBox(height: 16),
+                      Text(t.priority, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
+                      const SizedBox(height: 8),
+                      Wrap(spacing: 8, runSpacing: 8, children: [
+                        _RecurrenceChip(label: t.low,    value: '0', selected: selectedPriority == 0, accent: accent, onTap: () => setState(() => selectedPriority = 0)),
+                        _RecurrenceChip(label: t.medium, value: '1', selected: selectedPriority == 1, accent: accent, onTap: () => setState(() => selectedPriority = 1)),
+                        _RecurrenceChip(label: t.high,   value: '2', selected: selectedPriority == 2, accent: accent, onTap: () => setState(() => selectedPriority = 2)),
+                      ]),
+                      const SizedBox(height: 16),
                       Text(t.repeat, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                       const SizedBox(height: 8),
@@ -138,12 +150,12 @@ class PaymentDialog {
                       Text(t.reminders, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                       const SizedBox(height: 8),
-                      Wrap(spacing: 8, runSpacing: 8, children: [
-                        _ReminderChip(label: t.oneDayBefore, value: 'minus_1d', selected: reminders.contains('minus_1d'), accent: accent,
-                          onTap: () => setState(() => reminders.contains('minus_1d') ? reminders.remove('minus_1d') : reminders.add('minus_1d'))),
-                        _ReminderChip(label: t.sameDayMorning, value: 'same_day_8', selected: reminders.contains('same_day_8'), accent: accent,
-                          onTap: () => setState(() => reminders.contains('same_day_8') ? reminders.remove('same_day_8') : reminders.add('same_day_8'))),
-                      ]),
+                      ReminderSelector(
+                        selectedReminders: reminders,
+                        onChanged: (l) => setState(() => reminders = l),
+                        langCode: langCode,
+                        theme: theme,
+                      ),
                       const SizedBox(height: 24),
                       SizedBox(width: double.infinity,
                         child: ElevatedButton(
@@ -160,13 +172,14 @@ class PaymentDialog {
                             final recurrence = selectedRecurrence == 'none' ? null : selectedRecurrence;
                             if (existing != null) {
                               existing..title = what..dueDate = selectedDate..template = 'payment'
+                                ..priority = selectedPriority
                                 ..recurrence = recurrence..notes = notesStr;
                               existing.setReminders(reminders);
                               await existing.save();
                               await NotificationService().scheduleForTask(existing);
                             } else {
                               final task = Task(title: what, dueDate: selectedDate, categoryId: defaultCategoryId,
-                                priority: 1, template: 'payment', recurrence: recurrence, notes: notesStr,
+                                priority: selectedPriority, template: 'payment', recurrence: recurrence, notes: notesStr,
                                 reminders: reminders.isEmpty ? null : reminders);
                               await taskBox.add(task);
                               await NotificationService().scheduleForTask(task);

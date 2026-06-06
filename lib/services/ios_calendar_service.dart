@@ -113,6 +113,19 @@ class IosCalendarService {
     return count;
   }
 
+  /// Изтрива от Apple Calendar всички събития, които сме експортирали
+  /// (тези, за които пазим event ID). Връща броя изтрити. Задачите остават.
+  Future<int> deleteAllExportedTasks(List<Task> tasks) async {
+    int count = 0;
+    for (final task in tasks) {
+      final existing = await _getEventId(task);
+      if (existing == null) continue;
+      final ok = await deleteTask(task);
+      if (ok) count++;
+    }
+    return count;
+  }
+
   Future<bool> isTaskSynced(Task task) async {
     final eventId = await _getEventId(task);
     return eventId != null;

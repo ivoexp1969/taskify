@@ -332,11 +332,11 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
         ? ' · ${_formatTime(TimeOfDay.fromDateTime(d))}'
         : '';
     if (diff == 0) {
-      const m = {'en': 'Today', 'bg': 'Днес', 'de': 'Heute', 'fr': 'Auj.', 'it': 'Oggi', 'el': 'Σήμερα', 'es': 'Hoy', 'pt': 'Hoje', 'ru': 'Сегодня', 'tr': 'Bugün'};
+      const m = {'en': 'Today', 'bg': 'Днес', 'de': 'Heute', 'fr': 'Auj.', 'it': 'Oggi', 'el': 'Σήμερα', 'es': 'Hoy', 'pt': 'Hoje', 'ru': 'Сегодня', 'tr': 'Bugün', 'ja': '今日'};
       return '${m[lang] ?? m['en']!}$timeStr';
     }
     if (diff == 1) {
-      const m = {'en': 'Tomorrow', 'bg': 'Утре', 'de': 'Morgen', 'fr': 'Demain', 'it': 'Domani', 'el': 'Αύριο', 'es': 'Mañana', 'pt': 'Amanhã', 'ru': 'Завтра', 'tr': 'Yarın'};
+      const m = {'en': 'Tomorrow', 'bg': 'Утре', 'de': 'Morgen', 'fr': 'Demain', 'it': 'Domani', 'el': 'Αύριο', 'es': 'Mañana', 'pt': 'Amanhã', 'ru': 'Завтра', 'tr': 'Yarın', 'ja': '明日'};
       return '${m[lang] ?? m['en']!}$timeStr';
     }
     if (diff > 1 && diff < 7) {
@@ -881,7 +881,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
             const voiceLocales = {
               'en': 'en-US', 'bg': 'bg-BG', 'de': 'de-DE', 'fr': 'fr-FR', 
               'it': 'it-IT', 'el': 'el-GR', 'es': 'es-ES', 'pt': 'pt-PT',
-              'ru': 'ru-RU', 'tr': 'tr-TR',
+              'ru': 'ru-RU', 'tr': 'tr-TR', 'ja': 'ja-JP',
             };
             final voiceLocale = voiceLocales[langCode] ?? 'en-US';
             // Apple Speech не поддържа български → скриваме микрофона на iOS за bg.
@@ -2838,7 +2838,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                               return;
                             }
                             // Edit диалог по тип
-                            if (task.template == 'birthday') { BirthdayDialog.show(context, existing: task).then((_) => setState(() {})); return; }
+                            if (task.template == 'birthday' || task.categoryId == 'birthday') { BirthdayDialog.show(context, existing: task).then((_) => setState(() {})); return; }
                             if (task.template == 'meeting') { MeetingDialog.show(context, existing: task).then((_) => setState(() {})); return; }
                             if (task.template == 'workout') { WorkoutDialog.show(context, existing: task).then((_) => setState(() {})); return; }
                             if (task.template == 'payment') { PaymentDialog.show(context, existing: task).then((_) => setState(() {})); return; }
@@ -2982,7 +2982,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                 onEdit: () {
                                   if (task.categoryId == 'shopping' || task.template == 'shopping') {
                                     ShoppingListScreen.show(context, task).then((_) => setState(() {}));
-                                  } else if (task.template == 'birthday') {
+                                  } else if (task.template == 'birthday' || task.categoryId == 'birthday') {
                                     BirthdayDialog.show(context, existing: task).then((_) => setState(() {}));
                                   } else if (task.template == 'meeting') {
                                     MeetingDialog.show(context, existing: task).then((_) => setState(() {}));

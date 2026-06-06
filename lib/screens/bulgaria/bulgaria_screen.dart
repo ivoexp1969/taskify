@@ -207,27 +207,27 @@ class _BulgariaScreenState extends State<BulgariaScreen> {
 const _sectionTitle = {
   'en': 'Bulgaria', 'bg': 'България', 'de': 'Bulgarien', 'fr': 'Bulgarie',
   'it': 'Bulgaria', 'el': 'Βουλγαρία', 'es': 'Bulgaria', 'pt': 'Bulgária',
-  'ru': 'Болгария', 'tr': 'Bulgaristan',
+  'ru': 'Болгария', 'tr': 'Bulgaristan', 'ja': 'ブルガリア',
 };
 const _addBtn = {
   'en': 'Add', 'bg': 'Добави', 'de': 'Hinzufügen', 'fr': 'Ajouter',
   'it': 'Aggiungi', 'el': 'Προσθήκη', 'es': 'Añadir', 'pt': 'Adicionar',
-  'ru': 'Добавить', 'tr': 'Ekle',
+  'ru': 'Добавить', 'tr': 'Ekle', 'ja': '追加',
 };
 const _editBtn = {
   'en': 'Edit', 'bg': 'Редактирай', 'de': 'Bearbeiten', 'fr': 'Modifier',
   'it': 'Modifica', 'el': 'Επεξεργασία', 'es': 'Editar', 'pt': 'Editar',
-  'ru': 'Изменить', 'tr': 'Düzenle',
+  'ru': 'Изменить', 'tr': 'Düzenle', 'ja': '編集',
 };
 const _deleteBtn = {
   'en': 'Delete', 'bg': 'Изтрий', 'de': 'Löschen', 'fr': 'Supprimer',
   'it': 'Elimina', 'el': 'Διαγραφή', 'es': 'Eliminar', 'pt': 'Excluir',
-  'ru': 'Удалить', 'tr': 'Sil',
+  'ru': 'Удалить', 'tr': 'Sil', 'ja': '削除',
 };
 const _cancelBtn = {
   'en': 'Cancel', 'bg': 'Отказ', 'de': 'Abbrechen', 'fr': 'Annuler',
   'it': 'Annulla', 'el': 'Ακύρωση', 'es': 'Cancelar', 'pt': 'Cancelar',
-  'ru': 'Отмена', 'tr': 'İptal',
+  'ru': 'Отмена', 'tr': 'İptal', 'ja': 'キャンセル',
 };
 const _emptyState = {
   'en': 'Keep your important dates here — documents, holidays, name days. Start by adding your first one.',
@@ -239,25 +239,25 @@ const _emptyState = {
   'es': 'Guarda aquí tus fechas importantes — documentos, festivos, onomásticas. Empieza añadiendo una.',
   'pt': 'Guarda aqui as tuas datas importantes — documentos, feriados, dias do nome. Começa por adicionar uma.',
   'ru': 'Храни здесь важные даты — документы, праздники, именины. Начни с первой.',
-  'tr': 'Önemli tarihlerini burada sakla — belgeler, tatiller, isim günleri. İlkini ekleyerek başla.',
+  'tr': 'Önemli tarihlerini burada sakla — belgeler, tatiller, isim günleri. İlkini ekleyerek başla.', 'ja': '大切な日付をここで管理 — 書類、祝日、聖名祝日。まず最初の項目を追加しましょう。',
 };
 const _expiresInPrefix = {
   'en': 'Expires in {days} days', 'bg': 'Изтича след {days} дни',
   'de': 'Läuft in {days} Tagen ab', 'fr': 'Expire dans {days} jours',
   'it': 'Scade tra {days} giorni', 'el': 'Λήγει σε {days} ημέρες',
   'es': 'Caduca en {days} días', 'pt': 'Expira em {days} dias',
-  'ru': 'Истекает через {days} дней', 'tr': '{days} gün içinde doluyor',
+  'ru': 'Истекает через {days} дней', 'tr': '{days} gün içinde doluyor', 'ja': '{days}日後に期限切れ',
 };
 const _expiresToday = {
   'en': 'Expires today', 'bg': 'Изтича днес', 'de': 'Läuft heute ab',
   'fr': "Expire aujourd'hui", 'it': 'Scade oggi', 'el': 'Λήγει σήμερα',
   'es': 'Caduca hoy', 'pt': 'Expira hoje', 'ru': 'Истекает сегодня',
-  'tr': 'Bugün doluyor',
+  'tr': 'Bugün doluyor', 'ja': '本日期限切れ',
 };
 const _expiredOn = {
   'en': 'Expired on', 'bg': 'Изтекъл на', 'de': 'Abgelaufen am',
   'fr': 'Expiré le', 'it': 'Scaduto il', 'el': 'Έληξε στις',
-  'es': 'Caducó el', 'pt': 'Expirou em', 'ru': 'Истёк', 'tr': 'Doldu:',
+  'es': 'Caducó el', 'pt': 'Expirou em', 'ru': 'Истёк', 'tr': 'Doldu:', 'ja': '有効期限',
 };
 
 /// Долен лист за добавяне/редакция на документ.
@@ -456,38 +456,38 @@ class _DocumentEditorState extends State<_DocumentEditor> {
 
 const _typeLabel = {
   'en': 'Type', 'bg': 'Тип', 'de': 'Typ', 'fr': 'Type', 'it': 'Tipo',
-  'el': 'Τύπος', 'es': 'Tipo', 'pt': 'Tipo', 'ru': 'Тип', 'tr': 'Tür',
+  'el': 'Τύπος', 'es': 'Tipo', 'pt': 'Tipo', 'ru': 'Тип', 'tr': 'Tür', 'ja': '種類',
 };
 const _optionalLabel = {
   'en': 'Name (optional)', 'bg': 'Име (по желание)', 'de': 'Name (optional)',
   'fr': 'Nom (facultatif)', 'it': 'Nome (facoltativo)',
   'el': 'Όνομα (προαιρετικό)', 'es': 'Nombre (opcional)',
   'pt': 'Nome (opcional)', 'ru': 'Название (необязательно)',
-  'tr': 'Ad (isteğe bağlı)',
+  'tr': 'Ad (isteğe bağlı)', 'ja': '名前（任意）',
 };
 const _expiryLabel = {
   'en': 'Expiry date', 'bg': 'Дата на изтичане', 'de': 'Ablaufdatum',
   'fr': "Date d'expiration", 'it': 'Data di scadenza',
   'el': 'Ημερομηνία λήξης', 'es': 'Fecha de caducidad',
-  'pt': 'Data de validade', 'ru': 'Дата окончания', 'tr': 'Bitiş tarihi',
+  'pt': 'Data de validade', 'ru': 'Дата окончания', 'tr': 'Bitiş tarihi', 'ja': '有効期限',
 };
 const _pickDate0 = {
   'en': 'Pick a date', 'bg': 'Избери дата', 'de': 'Datum wählen',
   'fr': 'Choisir une date', 'it': 'Scegli una data',
   'el': 'Επίλεξε ημερομηνία', 'es': 'Elige una fecha',
-  'pt': 'Escolhe uma data', 'ru': 'Выбери дату', 'tr': 'Tarih seç',
+  'pt': 'Escolhe uma data', 'ru': 'Выбери дату', 'tr': 'Tarih seç', 'ja': '日付を選択',
 };
 const _remindersLabel = {
   'en': 'Remind me', 'bg': 'Напомни ми', 'de': 'Erinnere mich',
   'fr': 'Me rappeler', 'it': 'Ricordamelo', 'el': 'Υπενθύμισέ μου',
-  'es': 'Recordarme', 'pt': 'Lembrar-me', 'ru': 'Напомнить', 'tr': 'Hatırlat',
+  'es': 'Recordarme', 'pt': 'Lembrar-me', 'ru': 'Напомнить', 'tr': 'Hatırlat', 'ja': 'リマインド',
 };
 const _daysBefore = {
   'en': '{days} days before', 'bg': '{days} дни преди',
   'de': '{days} Tage vorher', 'fr': '{days} jours avant',
   'it': '{days} giorni prima', 'el': '{days} ημέρες πριν',
   'es': '{days} días antes', 'pt': '{days} dias antes',
-  'ru': 'за {days} дней', 'tr': '{days} gün önce',
+  'ru': 'за {days} дней', 'tr': '{days} gün önce', 'ja': '{days}日前',
 };
 const _remindersWebOnly = {
   'en': 'Reminders work in the mobile app 📱',
@@ -499,10 +499,10 @@ const _remindersWebOnly = {
   'es': 'Los recordatorios funcionan en la app móvil 📱',
   'pt': 'Os lembretes funcionam na app móvel 📱',
   'ru': 'Напоминания работают в мобильном приложении 📱',
-  'tr': 'Hatırlatmalar mobil uygulamada çalışır 📱',
+  'tr': 'Hatırlatmalar mobil uygulamada çalışır 📱', 'ja': 'リマインダーはモバイルアプリで利用できます 📱',
 };
 const _saveBtn = {
   'en': 'Save', 'bg': 'Запази', 'de': 'Speichern', 'fr': 'Enregistrer',
   'it': 'Salva', 'el': 'Αποθήκευση', 'es': 'Guardar', 'pt': 'Guardar',
-  'ru': 'Сохранить', 'tr': 'Kaydet',
+  'ru': 'Сохранить', 'tr': 'Kaydet', 'ja': '保存',
 };
