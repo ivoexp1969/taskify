@@ -27,6 +27,9 @@ class MainActivity : FlutterActivity() {
     override fun onResume() {
         super.onResume()
         promptWidgetIfNeeded()
+        // Освежаваме widget-ите при всяко връщане на преден план — така
+        // закачливата фраза в празно състояние се сменя често (произволно).
+        updateWidgets()
     }
 
     private fun promptWidgetIfNeeded() {

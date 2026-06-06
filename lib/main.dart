@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'models/task.dart';
 import 'models/category.dart';
@@ -11,6 +12,7 @@ import 'screens/home/home_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'utils/localization.dart';
 import 'services/widget_service.dart';
+import 'services/auth_service.dart';
 import 'services/pro_service.dart';
 import 'services/ad_service.dart';
 import 'services/task_view_preference.dart';
@@ -42,6 +44,15 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Заобикаляме wontfix бъга на firebase_auth (сесията не оцелява на някои
+  // Android OEM — flutterfire #17971): ако SDK „е забравил" потребителя,
+  // правим тих повторен вход от запазените credentials. Fire-and-forget — не
+  // блокира старта; екраните слушат authStateChanges и се обновяват.
+  if (FirebaseAuth.instance.currentUser == null) {
+    AuthService().tryRestoreSession();
+  }
+
   await Hive.initFlutter();
   Hive.registerAdapter(TaskAdapter());
   Hive.registerAdapter(CategoryAdapter());

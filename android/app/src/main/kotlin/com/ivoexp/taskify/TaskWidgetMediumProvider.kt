@@ -86,18 +86,7 @@ class TaskWidgetMediumProvider : AppWidgetProvider() {
         private fun getEmptyMessage(context: Context): String {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val lang = prefs.getString(LANGUAGE_KEY, "bg") ?: "bg"
-            val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
-            val index = hour % 12
-            val messages = when (lang) {
-                "bg" -> listOf("🦥 Дори мързелът ти завижда", "🏖️ Плажен режим: активиран", "🎮 Нула задачи. Време за игри?", "🧘 Вътрешен мир: постигнат", "🦸 Всички задачи — победени!", "🍕 Няма задачи = време за пица!", "🚀 Всичко чисто. Готов за излитане!", "🎵 Без задачи, само вайб", "🐱 Дори котката ти е впечатлена", "🌴 Рай на земята: 0 задачи", "🏆 Шампион по продуктивност!", "☕ Само кафе и спокойствие")
-                "de" -> listOf("🦥 Selbst Faultiere beneiden dich", "🏖️ Strandmodus: aktiviert", "🎮 Null Aufgaben. Spielzeit?", "🧘 Innerer Frieden: erreicht", "🦸 Alle Aufgaben — besiegt!", "🍕 Keine Aufgaben = Pizzazeit!", "🚀 Alles klar. Bereit zum Abheben!", "🎵 Keine Aufgaben, nur gute Laune", "🐱 Selbst deine Katze staunt", "🌴 Paradies gefunden: 0 Aufgaben", "🏆 Produktivitäts-Champion!", "☕ Nur Kaffee und Gelassenheit")
-                "fr" -> listOf("🦥 Même les paresseux t'envient", "🏖️ Mode plage : activé", "🎮 Zéro tâche. On joue ?", "🧘 Paix intérieure : atteinte", "🦸 Toutes les tâches — vaincues !", "🍕 Pas de tâches = pizza !", "🚀 Tout est clair. Prêt au décollage !", "🎵 Pas de tâches, que du bon", "🐱 Même ton chat est impressionné", "🌴 Paradis trouvé : 0 tâches", "🏆 Champion de productivité !", "☕ Juste un café et du calme")
-                "ru" -> listOf("🦥 Даже ленивцы тебе завидуют", "🏖️ Режим пляжа: активирован", "🎮 Ноль задач. Поиграем?", "🧘 Внутренний покой: достигнут", "🦸 Все задачи — повержены!", "🍕 Нет задач = время пиццы!", "🚀 Всё чисто. Готов к взлёту!", "🎵 Без задач, только вайб", "🐱 Даже кот впечатлён", "🌴 Рай найден: 0 задач", "🏆 Чемпион продуктивности!", "☕ Только кофе и спокойствие")
-                "es" -> listOf("🦥 Hasta los perezosos te envidian", "🏖️ Modo playa: activado", "🎮 Cero tareas. ¿Jugamos?", "🧘 Paz interior: alcanzada", "🦸 ¡Todas las tareas — vencidas!", "🍕 Sin tareas = ¡hora de pizza!", "🚀 Todo listo. ¡Listos para despegar!", "🎵 Sin tareas, solo buena onda", "🐱 Hasta tu gato está impresionado", "🌴 Paraíso encontrado: 0 tareas", "🏆 ¡Campeón de productividad!", "☕ Solo café y tranquilidad")
-                "tr" -> listOf("🦥 Tembel hayvanlar bile kıskanıyor", "🏖️ Plaj modu: aktif", "🎮 Sıfır görev. Oyun zamanı?", "🧘 İç huzur: sağlandı", "🦸 Tüm görevler — yenildi!", "🍕 Görev yok = pizza zamanı!", "🚀 Her şey temiz. Kalkışa hazır!", "🎵 Görev yok, sadece keyif", "🐱 Kedin bile etkilendi", "🌴 Cennet bulundu: 0 görev", "🏆 Verimlilik şampiyonu!", "☕ Sadece kahve ve huzur")
-                else -> listOf("🦥 Even sloths envy your free time", "🏖️ Beach mode: activated", "🎮 Zero tasks. Game time?", "🧘 Inner peace: achieved", "🦸 All tasks — defeated!", "🍕 No tasks = pizza time!", "🚀 All clear. Ready for takeoff!", "🎵 No tasks, just vibes", "🐱 Even your cat is impressed", "🌴 Paradise found: 0 tasks", "🏆 Productivity champion!", "☕ Just coffee and calm")
-            }
-            return messages[index]
+            return WidgetPhrases.random(lang)
         }
 
         fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {

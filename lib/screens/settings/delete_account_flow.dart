@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../utils/localization.dart';
+import '../../services/auth_service.dart';
 import '../home/home_screen.dart';
 
 class DeleteAccountFlow {
@@ -65,6 +66,9 @@ class DeleteAccountFlow {
 
       // Delete Firebase Auth user
       await user.delete();
+
+      // Чистим запазените credentials за тихия повторен вход.
+      await AuthService().clearSavedCredentials();
 
       // Close progress + navigate to HomeScreen (root) — remove all routes.
       // НЕ навигираме към LoginScreen, защото тя прави pop() при успешен login,

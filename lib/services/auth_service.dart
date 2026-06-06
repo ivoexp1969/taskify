@@ -1,13 +1,67 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:ui' as ui;
 
 class AuthService {
   AuthService._internal();
-  
+
   static final AuthService _instance = AuthService._internal();
   factory AuthService() => _instance;
-  
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // На някои Android устройства (Samsung/Redmi/Honor…) firebase_auth НЕ пази
+  // сесията между рестарти — известен wontfix бъг (flutterfire #17971):
+  // authStateChanges emit-ва null след cold start. Затова пазим credentials в
+  // Keystore-базирано сигурно хранилище и при старт правим тих повторен вход.
+  static const _secure = FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
+  static const _kEmail = 'auth_saved_email';
+  static const _kPass = 'auth_saved_password';
+
+  Future<void> _saveCredentials(String email, String password) async {
+    try {
+      await _secure.write(key: _kEmail, value: email);
+      await _secure.write(key: _kPass, value: password);
+    } catch (e) {
+      debugPrint('Save credentials failed: $e');
+    }
+  }
+
+  Future<void> _clearCredentials() async {
+    try {
+      await _secure.delete(key: _kEmail);
+      await _secure.delete(key: _kPass);
+    } catch (e) {
+      debugPrint('Clear credentials failed: $e');
+    }
+  }
+
+  /// Публично чистене на запазените credentials (напр. при изтриване на акаунт).
+  Future<void> clearSavedCredentials() => _clearCredentials();
+
+  /// Тих повторен вход при старт, ако firebase_auth е „забравил" сесията.
+  /// Не показва UI, не блокира — извиква се fire-and-forget от main().
+  /// Връща true ако сесията е възстановена.
+  Future<bool> tryRestoreSession() async {
+    if (kIsWeb) return false;
+    if (_auth.currentUser != null) return true;
+    try {
+      final email = await _secure.read(key: _kEmail);
+      final password = await _secure.read(key: _kPass);
+      if (email == null || password == null) return false;
+      final cred = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return cred.user != null;
+    } catch (e) {
+      debugPrint('Silent session restore failed: $e');
+      return false;
+    }
+  }
   
   // Текущ потребител
   User? get currentUser => _auth.currentUser;
@@ -71,6 +125,9 @@ class AuthService {
         return (success: false, error: _getErrorMessage('verify-email', lang), needsVerification: true);
       }
 
+      // Пазим credentials за тих повторен вход при старт (виж tryRestoreSession).
+      await _saveCredentials(email, password);
+
       return (success: true, error: null, needsVerification: false);
     } on FirebaseAuthException catch (e) {
       return (success: false, error: _getErrorMessage(e.code, lang), needsVerification: false);
@@ -114,6 +171,7 @@ class AuthService {
   
   // Изход
   Future<void> logout() async {
+    await _clearCredentials();
     await _auth.signOut();
   }
   

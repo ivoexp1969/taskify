@@ -5,6 +5,15 @@
 # Firebase
 -keep class com.google.firebase.** { *; }
 
+# Firebase Auth — в release (R8) сесията се губеше при рестарт, защото
+# реалната имплементация на firebase_auth живее в този GMS internal пакет,
+# който НЕ се покрива от com.google.firebase.**. Без keep R8 го обфускира
+# и persistence-ът на потребителя се чупи.
+-keep class com.google.android.gms.internal.** { *; }
+-keep class com.google.android.gms.auth.** { *; }
+-keep class com.google.android.gms.common.** { *; }
+-dontwarn com.google.android.gms.internal.**
+
 # RevenueCat
 -keep class com.revenuecat.purchases.** { *; }
 

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -53,6 +54,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _nameDaysEnabled = false;
   bool _holidaysEnabled = false;
   String _holidaysCountry = 'BG';
+  StreamSubscription<dynamic>? _authSub;
 
   @override
   void initState() {
@@ -63,6 +65,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadHolidaysSetting();
     _checkCalendarConnection();
     if (!kIsWeb && Platform.isIOS) _checkIosCalendarPermission();
+    // Този екран живее в IndexedStack и се build-ва още при стартиране,
+    // ПРЕДИ Firebase Auth да възстанови запазената сесия (асинхронно).
+    // Слушаме промените, за да се пребилдне акаунт секцията щом сесията
+    // се възстанови — иначе изглежда сякаш потребителят е излязъл.
+    _authSub = _authService.authStateChanges.listen((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadHolidaysSetting() async {

@@ -3,7 +3,9 @@ import 'package:hive/hive.dart';
 
 import '../models/task.dart';
 import '../models/category.dart';
+import '../models/expiring_document.dart';
 import 'auth_service.dart';
+import 'documents_service.dart';
 
 class FirestoreService {
   FirestoreService._internal();
@@ -24,6 +26,11 @@ class FirestoreService {
   CollectionReference<Map<String, dynamic>>? get _categoriesRef {
     if (_userId == null) return null;
     return _db.collection('users').doc(_userId).collection('categories');
+  }
+
+  CollectionReference<Map<String, dynamic>>? get _documentsRef {
+    if (_userId == null) return null;
+    return _db.collection('users').doc(_userId).collection('documents');
   }
 
   Future<({bool success, String? error, int tasksCount, int categoriesCount})> uploadToCloud() async {
@@ -79,6 +86,24 @@ class FirestoreService {
           'uploadedAt': FieldValue.serverTimestamp(),
         });
         tasksCount++;
+      }
+
+      // Документи с изтичащ срок (раздел „България"). notificationIds са
+      // локални — не се качват. Заменяме целия облачен списък.
+      final existingDocs = await _documentsRef!.get();
+      for (final doc in existingDocs.docs) {
+        await doc.reference.delete();
+      }
+      final documents = await DocumentsService().getAll();
+      for (final d in documents) {
+        await _documentsRef!.doc(d.id).set({
+          'id': d.id,
+          'type': d.type,
+          'label': d.label,
+          'expiryDate': d.expiryDate.toIso8601String(),
+          'reminderDays': d.reminderDays,
+          'uploadedAt': FieldValue.serverTimestamp(),
+        });
       }
 
       return (success: true, error: null, tasksCount: tasksCount, categoriesCount: categoriesCount);
@@ -140,6 +165,19 @@ class FirestoreService {
         task.isCompleted = data['isCompleted'] as bool? ?? false;
         await taskBox.add(task);
         tasksCount++;
+      }
+
+      // Документи (раздел „България") — заменяме локалните и пренасрочваме
+      // локалните нотификации през DocumentsService.
+      final docsService = DocumentsService();
+      final localDocs = await docsService.getAll();
+      for (final d in localDocs) {
+        await docsService.delete(d); // отменя старите локални нотификации
+      }
+      final docsSnapshot = await _documentsRef!.get();
+      for (final doc in docsSnapshot.docs) {
+        final d = ExpiringDocument.fromJson(doc.data());
+        await docsService.save(d); // планира локалните нотификации наново
       }
 
       return (success: true, error: null, tasksCount: tasksCount, categoriesCount: categoriesCount);
