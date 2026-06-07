@@ -37,6 +37,7 @@ dependencies:
   googleapis_auth: ^1.6.0
   http: ^1.6.0
   google_sign_in: ^7.0.0
+  google_sign_in_web: ^1.1.0
   extension_google_sign_in_as_googleapis_auth: ^3.0.0
   device_calendar: ^4.3.3
   speech_to_text: ^7.0.0

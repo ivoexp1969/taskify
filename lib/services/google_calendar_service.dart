@@ -11,9 +11,20 @@ class GoogleCalendarService {
   factory GoogleCalendarService() => _instance;
   GoogleCalendarService._internal();
 
+  // OAuth client ID-та (Google Cloud Console)
+  static const String _androidClientId =
+      '929046134968-g21i568en2jccqqvlkj4e2reqks9kuij.apps.googleusercontent.com';
+  static const String _webClientId =
+      '929046134968-m6ffgsd8dsotabi7ivkjdsqfnlm041n.apps.googleusercontent.com';
+
   bool _initialized = false;
   GoogleSignInAccount? _currentAccount;
   bool _isConnected = false;
+  StreamSubscription<GoogleSignInAuthenticationEvent>? _authSub;
+
+  /// Известява UI-я при промяна на връзката (важно за web, където входът
+  /// идва асинхронно от рендирания GIS бутон).
+  final ValueNotifier<bool> connectionNotifier = ValueNotifier<bool>(false);
 
   static const List<String> scopes = [
     'https://www.googleapis.com/auth/calendar',
@@ -25,14 +36,43 @@ class GoogleCalendarService {
   Future<void> _ensureInitialized() async {
     if (_initialized) return;
     await GoogleSignIn.instance.initialize(
-      clientId: kIsWeb
-          ? null
-          : '929046134968-g21i568en2jccqqvlkj4e2reqks9kuij.apps.googleusercontent.com',
-      serverClientId: kIsWeb
-          ? '929046134968-m6ffgsd8dsotabi7ivkjdsqfnlm041n.apps.googleusercontent.com'
-          : null,
+      // На web client ID-то трябва да е WEB клиентът (а не Android).
+      clientId: kIsWeb ? _webClientId : _androidClientId,
+      serverClientId: null,
+    );
+    // Слушаме събитията за вход/изход. На web входът идва от GIS бутона, не от
+    // authenticate() (който там хвърля грешка).
+    _authSub ??= GoogleSignIn.instance.authenticationEvents.listen(
+      _handleAuthEvent,
+      onError: (Object e) => debugPrint('GCALSYNC auth event error: $e'),
     );
     _initialized = true;
+  }
+
+  Future<void> _handleAuthEvent(GoogleSignInAuthenticationEvent event) async {
+    switch (event) {
+      case GoogleSignInAuthenticationEventSignIn():
+        _currentAccount = event.user;
+        if (kIsWeb) {
+          // На web автентикацията и оторизацията са разделени — веднага искаме
+          // календарните scopes, за да получим access token.
+          try {
+            final authz =
+                await event.user.authorizationClient.authorizeScopes(scopes);
+            _isConnected = authz.accessToken.isNotEmpty;
+          } catch (e) {
+            debugPrint('GCALSYNC web authorizeScopes failed: $e');
+            _isConnected = false;
+          }
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('google_calendar_connected', _isConnected);
+        }
+        connectionNotifier.value = _isConnected;
+      case GoogleSignInAuthenticationEventSignOut():
+        _currentAccount = null;
+        _isConnected = false;
+        connectionNotifier.value = false;
+    }
   }
 
   Future<void> tryReconnect() async {
@@ -53,13 +93,16 @@ class GoogleCalendarService {
       // relaunch, so the first calendar call hit an expired/absent token → 401 →
       // _disconnectOnAuthError() dropped the connection. Restore it silently here
       // so the iOS connection actually survives an app restart.
-      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      // iOS и web: lightweight auth е SILENT (без UI). На web входът ще дойде
+      // през authenticationEvents → _handleAuthEvent (възстановява акаунта и
+      // оторизира scopes). На Android го прескачаме (там показва picker).
+      if (kIsWeb || (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS)) {
         try {
           await _ensureInitialized();
           final future = GoogleSignIn.instance.attemptLightweightAuthentication();
           if (future != null) _currentAccount = await future;
         } catch (e) {
-          debugPrint('iOS silent reconnect failed (will retry lazily): $e');
+          debugPrint('Silent reconnect failed (will retry lazily): $e');
         }
       }
       debugPrint('Google Calendar: connection state restored');
@@ -71,6 +114,16 @@ class GoogleCalendarService {
   Future<bool> connect() async {
     try {
       await _ensureInitialized();
+      // На web authenticate() хвърля грешка — входът минава през рендирания
+      // GIS бутон (googleSignInButton()), а резултатът идва през
+      // authenticationEvents → _handleAuthEvent. Тук само опитваме silent.
+      if (kIsWeb) {
+        try {
+          final future = GoogleSignIn.instance.attemptLightweightAuthentication();
+          if (future != null) await future;
+        } catch (_) {}
+        return _isConnected;
+      }
       final account = await GoogleSignIn.instance.authenticate(
         scopeHint: scopes,
       );
@@ -78,6 +131,7 @@ class GoogleCalendarService {
       _isConnected = true;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('google_calendar_connected', true);
+      connectionNotifier.value = true;
       return true;
     } catch (e) {
       debugPrint('Error connecting to Google Calendar: $e');
@@ -94,6 +148,7 @@ class GoogleCalendarService {
       _isConnected = false;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('google_calendar_connected', false);
+      connectionNotifier.value = false;
     } catch (e) {
       debugPrint('Error disconnecting from Google Calendar: $e');
     }

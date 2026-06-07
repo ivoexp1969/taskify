@@ -14,6 +14,7 @@ import '../../models/task.dart';
 import '../../models/category.dart';
 import '../../utils/localization.dart';
 import '../../utils/file_saver.dart';
+import '../../utils/gsi_button.dart';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../auth/login_screen.dart';
@@ -73,11 +74,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _authSub = _authService.authStateChanges.listen((_) {
       if (mounted) setState(() {});
     });
+    // Web: входът в Google Calendar идва асинхронно от GIS бутона → обновяваме
+    // UI-я щом връзката се промени.
+    _calendarService.connectionNotifier.addListener(_onCalendarConnChanged);
+  }
+
+  void _onCalendarConnChanged() {
+    if (mounted) {
+      setState(() => _isCalendarConnected = _calendarService.isConnected);
+    }
   }
 
   @override
   void dispose() {
     _authSub?.cancel();
+    _calendarService.connectionNotifier.removeListener(_onCalendarConnChanged);
     super.dispose();
   }
 
@@ -1658,23 +1669,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _isCalendarConnected ? t.calendarSyncEnabled : t.connectForSync,
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
-                  trailing: TextButton(
-                    onPressed: () async {
-                      if (_isCalendarConnected) {
-                        await _calendarService.disconnect();
-                        setState(() => _isCalendarConnected = false);
-                      } else {
-                        final success = await _calendarService.connect();
-                        setState(() => _isCalendarConnected = success);
-                        if (!success && mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(t.connectionFailed)),
-                          );
-                        }
-                      }
-                    },
-                    child: Text(_isCalendarConnected ? t.disconnect : t.connect),
-                  ),
+                  trailing: (kIsWeb && !_isCalendarConnected)
+                      // Web: authenticate() не работи → официален GIS бутон.
+                      // Резултатът идва през connectionNotifier (listener в
+                      // initState обновява _isCalendarConnected).
+                      ? SizedBox(width: 200, child: googleSignInButton())
+                      : TextButton(
+                          onPressed: () async {
+                            if (_isCalendarConnected) {
+                              await _calendarService.disconnect();
+                              setState(() => _isCalendarConnected = false);
+                            } else {
+                              final success = await _calendarService.connect();
+                              setState(() => _isCalendarConnected = success);
+                              if (!success && mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(t.connectionFailed)),
+                                );
+                              }
+                            }
+                          },
+                          child: Text(_isCalendarConnected ? t.disconnect : t.connect),
+                        ),
                 ),
                 if (_isCalendarConnected) ...[
                   const Divider(height: 0),
