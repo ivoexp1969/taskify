@@ -122,7 +122,7 @@ class CalendarImportService {
     final thresholdDate = now.subtract(const Duration(days: 30));
 
     // === 1. CALENDAR EVENTS ===
-    final events = await calendarService.getUpcomingEvents(days: 60, interactive: interactive);
+    final events = await calendarService.getUpcomingEvents(days: 365, interactive: interactive);
 
     for (final event in events) {
       final eventId = event['id'] as String?;

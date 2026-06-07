@@ -248,6 +248,71 @@ class GoogleCalendarService {
     }
   }
 
+  /// Преобразува task.reminders ('minus_15m', 'at_time', ...) в Google Calendar
+  /// reminder overrides (минути преди началото). Google допуска макс. 5.
+  List<Map<String, dynamic>> _reminderOverrides(Task task) {
+    final list = task.reminders;
+    if (list == null || list.isEmpty) return [];
+    final seen = <int>{};
+    final overrides = <Map<String, dynamic>>[];
+    for (final r in list) {
+      int? minutes;
+      switch (r) {
+        case 'at_time': minutes = 0; break;
+        case 'minus_5m': minutes = 5; break;
+        case 'minus_15m': minutes = 15; break;
+        case 'minus_30m': minutes = 30; break;
+        case 'minus_1h': minutes = 60; break;
+        case 'minus_2h': minutes = 120; break;
+        case 'minus_1d': minutes = 1440; break;
+        case 'same_day_8':
+          final sameDay8 = DateTime(
+              task.dueDate.year, task.dueDate.month, task.dueDate.day, 8);
+          final diff = task.dueDate.difference(sameDay8).inMinutes;
+          minutes = diff >= 0 ? diff : 0;
+          break;
+      }
+      if (minutes == null || minutes < 0 || minutes > 40320) continue;
+      if (seen.add(minutes)) {
+        overrides.add({'method': 'popup', 'minutes': minutes});
+      }
+    }
+    return overrides.take(5).toList();
+  }
+
+  String _ymd(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  /// Тялото на Google Calendar събитието за дадена задача (вкл. напомняния).
+  /// [allDay] = true пази събитието „целодневно" (date вместо dateTime), за да
+  /// не се получава смесен формат при PATCH → „Sync Error".
+  Map<String, dynamic> _eventBody(Task task, {bool allDay = false}) {
+    final overrides = _reminderOverrides(task);
+    final body = <String, dynamic>{
+      'summary': task.title,
+      'description': task.notes ?? '',
+      // ВИНАГИ useDefault:false + явни overrides (дори празни). PATCH мърджва
+      // reminders обекта, затова само `useDefault:true` би оставил старите
+      // overrides → грешка „cannotUseDefaultRemindersAndSpecifyOverride" (400).
+      // Празен overrides списък = задачата няма напомняния.
+      'reminders': {'useDefault': false, 'overrides': overrides},
+    };
+    if (allDay) {
+      body['start'] = {'date': _ymd(task.dueDate)};
+      body['end'] = {'date': _ymd(task.dueDate.add(const Duration(days: 1)))};
+    } else {
+      body['start'] = {
+        'dateTime': task.dueDate.toUtc().toIso8601String(),
+        'timeZone': 'UTC',
+      };
+      body['end'] = {
+        'dateTime': task.dueDate.add(const Duration(hours: 1)).toUtc().toIso8601String(),
+        'timeZone': 'UTC',
+      };
+    }
+    return body;
+  }
+
   Future<String?> addTaskToCalendar(Task task, {bool interactive = false}) async {
     try {
       final token = await _getAccessToken(interactive: interactive);
@@ -257,18 +322,7 @@ class GoogleCalendarService {
         'https://www.googleapis.com/calendar/v3/calendars/primary/events',
       );
 
-      final event = {
-        'summary': task.title,
-        'description': task.notes ?? '',
-        'start': {
-          'dateTime': task.dueDate.toUtc().toIso8601String(),
-          'timeZone': 'UTC',
-        },
-        'end': {
-          'dateTime': task.dueDate.add(const Duration(hours: 1)).toUtc().toIso8601String(),
-          'timeZone': 'UTC',
-        },
-      };
+      final event = _eventBody(task);
 
       final response = await http.post(
         url,
@@ -279,6 +333,7 @@ class GoogleCalendarService {
         body: jsonEncode(event),
       );
 
+      debugPrint('GCALSYNC add: post ${response.statusCode}');
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         return data['id'];
@@ -287,11 +342,99 @@ class GoogleCalendarService {
         return null;
       }
 
-      debugPrint('Error adding event: ${response.body}');
+      debugPrint('GCALSYNC add: error ${response.statusCode}: ${response.body}');
       return null;
     } catch (e) {
       debugPrint('Error adding task to calendar: $e');
       return null;
+    }
+  }
+
+  /// Обновява вече свързано събитие (PATCH със същото [eventId]) → НЕ дублира.
+  /// Връща true при успех. Ако събитието е изтрито на Google страна (404/410),
+  /// пресъздава ново и записва новото ID в задачата.
+  Future<bool> updateCalendarEvent(String eventId, Task task, {bool interactive = false}) async {
+    try {
+      final token = await _getAccessToken(interactive: interactive);
+      if (token == null) return false;
+
+      const base =
+          'https://www.googleapis.com/calendar/v3/calendars/primary/events';
+
+      // 1) Вземи съществуващото събитие — за да знаем формата (all-day vs timed)
+      //    и дали изобщо подлежи на редакция. Така избягваме „Sync Error" и
+      //    случайни дубли от сляп PATCH/recreate.
+      final getResp = await http.get(
+        Uri.parse('$base/$eventId'),
+        headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+      );
+
+      if (getResp.statusCode == 401) {
+        await _disconnectOnAuthError();
+        return false;
+      }
+
+      bool gone = getResp.statusCode == 404 || getResp.statusCode == 410;
+      Map<String, dynamic>? existing;
+      if (getResp.statusCode == 200) {
+        existing = jsonDecode(getResp.body) as Map<String, dynamic>;
+        if (existing['status'] == 'cancelled') gone = true;
+      }
+
+      if (gone) {
+        // Импортирана задача, чийто източник вече липсва в Google (или е
+        // нередактируем recurring/birthday instance, който GET-ът не намира) →
+        // НЕ пресъздаваме. Иначе се появяват дубли (рождените дни като
+        // 00:00–01:00 събития). Само ЛОКАЛНО създадени задачи се пресъздават.
+        if (task.importedFromCalendar == true) {
+          debugPrint('GCALSYNC update: imported event gone → skip (no recreate)');
+          return false;
+        }
+        debugPrint('GCALSYNC update: local event gone → recreate');
+        final newId = await addTaskToCalendar(task, interactive: interactive);
+        if (newId != null) {
+          task.googleCalendarEventId = newId;
+          await task.save();
+          return true;
+        }
+        return false;
+      }
+
+      if (existing == null) {
+        debugPrint('GCALSYNC update: get ${getResp.statusCode}: ${getResp.body}');
+        return false;
+      }
+
+      // Специални типове (рожден ден, OOO, focus time, working location) не се
+      // редактират през стандартния events.patch → пропусни тихо.
+      final eventType = existing['eventType'] as String? ?? 'default';
+      if (eventType != 'default') {
+        debugPrint('GCALSYNC update: skip eventType=$eventType');
+        return false;
+      }
+
+      final isAllDay = (existing['start'] as Map?)?.containsKey('date') ?? false;
+
+      final patchResp = await http.patch(
+        Uri.parse('$base/$eventId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(_eventBody(task, allDay: isAllDay)),
+      );
+
+      debugPrint('GCALSYNC update: patch ${patchResp.statusCode} (allDay=$isAllDay)');
+      if (patchResp.statusCode == 200) return true;
+      if (patchResp.statusCode == 401) {
+        await _disconnectOnAuthError();
+        return false;
+      }
+      debugPrint('GCALSYNC update: patch error ${patchResp.statusCode}: ${patchResp.body}');
+      return false;
+    } catch (e) {
+      debugPrint('GCALSYNC update: exception $e');
+      return false;
     }
   }
 
@@ -319,6 +462,102 @@ class GoogleCalendarService {
     } catch (e) {
       debugPrint('Error deleting event: $e');
       return false;
+    }
+  }
+
+  /// Премахва дублирани събития от primary календара: събития с ЕДНАКВО
+  /// заглавие на същата или близка дата (в рамките на [dayTolerance] дни)
+  /// се свеждат до едно. Безопасно — НЕ пипа:
+  ///  • рождени дни (eventType=birthday),
+  ///  • легитимни повтарящи се серии (имат recurringEventId).
+  /// Връща броя изтрити събития.
+  Future<int> removeDuplicateEvents({bool interactive = false, int dayTolerance = 3}) async {
+    try {
+      final token = await _getAccessToken(interactive: interactive);
+      if (token == null) return 0;
+
+      final now = DateTime.now();
+      final timeMin = now.subtract(const Duration(days: 400)).toUtc().toIso8601String();
+      final timeMax = now.add(const Duration(days: 800)).toUtc().toIso8601String();
+
+      // Заглавие → списък от (eventId, начало) за standalone събития.
+      final byTitle = <String, List<MapEntry<String, DateTime>>>{};
+      String? pageToken;
+      do {
+        final url = Uri.parse(
+          'https://www.googleapis.com/calendar/v3/calendars/primary/events'
+          '?timeMin=$timeMin&timeMax=$timeMax&singleEvents=true&orderBy=startTime'
+          '&maxResults=250${pageToken != null ? '&pageToken=$pageToken' : ''}',
+        );
+        final resp = await http.get(url, headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        });
+        if (resp.statusCode == 401) {
+          await _disconnectOnAuthError();
+          return 0;
+        }
+        if (resp.statusCode != 200) {
+          debugPrint('GCALSYNC dedupe list ${resp.statusCode}: ${resp.body}');
+          break;
+        }
+        final data = jsonDecode(resp.body);
+        for (final it in (data['items'] as List? ?? [])) {
+          if (it['eventType'] == 'birthday') continue;
+          if (it['recurringEventId'] != null) continue; // легитимна серия
+          final id = it['id'] as String?;
+          final summary = (it['summary'] ?? '').toString().trim().toLowerCase();
+          if (id == null || summary.isEmpty) continue;
+          final start = it['start'];
+          final s = start?['dateTime'] ?? start?['date'];
+          if (s == null) continue;
+          DateTime dt;
+          try {
+            dt = DateTime.parse(s);
+          } catch (_) {
+            continue;
+          }
+          byTitle.putIfAbsent(summary, () => []).add(MapEntry(id, dt));
+        }
+        pageToken = data['nextPageToken'] as String?;
+      } while (pageToken != null);
+
+      // За всяко заглавие: пази клъстер от запазени дати; всичко в рамките на
+      // ±tolerance дни от вече запазена дата е дубликат.
+      final toDelete = <String>[];
+      for (final list in byTitle.values) {
+        if (list.length < 2) continue;
+        list.sort((a, b) => a.value.compareTo(b.value));
+        final kept = <DateTime>[];
+        for (final e in list) {
+          final isDup = kept.any(
+              (k) => e.value.difference(k).inHours.abs() <= dayTolerance * 24);
+          if (isDup) {
+            toDelete.add(e.key);
+          } else {
+            kept.add(e.value);
+          }
+        }
+      }
+
+      debugPrint('GCALSYNC dedupe: found ${toDelete.length} duplicates to delete');
+      int deleted = 0;
+      for (final id in toDelete) {
+        bool ok = false;
+        // Retry при временни мрежови грешки (socket abort и т.н.).
+        for (int attempt = 0; attempt < 3 && !ok; attempt++) {
+          ok = await deleteCalendarEvent(id, interactive: false);
+          if (!ok) await Future.delayed(const Duration(milliseconds: 500));
+        }
+        if (ok) deleted++;
+        // Лека пауза, за да не претоварваме връзката/квотата.
+        await Future.delayed(const Duration(milliseconds: 120));
+      }
+      debugPrint('GCALSYNC dedupe: deleted $deleted of ${toDelete.length}');
+      return deleted;
+    } catch (e) {
+      debugPrint('GCALSYNC dedupe exception: $e');
+      return 0;
     }
   }
 

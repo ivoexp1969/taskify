@@ -13,6 +13,7 @@ import 'package:file_picker/file_picker.dart';
 import '../../models/task.dart';
 import '../../models/category.dart';
 import '../../utils/localization.dart';
+import '../../utils/file_saver.dart';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../auth/login_screen.dart';
@@ -1019,6 +1020,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       final jsonString = const JsonEncoder.withIndent('  ').convert(data);
 
+      // Web: dart:io File / getTemporaryDirectory не съществуват → сваляме
+      // файла директно през браузъра (Blob download).
+      if (kIsWeb) {
+        final ts = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+        await saveTextFile('task_manager_backup_$ts.json', jsonString);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(t.tasksBackup)),
+          );
+        }
+        return;
+      }
+
       final tempDir = await getTemporaryDirectory();
       final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
       final fileName = 'task_manager_backup_$timestamp.json';
@@ -1683,19 +1697,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       int synced = 0;
                       for (final task in taskBox.values) {
                         if (task.isCompleted || task.isArchived) continue;
-                        // Не пипаме задачи, импортирани ОТ календара
-                        if (task.importedFromCalendar == true) continue;
                         if (!task.dueDate.isAfter(today.subtract(const Duration(days: 1)))) continue;
-                        // Ресетваме старото ID ако има (повторен експорт)
                         if (task.googleCalendarEventId != null) {
-                          await _calendarService.deleteCalendarEvent(task.googleCalendarEventId!, interactive: true);
-                          task.googleCalendarEventId = null;
-                        }
-                        final eventId = await _calendarService.addTaskToCalendar(task, interactive: true);
-                        if (eventId != null) {
-                          task.googleCalendarEventId = eventId;
-                          await task.save();
-                          synced++;
+                          // Вече свързана (импортирана или експортирана) → UPDATE
+                          // на място със същото ID → без дублиране при смяна на дата.
+                          final ok = await _calendarService.updateCalendarEvent(
+                              task.googleCalendarEventId!, task, interactive: true);
+                          if (ok) synced++;
+                        } else {
+                          // Нова локална задача → създай ново събитие.
+                          final eventId = await _calendarService.addTaskToCalendar(task, interactive: true);
+                          if (eventId != null) {
+                            task.googleCalendarEventId = eventId;
+                            await task.save();
+                            synced++;
+                          }
                         }
                       }
                       if (mounted) {
@@ -1729,6 +1745,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(t.importedSkipped(imported, skipped))),
+                        );
+                      }
+                    },
+                  ),
+                  const Divider(height: 0),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.cleaning_services, color: Colors.orange),
+                    ),
+                    title: Text(t.removeDuplicates),
+                    subtitle: Text(t.removeDuplicatesDesc, style: const TextStyle(fontSize: 12)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: Text('${t.removeDuplicates}?'),
+                          content: Text(t.removeDuplicatesDesc),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: Text(t.cancel),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              child: Text(t.delete, style: const TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirm != true) return;
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${t.removeDuplicates}…')),
+                        );
+                      }
+                      final removed = await _calendarService.removeDuplicateEvents(interactive: true);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(t.removedDuplicates(removed))),
                         );
                       }
                     },

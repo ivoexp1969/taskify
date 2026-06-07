@@ -1848,6 +1848,13 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                             existing.setSubtasks(tempSubtasks);
                             if (existing.template == null || existing.template == 'shopping') { existing.template = tempCategoryId == 'shopping' ? 'shopping' : null; }
                             await existing.save();
+                            // Google Calendar: обнови вече свързаното събитие
+                            // (важи и за импортирани задачи) → без дублиране.
+                            if (GoogleCalendarService().isConnected &&
+                                existing.googleCalendarEventId != null) {
+                              await GoogleCalendarService().updateCalendarEvent(
+                                  existing.googleCalendarEventId!, existing);
+                            }
                             await NotificationService().scheduleForTask(existing);
                           } else {
                             // Paywall check — free limit 50 tasks
