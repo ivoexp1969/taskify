@@ -1241,12 +1241,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final result = await SyncService().mergeWithCloud();
     if (!mounted) return;
     setState(() => _isSyncing = false);
+    if (result.error == 'in-progress') return; // тих — вече тече синхрон
+    final String msg;
+    final bool ok = result.success;
+    if (ok) {
+      msg = t.syncSuccess;
+    } else if (result.error == 'not-signed-in') {
+      msg = t.signInToSync; // приятелско — не „грешка"
+    } else {
+      msg = '${t.error}: ${result.error}';
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(result.success
-            ? t.syncSuccess
-            : '${t.error}: ${result.error}'),
-        backgroundColor: result.success ? Colors.green : Colors.redAccent,
+        content: Text(msg),
+        backgroundColor: ok ? Colors.green : Colors.orange,
+      ),
+    );
+  }
+
+  /// Авторитетно нулиране: трие облака + локалното. После потребителят
+  /// импортира чистия бекъп (напр. iPhone Export Data JSON).
+  Future<void> _resetSync() async {
+    final t = AppText.of(context);
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(t.resetSync),
+        content: Text(t.resetSyncConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(t.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(t.delete, style: const TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+    setState(() => _isSyncing = true);
+    final n = await SyncService().wipeAllTasks();
+    if (!mounted) return;
+    setState(() => _isSyncing = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(t.resetSyncDone(n)),
+        duration: const Duration(seconds: 5),
       ),
     );
   }
@@ -1542,32 +1584,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 8),
             Card(
-              child: ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: _isSyncing
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.cloud_sync_outlined,
+                              color: Colors.blue),
+                    ),
+                    title: Text(t.syncNow),
+                    subtitle: Text(
+                      // Сливането е автоматично и невидимо; този бутон само форсира.
+                      t.autoSyncDesc,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: _isSyncing ? null : _syncNow,
                   ),
-                  child: _isSyncing
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.cloud_sync_outlined, color: Colors.blue),
-                ),
-                title: Text(t.syncNow),
-                subtitle: Text(
-                  // Сливането е автоматично и невидимо; този бутон само форсира.
-                  t.autoSyncDesc,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  const Divider(height: 0),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.restart_alt, color: Colors.red),
+                    ),
+                    title: Text(t.resetSync),
+                    subtitle: Text(t.resetSyncDesc,
+                        style: const TextStyle(fontSize: 12)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: _isSyncing ? null : _resetSync,
                   ),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: _isSyncing ? null : _syncNow,
+                ],
               ),
             ),
           ],

@@ -706,6 +706,62 @@ class AppText {
     'ja': '自動的に同期されます — これは今すぐ実行するだけです',
   });
 
+  String get resetSync => _t({
+    'en': 'Reset sync (wipe cloud + local)',
+    'bg': 'Нулирай синхронизацията (изтрий облак + локално)',
+    'de': 'Sync zurücksetzen (Cloud + lokal löschen)',
+    'fr': 'Réinitialiser la sync (cloud + local)',
+    'it': 'Reimposta sync (cloud + locale)',
+    'el': 'Επαναφορά συγχρονισμού (cloud + τοπικά)',
+    'es': 'Restablecer sync (nube + local)',
+    'pt': 'Redefinir sync (nuvem + local)',
+    'ru': 'Сбросить синхронизацию (облако + локально)',
+    'tr': 'Senkronizasyonu sıfırla (bulut + yerel)',
+    'ja': '同期をリセット（クラウド＋ローカル削除）',
+  });
+
+  String get resetSyncDesc => _t({
+    'en': 'Deletes ALL tasks everywhere. Use to recover from a clean source (e.g. import).',
+    'bg': 'Изтрива ВСИЧКИ задачи навсякъде. За възстановяване от чист източник (импорт).',
+    'de': 'Löscht ALLE Aufgaben überall. Zur Wiederherstellung aus sauberer Quelle (Import).',
+    'fr': 'Supprime TOUTES les tâches partout. Pour restaurer depuis une source propre (import).',
+    'it': 'Elimina TUTTE le attività ovunque. Per ripristinare da una fonte pulita (import).',
+    'el': 'Διαγράφει ΟΛΕΣ τις εργασίες παντού. Για αποκατάσταση από καθαρή πηγή (εισαγωγή).',
+    'es': 'Elimina TODAS las tareas en todas partes. Para restaurar desde una fuente limpia (importar).',
+    'pt': 'Apaga TODAS as tarefas em todo o lado. Para restaurar de uma fonte limpa (importar).',
+    'ru': 'Удаляет ВСЕ задачи везде. Для восстановления из чистого источника (импорт).',
+    'tr': 'TÜM görevleri her yerden siler. Temiz bir kaynaktan kurtarmak için (içe aktar).',
+    'ja': 'すべてのタスクをどこからも削除します。クリーンなソースからの復元用（インポート）。',
+  });
+
+  String get resetSyncConfirm => _t({
+    'en': 'This deletes ALL tasks from the cloud AND this device. Continue?',
+    'bg': 'Това изтрива ВСИЧКИ задачи от облака И от това устройство. Да продължа?',
+    'de': 'Dies löscht ALLE Aufgaben aus der Cloud UND von diesem Gerät. Fortfahren?',
+    'fr': 'Ceci supprime TOUTES les tâches du cloud ET de cet appareil. Continuer?',
+    'it': 'Questo elimina TUTTE le attività dal cloud E da questo dispositivo. Continuare?',
+    'el': 'Αυτό διαγράφει ΟΛΕΣ τις εργασίες από το cloud ΚΑΙ από αυτή τη συσκευή. Συνέχεια;',
+    'es': 'Esto elimina TODAS las tareas de la nube Y de este dispositivo. ¿Continuar?',
+    'pt': 'Isto apaga TODAS as tarefas da nuvem E deste dispositivo. Continuar?',
+    'ru': 'Это удалит ВСЕ задачи из облака И с этого устройства. Продолжить?',
+    'tr': 'Bu, TÜM görevleri buluttan VE bu cihazdan siler. Devam edilsin mi?',
+    'ja': 'クラウドとこの端末からすべてのタスクを削除します。続行しますか？',
+  });
+
+  String resetSyncDone(int count) => _t({
+    'en': 'Wiped $count cloud tasks. Now import from your clean backup.',
+    'bg': 'Изтрити $count облачни задачи. Сега импортирай от чистия бекъп.',
+    'de': '$count Cloud-Aufgaben gelöscht. Jetzt aus sauberem Backup importieren.',
+    'fr': '$count tâches cloud supprimées. Importez depuis votre sauvegarde propre.',
+    'it': '$count attività cloud eliminate. Ora importa dal backup pulito.',
+    'el': 'Διαγράφηκαν $count εργασίες cloud. Τώρα κάνε εισαγωγή από καθαρό αντίγραφο.',
+    'es': '$count tareas en la nube eliminadas. Ahora importa desde tu copia limpia.',
+    'pt': '$count tarefas na nuvem apagadas. Agora importa do backup limpo.',
+    'ru': 'Удалено $count облачных задач. Теперь импортируй из чистой копии.',
+    'tr': '$count bulut görevi silindi. Şimdi temiz yedekten içe aktar.',
+    'ja': 'クラウドの$count件のタスクを削除しました。クリーンなバックアップからインポートしてください。',
+  });
+
   String get connectionFailed => _t({
     'en': 'Connection failed',
     'bg': 'Неуспешно свързване',

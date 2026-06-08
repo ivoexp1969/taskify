@@ -54,6 +54,10 @@ class SyncService {
   Timer? _debounce;
   StreamSubscription? _boxSub;
   bool _autoStarted = false;
+  // Циркуит брейкър: АВТО-синхрон не се пуска по-често от веднъж на толкова —
+  // дори при бъг това спира runaway цикъл. Ръчният syncNow НЕ е ограничен.
+  int _lastSyncMs = 0;
+  static const int _minAutoSyncGapMs = 15000;
 
   String? get _userId => _auth.currentUser?.uid;
 
@@ -104,12 +108,27 @@ class SyncService {
     if (_userId == null) return;
     _debounce?.cancel();
     _debounce = Timer(const Duration(seconds: 4), () {
+      final since = DateTime.now().millisecondsSinceEpoch - _lastSyncMs;
+      if (since < _minAutoSyncGapMs) {
+        // Твърде скоро след предишен синхрон → изчакай (циркуит брейкър).
+        _debounce = Timer(
+          Duration(milliseconds: _minAutoSyncGapMs - since + 500),
+          () => mergeWithCloud(),
+        );
+        return;
+      }
       mergeWithCloud();
     });
   }
 
-  /// Викай при старт на приложението и при връщане на фокус (resume).
-  Future<void> syncNow() => mergeWithCloud();
+  /// АВТО-тригер (старт, authStateChanges, resume). Минава през циркуит брейкъра
+  /// → не по-често от веднъж на _minAutoSyncGapMs. Ръчният бутон в Настройки вика
+  /// mergeWithCloud() директно (незабавно).
+  Future<void> syncNow() async {
+    final since = DateTime.now().millisecondsSinceEpoch - _lastSyncMs;
+    if (since < _minAutoSyncGapMs) return;
+    await mergeWithCloud();
+  }
 
   // ======================= MERGE АЛГОРИТЪМ =======================
 
@@ -136,7 +155,7 @@ class SyncService {
       for (final t in taskBox.values) {
         localById[t.ensureId()] = t;
       }
-      final localTombstones = _tomb.all(); // id -> deletedAt
+      var localTombstones = _tomb.all(); // id -> deletedAt
 
       // --- Облачно състояние ---
       final snap = await tasksRef.get();
@@ -146,6 +165,92 @@ class SyncService {
       }
 
       _applyingRemote = true;
+
+      // === PRE-A) LEGACY облачни документи (от старото „огледало") ===
+      // Те имат случайно Firestore doc-id и НЯМАТ updatedAtMillis/стабилен id,
+      // затова никога не съвпадат по id → старият merge ги сваляше наново при
+      // ВСЕКИ синхрон (2x, 3x...). Тук ги консумираме ВЕДНЪЖ: ако съдържанието
+      // вече е локално → само трием стария doc; ако е само в облака → сваляме
+      // веднъж и пак трием стария doc.
+      final legacyIds = <String>[];
+      for (final e in cloudDocs.entries) {
+        if (e.value['deleted'] == true) continue;
+        if (e.value['updatedAtMillis'] == null) legacyIds.add(e.key);
+      }
+      final localSigs = <String>{
+        for (final t in localById.values) _sigTask(t)
+      };
+      for (final id in legacyIds) {
+        final data = cloudDocs[id]!;
+        final sig = _sigData(data);
+        if (sig != null && !localSigs.contains(sig)) {
+          final t = _taskFromCloud(data); // null id → нов стабилен id
+          await taskBox.add(t);
+          localById[t.id!] = t;
+          localSigs.add(sig);
+          downloaded++;
+        }
+        await tasksRef.doc(id).delete();
+        cloudDocs.remove(id);
+      }
+
+      // === PRE-B) КОНВЕРГЕНТНА дедупликация по съдържание ===
+      // Дубли с РАЗЛИЧНИ id (възникнали при миграцията/legacy бъга, дори между
+      // устройства) се свеждат до един. Survivor = НАЙ-МАЛКИЯТ id из обединението
+      // local+cloud → всички устройства избират ЕДИН и същ → конвергира без
+      // загуба на данни. Останалите id-та се tombstone-ват (и в облака).
+      final sigGroups = <String, Set<String>>{};
+      void addSig(String? sig, String id) {
+        if (sig == null) return;
+        sigGroups.putIfAbsent(sig, () => <String>{}).add(id);
+      }
+      for (final t in localById.values) {
+        addSig(_sigTask(t), t.id!);
+      }
+      for (final e in cloudDocs.entries) {
+        if (e.value['deleted'] == true) continue;
+        if (localById.containsKey(e.key)) continue; // същата задача (по id)
+        addSig(_sigData(e.value), e.key);
+      }
+      for (final group in sigGroups.values) {
+        if (group.length < 2) continue;
+        final ids = group.toList()..sort();
+        final survivor = ids.first;
+        for (final dupId in ids.skip(1)) {
+          // ХАРД-трий облачния дубъл. Дедупликацията е детерминирана
+          // (survivor = min id из обединението) → всички устройства махат
+          // СЪЩИТЕ дубли и пазят СЪЩИЯ survivor → няма възкръсване. Без
+          // tombstone маркери → облакът остава чист (важно при хиляди дубли).
+          if (cloudDocs.containsKey(dupId)) {
+            await tasksRef.doc(dupId).delete();
+            cloudDocs.remove(dupId);
+          }
+          final localDup = localById[dupId];
+          if (localDup != null) {
+            await NotificationService().cancelForTask(localDup);
+            if (localDup.isInBox) await localDup.delete();
+            localById.remove(dupId);
+            deletedLocally++;
+          }
+        }
+        // Ако оцелелият е само в облака → свали го веднъж (запазва cloud id).
+        if (!localById.containsKey(survivor) &&
+            cloudDocs.containsKey(survivor)) {
+          final t = _taskFromCloud(cloudDocs[survivor]!);
+          if (t.id == survivor) {
+            await taskBox.add(t);
+            await _rescheduleNotifs(t);
+            localById[survivor] = t;
+            downloaded++;
+          }
+        }
+      }
+      // Презареди tombstones (pre-B добави нови) за коректна реконсилация долу.
+      localTombstones = _tomb.all();
+      // Сигнатури на текущите локални задачи — защита да не създаваме нов дубъл.
+      final localSigToId = <String, String>{
+        for (final t in localById.values) _sigTask(t): t.id!
+      };
 
       // === 1) Реконсилиране на всеки облачен документ ===
       for (final entry in cloudDocs.entries) {
@@ -205,11 +310,18 @@ class SyncService {
         }
 
         if (localTask == null) {
+          // Защита: ако вече има локална задача със същото съдържание (различен
+          // id), НЕ сваляме нов дубъл — pre-B ще е tombstone-нал този id.
+          final sig = _sigData(data);
+          if (sig != null && localSigToId.containsKey(sig)) {
+            continue;
+          }
           // Само в облака → свали локално.
           final t = _taskFromCloud(data);
           await taskBox.add(t);
           await _rescheduleNotifs(t);
           localById[cid] = t;
+          if (sig != null) localSigToId[sig] = t.id!;
           downloaded++;
         } else {
           // И на двете места → печели по-новата версия.
@@ -254,6 +366,7 @@ class SyncService {
     } finally {
       _applyingRemote = false;
       _syncInProgress = false;
+      _lastSyncMs = DateTime.now().millisecondsSinceEpoch;
       syncing.value = false;
     }
   }
@@ -313,6 +426,24 @@ class SyncService {
   }
 
   // ======================= FIRESTORE МАПИНГ =======================
+
+  /// Сигнатура по съдържание — за съпоставяне на дубли с различни id (вкл.
+  /// между устройства и от стария „огледален" облак). Нарочно проста и стабилна:
+  /// заглавие + точен срок + категория. Изчислява се ЕДНАКВО на всички устройства.
+  String _sig(String title, DateTime due, String categoryId) =>
+      '${title.trim().toLowerCase()}|${due.millisecondsSinceEpoch}|$categoryId';
+
+  String _sigTask(Task t) => _sig(t.title, t.dueDate, t.categoryId);
+
+  String? _sigData(Map<String, dynamic> d) {
+    final title = d['title'] as String?;
+    final dueStr = d['dueDate'] as String?;
+    final cat = d['categoryId'] as String?;
+    if (title == null || dueStr == null || cat == null) return null;
+    final due = DateTime.tryParse(dueStr);
+    if (due == null) return null;
+    return _sig(title, due, cat);
+  }
 
   int? _readMillis(dynamic v) {
     if (v is int) return v;
@@ -424,6 +555,39 @@ class SyncService {
     if (updatedMillis != null) {
       task.updatedAt = DateTime.fromMillisecondsSinceEpoch(updatedMillis);
     }
+  }
+
+  /// АВТОРИТЕТНО НУЛИРАНЕ: трие ВСИЧКИ задачи от облака (на партиди) + локалната
+  /// кутия + tombstones. За възстановяване начисто (после Import от iPhone JSON).
+  /// Пауза на синхрона по време на операцията.
+  Future<int> wipeAllTasks() async {
+    _syncInProgress = true;
+    _applyingRemote = true;
+    int n = 0;
+    try {
+      final ref = _tasksRef;
+      if (ref != null) {
+        // Изтрий на партиди (Firestore batch е до 500).
+        while (true) {
+          final snap = await ref.limit(400).get();
+          if (snap.docs.isEmpty) break;
+          final batch = _db.batch();
+          for (final d in snap.docs) {
+            batch.delete(d.reference);
+            n++;
+          }
+          await batch.commit();
+          if (snap.docs.length < 400) break;
+        }
+      }
+      await Hive.box<Task>('tasks').clear();
+      await Hive.box<int>(TombstoneService.boxName).clear();
+    } finally {
+      _applyingRemote = false;
+      _syncInProgress = false;
+      _lastSyncMs = DateTime.now().millisecondsSinceEpoch;
+    }
+    return n;
   }
 
   void dispose() {
