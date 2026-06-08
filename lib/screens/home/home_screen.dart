@@ -11,6 +11,7 @@ import '../../utils/localization.dart';
 import '../../widgets/banner_ad_widget.dart';
 import '../../services/pro_service.dart';
 import '../../services/holidays_service.dart';
+import '../../services/sync_service.dart';
 import '../paywall/paywall_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -20,7 +21,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _currentIndex = 0;
   final ProService _proService = ProService();
   bool _welcomeChecked = false;
@@ -59,10 +60,21 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _proService.addListener(_onProStatusChanged);
     if (!kIsWeb) {
       _initAndShowWelcome();
       _maybeShowHolidaysPrompt();
+    }
+  }
+
+  /// ФАЗА 2В: синхрон при връщане на фокус (resume). На iOS това е основният
+  /// надежден тригер (applicationDidBecomeActive), защото фоновата работа е
+  /// силно ограничена. На Android/web също е безобидно полезно.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      SyncService().syncNow();
     }
   }
 
@@ -146,6 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _proService.removeListener(_onProStatusChanged);
     super.dispose();
   }

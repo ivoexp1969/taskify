@@ -23,6 +23,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'services/morning_briefing_service.dart';
 import 'services/name_days_service.dart';
 import 'services/holidays_service.dart';
+import 'services/tombstone_service.dart';
+import 'services/migration_service.dart';
+import 'services/sync_service.dart';
 
 Future<void> _checkMorningBriefingOnLaunch() async {
   final prefs = await SharedPreferences.getInstance();
@@ -58,6 +61,13 @@ Future<void> main() async {
   Hive.registerAdapter(CategoryAdapter());
   await Hive.openBox<Task>('tasks');
   await Hive.openBox<Category>('categories');
+  // Кутия с tombstones (изтрити задачи) — за merge синхронизацията.
+  await Hive.openBox<int>(TombstoneService.boxName);
+
+  // Безопасна миграция: стабилизира id/updatedAt на старите задачи и чисти
+  // стари tombstones. НЕ изтрива и не губи нищо.
+  await MigrationService.migrateTaskSyncFields();
+  await MigrationService.purgeOldTombstones();
 
   // Widget инициализация - само за mobile
   if (!kIsWeb) {
@@ -90,6 +100,15 @@ Future<void> main() async {
 
   // Try reconnect Google Calendar silently
   GoogleCalendarService().tryReconnect();
+
+  // Merge синхронизация с облака (ФАЗА 2): авто-стамп на updatedAt + debounce
+  // синхрон при всяка локална промяна, начален синхрон при старт, и нов синхрон
+  // при вход в акаунт (authStateChanges — сесията може да се възстанови по-късно).
+  SyncService().startAutoSync();
+  SyncService().syncNow();
+  FirebaseAuth.instance.authStateChanges().listen((user) {
+    if (user != null) SyncService().syncNow();
+  });
 
   // Morning briefing — refresh top 3 tasks on every launch
   if (!kIsWeb) {

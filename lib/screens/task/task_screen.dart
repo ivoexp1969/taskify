@@ -15,6 +15,7 @@ import '../../models/task.dart';
 import '../../models/category.dart';
 import '../../utils/localization.dart';
 import '../../services/notification_service.dart';
+import '../../services/tombstone_service.dart';
 import '../../widgets/reminder_selector.dart';
 import '../../services/widget_service.dart';
 import '../../services/ad_service.dart';
@@ -2833,7 +2834,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                           onDismissed: (direction) async {
                             // Само за изтриване (swipe наляво)
                             await NotificationService().cancelForTask(task);
-                            await task.delete();
+                            await TombstoneService().deleteTask(task);
                             await WidgetService.updateWidget();
                             setState(() {});
                           },
@@ -2906,7 +2907,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                       onTap: () async {
                                         Navigator.pop(ctx);
                                         await NotificationService().cancelForTask(task);
-                                        await task.delete();
+                                        await TombstoneService().deleteTask(task);
                                         await WidgetService.updateWidget();
                                         setState(() {});
                                       },
@@ -3026,7 +3027,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                   );
                                   if (confirm == true) {
                                     await NotificationService().cancelForTask(task);
-                                    await task.delete();
+                                    await TombstoneService().deleteTask(task);
                                     await WidgetService.updateWidget();
                                     setState(() {});
                                   }

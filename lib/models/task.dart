@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
 
+import '../utils/uuid.dart';
+
 part 'task.g.dart';
 
 @HiveType(typeId: 0)
@@ -93,6 +95,28 @@ class Task extends HiveObject with EquatableMixin {
   @HiveField(18)
   bool? importedFromCalendar;
 
+  /// Стабилен UUID, генериран при създаване. Запазва се НАВСЯКЪДЕ (Hive,
+  /// Firestore, между устройства) и НИКОГА не се променя. Това е мостът на
+  /// merge синхронизацията — задачите се съпоставят по `id`, не по позиция.
+  @HiveField(19)
+  String? id;
+
+  /// Timestamp на последна промяна — за разрешаване на конфликти при merge
+  /// (last-write-wins). Обновявай чрез [touch] при всяка редакция преди save().
+  @HiveField(20)
+  DateTime? updatedAt;
+
+  /// Tombstone: true = задачата е изтрита логически, но записът се пази, за да
+  /// се разпространи изтриването до другите устройства. Реален purge чак след
+  /// ~30 дни (виж MigrationService.purgeOldTombstones), за да не „възкръсва".
+  @HiveField(21, defaultValue: false)
+  bool deleted;
+
+  /// Кога е маркирана като изтрита (tombstone). Използва се при конфликт
+  /// изтриване↔редакция (по-новото действие печели).
+  @HiveField(22)
+  DateTime? deletedAt;
+
   Task({
     required this.title,
     required this.dueDate,
@@ -112,7 +136,38 @@ class Task extends HiveObject with EquatableMixin {
     this.googleCalendarEventId,    this.durationMinutes,
     this.template,
     this.importedFromCalendar,
-  });
+    this.id,
+    this.updatedAt,
+    this.deleted = false,
+    this.deletedAt,
+  }) {
+    // Всяка задача винаги има стабилен id и updatedAt — дори стара задача,
+    // прочетена от Hive без тези полета (адаптерът подава null). Миграцията
+    // после ги записва трайно, за да станат постоянни.
+    id ??= Uuid.v4();
+    updatedAt ??= DateTime.now();
+  }
+
+  /// Маркира промяна — обновява [updatedAt]. Викай преди save() при всяка
+  /// редакция, за да печели правилната версия при merge.
+  void touch() {
+    updatedAt = DateTime.now();
+  }
+
+  /// Tombstone изтриване — НЕ маха записа, а го маркира, за да се разпространи
+  /// изтриването при следващ синхрон. Реалното премахване е purge-ът по-късно.
+  void markDeleted() {
+    final now = DateTime.now();
+    deleted = true;
+    deletedAt = now;
+    updatedAt = now;
+  }
+
+  /// Гарантира стабилен id (за миграция на стари задачи).
+  String ensureId() {
+    id ??= Uuid.v4();
+    return id!;
+  }
 
   /// Помощен getter - връща reminders или мигрира от старото reminder
   List<String> get remindersList {
@@ -194,6 +249,10 @@ class Task extends HiveObject with EquatableMixin {
         googleCalendarEventId,        durationMinutes,
         template,
         importedFromCalendar,
+        id,
+        updatedAt,
+        deleted,
+        deletedAt,
       ];
 }
 

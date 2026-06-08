@@ -12,6 +12,7 @@ import '../../models/task.dart';
 import '../../models/category.dart';
 import '../../utils/localization.dart';
 import '../../services/notification_service.dart';
+import '../../services/tombstone_service.dart';
 import '../../widgets/reminder_selector.dart';
 import '../../services/widget_service.dart';
 import '../../services/task_view_preference.dart';
@@ -1782,7 +1783,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         onEdit: () => _openTaskDialog(existing: task),
                         onDelete: () async {
                           await NotificationService().cancelForTask(task);
-                          await task.delete();
+                          await TombstoneService().deleteTask(task);
                           await WidgetService.updateWidget();
                           setState(() {});
                         },

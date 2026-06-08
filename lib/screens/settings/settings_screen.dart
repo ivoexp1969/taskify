@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -16,7 +16,7 @@ import '../../utils/localization.dart';
 import '../../utils/file_saver.dart';
 import '../../utils/gsi_button.dart';
 import '../../services/auth_service.dart';
-import '../../services/firestore_service.dart';
+import '../../services/sync_service.dart';
 import '../auth/login_screen.dart';
 import 'statistics_screen.dart';
 import 'ai_settings_screen.dart';
@@ -42,7 +42,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _authService = AuthService();
-  final _firestoreService = FirestoreService();
   final _viewPreference = TaskViewPreference();
   bool _isSyncing = false;
   bool _isCalendarConnected = false;
@@ -1233,99 +1232,71 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Future<void> _uploadToCloud() async {
+  /// ФАЗА 2Б: единен ръчен синхрон (merge с облака). Замества старите
+  /// „Качване"/„Сваляне" огледални бутони, които триеха данни. Безопасен —
+  /// само слива, нищо не се губи.
+  Future<void> _syncNow() async {
     final t = AppText.of(context);
-
-    final taskBox = Hive.box<Task>('tasks');
-    final categoryBox = Hive.box<Category>('categories');
-
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(t.uploadToCloud),
-        content: Text(t.uploadConfirmMessage(taskBox.length, categoryBox.length)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(t.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(t.upload),
-          ),
-        ],
+    setState(() => _isSyncing = true);
+    final result = await SyncService().mergeWithCloud();
+    if (!mounted) return;
+    setState(() => _isSyncing = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(result.success
+            ? t.syncSuccess
+            : '${t.error}: ${result.error}'),
+        backgroundColor: result.success ? Colors.green : Colors.redAccent,
       ),
     );
-
-    if (confirm != true) return;
-
-    setState(() => _isSyncing = true);
-
-    final result = await _firestoreService.uploadToCloud();
-
-    if (mounted) {
-      setState(() => _isSyncing = false);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            result.success
-                ? t.uploadSuccessMessage(result.tasksCount, result.categoriesCount)
-                : '${t.error}: ${result.error}',
-          ),
-          backgroundColor: result.success ? Colors.green : Colors.redAccent,
-        ),
-      );
-    }
   }
 
-  Future<void> _downloadFromCloud() async {
+  /// ФАЗА 2Б/3: ръчен двупосочен Google Calendar синхрон (импорт + експорт +
+  /// облачен merge). Безобиден — само слива; изтриване само през tombstone.
+  Future<void> _calendarSyncNow() async {
     final t = AppText.of(context);
-    final cloudData = await _firestoreService.getCloudDataCount();
-
-    if (!mounted) return;
-
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(t.downloadFromCloud),
-        content: Text(t.downloadConfirmMessage(cloudData.tasks, cloudData.categories)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(t.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-            ),
-            child: Text(t.download),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm != true) return;
-
     setState(() => _isSyncing = true);
+    try {
+      final taskBox = Hive.box<Task>('tasks');
+      final categoryBox = Hive.box<Category>('categories');
 
-    final result = await _firestoreService.downloadFromCloud();
-
-    if (mounted) {
-      setState(() => _isSyncing = false);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            result.success
-                ? t.downloadSuccessMessage(result.tasksCount, result.categoriesCount)
-                : '${t.error}: ${result.error}',
-          ),
-          backgroundColor: result.success ? Colors.green : Colors.redAccent,
-        ),
+      // 1) Импорт от Google (нови събития/задачи).
+      await CalendarImportService.runImport(
+        taskBox, categoryBox, t,
+        interactive: true,
       );
+      await CalendarImportService.markSynced();
+
+      // 2) Експорт/обновяване на локалните задачи към Google. Със същото ID →
+      //    events.update (без дубли); insert само ако още няма googleEventId.
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      for (final task in taskBox.values.toList()) {
+        if (task.isCompleted || task.isArchived) continue;
+        if (!task.dueDate.isAfter(today.subtract(const Duration(days: 1)))) continue;
+        if (task.googleCalendarEventId != null) {
+          await _calendarService.updateCalendarEvent(
+              task.googleCalendarEventId!, task, interactive: true);
+        } else {
+          final eventId =
+              await _calendarService.addTaskToCalendar(task, interactive: true);
+          if (eventId != null) {
+            task.googleCalendarEventId = eventId;
+            await task.save();
+          }
+        }
+      }
+
+      // 3) Облачен merge (Firebase).
+      await SyncService().mergeWithCloud();
+    } catch (e) {
+      debugPrint('Calendar sync error: $e');
     }
+    if (!mounted) return;
+    setState(() => _isSyncing = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(t.syncSuccess)),
+    );
   }
 
   @override
@@ -1571,68 +1542,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 8),
             Card(
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: _isSyncing
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(
-                              Icons.cloud_upload_outlined,
-                              color: Colors.blue,
-                            ),
-                    ),
-                    title: Text(t.uploadToCloud),
-                    subtitle: Text(
-                      t.saveToCloud,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: _isSyncing ? null : _uploadToCloud,
+              child: ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  const Divider(height: 0),
-                  ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: _isSyncing
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(
-                              Icons.cloud_download_outlined,
-                              color: Colors.orange,
-                            ),
-                    ),
-                    title: Text(t.downloadFromCloud),
-                    subtitle: Text(
-                      t.restoreFromCloud,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: _isSyncing ? null : _downloadFromCloud,
+                  child: _isSyncing
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.cloud_sync_outlined, color: Colors.blue),
+                ),
+                title: Text(t.syncNow),
+                subtitle: Text(
+                  // Сливането е автоматично и невидимо; този бутон само форсира.
+                  t.autoSyncDesc,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
-                ],
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _isSyncing ? null : _syncNow,
               ),
             ),
           ],
@@ -1701,69 +1636,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         color: Colors.blue.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.upload, color: Colors.blue),
+                      child: _isSyncing
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.sync, color: Colors.blue),
                     ),
-                    title: Text(t.exportToCalendar),
-                    subtitle: Text(t.exportToCalendarDesc, style: const TextStyle(fontSize: 12)),
+                    // ФАЗА 2Б: един безобиден ръчен синхрон. Импорт/експорт се
+                    // случват автоматично, двупосочно — потребителят не избира
+                    // посока. Старите ръчни „Експорт"/„Импорт"/bulk-изтриване
+                    // бутони са премахнати (бяха източник на загуба на данни).
+                    title: Text(t.syncNow),
+                    subtitle: Text(t.autoSyncDesc, style: const TextStyle(fontSize: 12)),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () async {
-                      final taskBox = Hive.box<Task>('tasks');
-                      final now = DateTime.now();
-                      final today = DateTime(now.year, now.month, now.day);
-                      int synced = 0;
-                      for (final task in taskBox.values) {
-                        if (task.isCompleted || task.isArchived) continue;
-                        if (!task.dueDate.isAfter(today.subtract(const Duration(days: 1)))) continue;
-                        if (task.googleCalendarEventId != null) {
-                          // Вече свързана (импортирана или експортирана) → UPDATE
-                          // на място със същото ID → без дублиране при смяна на дата.
-                          final ok = await _calendarService.updateCalendarEvent(
-                              task.googleCalendarEventId!, task, interactive: true);
-                          if (ok) synced++;
-                        } else {
-                          // Нова локална задача → създай ново събитие.
-                          final eventId = await _calendarService.addTaskToCalendar(task, interactive: true);
-                          if (eventId != null) {
-                            task.googleCalendarEventId = eventId;
-                            await task.save();
-                            synced++;
-                          }
-                        }
-                      }
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(t.tasksSynced(synced))),
-                        );
-                      }
-                    },
-                  ),
-                  const Divider(height: 0),
-                  ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.purple.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.download, color: Colors.purple),
-                    ),
-                    title: Text(t.importFromCalendar),
-                    subtitle: Text(t.importFromCalendarDesc, style: const TextStyle(fontSize: 12)),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () async {
-                      final taskBox = Hive.box<Task>('tasks');
-                      final categoryBox = Hive.box<Category>('categories');
-                      final (imported, skipped) = await CalendarImportService.runImport(
-                        taskBox, categoryBox, t,
-                        interactive: true,
-                      );
-                      await CalendarImportService.markSynced();
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(t.importedSkipped(imported, skipped))),
-                        );
-                      }
-                    },
+                    onTap: _isSyncing ? null : _calendarSyncNow,
                   ),
                   const Divider(height: 0),
                   ListTile(
@@ -1807,118 +1695,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(t.removedDuplicates(removed))),
                         );
-                      }
-                    },
-                  ),
-                  const Divider(height: 0),
-                  ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.delete_forever, color: Colors.red),
-                    ),
-                    title: Text(t.deleteImportedTasks),
-                    subtitle: Text(t.deleteImportedDesc, style: const TextStyle(fontSize: 12)),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () async {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: Text('${t.deleteImportedTasks}?'),
-                          content: Text(t.deleteCalendarTasksConfirm),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx, false),
-                              child: Text(t.cancel),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx, true),
-                              child: Text(t.delete, style: const TextStyle(color: Colors.red)),
-                            ),
-                          ],
-                        ),
-                      );
-
-                      if (confirm == true) {
-                        final taskBox = Hive.box<Task>('tasks');
-                        final tasksToDelete = taskBox.values
-                            .where((t) => t.importedFromCalendar == true)
-                            .toList();
-
-                        for (final task in tasksToDelete) {
-                          await task.delete();
-                        }
-
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(t.deletedCalendarTasks(tasksToDelete.length)),
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
-                        }
-                      }
-                    },
-                  ),
-                  const Divider(height: 0),
-                  ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.event_busy, color: Colors.red),
-                    ),
-                    title: Text(t.deleteExportedTasks),
-                    subtitle: Text(t.deleteExportedDesc, style: const TextStyle(fontSize: 12)),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () async {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: Text('${t.deleteExportedTasks}?'),
-                          content: Text(t.deleteExportedConfirm),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx, false),
-                              child: Text(t.cancel),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx, true),
-                              child: Text(t.delete, style: const TextStyle(color: Colors.red)),
-                            ),
-                          ],
-                        ),
-                      );
-
-                      if (confirm == true) {
-                        final taskBox = Hive.box<Task>('tasks');
-                        final exported = taskBox.values
-                            .where((t) => t.googleCalendarEventId != null && t.importedFromCalendar != true)
-                            .toList();
-
-                        int removed = 0;
-                        for (final task in exported) {
-                          final ok = await _calendarService.deleteCalendarEvent(
-                              task.googleCalendarEventId!, interactive: true);
-                          // Разкачаме връзката независимо от резултата
-                          task.googleCalendarEventId = null;
-                          await task.save();
-                          if (ok) removed++;
-                        }
-
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(t.deletedExportedTasks(removed)),
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
-                        }
                       }
                     },
                   ),

@@ -692,7 +692,19 @@ class AppText {
     'tr': 'Şimdi senkronize et', 'ja': '今すぐ同期',
   });
 
-  
+  String get autoSyncDesc => _t({
+    'en': 'Syncs automatically — this just forces it now',
+    'bg': 'Синхронизира се автоматично — това само форсира сега',
+    'de': 'Synchronisiert automatisch — dies erzwingt es jetzt',
+    'fr': 'Synchronisation automatique — ceci la force maintenant',
+    'it': 'Si sincronizza automaticamente — questo lo forza ora',
+    'el': 'Συγχρονίζεται αυτόματα — αυτό απλώς το επιβάλλει τώρα',
+    'es': 'Se sincroniza automáticamente — esto solo lo fuerza ahora',
+    'pt': 'Sincroniza automaticamente — isto apenas força agora',
+    'ru': 'Синхронизируется автоматически — это просто форсирует сейчас',
+    'tr': 'Otomatik senkronize olur — bu sadece şimdi zorlar',
+    'ja': '自動的に同期されます — これは今すぐ実行するだけです',
+  });
 
   String get connectionFailed => _t({
     'en': 'Connection failed',

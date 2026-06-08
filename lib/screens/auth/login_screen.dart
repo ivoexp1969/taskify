@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 
-import '../../models/task.dart';
 import '../../services/auth_service.dart';
-import '../../services/firestore_service.dart';
+import '../../services/sync_service.dart';
 import '../../utils/localization.dart';
 
 // 10-language maps for login screen
@@ -39,25 +37,6 @@ const _s = {
   'loadCloud': {'en': 'Load from cloud', 'bg': 'Зареди от облака', 'de': 'Aus Cloud laden', 'fr': 'Charger du cloud', 'it': 'Carica dal cloud', 'el': 'Φόρτωση από cloud', 'es': 'Cargar de la nube', 'pt': 'Carregar da nuvem', 'ru': 'Загрузить из облака', 'tr': 'Buluttan yükle', 'ja': 'クラウドから読込'},
   'cloudLoaded': {'en': 'Data loaded from cloud', 'bg': 'Данните са заредени от облака', 'de': 'Daten aus Cloud geladen', 'fr': 'Données chargées du cloud', 'it': 'Dati caricati dal cloud', 'el': 'Τα δεδομένα φορτώθηκαν από το cloud', 'es': 'Datos cargados de la nube', 'pt': 'Dados carregados da nuvem', 'ru': 'Данные загружены из облака', 'tr': 'Veriler buluttan yüklendi', 'ja': 'クラウドからデータを読み込みました'},
 };
-
-String _cloudFoundBody(int tasks, int categories, String lang) {
-  const m = {
-    'en': 'The cloud has TASKS tasks and CATS categories. Load them? This will replace local data on this device.',
-    'bg': 'В облака има TASKS задачи и CATS категории. Да ги заредя ли? Това ще замени локалните данни на това устройство.',
-    'de': 'Die Cloud enthält TASKS Aufgaben und CATS Kategorien. Laden? Lokale Daten auf diesem Gerät werden ersetzt.',
-    'fr': 'Le cloud contient TASKS tâches et CATS catégories. Les charger ? Cela remplacera les données locales de cet appareil.',
-    'it': 'Il cloud ha TASKS attività e CATS categorie. Caricarle? I dati locali su questo dispositivo verranno sostituiti.',
-    'el': 'Το cloud έχει TASKS εργασίες και CATS κατηγορίες. Φόρτωση; Θα αντικαταστήσει τα τοπικά δεδομένα σε αυτή τη συσκευή.',
-    'es': 'La nube tiene TASKS tareas y CATS categorías. ¿Cargarlas? Esto reemplazará los datos locales de este dispositivo.',
-    'pt': 'A nuvem tem TASKS tarefas e CATS categorias. Carregá-las? Isso substituirá os dados locais neste dispositivo.',
-    'ru': 'В облаке TASKS задач и CATS категорий. Загрузить? Это заменит локальные данные на этом устройстве.',
-    'tr': 'Bulutta TASKS görev ve CATS kategori var. Yüklensin mi? Bu cihazdaki yerel veriler değiştirilecek.',
-    'ja': 'クラウドにTASKS件のタスクとCATS件のカテゴリがあります。読み込みますか？この端末のローカルデータは置き換えられます。',
-  };
-  return (m[lang] ?? m['en']!)
-      .replaceAll('TASKS', '$tasks')
-      .replaceAll('CATS', '$categories');
-}
 
 String _t(String key, String lang) => _s[key]?[lang] ?? _s[key]?['en'] ?? '';
 
@@ -146,48 +125,18 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  /// След успешен вход — авто-зарежда данните от облака, ако има такива.
-  /// Ако локално вече има задачи, пита потребителя (за да не ги изтрие случайно).
+  /// След успешен вход — слива локалните и облачните данни (merge, ФАЗА 2).
+  /// Вече НЕ трие нищо и не пита „локални срещу облачни" — merge обединява двете
+  /// по стабилен id, без загуба на данни в нито посока.
   Future<void> _autoLoadFromCloud() async {
     final lang = _lang;
     try {
-      final fs = FirestoreService();
-      final cloud = await fs.getCloudDataCount();
-      if (cloud.tasks == 0 && cloud.categories == 0) return;
-      if (!mounted) return;
-
-      final taskBox = Hive.box<Task>('tasks');
-      bool doDownload = taskBox.isEmpty;
-
-      if (!doDownload) {
-        doDownload = await showDialog<bool>(
-              context: context,
-              builder: (ctx) => AlertDialog(
-                title: Text(_t('cloudFound', lang)),
-                content: Text(_cloudFoundBody(cloud.tasks, cloud.categories, lang)),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx, false),
-                    child: Text(_t('keepLocal', lang)),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(ctx, true),
-                    child: Text(_t('loadCloud', lang)),
-                  ),
-                ],
-              ),
-            ) ??
-            false;
-      }
-
-      if (!doDownload || !mounted) return;
-
       setState(() => _isLoading = true);
-      final result = await fs.downloadFromCloud();
+      final result = await SyncService().mergeWithCloud();
       if (!mounted) return;
       setState(() => _isLoading = false);
-
-      if (result.success) {
+      if (result.success &&
+          (result.downloaded > 0 || result.uploaded > 0)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(_t('cloudLoaded', lang)),
@@ -196,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (_) {
-      // Тихо — неуспешният авто-load не бива да блокира входа.
+      // Тихо — неуспешният merge не бива да блокира входа.
       if (mounted) setState(() => _isLoading = false);
     }
   }
