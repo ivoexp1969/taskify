@@ -15,7 +15,7 @@ class GoogleCalendarService {
   static const String _androidClientId =
       '929046134968-g21i568en2jccqqvlkj4e2reqks9kuij.apps.googleusercontent.com';
   static const String _webClientId =
-      '929046134968-m6ffgsd8dsotabi7ivkjdsqfnlm041n.apps.googleusercontent.com';
+      '929046134968-m6ffgsd8dsoatabi7lvkjdsqfnlm041n.apps.googleusercontent.com';
 
   bool _initialized = false;
   GoogleSignInAccount? _currentAccount;
@@ -26,6 +26,12 @@ class GoogleCalendarService {
   /// идва асинхронно от рендирания GIS бутон).
   final ValueNotifier<bool> connectionNotifier = ValueNotifier<bool>(false);
 
+  /// На web ВХОДЪТ (authentication) и ОТОРИЗАЦИЯТА за календара (scopes) са
+  /// РАЗДЕЛНИ. `authorizeScopes` иска popup, който браузърът блокира, ако не
+  /// идва от директен клик. Този notifier става true, когато сме влезли, но още
+  /// нямаме календарен достъп → UI показва бутон „Разреши достъп до календара".
+  final ValueNotifier<bool> webAuthPending = ValueNotifier<bool>(false);
+
   static const List<String> scopes = [
     'https://www.googleapis.com/auth/calendar',
     'https://www.googleapis.com/auth/tasks.readonly',
@@ -35,11 +41,15 @@ class GoogleCalendarService {
 
   Future<void> _ensureInitialized() async {
     if (_initialized) return;
-    await GoogleSignIn.instance.initialize(
-      // На web client ID-то трябва да е WEB клиентът (а не Android).
-      clientId: kIsWeb ? _webClientId : _androidClientId,
-      serverClientId: null,
-    );
+    try {
+      await GoogleSignIn.instance.initialize(
+        // На web client ID-то трябва да е WEB клиентът (а не Android).
+        clientId: kIsWeb ? _webClientId : _androidClientId,
+        serverClientId: null,
+      );
+    } on StateError {
+      // initialize() вече е извикан от конкурентен старт — безопасно е.
+    }
     // Слушаме събитията за вход/изход. На web входът идва от GIS бутона, не от
     // authenticate() (който там хвърля грешка).
     _authSub ??= GoogleSignIn.instance.authenticationEvents.listen(
@@ -54,29 +64,39 @@ class GoogleCalendarService {
       case GoogleSignInAuthenticationEventSignIn():
         _currentAccount = event.user;
         if (kIsWeb) {
-          // На web автентикацията и оторизацията са разделени — веднага искаме
-          // календарните scopes, за да получим access token.
-          try {
-            final authz =
-                await event.user.authorizationClient.authorizeScopes(scopes);
-            _isConnected = authz.accessToken.isNotEmpty;
-          } catch (e) {
-            debugPrint('GCALSYNC web authorizeScopes failed: $e');
-            _isConnected = false;
-          }
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('google_calendar_connected', _isConnected);
+          // НЕ искаме scopes автоматично тук! Без директен клик браузърът блокира
+          // OAuth popup-а и „научава" сайта да блокира всички popup-и. Затова само
+          // маркираме, че сме влезли, и показваме бутона „Разреши достъп" — той
+          // отваря ЕДИН popup, идващ директно от клика (браузърът го допуска).
+          _isConnected = false;
+          webAuthPending.value = true;
         }
         connectionNotifier.value = _isConnected;
       case GoogleSignInAuthenticationEventSignOut():
         _currentAccount = null;
         _isConnected = false;
+        webAuthPending.value = false;
         connectionNotifier.value = false;
     }
   }
 
+  /// Гарантира, че GIS клиентът е инициализиран (за да се рендира web бутонът).
+  /// Безопасно за многократно извикване.
+  Future<void> ensureInitialized() => _ensureInitialized();
+
   Future<void> tryReconnect() async {
     try {
+      // Web: официалният GIS бутон (renderButton) се нуждае от initialize(), за
+      // да се рендира — иначе стои ВЕЧНО на „Getting ready". Затова на web
+      // инициализираме ВИНАГИ при старт, дори когато още не сме свързани.
+      if (kIsWeb) {
+        try {
+          await _ensureInitialized();
+        } catch (e) {
+          debugPrint('GCALSYNC web init failed: $e');
+        }
+      }
+
       final prefs = await SharedPreferences.getInstance();
       final wasConnected = prefs.getBool('google_calendar_connected') ?? false;
       if (!wasConnected) return;
@@ -140,12 +160,35 @@ class GoogleCalendarService {
     }
   }
 
+  /// Web: иска календарните scopes за вече влезлия акаунт. ВИКА СЕ ОТ ДИРЕКТЕН
+  /// КЛИК на потребителя, за да не блокира браузърът OAuth popup-а. Връща true
+  /// при успешен достъп.
+  Future<bool> authorizeCalendarOnWeb() async {
+    try {
+      final account = _currentAccount;
+      if (account == null) return false;
+      // КРИТИЧНО: authorizeScopes трябва да е ПЪРВОТО действие, БЕЗ предходни
+      // await-и — иначе браузърът „губи" жеста на клика и блокира popup-а.
+      final authz = await account.authorizationClient.authorizeScopes(scopes);
+      _isConnected = authz.accessToken.isNotEmpty;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('google_calendar_connected', _isConnected);
+      webAuthPending.value = !_isConnected;
+      connectionNotifier.value = _isConnected;
+      return _isConnected;
+    } catch (e) {
+      debugPrint('GCALSYNC authorizeCalendarOnWeb failed: $e');
+      return false;
+    }
+  }
+
   Future<void> disconnect() async {
     try {
       await _ensureInitialized();
       await GoogleSignIn.instance.signOut();
       _currentAccount = null;
       _isConnected = false;
+      webAuthPending.value = false;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('google_calendar_connected', false);
       connectionNotifier.value = false;

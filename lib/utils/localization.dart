@@ -762,6 +762,34 @@ class AppText {
     'ja': 'クラウドの$count件のタスクを削除しました。クリーンなバックアップからインポートしてください。',
   });
 
+  String get allowCalendarAccess => _t({
+    'en': 'Allow calendar access',
+    'bg': 'Разреши достъп до календара',
+    'de': 'Kalenderzugriff erlauben',
+    'fr': 'Autoriser l\'accès au calendrier',
+    'it': 'Consenti accesso al calendario',
+    'el': 'Επίτρεψε πρόσβαση στο ημερολόγιο',
+    'es': 'Permitir acceso al calendario',
+    'pt': 'Permitir acesso ao calendário',
+    'ru': 'Разрешить доступ к календарю',
+    'tr': 'Takvim erişimine izin ver',
+    'ja': 'カレンダーへのアクセスを許可',
+  });
+
+  String get allowCalendarAccessDesc => _t({
+    'en': 'Signed in. Tap to grant calendar permission.',
+    'bg': 'Влязохте. Натиснете, за да дадете достъп до календара.',
+    'de': 'Angemeldet. Tippen, um Kalenderzugriff zu gewähren.',
+    'fr': 'Connecté. Touchez pour autoriser le calendrier.',
+    'it': 'Accesso effettuato. Tocca per concedere l\'accesso al calendario.',
+    'el': 'Συνδεθήκατε. Πατήστε για πρόσβαση στο ημερολόγιο.',
+    'es': 'Sesión iniciada. Toca para conceder acceso al calendario.',
+    'pt': 'Sessão iniciada. Toque para conceder acesso ao calendário.',
+    'ru': 'Вы вошли. Нажмите, чтобы разрешить доступ к календарю.',
+    'tr': 'Giriş yapıldı. Takvim izni için dokunun.',
+    'ja': 'サインイン済み。タップしてカレンダーへのアクセスを許可してください。',
+  });
+
   String get connectionFailed => _t({
     'en': 'Connection failed',
     'bg': 'Неуспешно свързване',

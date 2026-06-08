@@ -6,8 +6,11 @@
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Taskify - Simple task management app">
   <meta name="theme-color" content="#2196F3">
-  <meta name="google-signin-client_id" content="929046134968-m6ffgsd8dsotabi7ivkjdsqfnlm041n.apps.googleusercontent.com">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <meta name="google-signin-client_id" content="929046134968-m6ffgsd8dsoatabi7lvkjdsqfnlm041n.apps.googleusercontent.com">
+  <!-- ВАЖНО: НЕ зареждай ръчно accounts.google.com/gsi/client тук!
+       google_sign_in_web сам инжектира скрипта СЛЕД като сетне callback-а
+       window.onGoogleLibraryLoad. Ако SDK-то се зареди по-рано (ръчен таг),
+       callback-ът се губи и бутонът стои вечно на „Getting ready". -->
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">

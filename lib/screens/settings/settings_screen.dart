@@ -76,6 +76,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // Web: входът в Google Calendar идва асинхронно от GIS бутона → обновяваме
     // UI-я щом връзката се промени.
     _calendarService.connectionNotifier.addListener(_onCalendarConnChanged);
+    // Web: показва бутона „Разреши достъп" щом влезем, но още без календарен достъп.
+    _calendarService.webAuthPending.addListener(_onCalendarConnChanged);
+    // Web: гарантираме, че GIS клиентът е инициализиран, за да се рендира
+    // официалният бутон (иначе стои на „Getting ready").
+    if (kIsWeb) {
+      _calendarService.ensureInitialized().then((_) {
+        if (mounted) setState(() {});
+      });
+    }
   }
 
   void _onCalendarConnChanged() {
@@ -88,6 +97,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void dispose() {
     _authSub?.cancel();
     _calendarService.connectionNotifier.removeListener(_onCalendarConnChanged);
+    _calendarService.webAuthPending.removeListener(_onCalendarConnChanged);
     super.dispose();
   }
 
@@ -1691,6 +1701,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           child: Text(_isCalendarConnected ? t.disconnect : t.connect),
                         ),
                 ),
+                // Web: влязъл, но без календарен достъп → ръчен бутон (директен
+                // клик, за да не блокира браузърът OAuth popup-а).
+                if (kIsWeb &&
+                    !_isCalendarConnected &&
+                    _calendarService.webAuthPending.value) ...[
+                  const Divider(height: 0),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.lock_open, color: Colors.green),
+                    ),
+                    title: Text(t.allowCalendarAccess),
+                    subtitle: Text(t.allowCalendarAccessDesc,
+                        style: const TextStyle(fontSize: 12)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () async {
+                      final ok =
+                          await _calendarService.authorizeCalendarOnWeb();
+                      if (!mounted) return;
+                      setState(() => _isCalendarConnected = ok);
+                      if (!ok) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(t.connectionFailed)),
+                        );
+                      }
+                    },
+                  ),
+                ],
                 if (_isCalendarConnected) ...[
                   const Divider(height: 0),
                   ListTile(
