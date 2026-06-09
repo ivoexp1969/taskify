@@ -194,6 +194,53 @@ class SyncService {
         cloudDocs.remove(id);
       }
 
+      // === PRE-B0) ДЕДУП ПО googleCalendarEventId ===
+      // Едно и също календарно събитие, внесено на РАЗНИ устройства, става
+      // отделни задачи с различен стабилен id; часовите зони развалят и
+      // съдържателната сигнатура → PRE-B по съдържание не ги хваща. Тук ги
+      // свеждаме до една по eventId (детерминирано: survivor = min id).
+      final evtGroups = <String, Set<String>>{};
+      void addEvt(String? evt, String id) {
+        if (evt == null || evt.isEmpty) return;
+        evtGroups.putIfAbsent(evt, () => <String>{}).add(id);
+      }
+      for (final t in localById.values) {
+        addEvt(t.googleCalendarEventId, t.id!);
+      }
+      for (final e in cloudDocs.entries) {
+        if (e.value['deleted'] == true) continue;
+        if (localById.containsKey(e.key)) continue;
+        addEvt(e.value['googleCalendarEventId'] as String?, e.key);
+      }
+      for (final group in evtGroups.values) {
+        if (group.length < 2) continue;
+        final ids = group.toList()..sort();
+        final survivor = ids.first;
+        for (final dupId in ids.skip(1)) {
+          if (cloudDocs.containsKey(dupId)) {
+            await tasksRef.doc(dupId).delete();
+            cloudDocs.remove(dupId);
+          }
+          final localDup = localById[dupId];
+          if (localDup != null) {
+            await NotificationService().cancelForTask(localDup);
+            if (localDup.isInBox) await localDup.delete();
+            localById.remove(dupId);
+            deletedLocally++;
+          }
+        }
+        if (!localById.containsKey(survivor) &&
+            cloudDocs.containsKey(survivor)) {
+          final t = _taskFromCloud(cloudDocs[survivor]!);
+          if (t.id == survivor) {
+            await taskBox.add(t);
+            await _rescheduleNotifs(t);
+            localById[survivor] = t;
+            downloaded++;
+          }
+        }
+      }
+
       // === PRE-B) КОНВЕРГЕНТНА дедупликация по съдържание ===
       // Дубли с РАЗЛИЧНИ id (възникнали при миграцията/legacy бъга, дори между
       // устройства) се свеждат до един. Survivor = НАЙ-МАЛКИЯТ id из обединението

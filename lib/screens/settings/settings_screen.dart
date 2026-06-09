@@ -1039,6 +1039,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // авто-импортът ще ги мисли за нови → масови дубли.
           'googleCalendarEventId': t.googleCalendarEventId,
           'importedFromCalendar': t.importedFromCalendar,
+          'template': t.template,
         }).toList(),
       };
 
@@ -1177,6 +1178,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               : null,
           googleCalendarEventId: taskData['googleCalendarEventId'] as String?,
           importedFromCalendar: taskData['importedFromCalendar'] as bool?,
+          template: taskData['template'] as String?,
         );
         task.isCompleted = taskData['isCompleted'] as bool? ?? false;
         await taskBox.add(task);
@@ -1332,10 +1334,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       for (final task in taskBox.values.toList()) {
         if (task.isCompleted || task.isArchived) continue;
         if (!task.dueDate.isAfter(today.subtract(const Duration(days: 1)))) continue;
+        // Нативните рождени дни се управляват само в приложението → не ги
+        // качваме като събития (иначе плодим „рождени дни" в Google Calendar).
+        if (task.categoryId == 'birthday' || task.template == 'birthday') continue;
         if (task.googleCalendarEventId != null) {
           await _calendarService.updateCalendarEvent(
               task.googleCalendarEventId!, task, interactive: true);
-        } else {
+        } else if (task.importedFromCalendar != true) {
+          // Само ИСТИНСКИ твои задачи се качват като нови събития. Календарни
+          // задачи без eventId (загубен линк) НЕ се пресъздават → без дубли в
+          // Google Calendar; импортът по-горе вече ги е ре-свързал, ако още ги има.
           final eventId =
               await _calendarService.addTaskToCalendar(task, interactive: true);
           if (eventId != null) {

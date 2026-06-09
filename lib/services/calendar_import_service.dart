@@ -4,6 +4,7 @@ import '../models/task.dart';
 import '../models/category.dart';
 import '../utils/localization.dart';
 import 'google_calendar_service.dart';
+import 'tombstone_service.dart';
 
 class CalendarImportService {
   static const _lastSyncKey = 'calendar_last_auto_sync';
@@ -101,20 +102,34 @@ class CalendarImportService {
         .map((t) => t.googleCalendarEventId!)
         .toSet();
 
-    // Title+Date pairs (за near-duplicate check ±1 ден).
-    // ВАЖНО: гледаме ВСИЧКИ задачи, не само тези с googleCalendarEventId —
-    // иначе възстановени от бекъп календарни задачи (без eventId) не се
-    // разпознават и авто-импортът ги внася наново като дубли.
-    final importedPairs = taskBox.values
-        .map((t) => MapEntry(t.title.trim().toLowerCase(), t.dueDate))
-        .toList();
-
-    bool isNearDuplicate(String title, DateTime date) {
+    // Near-duplicate по заглавие+дата (±1 ден) върху ВСИЧКИ задачи. Връща
+    // съществуващата задача (или null), за да можем да я СВЪРЖЕМ със събитието,
+    // ако още няма googleCalendarEventId. Това е ключово: възстановени от бекъп
+    // календарни задачи (без eventId) се РЕ-СВЪРЗВАТ вместо да се дублират — и
+    // спира експортът да създава дубли в Google Calendar.
+    // Свързва ВСИЧКИ съществуващи задачи, които съвпадат с това събитие, като им
+    // слага същия eventId. Съвпадение = същото заглавие И (дата ±1 ден ИЛИ същи
+    // ден+месец, игнорирайки годината — за ГОДИШНИ събития като рождени дни!).
+    // След това облачният дедуп по eventId ги свежда до една → лекува и СТАРИ
+    // дубли без ново нулиране. Връща true при поне едно съвпадение (→ не създавай
+    // нова задача).
+    Future<bool> linkOrSkip(String eventId, String title, DateTime date) async {
       final key = title.trim().toLowerCase();
-      return importedPairs.any((e) {
-        if (e.key != key) return false;
-        return e.value.difference(date).inDays.abs() <= 1;
-      });
+      bool found = false;
+      for (final tk in taskBox.values) {
+        if (tk.title.trim().toLowerCase() != key) continue;
+        final d = tk.dueDate;
+        final near = d.difference(date).inDays.abs() <= 1;
+        final sameDayMonth = d.month == date.month && d.day == date.day;
+        if (!near && !sameDayMonth) continue;
+        found = true;
+        if (tk.googleCalendarEventId == null) {
+          tk.googleCalendarEventId = eventId;
+          tk.importedFromCalendar = true;
+          await tk.save();
+        }
+      }
+      return found;
     }
 
     int imported = 0;
@@ -125,6 +140,78 @@ class CalendarImportService {
 
     // === 1. CALENDAR EVENTS ===
     final events = await calendarService.getUpcomingEvents(days: 365, interactive: interactive);
+
+    // Google рождените дни (eventType=birthday) дублират НАТИВНИТЕ рождени дни на
+    // приложението (различно заглавие „Рожден ден на X" срещу „X") → НЕ ги
+    // импортираме (виж скока по-долу). Освен това ЧИСТИМ вече импортирани такива
+    // (свързани с birthday събитие) по стабилен base-id (без годишния суфикс),
+    // за да изчезнат старите дубли без ново нулиране. Томбстоун → пада и в облака.
+    final birthdayBaseIds = <String>{};
+    for (final e in events) {
+      if ((e['eventType'] as String?) == 'birthday') {
+        final id = e['id'] as String?;
+        if (id != null) {
+          birthdayBaseIds.add(id.contains('_') ? id.split('_').first : id);
+        }
+      }
+    }
+    if (birthdayBaseIds.isNotEmpty) {
+      final tomb = TombstoneService();
+      for (final tk in taskBox.values.toList()) {
+        if (tk.importedFromCalendar != true) continue;
+        final gid = tk.googleCalendarEventId;
+        if (gid == null) continue;
+        final base = gid.contains('_') ? gid.split('_').first : gid;
+        if (birthdayBaseIds.contains(base)) {
+          await tomb.recordId(tk.ensureId());
+          await tk.delete();
+          skipped++;
+        }
+      }
+    }
+
+    // Нативните рождени дни (template='birthday') се управляват САМО в
+    // приложението. Календарни събития, които ги дублират („Рожден ден на X"
+    // в същия ден като нативния „X" — различно заглавие, дори времеви, не
+    // eventType=birthday), НЕ се импортират; вече импортирани такива дубли се
+    // чистят тук (по съдържание на името + ден/месец, без годината).
+    final nativeBdays = taskBox.values
+        .where((t) =>
+            (t.categoryId == 'birthday' || t.template == 'birthday') &&
+            t.title.trim().isNotEmpty)
+        .map((t) => MapEntry(t.title.trim().toLowerCase(), t.dueDate))
+        .toList();
+    // Годишно съвпадение с толеранс ±1 ден (игнорирай годината). Покрива и
+    // вечерни напомняния (14-ти 21:00 за рожден ден на 15-ти) и часови отмествания.
+    bool annualWithin1(DateTime a, DateTime b) {
+      final na = DateTime(2000, a.month, a.day);
+      final nb = DateTime(2000, b.month, b.day);
+      final d = na.difference(nb).inDays.abs();
+      return d <= 1 || d >= 365; // ±1 ден, вкл. край-на-година (31.12 ↔ 01.01)
+    }
+    bool dupOfNativeBirthday(String title, DateTime date) {
+      final low = title.trim().toLowerCase();
+      for (final nb in nativeBdays) {
+        if (annualWithin1(nb.value, date) && low.contains(nb.key)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    if (nativeBdays.isNotEmpty) {
+      final tomb = TombstoneService();
+      for (final tk in taskBox.values.toList()) {
+        if (tk.importedFromCalendar != true) continue;
+        if (tk.categoryId == 'birthday' || tk.template == 'birthday') {
+          continue; // нативните рождени дни не се пипат
+        }
+        if (dupOfNativeBirthday(tk.title, tk.dueDate)) {
+          await tomb.recordId(tk.ensureId());
+          await tk.delete();
+          skipped++;
+        }
+      }
+    }
 
     for (final event in events) {
       final eventId = event['id'] as String?;
@@ -139,6 +226,8 @@ class CalendarImportService {
       if (idExists) { skipped++; continue; }
 
       final eventType = event['eventType'] as String? ?? 'default';
+      // Google рождените дни се управляват нативно от приложението → пропусни.
+      if (eventType == 'birthday') { skipped++; continue; }
 
       // Parse date
       DateTime dueDate;
@@ -154,9 +243,11 @@ class CalendarImportService {
         if (dueDate.isBefore(thresholdDate)) { skipped++; continue; }
       } catch (_) { skipped++; continue; }
 
-      // Near-duplicate check
+      // Дублира нативен рожден ден („Рожден ден на X" ↔ нативен „X") → пропусни.
       final eventTitle = event['summary'] as String? ?? '';
-      if (isNearDuplicate(eventTitle, dueDate)) { skipped++; continue; }
+      if (dupOfNativeBirthday(eventTitle, dueDate)) { skipped++; continue; }
+      // Near-duplicate: ако вече съществува (свържи я при липсващ eventId).
+      if (await linkOrSkip(eventId, eventTitle, dueDate)) { skipped++; continue; }
 
       // Всичко импортирано отива в ЕДНА локализирана категория „Календарни"
       // (без паразитни/нелокализирани категории като „Birthdays")
@@ -172,7 +263,6 @@ class CalendarImportService {
         importedFromCalendar: true,
       );
       await taskBox.add(newTask);
-      importedPairs.add(MapEntry(newTask.title.trim().toLowerCase(), newTask.dueDate));
       imported++;
     }
 
@@ -201,8 +291,7 @@ class CalendarImportService {
       } catch (_) { skipped++; continue; }
 
       final gtaskTitle = gTask['title'] as String? ?? '';
-      if (isNearDuplicate(gtaskTitle, dueDate)) { skipped++; continue; }
-      importedPairs.add(MapEntry(gtaskTitle.trim().toLowerCase(), dueDate));
+      if (await linkOrSkip(prefixedId, gtaskTitle, dueDate)) { skipped++; continue; }
 
       // Google Tasks също влизат в общата „Календарни" категория
       final categoryId = await getOrCreateCat(catIdCalendar, t.catCalendarEvents, 0xFF2196F3);
