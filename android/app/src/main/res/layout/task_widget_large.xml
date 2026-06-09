@@ -10,7 +10,7 @@
     <LinearLayout android:id="@+id/empty_container" android:layout_width="match_parent" android:layout_height="0dp"
         android:layout_weight="1" android:gravity="center" android:padding="8dp" android:visibility="gone">
         <TextView android:id="@+id/empty_text" android:layout_width="match_parent" android:layout_height="match_parent"
-            android:gravity="center" android:maxLines="3" android:ellipsize="end" android:fontFamily="cursive" android:textColor="#F2FFFFFF" android:textStyle="bold"
+            android:gravity="center" android:maxLines="3" android:ellipsize="end" android:fontFamily="@font/caveat" android:textColor="#F2FFFFFF"
             android:autoSizeTextType="uniform" android:autoSizeMinTextSize="10sp" android:autoSizeMaxTextSize="20sp" android:autoSizeStepGranularity="1sp"/>
     </LinearLayout>
     <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"

@@ -101,9 +101,11 @@ class CalendarImportService {
         .map((t) => t.googleCalendarEventId!)
         .toSet();
 
-    // Title+Date pairs (за near-duplicate check ±1 ден)
+    // Title+Date pairs (за near-duplicate check ±1 ден).
+    // ВАЖНО: гледаме ВСИЧКИ задачи, не само тези с googleCalendarEventId —
+    // иначе възстановени от бекъп календарни задачи (без eventId) не се
+    // разпознават и авто-импортът ги внася наново като дубли.
     final importedPairs = taskBox.values
-        .where((t) => t.googleCalendarEventId != null)
         .map((t) => MapEntry(t.title.trim().toLowerCase(), t.dueDate))
         .toList();
 

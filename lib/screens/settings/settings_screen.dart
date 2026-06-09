@@ -1035,6 +1035,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           'subtasks': t.subtasks,
           'notes': t.notes,
           'completedAt': t.completedAt?.toIso8601String(),
+          // ВАЖНО: пази връзката към Google Calendar, иначе при възстановяване
+          // авто-импортът ще ги мисли за нови → масови дубли.
+          'googleCalendarEventId': t.googleCalendarEventId,
+          'importedFromCalendar': t.importedFromCalendar,
         }).toList(),
       };
 
@@ -1171,6 +1175,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           completedAt: taskData['completedAt'] != null
               ? DateTime.parse(taskData['completedAt'] as String)
               : null,
+          googleCalendarEventId: taskData['googleCalendarEventId'] as String?,
+          importedFromCalendar: taskData['importedFromCalendar'] as bool?,
         );
         task.isCompleted = taskData['isCompleted'] as bool? ?? false;
         await taskBox.add(task);

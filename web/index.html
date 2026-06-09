@@ -23,5 +23,34 @@
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // Авто-обновяване на service worker: новите deploy-и да се виждат БЕЗ
+    // ръчно „Clear site data". При нова версия → skipWaiting + еднократен reload.
+    if ('serviceWorker' in navigator) {
+      // Когато нов SW поеме контрол (нов deploy активиран) → презареди веднъж.
+      var __reloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (__reloading) return;
+        __reloading = true;
+        window.location.reload();
+      });
+      // flutter_bootstrap регистрира SW асинхронно → изчакай ready, после следи.
+      navigator.serviceWorker.ready.then(function (reg) {
+        function __check() { reg.update().catch(function () {}); }
+        __check();                 // провери веднага при зареждане
+        setInterval(__check, 60000); // и на всеки 60 сек
+        reg.addEventListener('updatefound', function () {
+          var sw = reg.installing;
+          if (!sw) return;
+          sw.addEventListener('statechange', function () {
+            // Нова версия инсталирана, но има стар контролиращ SW → активирай я.
+            if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+              sw.postMessage('skipWaiting');
+            }
+          });
+        });
+      });
+    }
+  </script>
 </body>
 </html>
