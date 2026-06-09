@@ -1374,7 +1374,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: Text(t.settings),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
         children: [
           // Език - НАЙ-ОТГОРЕ
           Text(
@@ -1404,7 +1404,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
           // Статистики секция
           Text(
@@ -1445,7 +1445,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
           // Категории секция
           Text(
@@ -1482,7 +1482,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
           // AI секция
           Text(
@@ -1523,7 +1523,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
           // Акаунт секция
           Text(
@@ -1590,7 +1590,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // Синхронизация (само ако е логнат)
           if (user != null) ...[
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             Text(
               t.cloudSync,
               style: const TextStyle(
@@ -1652,7 +1652,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ],
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           // Google Calendar
           // Google Calendar
           Text(
@@ -1816,7 +1816,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           // iOS Calendar
           if (!kIsWeb && Platform.isIOS) ...[
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             Text(
               'Apple Calendar',
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
@@ -2000,7 +2000,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
 
           // Morning Briefing
@@ -2061,14 +2061,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
 
           // Официални празници — достъпно за всички държави (не само BG).
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           _buildHolidaysTile(
               context, LanguageScope.of(context).locale.languageCode),
 
           // Раздел „България" (именни дни) — само при BG език/локация.
           ..._buildBulgariaSection(context),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           // Backup / Restore
           Text(
             t.localData,
@@ -2132,7 +2132,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
           // App info
           Center(
@@ -2147,7 +2147,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // Delete Account (само ако е логнат)
           if (user != null) ...[
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             const Divider(),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),

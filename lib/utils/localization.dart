@@ -186,7 +186,7 @@ class AppText {
   String get viewCompactDesc => _t({'en': 'Less space, more tasks', 'bg': 'По-малко място, повече задачи', 'de': 'Weniger Platz', 'fr': 'Moins de place', 'it': 'Meno spazio', 'el': 'Λιγότερος χώρος', 'es': 'Menos espacio', 'pt': 'Menos espaço', 'ru': 'Меньше места', 'tr': 'Daha az alan', 'ja': 'スペースを節約してより多くのタスクを表示'});
 
   String get statistics => _t({'en': 'Statistics', 'bg': 'Статистики', 'de': 'Statistiken', 'fr': 'Statistiques', 'it': 'Statistiche', 'el': 'Στατιστικά', 'es': 'Estadísticas', 'pt': 'Estatísticas', 'ru': 'Статистика', 'tr': 'İstatistikler', 'ja': '統計'});
-  String get viewProgress => _t({'en': 'View your progress', 'bg': 'Преглед на твоя прогрес', 'de': 'Zeige deinen Fortschritt', 'fr': 'Voir votre progression', 'it': 'Visualizza i tuoi progressi', 'el': 'Δείτε την πρόοδό σας', 'es': 'Ver tu progreso', 'pt': 'Ver seu progresso', 'ru': 'Посмотреть прогресс', 'tr': 'İlerlemenizi görün', 'ja': '進捗を確認'});
+  String get viewProgress => _t({'en': 'See everything you\'ve accomplished', 'bg': 'Виж всичко, което си постигнал', 'de': 'Sieh, was du alles geschafft hast', 'fr': 'Voyez tout ce que vous avez accompli', 'it': 'Guarda tutto ciò che hai realizzato', 'el': 'Δες όλα όσα έχεις πετύχει', 'es': 'Mira todo lo que has logrado', 'pt': 'Veja tudo o que você conquistou', 'ru': 'Посмотрите, чего вы достигли', 'tr': 'Neler başardığını gör', 'ja': 'これまでの成果を確認'});
   String get today => _t({'en': 'Today', 'bg': 'Днес', 'de': 'Heute', 'fr': "Aujourd'hui", 'it': 'Oggi', 'el': 'Σήμερα', 'es': 'Hoy', 'pt': 'Hoje', 'ru': 'Сегодня', 'tr': 'Bugün', 'ja': '今日'});
   String get week => _t({'en': 'Week', 'bg': 'Седмица', 'de': 'Woche', 'fr': 'Semaine', 'it': 'Settimana', 'el': 'Εβδομάδα', 'es': 'Semana', 'pt': 'Semana', 'ru': 'Неделя', 'tr': 'Hafta', 'ja': '週'});
   String get month => _t({'en': 'Month', 'bg': 'Месец', 'de': 'Monat', 'fr': 'Mois', 'it': 'Mese', 'el': 'Μήνας', 'es': 'Mes', 'pt': 'Mês', 'ru': 'Месяц', 'tr': 'Ay', 'ja': '月'});
@@ -280,7 +280,7 @@ class AppText {
   String get shopping => _t({'en': 'Shopping', 'bg': 'Пазаруване', 'de': 'Einkaufen', 'fr': 'Courses', 'it': 'Spesa', 'el': 'Αγορές', 'es': 'Compras', 'pt': 'Compras', 'ru': 'Покупки', 'tr': 'Alışveriş', 'ja': '買い物'});
   String get categories => _t({'en': 'Categories', 'bg': 'Категории', 'de': 'Kategorien', 'fr': 'Catégories', 'it': 'Categorie', 'el': 'Κατηγορίες', 'es': 'Categorías', 'pt': 'Categorias', 'ru': 'Категории', 'tr': 'Kategoriler', 'ja': 'カテゴリー'});
   String get manageCategories => _t({'en': 'Manage Categories', 'bg': 'Управление на категории', 'de': 'Kategorien verwalten', 'fr': 'Gérer les catégories', 'it': 'Gestisci categorie', 'el': 'Διαχείριση κατηγοριών', 'es': 'Gestionar categorías', 'pt': 'Gerenciar categorias', 'ru': 'Управление категориями', 'tr': 'Kategorileri yönet', 'ja': 'カテゴリーを管理'});
-  String get editAddDeleteCategories => _t({'en': 'Edit, add or delete categories', 'bg': 'Редактирай, добави или изтрий категории', 'de': 'Kategorien bearbeiten, hinzufügen oder löschen', 'fr': 'Modifier, ajouter ou supprimer des catégories', 'it': 'Modifica, aggiungi o elimina categorie', 'el': 'Επεξεργασία, προσθήκη ή διαγραφή κατηγοριών', 'es': 'Editar, añadir o eliminar categorías', 'pt': 'Editar, adicionar ou excluir categorias', 'ru': 'Редактировать, добавить или удалить категории', 'tr': 'Kategorileri düzenle, ekle veya sil', 'ja': 'カテゴリーの編集・追加・削除'});
+  String get editAddDeleteCategories => _t({'en': 'Organize your tasks your way', 'bg': 'Подреди задачите си както ти е удобно', 'de': 'Organisiere deine Aufgaben nach deinen Wünschen', 'fr': 'Organisez vos tâches à votre façon', 'it': 'Organizza le attività come preferisci', 'el': 'Οργάνωσε τις εργασίες σου όπως θες', 'es': 'Organiza tus tareas a tu manera', 'pt': 'Organize suas tarefas do seu jeito', 'ru': 'Организуйте задачи так, как удобно вам', 'tr': 'Görevlerini istediğin gibi düzenle', 'ja': 'タスクを自分流に整理'});
   String get newCategory => _t({'en': 'New Category', 'bg': 'Нова категория', 'de': 'Neue Kategorie', 'fr': 'Nouvelle catégorie', 'it': 'Nuova categoria', 'el': 'Νέα κατηγορία', 'es': 'Nueva categoría', 'pt': 'Nova categoria', 'ru': 'Новая категория', 'tr': 'Yeni kategori', 'ja': '新しいカテゴリー'});
   String get editCategory => _t({'en': 'Edit Category', 'bg': 'Редактирай категория', 'de': 'Kategorie bearbeiten', 'fr': 'Modifier la catégorie', 'it': 'Modifica categoria', 'el': 'Επεξεργασία κατηγορίας', 'es': 'Editar categoría', 'pt': 'Editar categoria', 'ru': 'Редактировать категорию', 'tr': 'Kategoriyi düzenle', 'ja': 'カテゴリーを編集'});
   String get addCategory => _t({'en': 'Add Category', 'bg': 'Добави категория', 'de': 'Kategorie hinzufügen', 'fr': 'Ajouter une catégorie', 'it': 'Aggiungi categoria', 'el': 'Προσθήκη κατηγορίας', 'es': 'Añadir categoría', 'pt': 'Adicionar categoria', 'ru': 'Добавить категорию', 'tr': 'Kategori ekle', 'ja': 'カテゴリーを追加'});
@@ -322,7 +322,7 @@ class AppText {
 
   // ==================== АКАУНТ ====================
   String get account => _t({'en': 'Account', 'bg': 'Акаунт', 'de': 'Konto', 'fr': 'Compte', 'it': 'Account', 'el': 'Λογαριασμός', 'es': 'Cuenta', 'pt': 'Conta', 'ru': 'Аккаунт', 'tr': 'Hesap', 'ja': 'アカウント'});
-  String get signedIn => _t({'en': 'Signed in', 'bg': 'Влязъл си в акаунта', 'de': 'Angemeldet', 'fr': 'Connecté', 'it': 'Connesso', 'el': 'Συνδεδεμένος', 'es': 'Conectado', 'pt': 'Conectado', 'ru': 'Выполнен вход', 'tr': 'Giriş yapıldı', 'ja': 'サインイン済み'});
+  String get signedIn => _t({'en': 'Your tasks are safely backed up', 'bg': 'Задачите ти са в безопасност в облака', 'de': 'Deine Aufgaben sind sicher gesichert', 'fr': 'Vos tâches sont sauvegardées en toute sécurité', 'it': 'Le tue attività sono al sicuro', 'el': 'Οι εργασίες σου είναι ασφαλείς', 'es': 'Tus tareas están a salvo', 'pt': 'Suas tarefas estão seguras', 'ru': 'Ваши задачи надёжно сохранены', 'tr': 'Görevlerin güvende', 'ja': 'タスクは安全に保存されています'});
   String get logout => _t({'en': 'Logout', 'bg': 'Изход', 'de': 'Abmelden', 'fr': 'Déconnexion', 'it': 'Esci', 'el': 'Αποσύνδεση', 'es': 'Cerrar sesión', 'pt': 'Sair', 'ru': 'Выйти', 'tr': 'Çıkış', 'ja': 'ログアウト'});
   String get logoutConfirm => _t({'en': 'Are you sure you want to logout?', 'bg': 'Сигурен ли си, че искаш да излезеш?', 'de': 'Möchtest du dich wirklich abmelden?', 'fr': 'Êtes-vous sûr de vouloir vous déconnecter?', 'it': 'Sei sicuro di voler uscire?', 'el': 'Είστε σίγουροι ότι θέλετε να αποσυνδεθείτε;', 'es': '¿Estás seguro de que quieres cerrar sesión?', 'pt': 'Tem certeza de que deseja sair?', 'ru': 'Вы уверены, что хотите выйти?', 'tr': 'Çıkış yapmak istediğinize emin misiniz?', 'ja': 'ログアウトしてもよろしいですか？'});
   String get notLoggedIn => _t({'en': 'Not logged in', 'bg': 'Не си влязъл', 'de': 'Nicht angemeldet', 'fr': 'Non connecté', 'it': 'Non connesso', 'el': 'Δεν έχετε συνδεθεί', 'es': 'No conectado', 'pt': 'Não conectado', 'ru': 'Не выполнен вход', 'tr': 'Giriş yapılmadı', 'ja': 'ログインしていません'});
@@ -481,13 +481,13 @@ class AppText {
     'tr': '$tasks görev ve $cats kategori indirildi', 'ja': '$tasks件のタスクと$cats件のカテゴリーをダウンロードしました',
   });
 
-  String get signInToSync => _t({'en': 'Sign in to sync to cloud', 'bg': 'Влез за синхронизация в облака', 'de': 'Anmelden zur Cloud-Synchronisierung', 'fr': 'Connectez-vous pour synchroniser', 'it': 'Accedi per sincronizzare', 'el': 'Συνδεθείτε για συγχρονισμό', 'es': 'Inicia sesión para sincronizar', 'pt': 'Entre para sincronizar', 'ru': 'Войдите для синхронизации', 'tr': 'Senkronize etmek için giriş yapın', 'ja': 'サインインしてクラウドに同期'});
+  String get signInToSync => _t({'en': 'Keep your tasks on all your devices', 'bg': 'Задачите ти на всичките ти устройства', 'de': 'Deine Aufgaben auf allen Geräten', 'fr': 'Vos tâches sur tous vos appareils', 'it': 'Le tue attività su tutti i dispositivi', 'el': 'Οι εργασίες σου σε όλες τις συσκευές', 'es': 'Tus tareas en todos tus dispositivos', 'pt': 'Suas tarefas em todos os dispositivos', 'ru': 'Задачи на всех ваших устройствах', 'tr': 'Görevlerin tüm cihazlarında', 'ja': 'すべての端末でタスクを共有'});
   String get saveToCloud => _t({'en': 'Save tasks to cloud', 'bg': 'Запази задачите в облака', 'de': 'Aufgaben in Cloud speichern', 'fr': 'Enregistrer les tâches dans le cloud', 'it': 'Salva attività nel cloud', 'el': 'Αποθήκευση εργασιών στο cloud', 'es': 'Guardar tareas en la nube', 'pt': 'Salvar tarefas na nuvem', 'ru': 'Сохранить задачи в облако', 'tr': 'Görevleri buluta kaydet', 'ja': 'タスクをクラウドに保存'});
   String get restoreFromCloud => _t({'en': 'Restore tasks from cloud', 'bg': 'Възстанови задачите от облака', 'de': 'Aufgaben aus Cloud wiederherstellen', 'fr': 'Restaurer les tâches depuis le cloud', 'it': 'Ripristina attività dal cloud', 'el': 'Επαναφορά εργασιών από cloud', 'es': 'Restaurar tareas de la nube', 'pt': 'Restaurar tarefas da nuvem', 'ru': 'Восстановить задачи из облака', 'tr': 'Görevleri buluttan geri yükle', 'ja': 'クラウドからタスクを復元'});
   String get saveToFile => _t({'en': 'Save tasks to file', 'bg': 'Запази задачите във файл', 'de': 'Aufgaben in Datei speichern', 'fr': 'Enregistrer les tâches dans un fichier', 'it': 'Salva attività su file', 'el': 'Αποθήκευση εργασιών σε αρχείο', 'es': 'Guardar tareas en archivo', 'pt': 'Salvar tarefas em arquivo', 'ru': 'Сохранить задачи в файл', 'tr': 'Görevleri dosyaya kaydet', 'ja': 'タスクをファイルに保存'});
   String get restoreFromFile => _t({'en': 'Restore tasks from file', 'bg': 'Възстанови задачите от файл', 'de': 'Aufgaben aus Datei wiederherstellen', 'fr': 'Restaurer les tâches depuis un fichier', 'it': 'Ripristina attività da file', 'el': 'Επαναφορά εργασιών από αρχείο', 'es': 'Restaurar tareas desde archivo', 'pt': 'Restaurar tarefas de arquivo', 'ru': 'Восстановить задачи из файла', 'tr': 'Görevleri dosyadan geri yükle', 'ja': 'ファイルからタスクを復元'});
-  String get shareBackup => _t({'en': 'Share backup file', 'bg': 'Сподели backup файл', 'de': 'Backup-Datei teilen', 'fr': 'Partager le fichier de sauvegarde', 'it': 'Condividi file di backup', 'el': 'Κοινοποίηση αρχείου αντιγράφου', 'es': 'Compartir archivo de respaldo', 'pt': 'Compartilhar arquivo de backup', 'ru': 'Поделиться файлом резервной копии', 'tr': 'Yedek dosyasını paylaş', 'ja': 'バックアップファイルを共有'});
-  String get restoreFromJson => _t({'en': 'Restore from JSON file', 'bg': 'Възстанови от JSON файл', 'de': 'Aus JSON-Datei wiederherstellen', 'fr': 'Restaurer depuis un fichier JSON', 'it': 'Ripristina da file JSON', 'el': 'Επαναφορά από αρχείο JSON', 'es': 'Restaurar desde archivo JSON', 'pt': 'Restaurar de arquivo JSON', 'ru': 'Восстановить из файла JSON', 'tr': 'JSON dosyasından geri yükle', 'ja': 'JSONファイルから復元'});
+  String get shareBackup => _t({'en': 'Save a copy of your tasks', 'bg': 'Запази копие на задачите си', 'de': 'Sichere eine Kopie deiner Aufgaben', 'fr': 'Enregistrez une copie de vos tâches', 'it': 'Salva una copia delle tue attività', 'el': 'Αποθήκευσε ένα αντίγραφο των εργασιών σου', 'es': 'Guarda una copia de tus tareas', 'pt': 'Salve uma cópia das suas tarefas', 'ru': 'Сохраните копию своих задач', 'tr': 'Görevlerinin bir kopyasını kaydet', 'ja': 'タスクのコピーを保存'});
+  String get restoreFromJson => _t({'en': 'Restore your tasks from a saved copy', 'bg': 'Възстанови задачите от запазено копие', 'de': 'Stelle deine Aufgaben aus einer Sicherung wieder her', 'fr': 'Restaurez vos tâches depuis une copie enregistrée', 'it': 'Ripristina le tue attività da una copia salvata', 'el': 'Επανέφερε τις εργασίες σου από αποθηκευμένο αντίγραφο', 'es': 'Restaura tus tareas desde una copia guardada', 'pt': 'Restaure suas tarefas de uma cópia salva', 'ru': 'Восстановите задачи из сохранённой копии', 'tr': 'Görevlerini kayıtlı bir kopyadan geri yükle', 'ja': '保存したコピーからタスクを復元'});
 
   // ==================== СТАТИСТИКИ ====================
   String get summary => _t({'en': 'Summary', 'bg': 'Обобщение', 'de': 'Zusammenfassung', 'fr': 'Résumé', 'it': 'Riepilogo', 'el': 'Περίληψη', 'es': 'Resumen', 'pt': 'Resumo', 'ru': 'Сводка', 'tr': 'Özet', 'ja': '概要'});
@@ -628,29 +628,29 @@ class AppText {
   });
 
   String get calendarSyncEnabled => _t({
-    'en': 'Tasks sync with Google Calendar',
-    'bg': 'Задачите се синхронизират с Google Календар',
-    'de': 'Aufgaben werden mit Google Kalender synchronisiert',
-    'fr': 'Les tâches sont synchronisées avec Google Agenda',
-    'it': 'Le attività si sincronizzano con Google Calendar',
-    'el': 'Οι εργασίες συγχρονίζονται με το Ημερολόγιο Google',
-    'es': 'Las tareas se sincronizan con Google Calendar',
-    'pt': 'Tarefas sincronizam com Google Agenda',
-    'ru': 'Задачи синхронизируются с Google Календарём',
-    'tr': 'Görevler Google Takvim ile senkronize edilir', 'ja': 'タスクをGoogle Calendarと同期',
+    'en': 'Your tasks and Google Calendar stay in sync',
+    'bg': 'Задачите и Google Календар са винаги синхронизирани',
+    'de': 'Deine Aufgaben und Google Kalender bleiben synchron',
+    'fr': 'Vos tâches et Google Agenda restent synchronisés',
+    'it': 'Le tue attività e Google Calendar restano sincronizzati',
+    'el': 'Οι εργασίες σου και το Ημερολόγιο Google παραμένουν συγχρονισμένα',
+    'es': 'Tus tareas y Google Calendar siempre sincronizados',
+    'pt': 'Suas tarefas e o Google Agenda sempre sincronizados',
+    'ru': 'Ваши задачи и Google Календарь всегда синхронны',
+    'tr': 'Görevlerin ve Google Takvim hep senkron', 'ja': 'タスクとGoogleカレンダーが常に同期',
   });
 
   String get connectForSync => _t({
-    'en': 'Connect to sync tasks',
-    'bg': 'Свържи се за синхронизация',
-    'de': 'Verbinden zum Synchronisieren',
-    'fr': 'Connecter pour synchroniser',
-    'it': 'Connetti per sincronizzare',
-    'el': 'Συνδεθείτε για συγχρονισμό',
-    'es': 'Conectar para sincronizar',
-    'pt': 'Conectar para sincronizar',
-    'ru': 'Подключитесь для синхронизации',
-    'tr': 'Senkronize etmek için bağlan', 'ja': '接続してタスクを同期',
+    'en': 'See your tasks and events together',
+    'bg': 'Виж задачи и събития на едно място',
+    'de': 'Aufgaben und Termine zusammen sehen',
+    'fr': 'Voyez tâches et événements ensemble',
+    'it': 'Vedi attività ed eventi insieme',
+    'el': 'Δες εργασίες και γεγονότα μαζί',
+    'es': 'Ve tus tareas y eventos juntos',
+    'pt': 'Veja tarefas e eventos juntos',
+    'ru': 'Задачи и события в одном месте',
+    'tr': 'Görev ve etkinlikleri birlikte gör', 'ja': 'タスクと予定をまとめて表示',
   });
 
   String get connect => _t({
@@ -693,17 +693,17 @@ class AppText {
   });
 
   String get autoSyncDesc => _t({
-    'en': 'Syncs automatically — this just forces it now',
-    'bg': 'Синхронизира се автоматично — това само форсира сега',
-    'de': 'Synchronisiert automatisch — dies erzwingt es jetzt',
-    'fr': 'Synchronisation automatique — ceci la force maintenant',
-    'it': 'Si sincronizza automaticamente — questo lo forza ora',
-    'el': 'Συγχρονίζεται αυτόματα — αυτό απλώς το επιβάλλει τώρα',
-    'es': 'Se sincroniza automáticamente — esto solo lo fuerza ahora',
-    'pt': 'Sincroniza automaticamente — isto apenas força agora',
-    'ru': 'Синхронизируется автоматически — это просто форсирует сейчас',
-    'tr': 'Otomatik senkronize olur — bu sadece şimdi zorlar',
-    'ja': '自動的に同期されます — これは今すぐ実行するだけです',
+    'en': 'Updates automatically — tap to refresh now',
+    'bg': 'Обновява се автоматично — натисни за обновяване',
+    'de': 'Aktualisiert automatisch — zum Aktualisieren tippen',
+    'fr': 'Mise à jour automatique — touchez pour actualiser',
+    'it': 'Si aggiorna da solo — tocca per aggiornare',
+    'el': 'Ενημερώνεται αυτόματα — πάτησε για ανανέωση',
+    'es': 'Se actualiza solo — toca para actualizar',
+    'pt': 'Atualiza sozinho — toque para atualizar',
+    'ru': 'Обновляется автоматически — нажмите, чтобы обновить',
+    'tr': 'Otomatik güncellenir — yenilemek için dokun',
+    'ja': '自動更新 — タップで今すぐ更新',
   });
 
   String get resetSync => _t({
@@ -721,17 +721,17 @@ class AppText {
   });
 
   String get resetSyncDesc => _t({
-    'en': 'Deletes ALL tasks everywhere. Use to recover from a clean source (e.g. import).',
-    'bg': 'Изтрива ВСИЧКИ задачи навсякъде. За възстановяване от чист източник (импорт).',
-    'de': 'Löscht ALLE Aufgaben überall. Zur Wiederherstellung aus sauberer Quelle (Import).',
-    'fr': 'Supprime TOUTES les tâches partout. Pour restaurer depuis une source propre (import).',
-    'it': 'Elimina TUTTE le attività ovunque. Per ripristinare da una fonte pulita (import).',
-    'el': 'Διαγράφει ΟΛΕΣ τις εργασίες παντού. Για αποκατάσταση από καθαρή πηγή (εισαγωγή).',
-    'es': 'Elimina TODAS las tareas en todas partes. Para restaurar desde una fuente limpia (importar).',
-    'pt': 'Apaga TODAS as tarefas em todo o lado. Para restaurar de uma fonte limpa (importar).',
-    'ru': 'Удаляет ВСЕ задачи везде. Для восстановления из чистого источника (импорт).',
-    'tr': 'TÜM görevleri her yerden siler. Temiz bir kaynaktan kurtarmak için (içe aktar).',
-    'ja': 'すべてのタスクをどこからも削除します。クリーンなソースからの復元用（インポート）。',
+    'en': 'Erases all tasks, then restore from a backup. Use only if something broke.',
+    'bg': 'Изтрива всички задачи; после възстановяваш от бекъп. Само при проблем.',
+    'de': 'Löscht alle Aufgaben; danach aus einem Backup wiederherstellen. Nur im Notfall.',
+    'fr': 'Efface toutes les tâches, puis restaurez depuis une sauvegarde. En cas de problème seulement.',
+    'it': 'Cancella tutte le attività; poi ripristina da un backup. Solo in caso di problemi.',
+    'el': 'Σβήνει όλες τις εργασίες· μετά κάνεις επαναφορά από αντίγραφο. Μόνο σε πρόβλημα.',
+    'es': 'Borra todas las tareas; luego restaura desde una copia. Solo si algo falló.',
+    'pt': 'Apaga todas as tarefas; depois restaura de um backup. Só em caso de problema.',
+    'ru': 'Удаляет все задачи; затем восстановите из копии. Только при проблеме.',
+    'tr': 'Tüm görevleri siler; sonra bir yedekten geri yükle. Yalnızca sorun olduğunda.',
+    'ja': 'すべてのタスクを削除し、バックアップから復元します。問題時のみ使用。',
   });
 
   String get resetSyncConfirm => _t({
@@ -777,17 +777,17 @@ class AppText {
   });
 
   String get allowCalendarAccessDesc => _t({
-    'en': 'Signed in. Tap to grant calendar permission.',
-    'bg': 'Влязохте. Натиснете, за да дадете достъп до календара.',
-    'de': 'Angemeldet. Tippen, um Kalenderzugriff zu gewähren.',
-    'fr': 'Connecté. Touchez pour autoriser le calendrier.',
-    'it': 'Accesso effettuato. Tocca per concedere l\'accesso al calendario.',
-    'el': 'Συνδεθήκατε. Πατήστε για πρόσβαση στο ημερολόγιο.',
-    'es': 'Sesión iniciada. Toca para conceder acceso al calendario.',
-    'pt': 'Sessão iniciada. Toque para conceder acesso ao calendário.',
-    'ru': 'Вы вошли. Нажмите, чтобы разрешить доступ к календарю.',
-    'tr': 'Giriş yapıldı. Takvim izni için dokunun.',
-    'ja': 'サインイン済み。タップしてカレンダーへのアクセスを許可してください。',
+    'en': 'Signed in — tap to allow calendar access',
+    'bg': 'Влязохте — натиснете за достъп до календара',
+    'de': 'Angemeldet — für Kalenderzugriff tippen',
+    'fr': 'Connecté — touchez pour autoriser le calendrier',
+    'it': 'Accesso effettuato — tocca per il calendario',
+    'el': 'Συνδεθήκατε — πατήστε για πρόσβαση στο ημερολόγιο',
+    'es': 'Sesión iniciada — toca para el calendario',
+    'pt': 'Sessão iniciada — toque para o calendário',
+    'ru': 'Вы вошли — нажмите для доступа к календарю',
+    'tr': 'Giriş yapıldı — takvim erişimi için dokun',
+    'ja': 'サインイン済み — タップでカレンダーへのアクセスを許可',
   });
 
   String get connectionFailed => _t({
@@ -1004,7 +1004,7 @@ class AppText {
   String get deleteExportedConfirm => _t({'en': 'This will remove from the calendar all events that were exported from your tasks. Your tasks will stay in the app.', 'bg': 'Това ще премахне от календара всички събития, експортирани от твоите задачи. Задачите остават в приложението.', 'de': 'Dies entfernt aus dem Kalender alle aus deinen Aufgaben exportierten Ereignisse. Deine Aufgaben bleiben in der App.', 'fr': 'Cela supprimera du calendrier tous les événements exportés depuis vos tâches. Vos tâches restent dans l\'app.', 'it': 'Questo rimuoverà dal calendario tutti gli eventi esportati dalle tue attività. Le tue attività restano nell\'app.', 'el': 'Αυτό θα αφαιρέσει από το ημερολόγιο όλα τα γεγονότα που εξήχθησαν από τις εργασίες σου. Οι εργασίες σου παραμένουν στην εφαρμογή.', 'es': 'Esto eliminará del calendario todos los eventos exportados desde tus tareas. Tus tareas permanecerán en la app.', 'pt': 'Isso removerá do calendário todos os eventos exportados das suas tarefas. Suas tarefas permanecem no app.', 'ru': 'Это удалит из календаря все события, экспортированные из ваших задач. Ваши задачи останутся в приложении.', 'tr': 'Bu, görevlerinizden dışa aktarılan tüm etkinlikleri takvimden kaldıracaktır. Görevleriniz uygulamada kalır.', 'ja': 'タスクからエクスポートしたすべての予定をカレンダーから削除します。タスクはアプリに残ります。'});
   String deletedExportedTasks(int count) => _t({'en': 'Removed $count events from the calendar', 'bg': 'Премахнати $count събития от календара', 'de': '$count Ereignisse aus dem Kalender entfernt', 'fr': '$count événements supprimés du calendrier', 'it': '$count eventi rimossi dal calendario', 'el': 'Αφαιρέθηκαν $count γεγονότα από το ημερολόγιο', 'es': '$count eventos eliminados del calendario', 'pt': '$count eventos removidos do calendário', 'ru': 'Удалено $count событий из календаря', 'tr': 'Takvimden $count etkinlik kaldırıldı', 'ja': 'カレンダーから$count件の予定を削除しました'});
   String get removeDuplicates => _t({'en': 'Remove duplicates', 'bg': 'Премахни дубликати', 'de': 'Duplikate entfernen', 'fr': 'Supprimer les doublons', 'it': 'Rimuovi duplicati', 'el': 'Αφαίρεση διπλότυπων', 'es': 'Eliminar duplicados', 'pt': 'Remover duplicados', 'ru': 'Удалить дубликаты', 'tr': 'Yinelenenleri kaldır', 'ja': '重複を削除'});
-  String get removeDuplicatesDesc => _t({'en': 'Finds events with the same title on the same/nearby date and keeps only one', 'bg': 'Намира събития с еднакво заглавие на същата/близка дата и оставя само едно', 'de': 'Findet Ereignisse mit gleichem Titel am selben/nahen Datum und behält nur eines', 'fr': 'Trouve les événements de même titre à une date identique/proche et n\'en garde qu\'un', 'it': 'Trova eventi con lo stesso titolo nella stessa data o vicina e ne tiene solo uno', 'el': 'Βρίσκει γεγονότα με ίδιο τίτλο σε ίδια/κοντινή ημερομηνία και κρατά μόνο ένα', 'es': 'Encuentra eventos con el mismo título en la misma fecha o cercana y conserva solo uno', 'pt': 'Encontra eventos com o mesmo título na mesma data ou próxima e mantém apenas um', 'ru': 'Находит события с одинаковым названием на ту же/близкую дату и оставляет одно', 'tr': 'Aynı/yakın tarihte aynı başlıklı etkinlikleri bulur ve yalnızca birini tutar', 'ja': '同じ/近い日付で同名の予定を見つけ、1つだけ残します'});
+  String get removeDuplicatesDesc => _t({'en': 'Tidies up repeated events — keeps just one of each', 'bg': 'Изчиства повтарящи се събития — оставя по едно', 'de': 'Räumt doppelte Termine auf — behält je eines', 'fr': 'Nettoie les événements en double — n\'en garde qu\'un', 'it': 'Pulisce gli eventi ripetuti — ne tiene uno solo', 'el': 'Καθαρίζει διπλά γεγονότα — κρατά ένα από κάθε', 'es': 'Limpia eventos repetidos — conserva solo uno', 'pt': 'Limpa eventos repetidos — mantém só um', 'ru': 'Убирает повторяющиеся события — оставляет по одному', 'tr': 'Tekrar eden etkinlikleri temizler — birer tane bırakır', 'ja': '重複した予定を整理 — 各1件だけ残します'});
   String removedDuplicates(int count) => _t({'en': 'Removed $count duplicate events', 'bg': 'Премахнати $count дублирани събития', 'de': '$count doppelte Ereignisse entfernt', 'fr': '$count événements en double supprimés', 'it': '$count eventi duplicati rimossi', 'el': 'Αφαιρέθηκαν $count διπλότυπα γεγονότα', 'es': '$count eventos duplicados eliminados', 'pt': '$count eventos duplicados removidos', 'ru': 'Удалено $count дублированных событий', 'tr': '$count yinelenen etkinlik kaldırıldı', 'ja': '$count件の重複予定を削除しました'});
   String get untitledEvent => _t({'en': 'Untitled Event', 'bg': 'Без заглавие', 'de': 'Unbenanntes Ereignis', 'fr': 'Événement sans titre', 'it': 'Evento senza titolo', 'el': 'Χωρίς τίτλο', 'es': 'Evento sin título', 'pt': 'Evento sem título', 'ru': 'Без названия', 'tr': 'Adsız etkinlik', 'ja': '無題のイベント'});
   String get untitledTask => _t({'en': 'Untitled Task', 'bg': 'Без заглавие', 'de': 'Unbenannte Aufgabe', 'fr': 'Tâche sans titre', 'it': 'Attività senza titolo', 'el': 'Χωρίς τίτλο', 'es': 'Tarea sin título', 'pt': 'Tarefa sem título', 'ru': 'Без названия', 'tr': 'Adsız görev', 'ja': '無題のタスク'});
@@ -1257,7 +1257,7 @@ class AppText {
 
   // ----- AI настройки + rate limit -----
   String get aiSettings => _t({'en': 'AI Settings', 'bg': 'AI настройки', 'de': 'KI-Einstellungen', 'fr': 'Paramètres IA', 'it': 'Impostazioni IA', 'el': 'Ρυθμίσεις AI', 'es': 'Ajustes de IA', 'pt': 'Configurações de IA', 'ru': 'Настройки AI', 'tr': 'AI Ayarları', 'ja': 'AI設定'});
-  String get aiSettingsSubtitle => _t({'en': 'Parsing, voice, daily usage', 'bg': 'Парсване, глас, дневна употреба', 'de': 'Analyse, Sprache, Tagesnutzung', 'fr': 'Analyse, voix, usage quotidien', 'it': 'Analisi, voce, uso giornaliero', 'el': 'Ανάλυση, φωνή, ημερήσια χρήση', 'es': 'Análisis, voz, uso diario', 'pt': 'Análise, voz, uso diário', 'ru': 'Анализ, голос, дневной лимит', 'tr': 'Analiz, ses, günlük kullanım', 'ja': '解析、音声、1日の使用量'});
+  String get aiSettingsSubtitle => _t({'en': 'Save time with smart text and voice', 'bg': 'Спести време с умен текст и глас', 'de': 'Spare Zeit mit smartem Text und Sprache', 'fr': 'Gagnez du temps avec le texte intelligent et la voix', 'it': 'Risparmia tempo con testo intelligente e voce', 'el': 'Κέρδισε χρόνο με έξυπνο κείμενο και φωνή', 'es': 'Ahorra tiempo con texto inteligente y voz', 'pt': 'Ganhe tempo com texto inteligente e voz', 'ru': 'Экономьте время: умный ввод и голос', 'tr': 'Akıllı metin ve sesle zaman kazan', 'ja': 'スマート入力と音声で時短'});
   String get aiParsingSetting => _t({'en': 'AI parsing', 'bg': 'AI парсване', 'de': 'KI-Analyse', 'fr': 'Analyse IA', 'it': 'Analisi IA', 'el': 'Ανάλυση AI', 'es': 'Análisis IA', 'pt': 'Análise IA', 'ru': 'AI анализ', 'tr': 'AI analiz', 'ja': 'AI解析'});
   String get aiParsingSettingDesc => _t({'en': 'Auto-fill task details from text', 'bg': 'Авто-попълване на детайли от текста', 'de': 'Aufgabendetails aus Text ausfüllen', 'fr': 'Remplir les détails depuis le texte', 'it': 'Compila i dettagli dal testo', 'el': 'Αυτόματη συμπλήρωση από κείμενο', 'es': 'Rellenar detalles desde el texto', 'pt': 'Preencher detalhes a partir do texto', 'ru': 'Автозаполнение деталей из текста', 'tr': 'Metinden görev detaylarını doldur', 'ja': 'テキストからタスクの詳細を自動入力'});
   String get voiceInputSetting => _t({'en': 'Voice input', 'bg': 'Гласово въвеждане', 'de': 'Spracheingabe', 'fr': 'Saisie vocale', 'it': 'Input vocale', 'el': 'Φωνητική εισαγωγή', 'es': 'Entrada de voz', 'pt': 'Entrada de voz', 'ru': 'Голосовой ввод', 'tr': 'Sesli giriş', 'ja': '音声入力'});
