@@ -415,13 +415,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (mode == 'google') {
       await IosCalendarService.setMode('google'); // Apple export off
+      // Ако вече сме свързани (напр. връщане от Apple) — не пускай нов OAuth,
+      // за да не иска разрешение всеки път.
+      if (_calendarService.isConnected) {
+        if (mounted) setState(() { _calMode = 'google'; _isCalendarConnected = true; });
+        return;
+      }
       if (kIsWeb) {
         // На web самият GIS бутон върши входа; само маркираме режима и
         // оставяме UI-я да покаже бутона/„Разреши достъп".
         if (mounted) setState(() => _calMode = 'google');
         return;
       }
-      final ok = await _calendarService.connect();
+      // Първо тих reconnect (от keychain) — без диалог, ако вече е оторизиран.
+      await _calendarService.tryReconnect();
+      bool ok = _calendarService.isConnected;
+      if (!ok) ok = await _calendarService.connect();
       if (mounted) {
         setState(() {
           _isCalendarConnected = ok;
@@ -446,14 +455,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
       return;
     }
-    // Изключи Google (взаимно изключващи се).
-    if (_calendarService.isConnected) await _calendarService.disconnect();
+    // НЕ изключваме Google акаунта (за да не иска разрешение наново при връщане).
+    // Взаимната изключителност се пази от gate-а `!exportEnabled` в Google
+    // hook-овете — щом Apple е активен, Google експортът е заспал.
     await IosCalendarService.setMode('apple');
     if (mounted) {
       setState(() {
         _calMode = 'apple';
         _isIosCalendarGranted = true;
-        _isCalendarConnected = false;
+        // _isCalendarConnected се запазва — Google акаунтът остава, но заспал.
       });
     }
     // Еднократен първоначален експорт на отворените задачи.
@@ -1865,6 +1875,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     onChanged: (v) => _setCalendarMode(v!),
                   ),
+                  // Ръчно почистване на заварени дубли в Apple Calendar.
+                  if (_calMode == 'apple') ...[
+                    const Divider(height: 0),
+                    ListTile(
+                      leading: const Icon(Icons.cleaning_services, color: Colors.orange),
+                      title: Text(t.removeDuplicates),
+                      subtitle: Text(t.removeDuplicatesDesc, style: const TextStyle(fontSize: 12)),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: Text('${t.removeDuplicates}?'),
+                            content: Text(t.removeDuplicatesDesc),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: Text(t.cancel),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: Text(t.delete, style: const TextStyle(color: Colors.red)),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirm != true) return;
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('${t.removeDuplicates}…')),
+                          );
+                        }
+                        final taskBox = Hive.box<Task>('tasks');
+                        final res = await _iosCalendarService
+                            .removeDuplicateEvents(taskBox.values.toList());
+                        if (mounted) {
+                          // Ако нищо не е изтрито, но има дубли в read-only
+                          // (синхронизиран) календар — обясни защо.
+                          final msg = (res.removed == 0 && res.blockedReadonly > 0)
+                              ? t.duplicatesInSyncedCalendar
+                              : t.removedDuplicates(res.removed);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(msg)),
+                          );
+                        }
+                      },
+                    ),
+                  ],
                 ],
               ],
             ),

@@ -1202,8 +1202,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               notes: tempNotes.trim().isEmpty ? null : tempNotes.trim(),
                             );
                             await taskBox.add(newTask);
-                            // Google Calendar sync
-                            if (GoogleCalendarService().isConnected) {
+                            // Google Calendar sync (само ако Apple не е активен).
+                            if (GoogleCalendarService().isConnected && !IosCalendarService.exportEnabled) {
                               final eventId = await GoogleCalendarService().addTaskToCalendar(newTask);
                               if (eventId != null) {
                                 newTask.googleCalendarEventId = eventId;
@@ -1766,8 +1766,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               reminders: task.reminders,
                             );
                             await taskBox.add(newTask);
-                            // Google Calendar sync
-                            if (GoogleCalendarService().isConnected) {
+                            // Google Calendar sync (само ако Apple не е активен).
+                            if (GoogleCalendarService().isConnected && !IosCalendarService.exportEnabled) {
                               final eventId = await GoogleCalendarService().addTaskToCalendar(newTask);
                               if (eventId != null) {
                                 newTask.googleCalendarEventId = eventId;

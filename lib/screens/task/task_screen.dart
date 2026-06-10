@@ -1853,6 +1853,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                             // Google Calendar: обнови вече свързаното събитие
                             // (важи и за импортирани задачи) → без дублиране.
                             if (GoogleCalendarService().isConnected &&
+                                !IosCalendarService.exportEnabled &&
                                 existing.googleCalendarEventId != null) {
                               await GoogleCalendarService().updateCalendarEvent(
                                   existing.googleCalendarEventId!, existing);
@@ -1886,8 +1887,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                             newTask.setSubtasks(tempSubtasks);
                             await taskBox.add(newTask);
                             AdService().onUserAction();
-                            // Google Calendar sync
-                            if (GoogleCalendarService().isConnected) {
+                            // Google Calendar sync (само ако Apple не е активен —
+                            // източниците са взаимно изключващи се).
+                            if (GoogleCalendarService().isConnected && !IosCalendarService.exportEnabled) {
                               final eventId = await GoogleCalendarService().addTaskToCalendar(newTask);
                               if (eventId != null) {
                                 newTask.googleCalendarEventId = eventId;
@@ -2790,8 +2792,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                   }).toList(),
                                 );
                                 await taskBox.add(newTask);
-                            // Google Calendar sync
-                            if (GoogleCalendarService().isConnected) {
+                            // Google Calendar sync (само ако Apple не е активен —
+                            // източниците са взаимно изключващи се).
+                            if (GoogleCalendarService().isConnected && !IosCalendarService.exportEnabled) {
                               final eventId = await GoogleCalendarService().addTaskToCalendar(newTask);
                               if (eventId != null) {
                                 newTask.googleCalendarEventId = eventId;
@@ -2977,8 +2980,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                       }).toList(),
                                     );
                                     await taskBox.add(newTask);
-                            // Google Calendar sync
-                            if (GoogleCalendarService().isConnected) {
+                            // Google Calendar sync (само ако Apple не е активен —
+                            // източниците са взаимно изключващи се).
+                            if (GoogleCalendarService().isConnected && !IosCalendarService.exportEnabled) {
                               final eventId = await GoogleCalendarService().addTaskToCalendar(newTask);
                               if (eventId != null) {
                                 newTask.googleCalendarEventId = eventId;

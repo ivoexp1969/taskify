@@ -86,7 +86,7 @@ class TombstoneService {
     // Apple Calendar (export-only): махни събитието ПРЕДИ да изчезне задачата —
     // после appleEventId вече няма да е достъпно. exportEnabled е true само на
     // iOS при избран Apple източник, затова няма ефект на Android/web.
-    if (!kIsWeb && IosCalendarService.exportEnabled && task.appleEventId != null) {
+    if (!kIsWeb && IosCalendarService.exportEnabled) {
       await IosCalendarService().deleteEventFor(task);
     }
     await record(task);

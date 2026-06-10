@@ -1058,6 +1058,19 @@ class AppText {
   String get removeDuplicates => _t({'en': 'Remove duplicates', 'bg': 'Премахни дубликати', 'de': 'Duplikate entfernen', 'fr': 'Supprimer les doublons', 'it': 'Rimuovi duplicati', 'el': 'Αφαίρεση διπλότυπων', 'es': 'Eliminar duplicados', 'pt': 'Remover duplicados', 'ru': 'Удалить дубликаты', 'tr': 'Yinelenenleri kaldır', 'ja': '重複を削除'});
   String get removeDuplicatesDesc => _t({'en': 'Tidies up repeated events — keeps just one of each', 'bg': 'Изчиства повтарящи се събития — оставя по едно', 'de': 'Räumt doppelte Termine auf — behält je eines', 'fr': 'Nettoie les événements en double — n\'en garde qu\'un', 'it': 'Pulisce gli eventi ripetuti — ne tiene uno solo', 'el': 'Καθαρίζει διπλά γεγονότα — κρατά ένα από κάθε', 'es': 'Limpia eventos repetidos — conserva solo uno', 'pt': 'Limpa eventos repetidos — mantém só um', 'ru': 'Убирает повторяющиеся события — оставляет по одному', 'tr': 'Tekrar eden etkinlikleri temizler — birer tane bırakır', 'ja': '重複した予定を整理 — 各1件だけ残します'});
   String removedDuplicates(int count) => _t({'en': 'Removed $count duplicate events', 'bg': 'Премахнати $count дублирани събития', 'de': '$count doppelte Ereignisse entfernt', 'fr': '$count événements en double supprimés', 'it': '$count eventi duplicati rimossi', 'el': 'Αφαιρέθηκαν $count διπλότυπα γεγονότα', 'es': '$count eventos duplicados eliminados', 'pt': '$count eventos duplicados removidos', 'ru': 'Удалено $count дублированных событий', 'tr': '$count yinelenen etkinlik kaldırıldı', 'ja': '$count件の重複予定を削除しました'});
+
+  String get duplicatesInSyncedCalendar => _t({
+    'en': 'Duplicates are in a synced (read-only) calendar — remove them from its source',
+    'bg': 'Дублите са в синхронизиран календар (само за четене) — изтрий ги от източника му',
+    'de': 'Duplikate liegen in einem synchronisierten (schreibgeschützten) Kalender — entferne sie an der Quelle',
+    'fr': 'Les doublons sont dans un calendrier synchronisé (lecture seule) — supprimez-les à la source',
+    'it': 'I duplicati sono in un calendario sincronizzato (sola lettura) — rimuovili dalla fonte',
+    'el': 'Τα διπλότυπα είναι σε συγχρονισμένο (μόνο για ανάγνωση) ημερολόγιο — αφαίρεσέ τα από την πηγή',
+    'es': 'Los duplicados están en un calendario sincronizado (solo lectura) — elimínalos desde su origen',
+    'pt': 'Os duplicados estão num calendário sincronizado (só leitura) — remova-os na origem',
+    'ru': 'Дубликаты в синхронизированном (только для чтения) календаре — удалите их в источнике',
+    'tr': 'Yinelemeler senkronize (salt okunur) takvimde — kaynağından kaldırın', 'ja': '重複は同期された（読み取り専用）カレンダーにあります — 元の場所で削除してください',
+  });
   String get untitledEvent => _t({'en': 'Untitled Event', 'bg': 'Без заглавие', 'de': 'Unbenanntes Ereignis', 'fr': 'Événement sans titre', 'it': 'Evento senza titolo', 'el': 'Χωρίς τίτλο', 'es': 'Evento sin título', 'pt': 'Evento sem título', 'ru': 'Без названия', 'tr': 'Adsız etkinlik', 'ja': '無題のイベント'});
   String get untitledTask => _t({'en': 'Untitled Task', 'bg': 'Без заглавие', 'de': 'Unbenannte Aufgabe', 'fr': 'Tâche sans titre', 'it': 'Attività senza titolo', 'el': 'Χωρίς τίτλο', 'es': 'Tarea sin título', 'pt': 'Tarefa sem título', 'ru': 'Без названия', 'tr': 'Adsız görev', 'ja': '無題のタスク'});
   String get backupSubject => _t({'en': 'Taskify Backup', 'bg': 'Taskify Архив', 'de': 'Taskify Sicherung', 'fr': 'Sauvegarde Taskify', 'it': 'Backup Taskify', 'el': 'Αντίγραφο Taskify', 'es': 'Copia de Taskify', 'pt': 'Backup Taskify', 'ru': 'Резервная копия Taskify', 'tr': 'Taskify Yedek', 'ja': 'Taskifyバックアップ'});

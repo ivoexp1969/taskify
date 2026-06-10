@@ -53,7 +53,8 @@ class TravelDialog {
 
             final months = [t.january, t.february, t.march, t.april, t.may, t.june,
               t.july, t.august, t.september, t.october, t.november, t.december];
-            final depLabel = '${selectedDeparture.day} ${months[selectedDeparture.month - 1]}';
+            final depLabel = '${selectedDeparture.day} ${months[selectedDeparture.month - 1]}'
+                ', ${selectedDeparture.hour.toString().padLeft(2, '0')}:${selectedDeparture.minute.toString().padLeft(2, '0')}';
             final retLabel = selectedReturn != null
                 ? '${selectedReturn!.day} ${months[selectedReturn!.month - 1]}'
                 : t.optional;
@@ -101,7 +102,14 @@ class TravelDialog {
                               final picked = await showDatePicker(context: ctx,
                                 initialDate: selectedDeparture, firstDate: DateTime(2000),
                                 lastDate: DateTime(2100), locale: Locale(langCode));
-                              if (picked != null && ctx.mounted) setState(() => selectedDeparture = picked);
+                              if (picked == null || !ctx.mounted) return;
+                              final time = await showTimePicker(context: ctx,
+                                initialTime: TimeOfDay.fromDateTime(selectedDeparture));
+                              if (!ctx.mounted) return;
+                              setState(() => selectedDeparture = DateTime(
+                                picked.year, picked.month, picked.day,
+                                time?.hour ?? selectedDeparture.hour,
+                                time?.minute ?? selectedDeparture.minute));
                             },
                             child: _DateChip(label: depLabel, accent: accent, isDark: isDark, theme: theme)),
                         ])),
@@ -114,15 +122,24 @@ class TravelDialog {
                               color: theme.colorScheme.onSurface.withValues(alpha: 0.35))),
                           ]),
                           const SizedBox(height: 6),
-                          GestureDetector(
-                            onTap: () async {
-                              final picked = await showDatePicker(context: ctx,
-                                initialDate: selectedReturn ?? selectedDeparture.add(const Duration(days: 1)),
-                                firstDate: selectedDeparture, lastDate: DateTime(2100), locale: Locale(langCode));
-                              if (picked != null && ctx.mounted) setState(() => selectedReturn = picked);
-                            },
-                            child: _DateChip(label: retLabel, accent: accent, isDark: isDark, theme: theme,
-                              muted: selectedReturn == null)),
+                          Row(children: [
+                            Expanded(child: GestureDetector(
+                              onTap: () async {
+                                final picked = await showDatePicker(context: ctx,
+                                  initialDate: selectedReturn ?? selectedDeparture.add(const Duration(days: 1)),
+                                  firstDate: selectedDeparture, lastDate: DateTime(2100), locale: Locale(langCode));
+                                if (picked != null && ctx.mounted) setState(() => selectedReturn = picked);
+                              },
+                              child: _DateChip(label: retLabel, accent: accent, isDark: isDark, theme: theme,
+                                muted: selectedReturn == null))),
+                            if (selectedReturn != null)
+                              GestureDetector(
+                                onTap: () => setState(() => selectedReturn = null),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 6),
+                                  child: Icon(Icons.close, size: 18,
+                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.45)))),
+                          ]),
                         ])),
                       ]),
                       const SizedBox(height: 16),
