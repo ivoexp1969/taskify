@@ -1,7 +1,9 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import '../../services/google_calendar_service.dart';
+import '../../services/ios_calendar_service.dart';
 import '../../services/name_days_service.dart';
 import '../../services/holidays_service.dart';
 import 'package:hive/hive.dart';
@@ -1208,6 +1210,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 await newTask.save();
                               }
                             }
+                            // Apple Calendar (export-only)
+                            if (!kIsWeb && IosCalendarService.exportEnabled) {
+                              await IosCalendarService().syncTask(newTask);
+                            }
 
                             await NotificationService().scheduleForTask(newTask);
                           }
@@ -1767,6 +1773,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 newTask.googleCalendarEventId = eventId;
                                 await newTask.save();
                               }
+                            }
+                            // Apple Calendar (export-only)
+                            if (!kIsWeb && IosCalendarService.exportEnabled) {
+                              await IosCalendarService().syncTask(newTask);
                             }
 
                             await NotificationService().scheduleForTask(newTask);

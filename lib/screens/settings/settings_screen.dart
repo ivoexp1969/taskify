@@ -48,6 +48,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _calendarService = GoogleCalendarService();
   final _iosCalendarService = IosCalendarService();
   bool _isIosCalendarGranted = false;
+  // Единен избор на календарен източник: 'none' | 'google' | 'apple'.
+  // Двата източника са взаимно изключващи се (иначе при външна GCal↔Apple
+  // връзка всяко събитие се появява двойно). Виж IosCalendarService.
+  String _calMode = 'none';
   final _morningBriefingService = MorningBriefingService();
   bool _isMorningBriefingEnabled = false;
   int _briefingHour = 8;
@@ -89,7 +93,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _onCalendarConnChanged() {
     if (mounted) {
-      setState(() => _isCalendarConnected = _calendarService.isConnected);
+      setState(() {
+        _isCalendarConnected = _calendarService.isConnected;
+        // Web GIS вход → отразяваме режима като Google.
+        if (_isCalendarConnected) _calMode = 'google';
+      });
     }
   }
 
@@ -380,12 +388,85 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final prefs = await SharedPreferences.getInstance();
       connected = prefs.getBool('google_calendar_connected') ?? false;
     }
-    if (mounted) setState(() { _isCalendarConnected = connected; });
+    // Извеждаме режима: записаният избор печели; за стари потребители без
+    // запис, но със свързан Google → google.
+    final mode = await IosCalendarService.currentMode();
+    final resolved = (mode == 'none' && connected) ? 'google' : mode;
+    if (mounted) setState(() { _isCalendarConnected = connected; _calMode = resolved; });
   }
 
   Future<void> _checkIosCalendarPermission() async {
     final granted = await _iosCalendarService.hasPermission();
     if (mounted) setState(() => _isIosCalendarGranted = granted);
+  }
+
+  /// Превключва календарния източник. Източниците са взаимно изключващи се:
+  /// избор на Apple изключва Google и обратно.
+  Future<void> _setCalendarMode(String mode) async {
+    final t = AppText.of(context);
+    if (mode == _calMode) return;
+
+    if (mode == 'none') {
+      if (_calendarService.isConnected) await _calendarService.disconnect();
+      await IosCalendarService.setMode('none');
+      if (mounted) setState(() { _calMode = 'none'; _isCalendarConnected = false; });
+      return;
+    }
+
+    if (mode == 'google') {
+      await IosCalendarService.setMode('google'); // Apple export off
+      if (kIsWeb) {
+        // На web самият GIS бутон върши входа; само маркираме режима и
+        // оставяме UI-я да покаже бутона/„Разреши достъп".
+        if (mounted) setState(() => _calMode = 'google');
+        return;
+      }
+      final ok = await _calendarService.connect();
+      if (mounted) {
+        setState(() {
+          _isCalendarConnected = ok;
+          if (ok) _calMode = 'google';
+        });
+        if (!ok) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(t.connectionFailed)),
+          );
+        }
+      }
+      return;
+    }
+
+    // mode == 'apple'
+    final granted = await _iosCalendarService.requestPermission();
+    if (!granted) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t.calendarAccessDenied)),
+        );
+      }
+      return;
+    }
+    // Изключи Google (взаимно изключващи се).
+    if (_calendarService.isConnected) await _calendarService.disconnect();
+    await IosCalendarService.setMode('apple');
+    if (mounted) {
+      setState(() {
+        _calMode = 'apple';
+        _isIosCalendarGranted = true;
+        _isCalendarConnected = false;
+      });
+    }
+    // Еднократен първоначален експорт на отворените задачи.
+    final taskBox = Hive.box<Task>('tasks');
+    final tasks = taskBox.values
+        .where((t) => !t.isCompleted && !t.isArchived && !t.deleted)
+        .toList();
+    final count = await _iosCalendarService.exportOpenTasks(tasks);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.tasksAddedToAppleCalendar(count))),
+      );
+    }
   }
 
   // Списък с предефинирани цветове за color picker
@@ -1661,113 +1742,72 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
 
           const SizedBox(height: 16),
-          // Google Calendar
-          // Google Calendar
+          // Календарна синхронизация — ЕДИН избор. Източниците са взаимно
+          // изключващи се: ако потребителят има външна GCal↔Apple връзка, двата
+          // активни наведнъж биха показвали всяко събитие двойно. Apple е
+          // export-only (без импорт) — виж IosCalendarService.
           Text(
-            t.googleCalendar,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            t.calendarSource,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Card(
             child: Column(
               children: [
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: _isCalendarConnected ? Colors.green.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      _isCalendarConnected ? Icons.event_available : Icons.event_busy,
-                      color: _isCalendarConnected ? Colors.green : Colors.grey,
-                    ),
-                  ),
-                  title: Text(_isCalendarConnected ? t.calendarConnected : t.calendarNotConnected,
-                    style: const TextStyle(fontSize: 13)),
+                RadioListTile<String>(
+                  value: 'none',
+                  groupValue: _calMode,
+                  title: Text(t.calendarSyncOff),
+                  onChanged: (v) => _setCalendarMode(v!),
+                ),
+                const Divider(height: 0),
+                RadioListTile<String>(
+                  value: 'google',
+                  groupValue: _calMode,
+                  title: Text(t.googleCalendar),
                   subtitle: Text(
                     _isCalendarConnected ? t.calendarSyncEnabled : t.connectForSync,
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
-                  trailing: (kIsWeb && !_isCalendarConnected)
-                      // Web: authenticate() не работи → официален GIS бутон.
-                      // Резултатът идва през connectionNotifier (listener в
-                      // initState обновява _isCalendarConnected).
-                      ? SizedBox(width: 200, child: googleSignInButton())
-                      : TextButton(
-                          onPressed: () async {
-                            if (_isCalendarConnected) {
-                              await _calendarService.disconnect();
-                              setState(() => _isCalendarConnected = false);
-                            } else {
-                              final success = await _calendarService.connect();
-                              setState(() => _isCalendarConnected = success);
-                              if (!success && mounted) {
+                  onChanged: (v) => _setCalendarMode(v!),
+                ),
+                // Web: избран Google, но още без достъп → официален GIS бутон /
+                // „Разреши достъп" (браузърът не пуска програмен OAuth popup).
+                if (_calMode == 'google' && kIsWeb && !_isCalendarConnected)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    child: _calendarService.webAuthPending.value
+                        ? ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(Icons.lock_open, color: Colors.green),
+                            title: Text(t.allowCalendarAccess),
+                            subtitle: Text(t.allowCalendarAccessDesc,
+                                style: const TextStyle(fontSize: 12)),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () async {
+                              final ok = await _calendarService.authorizeCalendarOnWeb();
+                              if (!mounted) return;
+                              setState(() => _isCalendarConnected = ok);
+                              if (!ok) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(content: Text(t.connectionFailed)),
                                 );
                               }
-                            }
-                          },
-                          child: Text(_isCalendarConnected ? t.disconnect : t.connect),
-                        ),
-                ),
-                // Web: влязъл, но без календарен достъп → ръчен бутон (директен
-                // клик, за да не блокира браузърът OAuth popup-а).
-                if (kIsWeb &&
-                    !_isCalendarConnected &&
-                    _calendarService.webAuthPending.value) ...[
-                  const Divider(height: 0),
-                  ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.lock_open, color: Colors.green),
-                    ),
-                    title: Text(t.allowCalendarAccess),
-                    subtitle: Text(t.allowCalendarAccessDesc,
-                        style: const TextStyle(fontSize: 12)),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () async {
-                      final ok =
-                          await _calendarService.authorizeCalendarOnWeb();
-                      if (!mounted) return;
-                      setState(() => _isCalendarConnected = ok);
-                      if (!ok) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(t.connectionFailed)),
-                        );
-                      }
-                    },
+                            },
+                          )
+                        : SizedBox(width: 220, child: googleSignInButton()),
                   ),
-                ],
-                if (_isCalendarConnected) ...[
+                // Google свързан: ръчен синхрон + премахни дублирани събития.
+                if (_calMode == 'google' && _isCalendarConnected) ...[
                   const Divider(height: 0),
                   ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: _isSyncing
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.sync, color: Colors.blue),
-                    ),
-                    // ФАЗА 2Б: един безобиден ръчен синхрон. Импорт/експорт се
-                    // случват автоматично, двупосочно — потребителят не избира
-                    // посока. Старите ръчни „Експорт"/„Импорт"/bulk-изтриване
-                    // бутони са премахнати (бяха източник на загуба на данни).
+                    leading: _isSyncing
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.sync, color: Colors.blue),
                     title: Text(t.syncNow),
                     subtitle: Text(t.autoSyncDesc, style: const TextStyle(fontSize: 12)),
                     trailing: const Icon(Icons.chevron_right),
@@ -1775,14 +1815,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const Divider(height: 0),
                   ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.cleaning_services, color: Colors.orange),
-                    ),
+                    leading: const Icon(Icons.cleaning_services, color: Colors.orange),
                     title: Text(t.removeDuplicates),
                     subtitle: Text(t.removeDuplicatesDesc, style: const TextStyle(fontSize: 12)),
                     trailing: const Icon(Icons.chevron_right),
@@ -1819,135 +1852,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                   ),
                 ],
+                // Apple Calendar — само на iOS, export-only (без импорт).
+                if (!kIsWeb && Platform.isIOS) ...[
+                  const Divider(height: 0),
+                  RadioListTile<String>(
+                    value: 'apple',
+                    groupValue: _calMode,
+                    title: Text(t.appleCalendarSendOnly),
+                    subtitle: Text(
+                      t.appleCalendarSendOnlyDesc,
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                    onChanged: (v) => _setCalendarMode(v!),
+                  ),
+                ],
               ],
             ),
           ),
-          // iOS Calendar
-          if (!kIsWeb && Platform.isIOS) ...[
-            const SizedBox(height: 16),
-            Text(
-              'Apple Calendar',
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Card(
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: _isIosCalendarGranted
-                            ? Colors.green.withValues(alpha: 0.1)
-                            : Colors.grey.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.calendar_month,
-                        color: _isIosCalendarGranted ? Colors.green : Colors.grey,
-                      ),
-                    ),
-                    title: Text(_isIosCalendarGranted ? t.appleCalendarConnected : 'Apple Calendar'),
-                    subtitle: Text(
-                      _isIosCalendarGranted
-                          ? t.appleCalendarConnectedDesc
-                          : t.appleCalendarPermission,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                    ),
-                    trailing: TextButton(
-                      onPressed: () async {
-                        if (_isIosCalendarGranted) {
-                          setState(() => _isIosCalendarGranted = false);
-                        } else {
-                          final granted = await _iosCalendarService.requestPermission();
-                          setState(() => _isIosCalendarGranted = granted);
-                          if (!granted && mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(t.calendarAccessDenied)),
-                            );
-                          }
-                        }
-                      },
-                      child: Text(_isIosCalendarGranted ? t.disconnect : t.connect),
-                    ),
-                  ),
-                  if (_isIosCalendarGranted) ...[
-                    const Divider(height: 0),
-                    ListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.upload, color: Colors.blue),
-                      ),
-                      title: Text(t.exportTasks),
-                      subtitle: Text(
-                        t.exportTasksDesc,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () async {
-                        final taskBox = Hive.box<Task>('tasks');
-                        final tasks = taskBox.values
-                            .where((t) => !t.isCompleted && !t.isArchived)
-                            .toList();
-                        final count = await _iosCalendarService.exportAllTasks(tasks);
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(t.tasksAddedToAppleCalendar(count))),
-                          );
-                        }
-                      },
-                    ),
-                    const Divider(height: 0),
-                    ListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.event_busy, color: Colors.red),
-                      ),
-                      title: Text(t.deleteExportedTasks),
-                      subtitle: Text(t.deleteExportedDesc, style: const TextStyle(fontSize: 12)),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () async {
-                        final confirm = await showDialog<bool>(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            title: Text('${t.deleteExportedTasks}?'),
-                            content: Text(t.deleteExportedConfirm),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(ctx, false),
-                                child: Text(t.cancel),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.pop(ctx, true),
-                                child: Text(t.delete, style: const TextStyle(color: Colors.red)),
-                              ),
-                            ],
-                          ),
-                        );
-                        if (confirm != true) return;
-                        final taskBox = Hive.box<Task>('tasks');
-                        final removed = await _iosCalendarService
-                            .deleteAllExportedTasks(taskBox.values.toList());
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(t.deletedExportedTasks(removed))),
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
           // Тема
           Text(
             t.theme,

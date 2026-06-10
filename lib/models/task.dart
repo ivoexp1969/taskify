@@ -117,6 +117,14 @@ class Task extends HiveObject with EquatableMixin {
   @HiveField(22)
   DateTime? deletedAt;
 
+  /// Apple Calendar (device_calendar) Event ID — аналог на
+  /// [googleCalendarEventId]. Пази връзката към събитието в Apple Calendar, за
+  /// да можем да го ОБНОВИМ (а не дублираме) при редакция и да го изтрием при
+  /// изтриване на задачата. Мигрирано от стария SharedPreferences mapping
+  /// `ios_cal_event_*` (виж MigrationService.migrateAppleEventIds).
+  @HiveField(23)
+  String? appleEventId;
+
   Task({
     required this.title,
     required this.dueDate,
@@ -140,6 +148,7 @@ class Task extends HiveObject with EquatableMixin {
     this.updatedAt,
     this.deleted = false,
     this.deletedAt,
+    this.appleEventId,
   }) {
     // Всяка задача винаги има стабилен id и updatedAt — дори стара задача,
     // прочетена от Hive без тези полета (адаптерът подава null). Миграцията
@@ -253,6 +262,7 @@ class Task extends HiveObject with EquatableMixin {
         updatedAt,
         deleted,
         deletedAt,
+        appleEventId,
       ];
 }
 

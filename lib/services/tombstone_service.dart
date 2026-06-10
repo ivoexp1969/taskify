@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import '../models/task.dart';
+import 'ios_calendar_service.dart';
 
 /// Управлява „надгробните камъни" (tombstones) на изтритите задачи.
 ///
@@ -81,6 +83,12 @@ class TombstoneService {
   /// taskBox. Това е ЕДИНСТВЕНИЯТ начин за изтриване на задача (за да се
   /// разпространи изтриването). UI-ят вика този метод вместо `task.delete()`.
   Future<void> deleteTask(Task task) async {
+    // Apple Calendar (export-only): махни събитието ПРЕДИ да изчезне задачата —
+    // после appleEventId вече няма да е достъпно. exportEnabled е true само на
+    // iOS при избран Apple източник, затова няма ефект на Android/web.
+    if (!kIsWeb && IosCalendarService.exportEnabled && task.appleEventId != null) {
+      await IosCalendarService().deleteEventFor(task);
+    }
     await record(task);
     if (task.isInBox) await task.delete();
   }

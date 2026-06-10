@@ -19,6 +19,7 @@ import 'services/task_view_preference.dart';
 import 'services/notification_service.dart';
 import 'widgets/morning_briefing_dialog.dart';
 import 'services/google_calendar_service.dart';
+import 'services/ios_calendar_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'services/morning_briefing_service.dart';
 import 'services/name_days_service.dart';
@@ -67,6 +68,7 @@ Future<void> main() async {
   // Безопасна миграция: стабилизира id/updatedAt на старите задачи и чисти
   // стари tombstones. НЕ изтрива и не губи нищо.
   await MigrationService.migrateTaskSyncFields();
+  await MigrationService.migrateAppleEventIds();
   await MigrationService.purgeOldTombstones();
 
   // Widget инициализация - само за mobile
@@ -74,6 +76,11 @@ Future<void> main() async {
     WidgetService.setupWidgetListener();
     await WidgetService.syncFromWidget();
     WidgetService.updateWidget();
+  }
+
+  // Кешираме избрания календарен източник (за Apple export inline hook-овете).
+  if (!kIsWeb) {
+    await IosCalendarService.loadMode();
   }
 
   await TaskViewPreference().initialize();

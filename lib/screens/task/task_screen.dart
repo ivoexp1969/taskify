@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/google_calendar_service.dart';
+import '../../services/ios_calendar_service.dart';
 import '../../services/calendar_import_service.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -1856,6 +1857,11 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                               await GoogleCalendarService().updateCalendarEvent(
                                   existing.googleCalendarEventId!, existing);
                             }
+                            // Apple Calendar (export-only): създава или обновява
+                            // СЪЩОТО събитие по appleEventId → без дублиране.
+                            if (!kIsWeb && IosCalendarService.exportEnabled) {
+                              await IosCalendarService().syncTask(existing);
+                            }
                             await NotificationService().scheduleForTask(existing);
                           } else {
                             // Paywall check — free limit 50 tasks
@@ -1887,6 +1893,11 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                 newTask.googleCalendarEventId = eventId;
                                 await newTask.save();
                               }
+                            }
+                            // Apple Calendar (export-only) — само ако е избран
+                            // Apple източник (взаимно изключващ се с Google).
+                            if (!kIsWeb && IosCalendarService.exportEnabled) {
+                              await IosCalendarService().syncTask(newTask);
                             }
 
                             await NotificationService().scheduleForTask(newTask);
@@ -2787,6 +2798,11 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                 await newTask.save();
                               }
                             }
+                            // Apple Calendar (export-only) — само ако е избран
+                            // Apple източник (взаимно изключващ се с Google).
+                            if (!kIsWeb && IosCalendarService.exportEnabled) {
+                              await IosCalendarService().syncTask(newTask);
+                            }
 
                                 await NotificationService().scheduleForTask(newTask);
                               }
@@ -2968,6 +2984,11 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                 newTask.googleCalendarEventId = eventId;
                                 await newTask.save();
                               }
+                            }
+                            // Apple Calendar (export-only) — само ако е избран
+                            // Apple източник (взаимно изключващ се с Google).
+                            if (!kIsWeb && IosCalendarService.exportEnabled) {
+                              await IosCalendarService().syncTask(newTask);
                             }
 
                                     await NotificationService().scheduleForTask(newTask);

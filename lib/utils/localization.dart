@@ -653,6 +653,58 @@ class AppText {
     'tr': 'Görev ve etkinlikleri birlikte gör', 'ja': 'タスクと予定をまとめて表示',
   });
 
+  String get calendarSource => _t({
+    'en': 'Calendar sync',
+    'bg': 'Синхронизация с календар',
+    'de': 'Kalender-Synchronisierung',
+    'fr': 'Synchronisation du calendrier',
+    'it': 'Sincronizzazione calendario',
+    'el': 'Συγχρονισμός ημερολογίου',
+    'es': 'Sincronización del calendario',
+    'pt': 'Sincronização do calendário',
+    'ru': 'Синхронизация с календарём',
+    'tr': 'Takvim senkronizasyonu', 'ja': 'カレンダー同期',
+  });
+
+  String get calendarSyncOff => _t({
+    'en': 'Off',
+    'bg': 'Изключена',
+    'de': 'Aus',
+    'fr': 'Désactivée',
+    'it': 'Disattivata',
+    'el': 'Ανενεργό',
+    'es': 'Desactivada',
+    'pt': 'Desativada',
+    'ru': 'Выключена',
+    'tr': 'Kapalı', 'ja': 'オフ',
+  });
+
+  String get appleCalendarSendOnly => _t({
+    'en': 'Apple Calendar (send only)',
+    'bg': 'Apple Calendar (само изпращане)',
+    'de': 'Apple Kalender (nur senden)',
+    'fr': 'Apple Calendrier (envoi seul)',
+    'it': 'Apple Calendario (solo invio)',
+    'el': 'Apple Ημερολόγιο (μόνο αποστολή)',
+    'es': 'Apple Calendario (solo enviar)',
+    'pt': 'Apple Calendário (apenas enviar)',
+    'ru': 'Apple Календарь (только отправка)',
+    'tr': 'Apple Takvim (yalnızca gönder)', 'ja': 'Apple Calendar（送信のみ）',
+  });
+
+  String get appleCalendarSendOnlyDesc => _t({
+    'en': 'Sends your tasks to the calendar',
+    'bg': 'Изпраща задачите ти в календара',
+    'de': 'Sendet deine Aufgaben an den Kalender',
+    'fr': 'Envoie vos tâches vers le calendrier',
+    'it': 'Invia le tue attività al calendario',
+    'el': 'Στέλνει τις εργασίες σου στο ημερολόγιο',
+    'es': 'Envía tus tareas al calendario',
+    'pt': 'Envia suas tarefas para o calendário',
+    'ru': 'Отправляет ваши задачи в календарь',
+    'tr': 'Görevlerini takvime gönderir', 'ja': 'タスクをカレンダーに送信します',
+  });
+
   String get connect => _t({
     'en': 'Connect',
     'bg': 'Свържи',
