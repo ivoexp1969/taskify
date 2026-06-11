@@ -11,12 +11,13 @@ Repo: github.com/ivoexp1969/taskify
 - AdMob — advertising
 - Google Calendar API — bidirectional sync via OAuth
 
-## Localization (10 languages)
-bg (Bulgarian), en, de, fr, it, el (Greek), es, pt, ru, tr
+## Localization (11 languages)
+bg (Bulgarian), en, de, fr, it, el (Greek), es, pt, ru, tr, ja (Japanese)
 
-**CRITICAL:** All UI strings MUST use AppLocalizations.
-NEVER hardcode user-facing text in Dart files.
-When adding a new string, add the key to all 10 .arb files.
+**CRITICAL:** Never hardcode user-facing text in Dart files.
+Strings live in `lib/utils/localization.dart` as inline `AppText` getters using
+`_t({'en': ..., 'bg': ..., ...})` — NOT `.arb` files. When adding a string, add all
+11 language keys to the `_t({...})` map.
 
 ## UI Conventions
 - `ExpandableTaskCard` is the standard task list widget (notes preview, overdue tinting, animated checkboxes, priority dots, subtask progress bars)
@@ -41,20 +42,38 @@ flutter build appbundle --release
 - Firebase: `IVA` — lifetime access, 20-user cap
 
 ## Current Version
-v1.0.20 (Feb 2026)
+v1.0.40+44 (June 2026)
 
 ## Recent Work
-- **v1.0.20:** Localization audit — fixed 27 hardcoded strings across 5 files, added 18 new keys; redesigned ExpandableTaskCard
-- **v1.11:** Google Calendar bidirectional sync (OAuth + Google Cloud Console); rotating multilingual home-widget messages with emojis; Firebase promo `IVA`
+Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **v1.0.40+44:** Optional "Tickets" task-card theme (Pro; Settings → Appearance) — `TaskCardView` switcher + `TicketTaskCard` (stub colored by the live category color, perforation, tear-to-complete). Localized ALL categories incl. calendar (`cal_events`) everywhere. Sentence-case keyboard in template dialogs.
+- **v1.0.39+43 (Mac):** Apple Calendar moved to the merge architecture + unified radio source picker; Travel time/reset fixes.
+- **v1.0.38+42:** Two-way Google Calendar dedup overhaul (re-link on import, dedup by `googleCalendarEventId`, skip native birthdays); Settings cosmetics; web SW auto-update; handwritten widget font (Caveat).
 - **iOS exploration:** removed `cloud_firestore` dependency for Xcode/Firebase compatibility on native iOS build
 
 ## Working Style
 - Communicate in Bulgarian
-- Provide ready-to-run PowerShell commands for all file edits — user does not edit files manually
+- **Do everything yourself, end-to-end** — edit files, build, and install wirelessly on
+  the phone via adb over WiFi; don't hand the user commands to run. Only ask the user to
+  run something when it genuinely requires him (interactive login, physical action, a decision).
+- User edits no files manually
 - Verify every code/script at least 3 times before delivering: (1) bracket/parenthesis count, (2) pattern match against actual file content, (3) logical correctness check
-- Test PowerShell logic mentally in bash before delivering
 - No assumptions, no hallucinations — only verified facts
 - Keep responses concise, no filler
+- Settings persist in **SharedPreferences**, not Hive (Hive is for tasks/categories)
+
+## Cross-Machine Workflow (two machines, one repo)
+Work happens with Claude Code on **two machines via the same GitHub repo**:
+- **PC (Windows)** — Android version; adb to Note 9 over WiFi.
+- **Mac** — iOS version (Xcode/IPA builds).
+Claude's auto-memory is **local per machine and does NOT sync** — so this repo is the
+single shared source of truth across machines. Therefore:
+- **Start of every session, every machine:** `git pull --rebase origin main` BEFORE doing
+  anything (the other machine may have pushed — e.g. the Mac's Apple Calendar work).
+- **End of every session:** commit + push.
+- Keep the **Current Version**, **Recent Work** (above) and **`DEVLOG.md`** updated and
+  committed — that is how the other machine's Claude learns what was done here.
+- Commit messages: NO "Co-Authored-By: Claude" / no AI attribution (user's standing rule).
 
 ## Monetization Context
 Actively seeking realistic revenue opportunities — assist proactively across:
