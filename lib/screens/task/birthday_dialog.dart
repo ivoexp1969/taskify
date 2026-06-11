@@ -338,6 +338,7 @@ class _Field extends StatelessWidget {
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
       onChanged: onChanged,
+      textCapitalization: TextCapitalization.sentences,
       style: TextStyle(fontSize: 15, color: theme.colorScheme.onSurface),
       decoration: InputDecoration(
         hintText: hint,

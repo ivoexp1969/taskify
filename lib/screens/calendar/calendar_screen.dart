@@ -63,6 +63,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     // Слушаме за промени в задачите
     taskBox.listenable().addListener(_onTasksChanged);
+    // Промени в категориите (цвят/име) → дневните карти се преоцветяват веднага
+    categoryBox.listenable().addListener(_onTasksChanged);
 
     _loadNameDays();
     _loadHolidays();
@@ -111,6 +113,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void dispose() {
     taskBox.listenable().removeListener(_onTasksChanged);
+    categoryBox.listenable().removeListener(_onTasksChanged);
     NameDaysService.enabledNotifier.removeListener(_onNameDaysToggle);
     HolidaysService.enabledNotifier.removeListener(_onNameDaysToggle);
     HolidaysService.revision.removeListener(_onNameDaysToggle);
@@ -258,11 +261,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   String _localizedCategoryName(Category? c, AppText t) {
     if (c == null) return '';
+    // Календарната категория не е „default", но id-то е фиксирано → локализира се винаги.
+    if (c.id == 'cal_events') return t.catCalendarEvents;
     if (c.isDefault) {
       return {
             'work': t.work,
             'personal': t.personal,
             'shopping': t.shopping,
+            'birthday': t.catBirthdays,
+            'meeting': t.catMeeting,
+            'workout': t.catWorkout,
+            'payment': t.catPayment,
+            'travel': t.catTravel,
+            'gift': t.catGift,
           }[c.id] ??
           c.name;
     }
@@ -1735,7 +1746,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           : (_templateAccentColor(task.template)
                               ?? categoryColor);
 
-                      return ExpandableTaskCard(
+                      return TaskCardView(
                         task: task,
                         category: cat,
                         isOverdue: isOverdue,

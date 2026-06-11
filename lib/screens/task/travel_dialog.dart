@@ -232,6 +232,7 @@ class _Field extends StatelessWidget {
   const _Field({required this.controller, required this.hint, required this.theme, required this.isDark});
   @override
   Widget build(BuildContext context) => TextField(controller: controller,
+    textCapitalization: TextCapitalization.sentences,
     style: TextStyle(fontSize: 15, color: theme.colorScheme.onSurface),
     decoration: InputDecoration(hintText: hint,
       hintStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.35)),

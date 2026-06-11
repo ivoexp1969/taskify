@@ -98,6 +98,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
 
     // Слушаме за промени в задачите
     taskBox.listenable().addListener(_onTasksChanged);
+    // Слушаме за промени в категориите (цвят/име) → картите се преоцветяват веднага
+    categoryBox.listenable().addListener(_onTasksChanged);
 
     _listAnimationController = AnimationController(
       vsync: this,
@@ -166,6 +168,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     _searchController.dispose();
     if (_isListening) _speech.cancel();
     taskBox.listenable().removeListener(_onTasksChanged);
+    categoryBox.listenable().removeListener(_onTasksChanged);
     super.dispose();
   }
 
@@ -433,6 +436,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
 
   String _localizedCategoryName(Category? c, AppText t) {
     if (c == null) return '';
+    // Календарната категория не е „default", но id-то е фиксирано → локализира се винаги.
+    if (c.id == 'cal_events') return t.catCalendarEvents;
     if (c.isDefault) {
       return {
             'work': t.work,
@@ -2936,7 +2941,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                               ),
                             );
                           },
-                          child: ExpandableTaskCard(
+                          child: TaskCardView(
                                 task: task,
                                 category: cat,
                                 isOverdue: isOverdue,

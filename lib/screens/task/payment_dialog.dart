@@ -220,6 +220,7 @@ class _Field extends StatelessWidget {
   @override
   Widget build(BuildContext context) => TextField(controller: controller,
     keyboardType: keyboardType, inputFormatters: inputFormatters,
+    textCapitalization: TextCapitalization.sentences,
     style: TextStyle(fontSize: 15, color: theme.colorScheme.onSurface),
     decoration: InputDecoration(hintText: hint,
       hintStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.35)),

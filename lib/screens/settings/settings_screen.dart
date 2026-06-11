@@ -259,6 +259,121 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ('US', '🇺🇸 United States'),
   ];
 
+  /// Секция „Външен вид" — избор на стил на task картите (Класически / Билети).
+  /// Реактивна: смяната важи веднага в целия app. „Билети" е Pro тема.
+  Widget _buildAppearanceSection(BuildContext context, AppText t) {
+    final theme = Theme.of(context);
+    return AnimatedBuilder(
+      animation: Listenable.merge([TaskViewPreference(), ProService()]),
+      builder: (context, _) {
+        final pref = TaskViewPreference();
+        final isPro = ProService().isPro;
+
+        Widget styleTile({
+          required IconData icon,
+          required Color color,
+          required String title,
+          required String subtitle,
+          required bool selected,
+          required bool locked,
+          required VoidCallback onTap,
+        }) {
+          return InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(icon, color: color),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w600))),
+                            if (locked) ...[
+                              const SizedBox(width: 6),
+                              Icon(Icons.lock, size: 14, color: theme.colorScheme.primary),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(subtitle, style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        )),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                    color: selected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(t.appearance, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            Card(
+              child: Column(
+                children: [
+                  styleTile(
+                    icon: Icons.view_agenda_rounded,
+                    color: Colors.blueGrey,
+                    title: t.cardStyleClassic,
+                    subtitle: t.cardStyleClassicDesc,
+                    selected: pref.cardStyle == CardStyle.classic,
+                    locked: false,
+                    onTap: () => pref.setCardStyle(CardStyle.classic),
+                  ),
+                  const Divider(height: 0),
+                  styleTile(
+                    icon: Icons.confirmation_number_outlined,
+                    color: Colors.deepPurple,
+                    title: t.cardStyleTicket,
+                    subtitle: t.cardStyleTicketDesc,
+                    selected: pref.cardStyle == CardStyle.ticket,
+                    locked: !isPro,
+                    onTap: () async {
+                      if (!isPro) {
+                        final upgraded = await showPaywallIfNeeded(
+                          context,
+                          isFeatureAvailable: false,
+                          featureName: t.cardStyleTicket,
+                        );
+                        if (!upgraded) return;
+                      }
+                      await pref.setCardStyle(CardStyle.ticket);
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildHolidaysTile(BuildContext context, String lang) {
     final theme = Theme.of(context);
     const title = {
@@ -585,7 +700,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       itemBuilder: (context, index) {
                         final cat = categories[index];
                         final catColor = Color(cat.colorValue);
-                        final localizedName = cat.isDefault
+                        final localizedName = cat.id == 'cal_events'
+                            ? t.catCalendarEvents
+                            : cat.isDefault
                             ? {
                                 'work': t.catWork,
                                 'personal': t.catPersonal,
@@ -1504,6 +1621,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
 
           const SizedBox(height: 16),
+
+          _buildAppearanceSection(context, t),
 
           // Статистики секция
           Text(

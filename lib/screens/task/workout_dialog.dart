@@ -119,7 +119,8 @@ class WorkoutDialog {
                           color: theme.colorScheme.onSurface.withValues(alpha: 0.35))),
                       ]),
                       const SizedBox(height: 6),
-                      _Field(controller: durationCtrl, hint: t.workoutDurationHint, theme: theme, isDark: isDark),
+                      _Field(controller: durationCtrl, hint: t.workoutDurationHint, theme: theme, isDark: isDark,
+                        keyboardType: TextInputType.number, textCapitalization: TextCapitalization.none),
                       const SizedBox(height: 16),
                       Text(t.priority, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
@@ -209,9 +210,14 @@ class _Label extends StatelessWidget {
 class _Field extends StatelessWidget {
   final TextEditingController controller; final String hint;
   final ThemeData theme; final bool isDark;
-  const _Field({required this.controller, required this.hint, required this.theme, required this.isDark});
+  final TextInputType? keyboardType;
+  final TextCapitalization textCapitalization;
+  const _Field({required this.controller, required this.hint, required this.theme, required this.isDark,
+    this.keyboardType, this.textCapitalization = TextCapitalization.sentences});
   @override
   Widget build(BuildContext context) => TextField(controller: controller,
+    keyboardType: keyboardType,
+    textCapitalization: textCapitalization,
     style: TextStyle(fontSize: 15, color: theme.colorScheme.onSurface),
     decoration: InputDecoration(hintText: hint,
       hintStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.35)),

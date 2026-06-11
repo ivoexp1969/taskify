@@ -323,6 +323,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> with WidgetsBinding
         'tr': 'Diğer', 'ja': 'その他',
       }[lang] ?? 'Other';
     }
+    // Календарната категория не е „default", но id-то е фиксирано → локализира се винаги.
+    if (c.id == 'cal_events') {
+      return {'en': 'Calendar Events', 'bg': 'Календарни събития', 'de': 'Kalendereinträge', 'fr': 'Événements du calendrier', 'it': 'Eventi del calendario', 'el': 'Εκδηλώσεις ημερολογίου', 'es': 'Eventos del calendario', 'pt': 'Eventos do calendário', 'ru': 'События календаря', 'tr': 'Takvim etkinlikleri', 'ja': 'カレンダーのイベント'}[lang] ?? 'Calendar Events';
+    }
     if (c.isDefault) {
       final translations = {
         'work': {'en': 'Work', 'bg': 'Работа', 'de': 'Arbeit', 'fr': 'Travail', 'it': 'Lavoro', 'el': 'Εργασία', 'es': 'Trabajo', 'pt': 'Trabalho', 'ru': 'Работа', 'tr': 'İş', 'ja': '仕事'},
