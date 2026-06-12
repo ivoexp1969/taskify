@@ -6,6 +6,22 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-12 · Mac (iOS) — TODO за PC: руско изтичане в breakdown
+- Тестван живият worker след PC фикса: parse чист, но **breakdown на bg понякога връща руски**
+  думи вместо български (напр. „Пригласи гости" вм. „Покани гостите", „Закажи местонахождение"
+  вм. „Резервирай място"). Функционално работи, чисто косметично.
+- **ЗА ПC (worker е само там, `Desktop/taskify-ai/`):** в клона `mode === 'breakdown'`, в
+  system/user промпта добави строго езиково ограничение (ползвай вече подаваната `${lang}`,
+  за да важи за всичките 11 езика):
+  `Write EVERY subtask strictly in the user's language (code: ${lang}). Do NOT use Russian or`
+  `any other language. Bulgarian example: "Покани гостите"/"Резервирай място" — NOT the Russian`
+  `"Пригласи гости"/"Закажи местонахождение".`
+  parse промпта НЕ го пипай (чист е). Деплой: `cd Desktop/taskify-ai && npx wrangler deploy`.
+  Тест: `curl -X POST <endpoint> -d '{"text":"организирай рожден ден","mode":"breakdown","lang":"bg"}'`
+  → чист български, без руски. Потвърди и че parse още работи.
+
+---
+
 ## 2026-06-12 · PC — AI worker model fix (parsing was dead)
 - **Symptom:** AI Smart Parse / Breakdown / Schedule всички връщаха нищо — Cloudflare спря
   стария Workers AI модел `@cf/meta/llama-3.1-8b-instruct` (502 `AiError 5028 deprecated`,
