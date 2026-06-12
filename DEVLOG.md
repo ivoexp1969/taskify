@@ -6,6 +6,33 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-12 · PC → for the Mac: iOS-readiness review of the Documents feature
+Pre-flight review done on Windows before the iOS update. Documents/Tickets/fixes are
+all shared Dart — iOS just needs `pull --rebase` + build on the Mac. Findings:
+- **Notifications ✅** — `notification_service.dart` exports `_mobile` for `dart.library.io`,
+  so iOS uses the SAME file; the new long-lead tokens (`minus_3d…minus_2mo`) schedule on
+  iOS too. ⚠️ Heads-up: iOS caps pending local notifications at **64** — many documents ×
+  up to 5 reminders each could hit it (pre-existing concern, now heavier).
+- **Cloud ✅** — `cloud_firestore` is still in `pubspec` (^5.6.0); the old "removed for iOS"
+  note was only an exploration, not on main. Documents ride the normal task sync and the
+  separate `documents` Firestore subcollection was REMOVED → smaller cloud surface, no new
+  iOS risk. (The Firebase/CocoaPods Xcode pain is a build-env issue, unrelated to Documents.)
+- **No platform guards** in the new files (`documents_screen`, `document_dialog`,
+  `migration_service` additions) — fully platform-agnostic. ✅
+- **Delete is iOS-safe ✅** — `TombstoneService.deleteTask` → `IosCalendarService.deleteEventFor`
+  is a null-safe no-op when `appleEventId == null` (catches errors, just debugPrint).
+- ⚠️ **VERIFY on device (Mac):** `IosCalendarService.syncTask` has NO template filter, so a
+  document task WILL export to Apple Calendar (like Google) on its expiry date. Two notes:
+  (a) the event description = `task.notes` = `"doctype:passport\nlabel:…"` → technical
+  metadata leaks into the calendar event text (this ALSO happens on Android/GCal today —
+  candidate cleanup for BOTH platforms: strip `doctype:`/`label:` lines from the calendar
+  description). (b) `DocumentDialog` save does NOT itself call Apple/Google calendar sync
+  (only `scheduleForTask` + widget) → documents reach the calendar only via the central
+  merge sync; confirm they actually show up.
+- Build number **47** > last iOS upload (~+37) → fine for App Store Connect.
+
+---
+
 ## 2026-06-12 · PC (Android) — docs out of main list
 - **Documents hidden from the main Tasks list + Matrix.** Expiring-document tasks have
   far-future due dates (often a year+ out), so they piled up at the bottom of the active
