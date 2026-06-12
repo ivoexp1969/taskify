@@ -6,6 +6,26 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-12 · PC — AI worker model fix (parsing was dead)
+- **Symptom:** AI Smart Parse / Breakdown / Schedule всички връщаха нищо — Cloudflare спря
+  стария Workers AI модел `@cf/meta/llama-3.1-8b-instruct` (502 `AiError 5028 deprecated`,
+  спрян 2026-05-30). По-рано в сесията сменено на `@cf/meta/llama-3.1-8b-instruct-fp8`
+  (работеше, но тромав български).
+- **Този ход:** качен на **`@cf/meta/llama-3.3-70b-instruct-fp8-fast`** — много по-чист
+  български (breakdown вече дава нормални императиви: „купете подарък, поръчайте торта…").
+- **Засечен капан:** 70B връща **OpenAI-style** отговор — `aiResp.response` е ВЕЧЕ ПАРСНАТ
+  ОБЕКТ (+ `choices[0].message.content` като низ), докато 8B връщаше низ. Старият код
+  `extractJSON(aiResp.response)` гърмеше с `text.match is not a function` (1101). Добавен
+  helper **`modelJSON(aiResp)`** в worker-а — нормализира двата shape-а (обект / json-низ /
+  choices fallback), ползван и в parse, и в breakdown, и в schedule. + top-level try/catch
+  предпазна мрежа (връща stack при бъдеща смяна на модел).
+- **Worker репо:** `Desktop/taskify-ai/` (НЕ е git, отделно от app репото) → деплой с
+  `npx wrangler deploy`. Endpoint непроменен (`taskify-ai.cbndkbr92h.workers.dev`).
+- **Server-side фикс — НЯМА нужда от нов app build/bump.** `lib/services/ai_service.dart`
+  сочи същия endpoint и схемата е същата. Тествани и 3-те режима (bg+en), 200 OK.
+
+---
+
 ## 2026-06-12 · Mac (iOS) — feature parity + App Store 1.0.43
 - **Pulled PC work** (Documents tab, Tickets card theme, doc-out-of-list) and brought iOS to
   parity — all shared Dart, built & verified on Toto (iPhone 13 Pro) over devicectl. AdMob iOS

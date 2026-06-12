@@ -46,6 +46,12 @@ v1.0.43+48 (June 2026)
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **AI worker model fix (PC, no app bump):** AI parsing/breakdown/schedule бяха мъртви —
+  Cloudflare спря стария Workers AI модел (`llama-3.1-8b-instruct`, 502 deprecated). Worker-ът
+  (`Desktop/taskify-ai/`, отделно НЕ-git репо) качен на **`@cf/meta/llama-3.3-70b-instruct-fp8-fast`**
+  (по-чист български). 70B връща OpenAI-style отговор (`response` = ВЕЧЕ обект, не низ) → нов helper
+  `modelJSON()` нормализира shape-овете за parse/breakdown/schedule. Server-side фикс, endpoint
+  непроменен → НЯМА нужда от app rebuild. Деплой: `cd Desktop/taskify-ai && npx wrangler deploy`.
 - **v1.0.43+48 (Mac):** iOS brought to feature parity (Documents/Tickets pulled & verified on device). New `utils/calendar_notes.dart` strips internal `key:value` metadata (`doctype:`/`dest:`/`with:`…) from calendar event descriptions on BOTH Apple & Google. Unified the 3 duplicated category-color palettes into shared `utils/category_colors.dart` + added ~17 bright/vivid colors. Submitted to App Store (live was 1.0.39).
 - **v1.0.43+47:** Documents (`template == 'document'`) are now excluded from the main Tasks list + its stat counts (`_computeTasks`) and from the Eisenhower matrix — they have far-future expiry dates and their own "Documents" tab (+ Calendar + reminders), so they no longer clutter the daily task list.
 - **v1.0.42+46:** Bugfix — deleting a document in the Documents tab now goes through `TombstoneService().deleteTask()` instead of raw `task.delete()`; without the tombstone the merge sync re-downloaded the doc from the cloud so it "resurrected" at the bottom of the list. Caught live on Note 9. (Reminder: `TombstoneService.deleteTask` is the ONLY correct way to delete any task.)
