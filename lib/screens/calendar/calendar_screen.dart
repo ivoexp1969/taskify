@@ -263,6 +263,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     if (c == null) return '';
     // Календарната категория не е „default", но id-то е фиксирано → локализира се винаги.
     if (c.id == 'cal_events') return t.catCalendarEvents;
+    if (c.id == 'documents') return t.catDocuments;
     if (c.isDefault) {
       return {
             'work': t.work,

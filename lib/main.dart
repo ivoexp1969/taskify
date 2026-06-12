@@ -69,6 +69,7 @@ Future<void> main() async {
   // стари tombstones. НЕ изтрива и не губи нищо.
   await MigrationService.migrateTaskSyncFields();
   await MigrationService.migrateAppleEventIds();
+  await MigrationService.migrateDocumentsToTasks();
   await MigrationService.purgeOldTombstones();
 
   // Widget инициализация - само за mobile

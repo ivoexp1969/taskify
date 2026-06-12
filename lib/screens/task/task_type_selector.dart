@@ -109,6 +109,15 @@ class _Sheet extends StatelessWidget {
       darkIcon: const Color(0xFFF0997B),
       label: (t) => t.typeGift,
     ),
+    _TypeItem(
+      type: 'document',
+      icon: Icons.badge_outlined,
+      lightBg: const Color(0xFFE7EBED),
+      darkBg: const Color(0xFF15191c),
+      lightIcon: const Color(0xFF37474F),
+      darkIcon: const Color(0xFF90A4AE),
+      label: (t) => t.typeDocument,
+    ),
   ];
 
   @override

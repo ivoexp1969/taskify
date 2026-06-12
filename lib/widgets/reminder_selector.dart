@@ -7,12 +7,17 @@ class ReminderSelector extends StatelessWidget {
   final String langCode;
   final ThemeData theme;
 
+  /// По избор: ограничи показаните опции (напр. дълги изпреварвания за документи).
+  /// Ако е null — показва стандартните [reminderKeys] (поведението не се променя).
+  final List<String>? availableKeys;
+
   const ReminderSelector({
     super.key,
     required this.selectedReminders,
     required this.onChanged,
     required this.langCode,
     required this.theme,
+    this.availableKeys,
   });
 
   // Подредени хронологично (от най-рано до в точното време)
@@ -59,6 +64,36 @@ class ReminderSelector extends StatelessWidget {
     },
   };
 
+  /// Дълги изпреварвания (дни/седмици/месеци преди) — за документи и др. дългосрочни
+  /// срокове. Не са в стандартния списък, за да не затрупват обикновените задачи.
+  static const Map<String, Map<String, String>> longLeadLabels = {
+    'minus_2mo': {
+      'en': '2 months before', 'bg': '2 месеца преди', 'de': '2 Monate vorher',
+      'fr': '2 mois avant', 'it': '2 mesi prima', 'el': '2 μήνες πριν',
+      'es': '2 meses antes', 'pt': '2 meses antes', 'ru': 'За 2 месяца', 'tr': '2 ay önce', 'ja': '2か月前',
+    },
+    'minus_1mo': {
+      'en': '1 month before', 'bg': '1 месец преди', 'de': '1 Monat vorher',
+      'fr': '1 mois avant', 'it': '1 mese prima', 'el': '1 μήνα πριν',
+      'es': '1 mes antes', 'pt': '1 mês antes', 'ru': 'За 1 месяц', 'tr': '1 ay önce', 'ja': '1か月前',
+    },
+    'minus_2w': {
+      'en': '2 weeks before', 'bg': '2 седмици преди', 'de': '2 Wochen vorher',
+      'fr': '2 semaines avant', 'it': '2 settimane prima', 'el': '2 εβδομάδες πριν',
+      'es': '2 semanas antes', 'pt': '2 semanas antes', 'ru': 'За 2 недели', 'tr': '2 hafta önce', 'ja': '2週間前',
+    },
+    'minus_1w': {
+      'en': '1 week before', 'bg': '1 седмица преди', 'de': '1 Woche vorher',
+      'fr': '1 semaine avant', 'it': '1 settimana prima', 'el': '1 εβδομάδα πριν',
+      'es': '1 semana antes', 'pt': '1 semana antes', 'ru': 'За 1 неделю', 'tr': '1 hafta önce', 'ja': '1週間前',
+    },
+    'minus_3d': {
+      'en': '3 days before', 'bg': '3 дни преди', 'de': '3 Tage vorher',
+      'fr': '3 jours avant', 'it': '3 giorni prima', 'el': '3 ημέρες πριν',
+      'es': '3 días antes', 'pt': '3 dias antes', 'ru': 'За 3 дня', 'tr': '3 gün önce', 'ja': '3日前',
+    },
+  };
+
   static const Map<String, String> noReminderLabels = {
     'en': 'No reminder', 'bg': 'Без напомняне', 'de': 'Keine Erinnerung',
     'fr': 'Pas de rappel', 'it': 'Nessun promemoria', 'el': 'Χωρίς υπενθύμιση',
@@ -68,7 +103,8 @@ class ReminderSelector extends StatelessWidget {
   static List<String> get reminderKeys => reminderLabels.keys.toList();
 
   String _getLabel(String key) {
-    return reminderLabels[key]?[langCode] ?? reminderLabels[key]?['en'] ?? key;
+    final m = reminderLabels[key] ?? longLeadLabels[key];
+    return m?[langCode] ?? m?['en'] ?? key;
   }
 
   String _getNoReminderLabel() {
@@ -146,7 +182,7 @@ class ReminderSelector extends StatelessWidget {
         // Опции за напомняния
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: reminderKeys.map((key) {
+          children: (availableKeys ?? reminderKeys).map((key) {
             final isSelected = selectedReminders.contains(key);
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),

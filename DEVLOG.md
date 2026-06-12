@@ -6,6 +6,34 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-12 · PC (Android)
+- **"Bulgaria" tab → universal "Documents" tab** (Pro-gated for everyone, 11 languages).
+  The old BG-only section was really just expiring-document tracking; name days/holidays
+  already live in Calendar, so the tab is now purely Documents.
+- **Architecture:** documents are ordinary `Task`s (`template == 'document'`, category
+  `documents`) instead of a separate store → they inherit Calendar sync, Today, cloud
+  sync and statistics with zero extra plumbing. The old `bg_documents` Hive box and the
+  Firestore `documents` subcollection are abandoned (upload/download paths removed).
+- **New files:** `screens/documents/documents_screen.dart` (list + urgency colors + CRUD),
+  `screens/task/document_dialog.dart` (type chips, optional name, expiry, yearly renewal,
+  long-lead reminders).
+- **Phase 1 – longer reminders:** `ReminderSelector` gained `availableKeys` (restrict shown
+  options) + `longLeadLabels` (3d/1w/2w/1mo/2mo, 11 langs); `notification_service_mobile`
+  schedules them; `google_calendar_service` maps the new tokens but skips 1/2-month (over
+  GCal's 28-day = 40320-min override cap).
+- **Phase 4 – migration:** `migrateDocumentsToTasks` (idempotent, flag
+  `documents_to_tasks_migrated_v1`). Deterministic task id `doc_<docId>` so two devices
+  merge (not duplicate) the same documents; cancels old per-doc notifications; ensures
+  `documents` category; clears the old box afterwards.
+- Category `documents` localized by id in task/calendar/settings/statistics screens.
+- **Verified live on Note 9** over WiFi adb: `flutter analyze` 0 errors, release APK
+  installed no-crash, full CRUD (add ID card → green urgency card → edit/delete menu →
+  confirm), and confirmed the document is a real Task (count 361→362).
+- Version → **1.0.41+45**. AAB to be built for Play Console (manual upload). New store
+  screenshots (EN + BG) of the Documents tab to follow.
+
+---
+
 ## 2026-06-11 · PC (Android)
 - **Tickets card theme** finalized after on-device testing (Note 9): ticket stub now uses
   the **live category color** (not the template accent) so it matches the category and

@@ -1,12 +1,18 @@
+import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/task.dart';
+import '../models/category.dart';
+import '../models/expiring_document.dart';
+import 'documents_service.dart';
+import 'notification_service.dart';
 import 'tombstone_service.dart';
 
 /// Безопасни еднократни миграции на локалните данни.
 class MigrationService {
   static const _syncFieldsKey = 'sync_fields_migrated_v1';
   static const _appleEventIdsKey = 'apple_event_ids_migrated_v1';
+  static const _documentsToTasksKey = 'documents_to_tasks_migrated_v1';
   static const _iosEventPrefix = 'ios_cal_event_';
 
   /// Гарантира, че всяка съществуваща задача има стабилен `id` и `updatedAt`,
@@ -77,6 +83,100 @@ class MigrationService {
     }
 
     await prefs.setBool(_appleEventIdsKey, true);
+  }
+
+  /// Мигрира старите документи с изтичащ срок (Hive box `bg_documents`, използван
+  /// от стария раздел „България") в обикновени задачи (template `document`, категория
+  /// `documents`). Така документите получават наготово Календар/„Днес"/облачен синхрон,
+  /// а отделната система отпада.
+  ///
+  /// КРИТИЧНО за cross-device: task id-то е ДЕТЕРМИНИСТИЧНО (`doc_<docId>`), за да се
+  /// слее (а не дублира) ако две устройства мигрират едни и същи документи. Идемпотентно.
+  static Future<void> migrateDocumentsToTasks() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_documentsToTasksKey) ?? false) return;
+
+    Box docBox;
+    try {
+      docBox = Hive.isBoxOpen('bg_documents')
+          ? Hive.box('bg_documents')
+          : await Hive.openBox('bg_documents');
+    } catch (_) {
+      await prefs.setBool(_documentsToTasksKey, true);
+      return;
+    }
+
+    final taskBox = Hive.box<Task>('tasks');
+    final categoryBox = Hive.box<Category>('categories');
+    final lang = prefs.getString('app_language') ?? 'en';
+
+    // Гарантирай категория „Документи" (локализира се по id навсякъде).
+    if (categoryBox.get('documents') == null) {
+      await categoryBox.put('documents', Category(
+        id: 'documents', name: 'Documents', colorValue: 0xFF455A64, isDefault: false));
+    }
+
+    final existingIds = taskBox.values.map((t) => t.id).whereType<String>().toSet();
+
+    for (final v in docBox.values) {
+      if (v is! String || v.isEmpty) continue;
+      ExpiringDocument doc;
+      try {
+        doc = ExpiringDocument.fromJson(json.decode(v) as Map<String, dynamic>);
+      } catch (_) {
+        continue;
+      }
+
+      final taskId = 'doc_${doc.id}';
+      if (existingIds.contains(taskId)) continue;
+
+      // Отмени старите док-нотификации (новата задача планира свои).
+      for (final nid in doc.notificationIds) {
+        try {
+          await NotificationService().cancelNotification(nid);
+        } catch (_) {}
+      }
+
+      final label = doc.label?.trim() ?? '';
+      final title = documentTypeName(doc.type, lang, label: label.isEmpty ? null : label);
+      final notes = [
+        'doctype:${doc.type}',
+        if (label.isNotEmpty) 'label:$label',
+      ].join('\n');
+      // Срокът в 09:00, за да падат напомнянията в разумен час.
+      final dueDate = DateTime(doc.expiryDate.year, doc.expiryDate.month, doc.expiryDate.day, 9);
+      final reminders = doc.reminderDays.map(_dayToReminderToken).toList();
+
+      final task = Task(
+        title: title,
+        dueDate: dueDate,
+        categoryId: 'documents',
+        priority: 1,
+        template: 'document',
+        notes: notes,
+        reminders: reminders.isEmpty ? null : reminders,
+        id: taskId,
+      );
+      await taskBox.add(task);
+      existingIds.add(taskId);
+      try {
+        await NotificationService().scheduleForTask(task);
+      } catch (_) {}
+    }
+
+    // Старите данни вече са задачи — изчисти box-а, за да не висят/възкръсват.
+    await docBox.clear();
+    await prefs.setBool(_documentsToTasksKey, true);
+  }
+
+  /// Дни-преди → токен за напомняне (най-близкият наличен).
+  static String _dayToReminderToken(int days) {
+    if (days >= 45) return 'minus_2mo';
+    if (days >= 21) return 'minus_1mo';
+    if (days >= 10) return 'minus_2w';
+    if (days >= 5) return 'minus_1w';
+    if (days >= 2) return 'minus_3d';
+    return 'minus_1d';
   }
 
   /// Чисти стари tombstones (purge след 30 дни). Безопасно за извикване при старт.

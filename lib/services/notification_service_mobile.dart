@@ -210,6 +210,21 @@ class NotificationService {
       case 'minus_1d':
         result = dueDate.subtract(const Duration(days: 1));
         break;
+      case 'minus_3d':
+        result = dueDate.subtract(const Duration(days: 3));
+        break;
+      case 'minus_1w':
+        result = dueDate.subtract(const Duration(days: 7));
+        break;
+      case 'minus_2w':
+        result = dueDate.subtract(const Duration(days: 14));
+        break;
+      case 'minus_1mo':
+        result = dueDate.subtract(const Duration(days: 30));
+        break;
+      case 'minus_2mo':
+        result = dueDate.subtract(const Duration(days: 60));
+        break;
       case 'same_day_8':
         result = DateTime(dueDate.year, dueDate.month, dueDate.day, 8, 0);
         break;
@@ -230,6 +245,11 @@ class NotificationService {
       'minus_1h': {'en': 'In 1 hour', 'bg': 'След 1 час', 'de': 'In 1 Stunde', 'fr': 'Dans 1 heure', 'it': 'Tra 1 ora', 'el': 'Σε 1 ώρα', 'es': 'En 1 hora', 'pt': 'Em 1 hora', 'ru': 'Через 1 час', 'tr': '1 saat içinde', 'ja': '1時間後'},
       'minus_2h': {'en': 'In 2 hours', 'bg': 'След 2 часа', 'de': 'In 2 Stunden', 'fr': 'Dans 2 heures', 'it': 'Tra 2 ore', 'el': 'Σε 2 ώρες', 'es': 'En 2 horas', 'pt': 'Em 2 horas', 'ru': 'Через 2 часа', 'tr': '2 saat içinde', 'ja': '2時間後'},
       'minus_1d': {'en': 'Tomorrow', 'bg': 'Утре', 'de': 'Morgen', 'fr': 'Demain', 'it': 'Domani', 'el': 'Αύριο', 'es': 'Mañana', 'pt': 'Amanhã', 'ru': 'Завтра', 'tr': 'Yarın', 'ja': '明日'},
+      'minus_3d': {'en': 'In 3 days', 'bg': 'След 3 дни', 'de': 'In 3 Tagen', 'fr': 'Dans 3 jours', 'it': 'Tra 3 giorni', 'el': 'Σε 3 ημέρες', 'es': 'En 3 días', 'pt': 'Em 3 dias', 'ru': 'Через 3 дня', 'tr': '3 gün içinde', 'ja': '3日後'},
+      'minus_1w': {'en': 'In 1 week', 'bg': 'След 1 седмица', 'de': 'In 1 Woche', 'fr': 'Dans 1 semaine', 'it': 'Tra 1 settimana', 'el': 'Σε 1 εβδομάδα', 'es': 'En 1 semana', 'pt': 'Em 1 semana', 'ru': 'Через 1 неделю', 'tr': '1 hafta içinde', 'ja': '1週間後'},
+      'minus_2w': {'en': 'In 2 weeks', 'bg': 'След 2 седмици', 'de': 'In 2 Wochen', 'fr': 'Dans 2 semaines', 'it': 'Tra 2 settimane', 'el': 'Σε 2 εβδομάδες', 'es': 'En 2 semanas', 'pt': 'Em 2 semanas', 'ru': 'Через 2 недели', 'tr': '2 hafta içinde', 'ja': '2週間後'},
+      'minus_1mo': {'en': 'In 1 month', 'bg': 'След 1 месец', 'de': 'In 1 Monat', 'fr': 'Dans 1 mois', 'it': 'Tra 1 mese', 'el': 'Σε 1 μήνα', 'es': 'En 1 mes', 'pt': 'Em 1 mês', 'ru': 'Через 1 месяц', 'tr': '1 ay içinde', 'ja': '1か月後'},
+      'minus_2mo': {'en': 'In 2 months', 'bg': 'След 2 месеца', 'de': 'In 2 Monaten', 'fr': 'Dans 2 mois', 'it': 'Tra 2 mesi', 'el': 'Σε 2 μήνες', 'es': 'En 2 meses', 'pt': 'Em 2 meses', 'ru': 'Через 2 месяца', 'tr': '2 ay içinde', 'ja': '2か月後'},
       'same_day_8': {'en': 'Today', 'bg': 'Днес', 'de': 'Heute', 'fr': "Aujourd'hui", 'it': 'Oggi', 'el': 'Σήμερα', 'es': 'Hoy', 'pt': 'Hoje', 'ru': 'Сегодня', 'tr': 'Bugün', 'ja': '今日'},
     };
     const defaultLabel = {

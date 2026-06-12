@@ -6,7 +6,7 @@ import '../task/task_screen.dart';
 import '../task/eisenhower_screen.dart';
 import '../calendar/calendar_screen.dart';
 import '../settings/settings_screen.dart';
-import '../bulgaria/bulgaria_screen.dart';
+import '../documents/documents_screen.dart';
 import '../../utils/localization.dart';
 import '../../widgets/banner_ad_widget.dart';
 import '../../services/pro_service.dart';
@@ -26,36 +26,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final ProService _proService = ProService();
   bool _welcomeChecked = false;
 
-  /// Разделът „България" се показва само при български език или устройство
-  /// на територията на България (БЕЗ GPS — само locale).
-  bool get _showBulgaria {
-    final lang = LanguageScope.of(context).locale.languageCode;
-    if (lang == 'bg') return true;
-    final cc = WidgetsBinding.instance.platformDispatcher.locale.countryCode;
-    return cc?.toUpperCase() == 'BG';
-  }
+  /// Разделът „Документи" се показва на ВСИЧКИ (универсална функция; Pro gated).
+  bool get _showDocuments => true;
 
-  /// Екраните в долната навигация. „България" се вмъква преди Настройки.
+  /// Екраните в долната навигация. „Документи" се вмъква преди Настройки.
   List<Widget> get _screens => [
         const TaskScreen(),
         const EisenhowerScreen(),
         const CalendarScreen(),
-        if (_showBulgaria) const BulgariaScreen(),
+        if (_showDocuments) const DocumentsScreen(),
         const SettingsScreen(),
       ];
 
-  /// Индекс на „България" таба (или -1, ако не се показва).
-  int get _bulgariaIndex => _showBulgaria ? 3 : -1;
-
-  String _bulgariaTabLabel(BuildContext context) {
-    final lang = LanguageScope.of(context).locale.languageCode;
-    const m = {
-      'en': 'Bulgaria', 'bg': 'България', 'de': 'Bulgarien', 'fr': 'Bulgarie',
-      'it': 'Bulgaria', 'el': 'Βουλγαρία', 'es': 'Bulgaria', 'pt': 'Bulgária',
-      'ru': 'Болгария', 'tr': 'Bulgaristan', 'ja': 'ブルガリア',
-    };
-    return m[lang] ?? m['en']!;
-  }
+  /// Индекс на „Документи" таба (или -1, ако не се показва).
+  int get _documentsIndex => _showDocuments ? 3 : -1;
 
   @override
   void initState() {
@@ -248,14 +232,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (!upgraded) return;
     }
 
-    // Раздел „България" е premium функция.
-    if (!kIsWeb && index == _bulgariaIndex && !_proService.isPro) {
-      final lang = LanguageScope.of(context).locale.languageCode;
-      const bgName = {'en': 'Bulgaria', 'bg': 'България', 'de': 'Bulgarien', 'fr': 'Bulgarie', 'it': 'Bulgaria', 'el': 'Βουλγαρία', 'es': 'Bulgaria', 'pt': 'Bulgária', 'ru': 'Болгария', 'tr': 'Bulgaristan', 'ja': 'ブルガリア'};
+    // Раздел „Документи" е premium функция.
+    if (!kIsWeb && index == _documentsIndex && !_proService.isPro) {
       final upgraded = await showPaywallIfNeeded(
         context,
         isFeatureAvailable: false,
-        featureName: bgName[lang] ?? bgName['en']!,
+        featureName: AppText.of(context).documents,
       );
       if (!upgraded) return;
     }
@@ -273,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     // Списъкът може да се промени (вкл./изкл. на „България") — пазим индекса валиден.
     final screens = _screens;
-    final showBulgaria = _showBulgaria;
+    final showDocuments = _showDocuments;
     if (_currentIndex >= screens.length) _currentIndex = 0;
 
     return Scaffold(
@@ -360,11 +342,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   selectedIcon: const Icon(Icons.calendar_today),
                   label: t.calendar,
                 ),
-                if (showBulgaria)
+                if (showDocuments)
                   NavigationDestination(
                     icon: Stack(
                       children: [
-                        const Icon(Icons.flag_outlined),
+                        const Icon(Icons.badge_outlined),
                         if (!kIsWeb && !_proService.isPro)
                           Positioned(
                             right: -2,
@@ -377,8 +359,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           ),
                       ],
                     ),
-                    selectedIcon: const Icon(Icons.flag),
-                    label: _bulgariaTabLabel(context),
+                    selectedIcon: const Icon(Icons.badge),
+                    label: t.documents,
                   ),
                 NavigationDestination(
                   icon: const Icon(Icons.settings_outlined),

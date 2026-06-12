@@ -702,6 +702,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         final catColor = Color(cat.colorValue);
                         final localizedName = cat.id == 'cal_events'
                             ? t.catCalendarEvents
+                            : cat.id == 'documents'
+                            ? t.catDocuments
                             : cat.isDefault
                             ? {
                                 'work': t.catWork,

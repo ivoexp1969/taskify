@@ -30,6 +30,7 @@ import 'workout_dialog.dart';
 import 'payment_dialog.dart';
 import 'travel_dialog.dart';
 import 'gift_dialog.dart';
+import 'document_dialog.dart';
 import '../../widgets/task_card_styles.dart';
 import '../../widgets/pomodoro_timer_sheet.dart';
 import '../settings/statistics_screen.dart';
@@ -438,6 +439,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     if (c == null) return '';
     // Календарната категория не е „default", но id-то е фиксирано → локализира се винаги.
     if (c.id == 'cal_events') return t.catCalendarEvents;
+    if (c.id == 'documents') return t.catDocuments;
     if (c.isDefault) {
       return {
             'work': t.work,
@@ -2876,6 +2878,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                             if (task.template == 'payment') { PaymentDialog.show(context, existing: task).then((_) => setState(() {})); return; }
                             if (task.template == 'travel') { TravelDialog.show(context, existing: task).then((_) => setState(() {})); return; }
                             if (task.template == 'gift') { GiftDialog.show(context, existing: task).then((_) => setState(() {})); return; }
+                            if (task.template == 'document') { DocumentDialog.show(context, existing: task).then((_) => setState(() {})); return; }
                           },
                           onLongPress: () {
                             showModalBottomSheet(
@@ -3032,6 +3035,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                     TravelDialog.show(context, existing: task).then((_) => setState(() {}));
                                   } else if (task.template == 'gift') {
                                     GiftDialog.show(context, existing: task).then((_) => setState(() {}));
+                                  } else if (task.template == 'document') {
+                                    DocumentDialog.show(context, existing: task).then((_) => setState(() {}));
                                   } else {
                                     _openTaskDialog(existing: task);
                                   }
@@ -3113,6 +3118,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                 if (type == 'payment') { PaymentDialog.show(context).then((_) => setState(() {})); return; }
                 if (type == 'travel') { TravelDialog.show(context).then((_) => setState(() {})); return; }
                 if (type == 'gift') { GiftDialog.show(context).then((_) => setState(() {})); return; }
+                if (type == 'document') { DocumentDialog.show(context).then((_) => setState(() {})); return; }
                 _openTaskDialog();
               },
                 child: const Icon(Icons.add),

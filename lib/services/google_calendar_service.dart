@@ -363,6 +363,13 @@ class GoogleCalendarService {
         case 'minus_1h': minutes = 60; break;
         case 'minus_2h': minutes = 120; break;
         case 'minus_1d': minutes = 1440; break;
+        case 'minus_3d': minutes = 4320; break;
+        case 'minus_1w': minutes = 10080; break;
+        case 'minus_2w': minutes = 20160; break;
+        // 1/2 месеца надхвърлят лимита на Google Calendar (40320 мин = 28 дни) →
+        // прескачат се за GCal (локалното напомняне пак работи).
+        case 'minus_1mo': minutes = 43200; break;
+        case 'minus_2mo': minutes = 86400; break;
         case 'same_day_8':
           final sameDay8 = DateTime(
               task.dueDate.year, task.dueDate.month, task.dueDate.day, 8);
