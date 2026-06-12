@@ -46,6 +46,12 @@ v1.0.43+48 (June 2026)
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **AI anti-Russian hardening (PC, no app bump):** реши Mac-овия TODO — breakdown понякога връщаше
+  руски повелителни форми. В worker-а (`Desktop/taskify-ai/`): (1) few-shot контрастен промпт за
+  `lang==='bg'` (ПРАВИЛНО бг vs ЗАБРАНЕНО ру примери) + забрана на ы/э/ё в parse/schedule;
+  (2) server-side `looksRussian()` детекция + `runAI()` авто-retry с подсилен промпт при засечен
+  руски (за всеки не-руски език). Внимание: думи валидни и на бг (задача, отправ, ваш…) изключени
+  от детекцията. Тествано bg ×12 → 0 руски. Server-side. Deploy `npx wrangler deploy`.
 - **AI worker model fix (PC, no app bump):** AI parsing/breakdown/schedule бяха мъртви —
   Cloudflare спря стария Workers AI модел (`llama-3.1-8b-instruct`, 502 deprecated). Worker-ът
   (`Desktop/taskify-ai/`, отделно НЕ-git репо) качен на **`@cf/meta/llama-3.3-70b-instruct-fp8-fast`**
