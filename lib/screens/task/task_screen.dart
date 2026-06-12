@@ -477,7 +477,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
   }
 
   ({List<Task> filtered, int total, int completed, int overdue, int upcoming, int archived}) _computeTasks() {
-    final all = taskBox.values.toList();
+    // Документите имат собствен таб „Документи" (+ Календар + напомняния) и са с
+    // далечни срокове (месеци/години) → НЕ ги показваме и НЕ ги броим в главния
+    // списък със задачи, за да не го затрупват.
+    final all = taskBox.values.where((t) => t.template != 'document').toList();
 
     // Stats — single pass over all tasks
     int total = 0, completed = 0, overdue = 0, upcoming = 0, archived = 0;

@@ -6,6 +6,17 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-12 · PC (Android) — docs out of main list
+- **Documents hidden from the main Tasks list + Matrix.** Expiring-document tasks have
+  far-future due dates (often a year+ out), so they piled up at the bottom of the active
+  task list (sorted by date) and inflated the stat counts. Now `_computeTasks` filters
+  `template != 'document'` at the source (excludes from both the list and the total/
+  completed/overdue/upcoming counts), and `eisenhower_screen` excludes them too.
+  Documents still live in the Documents tab + Calendar + scheduled reminders.
+  User decision (asked on-device). Version → **1.0.43+47**.
+
+---
+
 ## 2026-06-12 · PC (Android) — bugfix follow-up
 - **Documents delete → resurrection bug (fixed).** `documents_screen._confirmDelete`
   called raw `task.delete()`, skipping the tombstone. Since the doc-task had been pushed

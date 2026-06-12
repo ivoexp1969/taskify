@@ -26,7 +26,9 @@ class EisenhowerScreen extends StatelessWidget {
         valueListenable: Hive.box<Task>('tasks').listenable(),
         builder: (context, Box<Task> taskBox, _) {
           final active = taskBox.values
-              .where((task) => !task.isCompleted && !task.isArchived)
+              // Документите имат собствен таб → не ги показваме в матрицата.
+              .where((task) =>
+                  !task.isCompleted && !task.isArchived && task.template != 'document')
               .toList();
 
           final q1 = <Task>[], q2 = <Task>[], q3 = <Task>[], q4 = <Task>[];
