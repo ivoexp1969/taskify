@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../models/task.dart';
 import '../../services/notification_service.dart';
+import '../../services/tombstone_service.dart';
 import '../../utils/localization.dart';
 import '../task/document_dialog.dart';
 
@@ -164,7 +165,10 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
     );
     if (ok == true) {
       await NotificationService().cancelForTask(task);
-      await task.delete();
+      // ВАЖНО: трий през TombstoneService (не `task.delete()`), за да се запише
+      // надгробен камък → изтриването се разпространява до облака и задачата НЕ
+      // „възкръсва" при следващ merge sync.
+      await TombstoneService().deleteTask(task);
     }
   }
 

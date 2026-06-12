@@ -6,6 +6,18 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-12 · PC (Android) — bugfix follow-up
+- **Documents delete → resurrection bug (fixed).** `documents_screen._confirmDelete`
+  called raw `task.delete()`, skipping the tombstone. Since the doc-task had been pushed
+  to Firestore, the next merge sync saw it still in the cloud with no tombstone and
+  re-downloaded it → it "reappeared" at the bottom of the list after every delete.
+  Fix: delete via `TombstoneService().deleteTask(task)` (records tombstone → deletion
+  propagates to cloud, no resurrection). Caught live on Note 9 while preparing store
+  screenshots. Verified: deleted doc stays gone across force-stop + relaunch (startup sync).
+- Version → **1.0.42+46**.
+
+---
+
 ## 2026-06-12 · PC (Android)
 - **"Bulgaria" tab → universal "Documents" tab** (Pro-gated for everyone, 11 languages).
   The old BG-only section was really just expiring-document tracking; name days/holidays
