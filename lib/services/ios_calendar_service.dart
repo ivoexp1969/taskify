@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import '../models/task.dart';
+import '../utils/calendar_notes.dart';
 
 /// Apple Calendar експорт (device_calendar) — ЕДНОПОСОЧЕН (само изпращане).
 ///
@@ -128,7 +129,7 @@ class IosCalendarService {
         title: task.title,
         start: start,
         end: end,
-        description: task.notes ?? '',
+        description: cleanCalendarNotes(task.notes),
       );
 
       final result = await _plugin.createOrUpdateEvent(event);

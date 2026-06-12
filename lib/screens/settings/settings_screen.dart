@@ -13,6 +13,7 @@ import 'package:file_picker/file_picker.dart';
 import '../../models/task.dart';
 import '../../models/category.dart';
 import '../../utils/localization.dart';
+import '../../utils/category_colors.dart';
 import '../../utils/file_saver.dart';
 import '../../utils/gsi_button.dart';
 import '../../services/auth_service.dart';
@@ -594,28 +595,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  // Списък с предефинирани цветове за color picker
-  static const List<Color> _categoryColors = [
-    Colors.red,
-    Colors.pink,
-    Colors.purple,
-    Colors.deepPurple,
-    Colors.indigo,
-    Colors.blue,
-    Colors.lightBlue,
-    Colors.cyan,
-    Colors.teal,
-    Colors.green,
-    Colors.lightGreen,
-    Colors.lime,
-    Colors.yellow,
-    Colors.amber,
-    Colors.orange,
-    Colors.deepOrange,
-    Colors.brown,
-    Colors.grey,
-    Colors.blueGrey,
-  ];
+  // Списък с предефинирани цветове за color picker (споделен — виж utils/category_colors.dart)
+  static const List<Color> _categoryColors = kCategoryColors;
 
   /// Показва диалог за управление на категориите
   void _showCategoryManagementDialog() {

@@ -6,6 +6,24 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-12 · Mac (iOS) — feature parity + App Store 1.0.43
+- **Pulled PC work** (Documents tab, Tickets card theme, doc-out-of-list) and brought iOS to
+  parity — all shared Dart, built & verified on Toto (iPhone 13 Pro) over devicectl. AdMob iOS
+  IDs, RevenueCat iOS key and the iOS `TaskifyWidget` extension confirmed real (old "placeholder"
+  notes were stale).
+- **Calendar description cleanup (BOTH platforms):** new `utils/calendar_notes.dart`
+  `cleanCalendarNotes()` strips internal `key:value` metadata (`doctype:`, `dest:`, `with:`,
+  `amount:`…) from `task.notes` before it's used as the Apple/Google calendar event description —
+  fixes the metadata leak flagged in the previous PC entry. Wired into `ios_calendar_service`
+  + `google_calendar_service`.
+- **More category colors:** unified the 3 duplicated `_categoryColors` palettes (settings/
+  calendar/task) into one shared `utils/category_colors.dart` (`kCategoryColors`) and added ~17
+  bright/vivid (accent/neon) colors.
+- **App Store:** built IPA (Xcode 26) → uploaded → version 1.0.43 created, whatsNew (en-US),
+  build attached, submitted for review. Live store version was 1.0.39 (approved). Version → **1.0.43+48**.
+
+---
+
 ## 2026-06-12 · PC → for the Mac: iOS-readiness review of the Documents feature
 Pre-flight review done on Windows before the iOS update. Documents/Tickets/fixes are
 all shared Dart — iOS just needs `pull --rebase` + build on the Mac. Findings:

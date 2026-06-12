@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/task.dart';
+import '../utils/calendar_notes.dart';
 
 class GoogleCalendarService {
   static final GoogleCalendarService _instance = GoogleCalendarService._internal();
@@ -395,7 +396,7 @@ class GoogleCalendarService {
     final overrides = _reminderOverrides(task);
     final body = <String, dynamic>{
       'summary': task.title,
-      'description': task.notes ?? '',
+      'description': cleanCalendarNotes(task.notes),
       // ВИНАГИ useDefault:false + явни overrides (дори празни). PATCH мърджва
       // reminders обекта, затова само `useDefault:true` би оставил старите
       // overrides → грешка „cannotUseDefaultRemindersAndSpecifyOverride" (400).

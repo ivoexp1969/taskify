@@ -13,6 +13,7 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../models/task.dart';
 import '../../models/category.dart';
 import '../../utils/localization.dart';
+import '../../utils/category_colors.dart';
 import '../../services/notification_service.dart';
 import '../../services/tombstone_service.dart';
 import '../../widgets/reminder_selector.dart';
@@ -333,27 +334,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-  static const List<Color> _categoryColors = [
-    Colors.red,
-    Colors.pink,
-    Colors.purple,
-    Colors.deepPurple,
-    Colors.indigo,
-    Colors.blue,
-    Colors.lightBlue,
-    Colors.cyan,
-    Colors.teal,
-    Colors.green,
-    Colors.lightGreen,
-    Colors.lime,
-    Colors.yellow,
-    Colors.amber,
-    Colors.orange,
-    Colors.deepOrange,
-    Colors.brown,
-    Colors.grey,
-    Colors.blueGrey,
-  ];
+  static const List<Color> _categoryColors = kCategoryColors;
 
   void _showAddCategoryDialog(StateSetter setDialogState) {
     final t = AppText.of(context);

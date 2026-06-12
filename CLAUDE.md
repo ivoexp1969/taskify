@@ -42,10 +42,11 @@ flutter build appbundle --release
 - Firebase: `IVA` — lifetime access, 20-user cap
 
 ## Current Version
-v1.0.43+47 (June 2026)
+v1.0.43+48 (June 2026)
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **v1.0.43+48 (Mac):** iOS brought to feature parity (Documents/Tickets pulled & verified on device). New `utils/calendar_notes.dart` strips internal `key:value` metadata (`doctype:`/`dest:`/`with:`…) from calendar event descriptions on BOTH Apple & Google. Unified the 3 duplicated category-color palettes into shared `utils/category_colors.dart` + added ~17 bright/vivid colors. Submitted to App Store (live was 1.0.39).
 - **v1.0.43+47:** Documents (`template == 'document'`) are now excluded from the main Tasks list + its stat counts (`_computeTasks`) and from the Eisenhower matrix — they have far-future expiry dates and their own "Documents" tab (+ Calendar + reminders), so they no longer clutter the daily task list.
 - **v1.0.42+46:** Bugfix — deleting a document in the Documents tab now goes through `TombstoneService().deleteTask()` instead of raw `task.delete()`; without the tombstone the merge sync re-downloaded the doc from the cloud so it "resurrected" at the bottom of the list. Caught live on Note 9. (Reminder: `TombstoneService.deleteTask` is the ONLY correct way to delete any task.)
 - **v1.0.41+45:** "Bulgaria" tab replaced by a universal **"Documents"** tab (Pro-gated for everyone, all 11 languages) for expiring-document tracking (ID, passport, license, insurance, inspection, vignette, other). Documents are now ordinary tasks (`template == 'document'`, category `documents`) → they get Calendar/Today/cloud-sync/statistics for free; the separate `bg_documents` Hive box + Firestore `documents` subcollection are abandoned. New `DocumentDialog` (long-lead reminders: 3d/1w/2w/1mo/2mo, optional yearly renewal). `ReminderSelector` gained `availableKeys` + `longLeadLabels`; GCal maps the new tokens (1/2-month skipped past GCal's 28-day cap). Idempotent migration `migrateDocumentsToTasks` (deterministic `doc_<id>` for cross-device merge, cancels old doc notifications, clears old box). Category `documents` localized in task/calendar/settings/statistics. Verified live on Note 9 (full CRUD).
