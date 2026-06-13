@@ -182,11 +182,31 @@ class _SharedGroupsScreenState extends State<SharedGroupsScreen> {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(32),
-              child: Text(
-                t.sharedEmpty,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.groups_rounded,
+                      size: 56, color: theme.colorScheme.primary),
+                  const SizedBox(height: 16),
+                  Text(
+                    t.sharedEmpty,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyLarge
+                        ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    onPressed: _createGroup,
+                    icon: const Icon(Icons.add),
+                    label: Text(t.newGroup),
+                  ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: _joinGroup,
+                    icon: const Icon(Icons.group_add_outlined),
+                    label: Text(t.joinWithCode),
+                  ),
+                ],
               ),
             ),
           );
