@@ -47,11 +47,20 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
     кеш** (стар орязан шрифт от ерата „България"). Поука: след web deploy → hard clear (Unregister SW + Clear site
     data + Cmd+Q) ИЛИ тествай в друг браузър. НЕ пипай иконите в кода.
 
+- **ДОВЪРШЕНО (2-ра част от сесията):**
+  - ✅ **Богат диалог за задача в групата** (`_addOrEditTask`) — вече има **Подзадачи** (добавяне/чек/триене),
+    повторение, категория (текст), бележки + досегашните приоритет/дата. Подзадачите се пазят като "0:text"/"1:text".
+  - ✅ **Тема „Билети" по-наситена** — купончето alpha 0.14→0.22 (светла)/0.22→0.34 (тъмна) в `task_card_styles.dart`.
+    Груповите карти получават ЦВЯТ по категория от `kCategoryColors` (хеш по име), не сив primary. По искане „като макета".
+  - ✅ **Име за показване** — Настройки→Акаунт нов ред „Име" → Auth `displayName` + `GroupService.syncMyMemberInfo()`
+    разпространява към `memberInfo` на всички мои групи. Показване: име→имейл→кратък id. Целта: да не се виждат имейли.
+    **Rules обновени и РЕ-деплойнати** (`firebase deploy --only firestore:rules`, CLI логнат): нова `memberSafeUpdate()`
+    — член може да обнови собственото си memberInfo/name БЕЗ да пипа members/ownerId.
+  - **Deploy:** web (Cloudflare taskify-app) + iOS Toto (1.0.43+48) обновени с целия код. Commits до `cba4769`.
+
 - **ОТВОРЕНИ TODO (следваща сесия):**
-  1. **Богат диалог за задача в групата** — сега е базов (заглавие/приоритет/дата). Иска се „същото меню
-     както на екран Задачи, с ВСИЧКИ опции, вкл. **Подзадачи**". GroupTask моделът вече има полета subtasks/
-     notes/recurrence/reminders — трябва само по-богат editor UI в `screens/shared/group_tasks_screen.dart` (`_addOrEditTask`).
-  2. Тест: изтриване (да не възкръсва) + негативен (не-член → permission-denied); APK на PC.
+  1. Тест: изтриване (да не възкръсва) + негативен (не-член → permission-denied); APK на PC.
+  2. (по желание) reminders/нотификации за групови задачи — съзнателно извън MVP (искат per-device логика).
 
 ## 2026-06-12 · PC — anti-Russian мерки в worker-а (✅ решава Mac TODO-то)
 Адресирано искането „нула руски" + Mac-овия TODO (breakdown понякога връщаше руски
