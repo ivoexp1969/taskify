@@ -275,18 +275,15 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
           appBar: AppBar(
             title: Text(_group.name),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.person_add_alt_1_outlined),
-                tooltip: t.inviteTitle,
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => GroupInviteScreen(group: _group),
-                  ),
-                ),
-              ),
               PopupMenuButton<String>(
                 onSelected: (v) {
                   switch (v) {
+                    case 'invite':
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => GroupInviteScreen(group: _group),
+                        ),
+                      );
                     case 'members':
                       _showMembers();
                     case 'leave':
@@ -294,6 +291,10 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                   }
                 },
                 itemBuilder: (ctx) => [
+                  PopupMenuItem(
+                    value: 'invite',
+                    child: Text(t.inviteTitle),
+                  ),
                   PopupMenuItem(
                     value: 'members',
                     child: Text('${t.members} · ${_group.memberCount}'),
