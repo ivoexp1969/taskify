@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/group.dart';
+import '../../models/category.dart';
 import '../../services/auth_service.dart';
 import '../../services/group_service.dart';
+import '../../services/ai_service.dart';
+import '../../services/ai_usage_service.dart';
+import '../../services/pro_service.dart';
 import '../../utils/localization.dart';
 import '../../widgets/task_card_styles.dart';
 import '../../utils/category_colors.dart';
+import '../paywall/paywall_screen.dart';
 import 'group_invite_screen.dart';
 
 /// Екран със задачите на ЕДНА споделена група. Real-time (Firestore snapshots):
@@ -119,139 +125,257 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
   Future<void> _addOrEditTask({GroupTask? existing}) async {
     final t = AppText.of(context);
     final titleCtrl = TextEditingController(text: existing?.title ?? '');
-    final categoryCtrl = TextEditingController(text: existing?.categoryName ?? '');
     final notesCtrl = TextEditingController(text: existing?.notes ?? '');
     final subtaskCtrl = TextEditingController();
     int priority = existing?.priority ?? 1;
     DateTime due = existing?.dueDate ?? DateTime.now();
     String? recurrence = existing?.recurrence;
+    String? categoryName = existing?.categoryName;
     final subtasks = _parseSubtasks(existing?.subtasks);
 
-    final saved = await showDialog<bool>(
+    // Личните категории на потребителя — за чипове (груповата задача пази ИМЕТО като текст).
+    final cats = Hive.isBoxOpen('categories')
+        ? Hive.box<Category>('categories').values.toList()
+        : <Category>[];
+
+    final saved = await showModalBottomSheet<bool>(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setLocal) => AlertDialog(
-          title: Text(existing == null ? t.groupAddTask : t.edit),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleCtrl,
-                  autofocus: true,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: InputDecoration(hintText: t.groupTaskHint),
-                ),
-                const SizedBox(height: 16),
-                // Приоритет
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    for (var p = 0; p <= 2; p++)
-                      ChoiceChip(
-                        label: Text(_priorityLabel(p, t)),
-                        selected: priority == p,
-                        selectedColor:
-                            _priorityColor(p).withValues(alpha: 0.25),
-                        onSelected: (_) => setLocal(() => priority = p),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                // Срок
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.event_outlined),
-                  title: Text(_dateStr(due)),
-                  onTap: () async {
-                    final picked = await showDatePicker(
-                      context: ctx,
-                      initialDate: due,
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(2100),
-                    );
-                    if (picked != null && ctx.mounted) {
-                      final time = await showTimePicker(
-                        context: ctx,
-                        initialTime: TimeOfDay.fromDateTime(due),
-                      );
-                      setLocal(() => due = DateTime(
-                            picked.year,
-                            picked.month,
-                            picked.day,
-                            time?.hour ?? 0,
-                            time?.minute ?? 0,
-                          ));
-                    }
-                  },
-                ),
-                const SizedBox(height: 8),
-                // Повторение
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(t.repeat,
-                      style: Theme.of(ctx).textTheme.labelMedium),
-                ),
-                Wrap(
-                  spacing: 6,
-                  children: [
-                    for (final r in const [
-                      null,
-                      'daily',
-                      'weekly',
-                      'monthly',
-                      'yearly'
-                    ])
-                      ChoiceChip(
-                        label: Text(_recurrenceLabel(r, t)),
-                        selected: recurrence == r,
-                        onSelected: (_) => setLocal(() => recurrence = r),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // Категория (текст — личните категории не се споделят)
-                TextField(
-                  controller: categoryCtrl,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: InputDecoration(
-                    labelText: t.category,
-                    isDense: true,
+        builder: (ctx, setLocal) {
+          bool aiLoading = false;
+          final lang = LanguageScope.of(ctx).locale.languageCode;
+
+          Future<void> runAiParse() async {
+            final text = titleCtrl.text.trim();
+            if (text.isEmpty) return;
+            if (!ProService().isPro) {
+              Navigator.pop(ctx);
+              if (mounted) {
+                showPaywallIfNeeded(context, isFeatureAvailable: false);
+              }
+              return;
+            }
+            if (!await AiUsageService.instance.canUse()) {
+              if (ctx.mounted) {
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(content: Text(t.aiLimitReached)));
+              }
+              return;
+            }
+            setLocal(() => aiLoading = true);
+            final r = await AiService.parseTask(
+                text, cats.map((c) => c.name).toList(),
+                lang: lang);
+            if (!ctx.mounted) return;
+            setLocal(() => aiLoading = false);
+            if (r == null) {
+              ScaffoldMessenger.of(ctx)
+                  .showSnackBar(SnackBar(content: Text(t.aiError)));
+              return;
+            }
+            await AiUsageService.instance.recordUse();
+            setLocal(() {
+              titleCtrl.text = r.title;
+              priority = r.priority;
+              if (r.recurring != null) recurrence = r.recurring;
+              if (r.categoryName != null) {
+                final low = r.categoryName!.toLowerCase();
+                final m = cats.where((c) => c.name.toLowerCase() == low);
+                categoryName = m.isNotEmpty ? m.first.name : r.categoryName;
+              }
+              if (r.time != null) {
+                final parts = r.time!.split(':');
+                if (parts.length == 2) {
+                  final h = int.tryParse(parts[0]);
+                  final mm = int.tryParse(parts[1]);
+                  if (h != null && mm != null) {
+                    due = DateTime(due.year, due.month, due.day, h, mm);
+                  }
+                }
+              }
+            });
+          }
+
+          return Padding(
+            padding: EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 16,
+              bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(existing == null ? t.groupAddTask : t.edit,
+                      style: Theme.of(ctx).textTheme.titleLarge),
+                  const SizedBox(height: 12),
+                  // Заглавие + AI-парсване
+                  TextField(
+                    controller: titleCtrl,
+                    autofocus: true,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: InputDecoration(
+                      hintText: t.groupTaskHint,
+                      suffixIcon: aiLoading
+                          ? const Padding(
+                              padding: EdgeInsets.all(12),
+                              child: SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2)),
+                            )
+                          : IconButton(
+                              icon: const Icon(Icons.auto_awesome),
+                              tooltip: t.aiParsingSetting,
+                              onPressed: runAiParse,
+                            ),
+                    ),
+                    onSubmitted: (_) => runAiParse(),
                   ),
-                ),
-                const SizedBox(height: 12),
-                // Подзадачи
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(t.subtasks,
-                      style: Theme.of(ctx).textTheme.labelMedium),
-                ),
-                for (var i = 0; i < subtasks.length; i++)
+                  const SizedBox(height: 16),
+                  // Приоритет
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Checkbox(
-                        value: subtasks[i]['done'] == true,
-                        onChanged: (v) =>
-                            setLocal(() => subtasks[i]['done'] = v ?? false),
-                      ),
-                      Expanded(child: Text(subtasks[i]['text'] as String)),
-                      IconButton(
-                        icon: const Icon(Icons.close, size: 18),
-                        onPressed: () => setLocal(() => subtasks.removeAt(i)),
-                      ),
+                      for (var p = 0; p <= 2; p++)
+                        ChoiceChip(
+                          label: Text(_priorityLabel(p, t)),
+                          selected: priority == p,
+                          selectedColor:
+                              _priorityColor(p).withValues(alpha: 0.25),
+                          onSelected: (_) => setLocal(() => priority = p),
+                        ),
                     ],
                   ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: subtaskCtrl,
-                        textCapitalization: TextCapitalization.sentences,
-                        decoration: InputDecoration(
-                          hintText: t.newSubtask,
-                          isDense: true,
+                  const SizedBox(height: 8),
+                  // Срок
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.event_outlined),
+                    title: Text(_dateStr(due)),
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: ctx,
+                        initialDate: due,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked != null && ctx.mounted) {
+                        final time = await showTimePicker(
+                          context: ctx,
+                          initialTime: TimeOfDay.fromDateTime(due),
+                        );
+                        setLocal(() => due = DateTime(
+                              picked.year,
+                              picked.month,
+                              picked.day,
+                              time?.hour ?? 0,
+                              time?.minute ?? 0,
+                            ));
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  // Категория (чипове от личните категории; пази се ИМЕТО като текст)
+                  if (cats.isNotEmpty) ...[
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(t.category,
+                          style: Theme.of(ctx).textTheme.labelMedium),
+                    ),
+                    Wrap(
+                      spacing: 6,
+                      children: [
+                        for (final c in cats)
+                          ChoiceChip(
+                            label: Text(c.name),
+                            selected: categoryName == c.name,
+                            selectedColor:
+                                Color(c.colorValue).withValues(alpha: 0.25),
+                            onSelected: (_) => setLocal(() => categoryName =
+                                categoryName == c.name ? null : c.name),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  // Повторение
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(t.repeat,
+                        style: Theme.of(ctx).textTheme.labelMedium),
+                  ),
+                  Wrap(
+                    spacing: 6,
+                    children: [
+                      for (final r in const [
+                        null,
+                        'daily',
+                        'weekly',
+                        'monthly',
+                        'yearly'
+                      ])
+                        ChoiceChip(
+                          label: Text(_recurrenceLabel(r, t)),
+                          selected: recurrence == r,
+                          onSelected: (_) => setLocal(() => recurrence = r),
                         ),
-                        onSubmitted: (_) {
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Подзадачи
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(t.subtasks,
+                        style: Theme.of(ctx).textTheme.labelMedium),
+                  ),
+                  for (var i = 0; i < subtasks.length; i++)
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: subtasks[i]['done'] == true,
+                          onChanged: (v) =>
+                              setLocal(() => subtasks[i]['done'] = v ?? false),
+                        ),
+                        Expanded(child: Text(subtasks[i]['text'] as String)),
+                        IconButton(
+                          icon: const Icon(Icons.close, size: 18),
+                          onPressed: () => setLocal(() => subtasks.removeAt(i)),
+                        ),
+                      ],
+                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: subtaskCtrl,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: InputDecoration(
+                            hintText: t.newSubtask,
+                            isDense: true,
+                          ),
+                          onSubmitted: (_) {
+                            final txt = subtaskCtrl.text.trim();
+                            if (txt.isEmpty) return;
+                            setLocal(() {
+                              subtasks.add({'done': false, 'text': txt});
+                              subtaskCtrl.clear();
+                            });
+                          },
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: t.addSubtask,
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
                           final txt = subtaskCtrl.text.trim();
                           if (txt.isEmpty) return;
                           setLocal(() {
@@ -260,46 +384,40 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                           });
                         },
                       ),
-                    ),
-                    IconButton(
-                      tooltip: t.addSubtask,
-                      icon: const Icon(Icons.add),
-                      onPressed: () {
-                        final txt = subtaskCtrl.text.trim();
-                        if (txt.isEmpty) return;
-                        setLocal(() {
-                          subtasks.add({'done': false, 'text': txt});
-                          subtaskCtrl.clear();
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // Бележки
-                TextField(
-                  controller: notesCtrl,
-                  maxLines: 3,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: InputDecoration(
-                    labelText: t.notes,
-                    alignLabelWithHint: true,
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  // Бележки
+                  TextField(
+                    controller: notesCtrl,
+                    maxLines: 3,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: InputDecoration(
+                      labelText: t.notes,
+                      alignLabelWithHint: true,
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: Text(t.cancel),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: Text(t.save),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(t.cancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(t.save),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
 
@@ -313,7 +431,9 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
       dueDate: due,
       priority: priority,
       categoryName:
-          categoryCtrl.text.trim().isEmpty ? null : categoryCtrl.text.trim(),
+          (categoryName != null && categoryName!.trim().isNotEmpty)
+              ? categoryName!.trim()
+              : null,
       recurrence: recurrence,
       reminders: existing?.reminders,
       subtasks: _serializeSubtasks(subtasks),
