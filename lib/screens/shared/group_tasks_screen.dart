@@ -70,11 +70,52 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
+  String _recurrenceLabel(String? r, AppText t) {
+    switch (r) {
+      case 'daily':
+        return t.daily;
+      case 'weekly':
+        return t.weekly;
+      case 'monthly':
+        return t.monthly;
+      case 'yearly':
+        return t.yearly;
+      default:
+        return t.noRepeat;
+    }
+  }
+
+  /// Подзадачите се пазят като "done:text" (0/1). Парсва за редакция.
+  List<Map<String, dynamic>> _parseSubtasks(List<String>? raw) {
+    if (raw == null) return [];
+    return raw.map((s) {
+      final parts = s.split(':');
+      final done = parts.isNotEmpty && parts.first == '1';
+      final text = parts.length >= 3
+          ? parts.sublist(2).join(':')
+          : (parts.length == 2 ? parts[1] : '');
+      return {'done': done, 'text': text};
+    }).toList();
+  }
+
+  List<String>? _serializeSubtasks(List<Map<String, dynamic>> list) {
+    if (list.isEmpty) return null;
+    return list
+        .where((m) => (m['text'] as String).trim().isNotEmpty)
+        .map((m) => '${m['done'] == true ? '1' : '0'}:${(m['text'] as String).trim()}')
+        .toList();
+  }
+
   Future<void> _addOrEditTask({GroupTask? existing}) async {
     final t = AppText.of(context);
     final titleCtrl = TextEditingController(text: existing?.title ?? '');
+    final categoryCtrl = TextEditingController(text: existing?.categoryName ?? '');
+    final notesCtrl = TextEditingController(text: existing?.notes ?? '');
+    final subtaskCtrl = TextEditingController();
     int priority = existing?.priority ?? 1;
     DateTime due = existing?.dueDate ?? DateTime.now();
+    String? recurrence = existing?.recurrence;
+    final subtasks = _parseSubtasks(existing?.subtasks);
 
     final saved = await showDialog<bool>(
       context: context,
@@ -134,6 +175,107 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                     }
                   },
                 ),
+                const SizedBox(height: 8),
+                // Повторение
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(t.repeat,
+                      style: Theme.of(ctx).textTheme.labelMedium),
+                ),
+                Wrap(
+                  spacing: 6,
+                  children: [
+                    for (final r in const [
+                      null,
+                      'daily',
+                      'weekly',
+                      'monthly',
+                      'yearly'
+                    ])
+                      ChoiceChip(
+                        label: Text(_recurrenceLabel(r, t)),
+                        selected: recurrence == r,
+                        onSelected: (_) => setLocal(() => recurrence = r),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Категория (текст — личните категории не се споделят)
+                TextField(
+                  controller: categoryCtrl,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(
+                    labelText: t.category,
+                    isDense: true,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Подзадачи
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(t.subtasks,
+                      style: Theme.of(ctx).textTheme.labelMedium),
+                ),
+                for (var i = 0; i < subtasks.length; i++)
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: subtasks[i]['done'] == true,
+                        onChanged: (v) =>
+                            setLocal(() => subtasks[i]['done'] = v ?? false),
+                      ),
+                      Expanded(child: Text(subtasks[i]['text'] as String)),
+                      IconButton(
+                        icon: const Icon(Icons.close, size: 18),
+                        onPressed: () => setLocal(() => subtasks.removeAt(i)),
+                      ),
+                    ],
+                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: subtaskCtrl,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: InputDecoration(
+                          hintText: t.newSubtask,
+                          isDense: true,
+                        ),
+                        onSubmitted: (_) {
+                          final txt = subtaskCtrl.text.trim();
+                          if (txt.isEmpty) return;
+                          setLocal(() {
+                            subtasks.add({'done': false, 'text': txt});
+                            subtaskCtrl.clear();
+                          });
+                        },
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: t.addSubtask,
+                      icon: const Icon(Icons.add),
+                      onPressed: () {
+                        final txt = subtaskCtrl.text.trim();
+                        if (txt.isEmpty) return;
+                        setLocal(() {
+                          subtasks.add({'done': false, 'text': txt});
+                          subtaskCtrl.clear();
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Бележки
+                TextField(
+                  controller: notesCtrl,
+                  maxLines: 3,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(
+                    labelText: t.notes,
+                    alignLabelWithHint: true,
+                  ),
+                ),
               ],
             ),
           ),
@@ -160,11 +302,12 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
       title: title,
       dueDate: due,
       priority: priority,
-      categoryName: existing?.categoryName,
-      recurrence: existing?.recurrence,
+      categoryName:
+          categoryCtrl.text.trim().isEmpty ? null : categoryCtrl.text.trim(),
+      recurrence: recurrence,
       reminders: existing?.reminders,
-      subtasks: existing?.subtasks,
-      notes: existing?.notes,
+      subtasks: _serializeSubtasks(subtasks),
+      notes: notesCtrl.text.trim().isEmpty ? null : notesCtrl.text.trim(),
       isCompleted: existing?.isCompleted ?? false,
     );
 
