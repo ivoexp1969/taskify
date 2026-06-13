@@ -1,40 +1,46 @@
 rules_version = '2';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Taskify Firestore Security Rules
+// Taskify Firestore Security Rules (продукция — проект taskify-1969)
 //
-// ДВА слоя:
-//   1) Лични задачи — users/{uid}/...  (само собственикът; НЕПРОМЕНЕНО)
-//   2) Споделени групи — groups/...    (само членове; нов слой)
+// СЛОЕВЕ:
+//   1) Лични задачи — users/{uid}/...  (само собственикът)
+//   2) Промо кодове — promo_codes/...  (четене за всички, update за логнати)
+//   3) Споделени групи — groups/... + invites/... (нов слой)
 //
 // Кодът за присъединяване (inviteCode) е споделената ТАЙНА. invites/{code}
-// мапва само код→groupId (нечувствително), четим е с GET по точен код, но
-// LIST е забранен → няма изброяване на кодове.
+// мапва само код→groupId (нечувствително): GET по точен код, LIST забранен.
 // ═══════════════════════════════════════════════════════════════════════════
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function signedIn() {
-      return request.auth != null;
+    function signedIn() { return request.auth != null; }
+
+    // Потребителски данни - само собственикът има достъп
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Подколекции на потребителя (tasks, categories)
+      match /{subcollection=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
-    // ─────────────────────────── ЛИЧЕН СЛОЙ ───────────────────────────
-    // Всичко под users/{uid} е видимо/писуемо само от самия потребител.
-    match /users/{userId}/{document=**} {
-      allow read, write: if signedIn() && request.auth.uid == userId;
+    // Промо кодове - четене за всички, update за логнати
+    match /promo_codes/{code} {
+      allow read: if true;
+      allow update: if request.auth != null;
     }
 
     // ─────────────────────────── ПОКАНИ ───────────────────────────────
     // invites/{inviteCode} → { groupId }. GET по точен код за всеки логнат
-    // (така присъединяването резолвва groupId). LIST забранен (без enumerate).
+    // (резолвва groupId). LIST забранен (без enumerate на кодове).
     match /invites/{code} {
       allow get: if signedIn();
       allow list: if false;
-      allow create: if signedIn()
-                    && request.resource.data.groupId is string;
+      allow create: if signedIn() && request.resource.data.groupId is string;
       allow update: if false;
-      // owner трие поканата при изтриване на групата (или сам себе си-чистене).
       allow delete: if signedIn();
     }
 
@@ -47,11 +53,9 @@ service cloud.firestore {
       function isOwner() {
         return signedIn() && request.auth.uid == resource.data.ownerId;
       }
-      // Меки лимити, валидирани и тук (втора защита покрай клиента).
       function membersWithinLimit() {
         return request.resource.data.members.size() <= 20;
       }
-      // Присъединяване: добавя САМО себе си, нищо друго не маха, owner непроменен.
       function addsOnlySelf() {
         let added = request.resource.data.members.toSet()
                       .difference(resource.data.members.toSet());
@@ -62,7 +66,6 @@ service cloud.firestore {
             && removed.size() == 0
             && request.resource.data.ownerId == resource.data.ownerId;
       }
-      // Напускане: маха САМО себе си, нищо не добавя, owner непроменен.
       function removesOnlySelf() {
         let added = request.resource.data.members.toSet()
                       .difference(resource.data.members.toSet());
@@ -74,25 +77,20 @@ service cloud.firestore {
             && request.resource.data.ownerId == resource.data.ownerId;
       }
 
-      // Четене: само членове. Покрива и query where('members', arrayContains uid).
       allow read: if isMember();
 
-      // Създаване: създателят е owner И е в members; лимит на членовете.
       allow create: if signedIn()
                     && request.resource.data.ownerId == request.auth.uid
                     && request.auth.uid in request.resource.data.members
                     && membersWithinLimit();
 
-      // Изтриване: само owner.
       allow delete: if isOwner();
 
-      // Обновяване: owner (вкл. промяна на members), или присъединяване/напускане.
       allow update: if (isOwner() && membersWithinLimit())
                     || (signedIn() && addsOnlySelf() && membersWithinLimit())
                     || (signedIn() && removesOnlySelf());
 
-      // ───────────────────── ЗАДАЧИ В ГРУПАТА ─────────────────────────
-      // Read/write само за членове на РОДИТЕЛСКАТА група.
+      // Задачи в групата — read/write само за членове на родителската група.
       match /tasks/{taskId} {
         allow read, write: if signedIn()
           && request.auth.uid in
