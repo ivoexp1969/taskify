@@ -294,8 +294,8 @@ class GroupService {
 
   /// Текст за споделяне на поканата (виж share_plus в UI).
   static String shareText(String groupName, String code, String lang) {
-    // Лендингът — същият домейн като privacy policy/web хостинга.
-    const landing = 'https://taskify-1969.web.app';
+    // Лендингът — официалният домейн на Taskify.
+    const landing = 'https://taskify1969.com';
     final templates = <String, String>{
       'en': "Join the list '$groupName' in Taskify with code: $code\n$landing",
       'bg': "Присъедини се към списъка '$groupName' в Taskify с код: $code\n$landing",
