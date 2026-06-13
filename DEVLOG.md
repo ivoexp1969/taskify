@@ -14,16 +14,42 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   createdBy/completedBy/completedAt, server updatedAt, `deleted` tombstone); `invites/{code}→{groupId}`.
 - **firestore.rules (НОВ файл, рег. в firebase.json):** не-член не чете/пише; присъединяване само
   добавя СЕБЕ СИ (`addsOnlySelf`), напускане маха СЕБЕ СИ; само owner трие; `invites` get-only (list:false,
-  без enumerate). ⚠️ **Още НЕ е деплойнат** — нямаше firebase CLI на Mac. Деплой: `firebase deploy --only firestore:rules`.
+  без enumerate). ✅ **ДЕПЛОЙНАТ** в продукция (taskify-1969) — слят с existing rules (users + promo_codes
+  ЗАПАЗЕНИ). Качен ръчно през Firebase Console (Rules editor), защото firebase login е интерактивен.
 - **Код:** `models/group.dart`, `services/group_service.dart` (watchMyGroups/watchTasks, create/join/leave/
   delete, CRUD, лимити 10 групи/owner·20 члена·500 задачи, Crockford base32 код, share текст).
 - **UI:** нов таб **„Споделени"** ЗАМЕНИ „Матрица" в долната навигация; Матрицата вече е иконка
   (`grid_view`) в AppBar-а на Задачи. Нови екрани `screens/shared/` (списък+create/join, задачи на живо
   с `TaskCardView` вкл. Билети тема + индикатор „завършена от…", покана+Share, членове).
 - **Gating:** създаване = Pro; присъединяване = безплатно (viral loop). Локализация: ~28 низа × 11 езика.
-- **Проверка:** `flutter analyze` 0 грешки (новите файлове чисти); `flutter build web` ✅. Android APK
-  НЕ е тестван (Mac няма Android SDK → провери на PC). iOS нативно непроменено (cloud_firestore вече в Podfile.lock).
-- **Остава:** deploy rules; тест с 2 потребителя + негативен (не-член); APK build на PC.
+- **Фиксове по време на теста:** (1) owner-лимитът броеше с `where('ownerId'==uid)` → rules забраняват
+  тази заявка (четене само по `members`) → create-ът падаше ТИХО → сменено да брои моите групи по members
+  клиентски; (2) UI вече показва и Firebase грешки (не само GroupException); (3) видими бутони „Нова група"/
+  „Присъедини се с код" в празното състояние (AppBar иконите бяха незабележими).
+
+- **ДЕПЛОЙ СТАТУС (всичко на най-новия код):**
+  - **Web app = app.taskify1969.com** → Cloudflare **Pages проект `taskify-app`** (НЕ Firebase!). Деплой:
+    `wrangler pages deploy build/web --project-name=taskify-app`. (taskify-1969.web.app на Firebase също обновен, но е резервен.)
+  - **Лендинг = taskify1969.com** → отделен Cloudflare Pages проект **`taskify`** (статичен маркетинг сайт, НЕ в това репо).
+  - **iOS Toto** → release билд (Xcode 26) инсталиран през `devicectl` (вж [[ios-build-appstore]]).
+  - На този Mac СЕГА са логнати: **firebase CLI (ivoexp@gmail.com)** и **wrangler (Cloudflare)** → бъдещи
+    деплои на rules/web стават директно оттук без Console.
+  - ⚠️ Flutter web кешира агресивно (service worker + icon font) — след нов deploy ТРЯБВА hard clear
+    (DevTools → Application → Unregister SW + Clear site data), иначе се вижда стар билд/празни икони.
+
+- **Проверка:** analyze 0 грешки; web build ✅; live тест: създаване+присъединяване с код РАБОТИ (група „Семейство", 2 члена).
+  Android APK НЕ е тестван (Mac няма Android SDK → провери на PC). iOS нативно непроменено.
+
+- **ОТВОРЕНИ TODO (поискани при теста, ЗАПОЧНАТИ но НЕ завършени — следваща сесия):**
+  1. **Богат диалог за задача в групата** — сега е базов (заглавие/приоритет/дата). Иска се „същото меню
+     както на екран Задачи, с ВСИЧКИ опции, вкл. **Подзадачи**". GroupTask моделът вече има полета subtasks/
+     notes/recurrence/reminders — трябва само по-богат editor UI в `screens/shared/group_tasks_screen.dart` (`_addOrEditTask`).
+  2. **Двата „+" на екрана на групата** — единият да изчезне (вероятно иконата „Покани" `person_add` до FAB-а
+     → да отиде в ⋮ менюто, да остане само FAB +).
+  3. **Липсващи икони на web** за табовете „Споделени" (`groups_*`) и „Документи" (`badge_*`) — въпреки
+     `--no-tree-shake-icons` и cache clear не се рендират. Хипотеза: стар кеширан icon-font / codepoint липсва
+     във версията на шрифта. Опитай по-стандартни икони (напр. `Icons.group`/`Icons.people`) или провери font subset.
+  4. Тест: изтриване (да не възкръсва) + негативен (не-член → permission-denied); APK на PC.
 
 ## 2026-06-12 · PC — anti-Russian мерки в worker-а (✅ решава Mac TODO-то)
 Адресирано искането „нула руски" + Mac-овия TODO (breakdown понякога връщаше руски
