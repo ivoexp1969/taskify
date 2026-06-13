@@ -58,9 +58,30 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
     — член може да обнови собственото си memberInfo/name БЕЗ да пипа members/ownerId.
   - **Deploy:** web (Cloudflare taskify-app) + iOS Toto (1.0.43+48) обновени с целия код. Commits до `cba4769`.
 
-- **ОТВОРЕНИ TODO (следваща сесия):**
-  1. Тест: изтриване (да не възкръсва) + негативен (не-член → permission-denied); APK на PC.
-  2. (по желание) reminders/нотификации за групови задачи — съзнателно извън MVP (искат per-device логика).
+- **3-та част:** ✅ Груповият редактор стана **богат bottom-sheet като личния** с **AI-парсване**
+  (бутон „искрица" → `AiService.parseTask`, Pro-gated + дневен лимит; попълва заглавие/приоритет/повторение/
+  категория/час), категории-чипове от личните. ✅ **Версия 1.0.44 (49)** билдната (Xcode 26), качена с altool
+  (ключ R342BR6F85) и **ПОДАДЕНА за ревю** през ASC API (whatsNew EN+BG — БЕЗ емоджи, Apple ги отхвърля в release notes!).
+  Web (Cloudflare taskify-app) обновен. Скриптове: `/tmp/asc_groups.py` + `/tmp/asc_fix.py`.
+
+- **🤖 ANDROID (PC) — пускане на v1.0.44 със Споделени списъци:**
+  Backend-ът е общ → НЯМА нужда от Android-специфична настройка за групите (cloud_firestore + Firebase Auth
+  вече са конфигурирани; `google-services.json` е на място; **Firestore rules вече са деплойнати** от Mac —
+  важат и за Android). Стъпки на PC:
+  1. `git pull --rebase origin main` (вземи целия групов код + version 1.0.44+49).
+  2. JDK 17, после: `flutter clean && flutter pub get`.
+  3. `flutter build appbundle --release` (за Play Store) или `flutter build apk --release` (за adb тест на Note 9).
+  4. Инсталирай на Note 9 по WiFi/adb и тествай:
+     - вход → таб **„Споделени"** → Нова група (Pro) → код → присъединяване с 2-ри акаунт → задача на живо.
+     - богатият редактор с **подзадачи + AI „искрица"**; „завършена от [име]"; изтриване да не възкръсва.
+     - **негативен тест:** не-член НЕ чете групата (permission-denied).
+  5. Качи `app-release.aab` в Play Console → нов release, whatsNew (Споделени списъци).
+  Бележки: табът „Споделени" замени „Матрица" (Матрицата е иконка в AppBar-а на Задачи). Премиум: създаване
+  на група = Pro; присъединяване с код = безплатно. Лимити: 10 групи/owner, 20 члена, 500 задачи/група.
+
+- **ОТВОРЕНИ TODO:**
+  1. Тест на живо: изтриване (да не възкръсва) + негативен (не-член); Android build на PC (горе).
+  2. (по желание) reminders/нотификации за групови задачи — извън MVP (per-device логика, Cloud Functions).
 
 ## 2026-06-12 · PC — anti-Russian мерки в worker-а (✅ решава Mac TODO-то)
 Адресирано искането „нула руски" + Mac-овия TODO (breakdown понякога връщаше руски
