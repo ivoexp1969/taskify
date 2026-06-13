@@ -58,22 +58,32 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
     — член може да обнови собственото си memberInfo/name БЕЗ да пипа members/ownerId.
   - **Deploy:** web (Cloudflare taskify-app) + iOS Toto (1.0.43+48) обновени с целия код. Commits до `cba4769`.
 
-- **3-та част:** ✅ Груповият редактор стана **богат bottom-sheet като личния** с **AI-парсване**
-  (бутон „искрица" → `AiService.parseTask`, Pro-gated + дневен лимит; попълва заглавие/приоритет/повторение/
-  категория/час), категории-чипове от личните. ✅ **Версия 1.0.44 (49)** билдната (Xcode 26), качена с altool
-  (ключ R342BR6F85) и **ПОДАДЕНА за ревю** през ASC API (whatsNew EN+BG — БЕЗ емоджи, Apple ги отхвърля в release notes!).
-  Web (Cloudflare taskify-app) обновен. Скриптове: `/tmp/asc_groups.py` + `/tmp/asc_fix.py`.
+- **3-та част:** ✅ Груповият редактор стана богат, после — **ТОЧНО СЪЩИЯТ като таб „Задачи"** (умен мост,
+  БЕЗ дублиране на 1100 реда и БЕЗ риск за продукцията):
+  - Личният `_openTaskDialog` получи опционален `onSave` callback → при него **прескача Hive/календар/
+    нотификации**, само връща готовата `Task`. Личният път (else) е НЕПРОМЕНЕН.
+  - Нов публичен `TaskEditorBridge` (в `task_screen.dart`): TaskScreen регистрира `_current` (живее винаги в
+    IndexedStack) → други екрани викат `TaskEditorBridge.open(existing:, onSave:)` и отварят СЪЩИЯ диалог.
+  - `group_tasks_screen._addOrEditTask` вече само вика моста; onSave конвертира `Task ↔ GroupTask`
+    (категория ↔ ИМЕ по личните категории) и пише във Firestore. → групите имат глас, NLP, AI, категории,
+    напомняния, повторение, подзадачи, бележки — 1:1 като личния екран.
+- ✅ **Версия 1.0.44** в App Store: build 49 (по-прост редактор) подаден, после потребителят го МАХНА от ревю;
+  build **50** (умен редактор) билднат (Xcode 26), качен с altool (ключ R342BR6F85) и **подаден за ревю**
+  (whatsNew EN+BG — **БЕЗ емоджи**, Apple ги отхвърля!). VID версия = `ba4f4353-...`. Скриптове: `/tmp/asc_50.py`.
+- Web (Cloudflare taskify-app) + iOS Toto обновени с умния редактор. Commits до `3d673cd` (+ bump 50).
 
 - **🤖 ANDROID (PC) — пускане на v1.0.44 със Споделени списъци:**
   Backend-ът е общ → НЯМА нужда от Android-специфична настройка за групите (cloud_firestore + Firebase Auth
   вече са конфигурирани; `google-services.json` е на място; **Firestore rules вече са деплойнати** от Mac —
   важат и за Android). Стъпки на PC:
-  1. `git pull --rebase origin main` (вземи целия групов код + version 1.0.44+49).
+  1. `git pull --rebase origin main` (вземи целия групов код + version **1.0.44+50**).
   2. JDK 17, после: `flutter clean && flutter pub get`.
   3. `flutter build appbundle --release` (за Play Store) или `flutter build apk --release` (за adb тест на Note 9).
+     ⚠️ Android release се билдва САМО на PC — Mac-ът няма Android SDK НИТО release keystore (`android/key.properties`).
   4. Инсталирай на Note 9 по WiFi/adb и тествай:
      - вход → таб **„Споделени"** → Нова група (Pro) → код → присъединяване с 2-ри акаунт → задача на живо.
-     - богатият редактор с **подзадачи + AI „искрица"**; „завършена от [име]"; изтриване да не възкръсва.
+     - „+" отваря **СЪЩИЯ редактор като таб Задачи** (глас/AI/категории/напомняния/повторение/подзадачи/бележки);
+       „завършена от [име]"; изтриване да не възкръсва.
      - **негативен тест:** не-член НЕ чете групата (permission-denied).
   5. Качи `app-release.aab` в Play Console → нов release, whatsNew (Споделени списъци).
   Бележки: табът „Споделени" замени „Матрица" (Матрицата е иконка в AppBar-а на Задачи). Премиум: създаване
