@@ -1143,7 +1143,7 @@ class _TicketTaskCardState extends State<TicketTaskCard>
     final liveDrag = _dragging ? _dragDy.clamp(0.0, 44.0) * 0.7 : 0.0;
     final stub = Container(
       width: _stubWidth,
-      color: stubColor.withValues(alpha: isDark ? 0.22 : 0.14),
+      color: stubColor.withValues(alpha: isDark ? 0.34 : 0.22),
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

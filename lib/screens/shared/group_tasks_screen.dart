@@ -6,6 +6,7 @@ import '../../services/auth_service.dart';
 import '../../services/group_service.dart';
 import '../../utils/localization.dart';
 import '../../widgets/task_card_styles.dart';
+import '../../utils/category_colors.dart';
 import 'group_invite_screen.dart';
 
 /// Екран със задачите на ЕДНА споделена група. Real-time (Firestore snapshots):
@@ -24,6 +25,15 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
 
   // Държим последно полученото състояние на групата (членове/owner) на живо.
   late Group _group = widget.group;
+
+  /// Наситен акцент за груповата карта. Категориите са текст (без цвят), затова
+  /// извеждаме стабилен цвят от името по споделената палитра; без категория → по приоритет.
+  Color _accentFor(GroupTask gt) {
+    final name = gt.categoryName?.trim() ?? '';
+    if (name.isEmpty) return _priorityColor(gt.priority);
+    final idx = name.toLowerCase().hashCode.abs() % kCategoryColors.length;
+    return kCategoryColors[idx];
+  }
 
   Color _priorityColor(int p) {
     switch (p) {
@@ -498,7 +508,7 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                         isOverdue: isOverdue,
                         isCompleted: gt.isCompleted,
                         isExpanded: _expanded.contains(gt.id),
-                        accentColor: theme.colorScheme.primary,
+                        accentColor: _accentFor(gt),
                         priorityColor: _priorityColor(gt.priority),
                         priorityText: _priorityLabel(gt.priority, t),
                         dateTimeStr: _dateStr(gt.dueDate),
