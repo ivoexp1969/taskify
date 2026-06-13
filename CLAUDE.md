@@ -46,6 +46,17 @@ v1.0.43+48 (June 2026)
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **Споделени групи / групови задачи — MVP (Mac, още НЕ release):** Нов ОТДЕЛЕН слой за споделени
+  списъци между потребители; личният Hive/merge sync е НЕДОКОСНАТ. Живее само във Firestore (real-time
+  snapshots + вграден offline кеш, БЕЗ Hive). Структура: `groups/{id}` (ownerId, members[], memberInfo,
+  inviteCode, server timestamps), `groups/{id}/tasks/{taskId}` (Task полета + categoryName като ТЕКСТ,
+  createdBy/completedBy, `deleted` tombstone, server updatedAt), `invites/{code}→{groupId}`. НОВ
+  `firestore.rules` (рег. в firebase.json) — сигурностна граница: само членове четат/пишат; join добавя
+  само СЕБЕ СИ; само owner трие; invites get-only. ⚠️ **rules НЕ са деплойнати още** —
+  `firebase deploy --only firestore:rules`. Нов таб **„Споделени"** замени „Матрица" долу; Матрицата →
+  иконка в AppBar-а на Задачи. Нов код: `models/group.dart`, `services/group_service.dart`,
+  `screens/shared/*`. Gating: създаване=Pro, присъединяване=безплатно. analyze 0 грешки, web build ✅;
+  Android APK не тестван на Mac (виж DEVLOG).
 - **AI anti-Russian hardening (PC, no app bump):** реши Mac-овия TODO — breakdown понякога връщаше
   руски повелителни форми. В worker-а (`Desktop/taskify-ai/`): (1) few-shot контрастен промпт за
   `lang==='bg'` (ПРАВИЛНО бг vs ЗАБРАНЕНО ру примери) + забрана на ы/э/ё в parse/schedule;

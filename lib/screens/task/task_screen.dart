@@ -25,6 +25,7 @@ import '../../widgets/celebration_overlay.dart';
 import '../../services/review_service.dart';
 import 'shopping_list_screen.dart';
 import 'task_type_selector.dart';
+import 'eisenhower_screen.dart';
 import 'birthday_dialog.dart';
 import 'meeting_dialog.dart';
 import 'workout_dialog.dart';
@@ -2426,6 +2427,15 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
         actions: _isSearching
             ? []
             : [
+                IconButton(
+                  icon: const Icon(Icons.grid_view_rounded),
+                  tooltip: t.matrix,
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const EisenhowerScreen(),
+                    ),
+                  ),
+                ),
                 IconButton(
                   icon: const Icon(Icons.search_rounded),
                   onPressed: () => setState(() => _isSearching = true),

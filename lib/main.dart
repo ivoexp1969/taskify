@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'models/task.dart';
 import 'models/category.dart';
@@ -48,6 +49,15 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Споделените групи разчитат на вградения Firestore offline кеш (без Hive
+  // дублиране). На web го оставяме по подразбиране (избягва multi-tab проблеми).
+  if (!kIsWeb) {
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+    );
+  }
 
   // Заобикаляме wontfix бъга на firebase_auth (сесията не оцелява на някои
   // Android OEM — flutterfire #17971): ако SDK „е забравил" потребителя,

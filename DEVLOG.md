@@ -6,6 +6,25 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-13 · Mac — Споделени групи (групови задачи), MVP · още НЕ е release
+Нов **отделен** слой за споделени списъци между потребители — личният Hive/merge sync е
+НЕДОКОСНАТ. Живее само във Firestore (real-time snapshots + вграден offline кеш, без Hive дублиране).
+- **Firestore:** `groups/{id}` (name, ownerId, members[], memberInfo{uid:{name,email}}, inviteCode,
+  server `createdAt/updatedAt`); `groups/{id}/tasks/{taskId}` (Task полета + categoryName като ТЕКСТ,
+  createdBy/completedBy/completedAt, server updatedAt, `deleted` tombstone); `invites/{code}→{groupId}`.
+- **firestore.rules (НОВ файл, рег. в firebase.json):** не-член не чете/пише; присъединяване само
+  добавя СЕБЕ СИ (`addsOnlySelf`), напускане маха СЕБЕ СИ; само owner трие; `invites` get-only (list:false,
+  без enumerate). ⚠️ **Още НЕ е деплойнат** — нямаше firebase CLI на Mac. Деплой: `firebase deploy --only firestore:rules`.
+- **Код:** `models/group.dart`, `services/group_service.dart` (watchMyGroups/watchTasks, create/join/leave/
+  delete, CRUD, лимити 10 групи/owner·20 члена·500 задачи, Crockford base32 код, share текст).
+- **UI:** нов таб **„Споделени"** ЗАМЕНИ „Матрица" в долната навигация; Матрицата вече е иконка
+  (`grid_view`) в AppBar-а на Задачи. Нови екрани `screens/shared/` (списък+create/join, задачи на живо
+  с `TaskCardView` вкл. Билети тема + индикатор „завършена от…", покана+Share, членове).
+- **Gating:** създаване = Pro; присъединяване = безплатно (viral loop). Локализация: ~28 низа × 11 езика.
+- **Проверка:** `flutter analyze` 0 грешки (новите файлове чисти); `flutter build web` ✅. Android APK
+  НЕ е тестван (Mac няма Android SDK → провери на PC). iOS нативно непроменено (cloud_firestore вече в Podfile.lock).
+- **Остава:** deploy rules; тест с 2 потребителя + негативен (не-член); APK build на PC.
+
 ## 2026-06-12 · PC — anti-Russian мерки в worker-а (✅ решава Mac TODO-то)
 Адресирано искането „нула руски" + Mac-овия TODO (breakdown понякога връщаше руски
 повелителни форми: „Пригласи гостей", „Закажи место"). Двупластова защита в `Desktop/taskify-ai/`:

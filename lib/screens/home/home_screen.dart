@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../task/task_screen.dart';
-import '../task/eisenhower_screen.dart';
 import '../calendar/calendar_screen.dart';
 import '../settings/settings_screen.dart';
 import '../documents/documents_screen.dart';
+import '../shared/shared_groups_screen.dart';
 import '../../utils/localization.dart';
 import '../../widgets/banner_ad_widget.dart';
 import '../../services/pro_service.dart';
@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// Екраните в долната навигация. „Документи" се вмъква преди Настройки.
   List<Widget> get _screens => [
         const TaskScreen(),
-        const EisenhowerScreen(),
+        const SharedGroupsScreen(),
         const CalendarScreen(),
         if (_showDocuments) const DocumentsScreen(),
         const SettingsScreen(),
@@ -319,9 +319,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   label: t.tasks,
                 ),
                 NavigationDestination(
-                  icon: const Icon(Icons.grid_view_outlined),
-                  selectedIcon: const Icon(Icons.grid_view_rounded),
-                  label: t.matrix,
+                  icon: const Icon(Icons.groups_outlined),
+                  selectedIcon: const Icon(Icons.groups_rounded),
+                  label: t.sharedTab,
                 ),
                 NavigationDestination(
                   icon: Stack(
