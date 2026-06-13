@@ -6,6 +6,26 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-13 · PC (Android) — Споделени списъци пуснати в Play Store · v1.0.44+50 PRODUCTION
+Изпълних Android-задачата от Mac entry-то по-долу (Споделени списъци v1.0.44).
+- `git pull --rebase` → взе целия групов код + version **1.0.44+50** (умен редактор, build 50).
+- JDK 17 ✅; `flutter clean && flutter pub get` ✅; analyze няма нови грешки.
+- **APK release билднат** (71.0 MB) и инсталиран на Note 9 по WiFi adb (192.168.0.117:5555).
+  Старата инсталация беше Play-подписана → signature mismatch → деинсталирах и сложих локалния
+  release (данните са в облака, връщат се при вход). Стартира чисто (onboarding). ⚠️ Пълният
+  live тест на групите (вход + 2-ри акаунт + create/join/завършена-от/негативен) НЕ е правен —
+  чака потребителя.
+- **AAB release билднат** (57.4 MB) → `build/app/outputs/bundle/release/app-release.aab`.
+- **Качен РЪЧНО в Play Console → Production** (rollout стартиран от потребителя). Release notes
+  bg+en (Споделени списъци). Backend общ → НЯМА Android-специфична настройка (Firestore rules вече
+  деплойнати от Mac; cloud_firestore + Auth + google-services.json на място).
+- **Бонус (отложено):** проучихме автоматично качване през Google Play Developer API (service account
+  + JSON ключ). Python 3.14 + `google-api-python-client`/`google-auth` инсталирани. Настройката иска
+  интерактивни стъпки на потребителя (GCP service account + права в Play Console → Users & permissions).
+  ВАЖНО: вече има GCP проект **`taskmasteruploader`** с RevenueCat service account (`revenuecat-
+  integration@taskmasteruploader.iam.gserviceaccount.com`) → бъдеща автоматизация може да преизползва
+  СЪЩИЯ проект (нов ключ + Releases права), без проект от нула. Засега качването остава ръчно.
+
 ## 2026-06-13 · Mac — Споделени групи (групови задачи), MVP · още НЕ е release
 Нов **отделен** слой за споделени списъци между потребители — личният Hive/merge sync е
 НЕДОКОСНАТ. Живее само във Firestore (real-time snapshots + вграден offline кеш, без Hive дублиране).

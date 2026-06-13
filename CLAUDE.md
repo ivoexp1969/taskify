@@ -42,11 +42,17 @@ flutter build appbundle --release
 - Firebase: `IVA` — lifetime access, 20-user cap
 
 ## Current Version
-v1.0.44+49 (June 2026) — Споделени списъци (групи) подадена за ревю; виж DEVLOG
+v1.0.44+50 (June 2026) — Споделени списъци (групи): **Android в Play Store Production**, iOS подадена за ревю; виж DEVLOG
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
-- **Споделени групи / групови задачи — MVP (Mac, още НЕ release):** Нов ОТДЕЛЕН слой за споделени
+- **Споделени списъци — Android в Production (PC):** v1.0.44+50 (умен редактор, build 50) build-нат
+  на PC (JDK 17) и **качен ръчно в Play Console → Production** (rollout стартиран). APK тестван само
+  колкото да стартира на Note 9 (signature mismatch → деинсталиран Play билд, сложен локален release);
+  ПЪЛният live тест на групите чака потребителя. Backend общ → без Android-специфична настройка.
+  Проучено авто-качване през Play Developer API (service account/JSON) — отложено; има готов GCP
+  проект `taskmasteruploader` (RevenueCat SA) за преизползване. Виж DEVLOG.
+- **Споделени групи / групови задачи — MVP (Mac):** Нов ОТДЕЛЕН слой за споделени
   списъци между потребители; личният Hive/merge sync е НЕДОКОСНАТ. Живее само във Firestore (real-time
   snapshots + вграден offline кеш, БЕЗ Hive). Структура: `groups/{id}` (ownerId, members[], memberInfo,
   inviteCode, server timestamps), `groups/{id}/tasks/{taskId}` (Task полета + categoryName като ТЕКСТ,
