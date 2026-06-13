@@ -53,6 +53,26 @@ class TaskScreen extends StatefulWidget {
   State<TaskScreen> createState() => _TaskScreenState();
 }
 
+/// Мост, който позволява на ДРУГИ екрани (напр. споделените групи) да отворят
+/// ТОЧНО СЪЩИЯ редактор за задача като таб „Задачи", без дублиране на UI.
+/// TaskScreen живее в IndexedStack (винаги инстанциран) → `_current` е наличен.
+/// При `onSave` редакторът не пипа Hive/календар/нотификации — само връща
+/// готовата [Task] през callback-а (извикващият решава къде да я запише).
+class TaskEditorBridge {
+  static _TaskScreenState? _current;
+
+  static bool get isReady => _current != null;
+
+  static Future<void> open({
+    Task? existing,
+    required Future<void> Function(Task draft) onSave,
+  }) async {
+    final s = _current;
+    if (s == null) return;
+    await s._openTaskDialog(existing: existing, onSave: onSave);
+  }
+}
+
 class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, WidgetsBindingObserver {
   late Box<Task> taskBox;
   late Box<Category> categoryBox;
@@ -91,6 +111,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
   @override
   void initState() {
     super.initState();
+    TaskEditorBridge._current = this; // позволи на други екрани (групи) да ползват СЪЩИЯ редактор
     taskBox = Hive.box<Task>('tasks');
     categoryBox = Hive.box<Category>('categories');
     _speech = SpeechToText();
@@ -164,6 +185,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
 
   @override
   void dispose() {
+    if (TaskEditorBridge._current == this) TaskEditorBridge._current = null;
     WidgetsBinding.instance.removeObserver(this);
     _listAnimationController.dispose();
     _micPulseController.dispose();
@@ -829,7 +851,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     }
   }
 
-  Future<void> _openTaskDialog({Task? existing}) async {
+  Future<void> _openTaskDialog({Task? existing, Future<void> Function(Task draft)? onSave}) async {
     // Зареждаме AI настройките при всяко отваряне, за да са актуални
     final aiParsingEnabled = await AiUsageService.instance.isParsingEnabled();
     final voiceEnabled = await AiUsageService.instance.isVoiceEnabled();
@@ -1828,6 +1850,34 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
 
                           final recurrenceToSave =
                               tempRecurrence == 'none' ? null : tempRecurrence;
+
+                          // Външен режим (напр. споделени групи): НЕ пипаме Hive/
+                          // календар/нотификации — само връщаме готовата задача през
+                          // callback-а. Личният път (else по-долу) остава непроменен.
+                          if (onSave != null) {
+                            final draft = existing ??
+                                Task(
+                                  title: titleText,
+                                  dueDate: dueDateToSave,
+                                  categoryId: tempCategoryId,
+                                  priority: tempPriority,
+                                );
+                            draft
+                              ..title = titleText
+                              ..dueDate = dueDateToSave
+                              ..categoryId = tempCategoryId
+                              ..priority = tempPriority
+                              ..recurrence = recurrenceToSave
+                              ..notes = tempNotes.trim().isEmpty
+                                  ? null
+                                  : tempNotes.trim();
+                            draft.setReminders(tempReminders);
+                            draft.setSubtasks(tempSubtasks);
+                            _titleController.clear();
+                            if (innerContext.mounted) Navigator.pop(innerContext);
+                            await onSave(draft);
+                            return;
+                          }
 
                           Task? _openShoppingAfterCreate;
                           if (isEditing) {
