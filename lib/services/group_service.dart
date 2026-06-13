@@ -190,6 +190,22 @@ class GroupService {
     return (group.data()?['name'] as String?)?.trim() ?? '';
   }
 
+  /// Обновява `memberInfo` (име/имейл) на текущия потребител във ВСИЧКИ негови групи —
+  /// напр. след смяна на името за показване в Настройки. Безопасно е, ако няма групи.
+  Future<void> syncMyMemberInfo() async {
+    final uid = _uid;
+    if (uid == null) return;
+    final snap = await _groups.where('members', arrayContains: uid).get();
+    for (final d in snap.docs) {
+      try {
+        await d.reference.update({
+          'memberInfo.$uid': _selfInfo(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      } catch (_) {/* напр. permission — пропусни тихо */}
+    }
+  }
+
   /// Член напуска групата сам (без изтриване на групата).
   Future<void> leaveGroup(String groupId) async {
     final uid = _uid;

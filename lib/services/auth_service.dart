@@ -65,6 +65,23 @@ class AuthService {
   
   // Текущ потребител
   User? get currentUser => _auth.currentUser;
+
+  /// Името за показване (от Auth displayName). Празно ако не е зададено.
+  String get displayName => _auth.currentUser?.displayName ?? '';
+
+  /// Задава име за показване (в Auth profile). Връща true при успех.
+  Future<bool> updateDisplayName(String name) async {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+    try {
+      await user.updateDisplayName(name.trim());
+      await user.reload();
+      return true;
+    } catch (e) {
+      debugPrint('updateDisplayName failed: $e');
+      return false;
+    }
+  }
   
   // Дали е логнат
   bool get isLoggedIn => _auth.currentUser != null;

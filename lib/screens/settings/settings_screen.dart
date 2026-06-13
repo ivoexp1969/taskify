@@ -17,6 +17,7 @@ import '../../utils/category_colors.dart';
 import '../../utils/file_saver.dart';
 import '../../utils/gsi_button.dart';
 import '../../services/auth_service.dart';
+import '../../services/group_service.dart';
 import '../../services/sync_service.dart';
 import '../auth/login_screen.dart';
 import 'statistics_screen.dart';
@@ -1407,6 +1408,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _editDisplayName() async {
+    final t = AppText.of(context);
+    final ctrl = TextEditingController(text: _authService.displayName);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(t.displayName),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          decoration: InputDecoration(
+            hintText: t.displayName,
+            helperText: t.displayNameDesc,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(t.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+            child: Text(t.save),
+          ),
+        ],
+      ),
+    );
+    if (name == null) return;
+    await _authService.updateDisplayName(name);
+    // Разпространи новото име към всичките ми групи (за „завършена от …" и членове).
+    await GroupService().syncMyMemberInfo();
+    if (mounted) setState(() {});
+  }
+
   Future<void> _logout() async {
     final t = AppText.of(context);
 
@@ -1737,32 +1773,59 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 8),
           Card(
             child: user != null
-                ? ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: theme.colorScheme.primary,
-                      child: Text(
-                        user.email?.substring(0, 1).toUpperCase() ?? '?',
-                        style: TextStyle(
-                          color: theme.colorScheme.onPrimary,
-                          fontWeight: FontWeight.bold,
+                ? Column(
+                    children: [
+                      ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: theme.colorScheme.primary,
+                          child: Text(
+                            (_authService.displayName.isNotEmpty
+                                    ? _authService.displayName
+                                    : (user.email ?? '?'))
+                                .substring(0, 1)
+                                .toUpperCase(),
+                            style: TextStyle(
+                              color: theme.colorScheme.onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        title: Text(user.email ?? ''),
+                        subtitle: Text(
+                          t.signedIn,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurface
+                                .withValues(alpha: 0.6),
+                          ),
+                        ),
+                        trailing: TextButton(
+                          onPressed: _logout,
+                          child: Text(
+                            t.logout,
+                            style: const TextStyle(color: Colors.redAccent),
+                          ),
                         ),
                       ),
-                    ),
-                    title: Text(user.email ?? ''),
-                    subtitle: Text(
-                      t.signedIn,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: Icon(Icons.badge_outlined,
+                            color: theme.colorScheme.primary),
+                        title: Text(_authService.displayName.isNotEmpty
+                            ? _authService.displayName
+                            : t.addName),
+                        subtitle: Text(
+                          t.displayNameDesc,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurface
+                                .withValues(alpha: 0.6),
+                          ),
+                        ),
+                        trailing: const Icon(Icons.edit_outlined, size: 18),
+                        onTap: _editDisplayName,
                       ),
-                    ),
-                    trailing: TextButton(
-                      onPressed: _logout,
-                      child: Text(
-                        t.logout,
-                        style: const TextStyle(color: Colors.redAccent),
-                      ),
-                    ),
+                    ],
                   )
                 : ListTile(
                     leading: Container(

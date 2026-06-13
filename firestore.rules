@@ -77,6 +77,14 @@ service cloud.firestore {
             && request.resource.data.ownerId == resource.data.ownerId;
       }
 
+      // Член обновява безопасни полета (memberInfo/name) БЕЗ да пипа members/ownerId.
+      function memberSafeUpdate() {
+        return request.auth.uid in resource.data.members
+            && request.resource.data.members.toSet().hasOnly(resource.data.members)
+            && resource.data.members.toSet().hasOnly(request.resource.data.members)
+            && request.resource.data.ownerId == resource.data.ownerId;
+      }
+
       allow read: if isMember();
 
       allow create: if signedIn()
@@ -88,7 +96,8 @@ service cloud.firestore {
 
       allow update: if (isOwner() && membersWithinLimit())
                     || (signedIn() && addsOnlySelf() && membersWithinLimit())
-                    || (signedIn() && removesOnlySelf());
+                    || (signedIn() && removesOnlySelf())
+                    || (signedIn() && memberSafeUpdate());
 
       // Задачи в групата — read/write само за членове на родителската група.
       match /tasks/{taskId} {
