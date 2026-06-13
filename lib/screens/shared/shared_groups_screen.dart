@@ -88,6 +88,8 @@ class _SharedGroupsScreenState extends State<SharedGroupsScreen> {
       );
     } on GroupException catch (e) {
       if (mounted) await _showError(context, e);
+    } catch (_) {
+      if (mounted) await _showError(context, GroupException('generic'));
     }
   }
 
@@ -127,6 +129,8 @@ class _SharedGroupsScreenState extends State<SharedGroupsScreen> {
       }
     } on GroupException catch (e) {
       if (mounted) await _showError(context, e);
+    } catch (_) {
+      if (mounted) await _showError(context, GroupException('generic'));
     }
   }
 

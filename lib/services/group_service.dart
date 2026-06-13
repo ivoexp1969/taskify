@@ -109,10 +109,14 @@ class GroupService {
     final uid = _uid;
     if (uid == null) throw GroupException('not-signed-in');
 
-    // Лимит: макс. групи като owner.
-    final owned =
-        await _groups.where('ownerId', isEqualTo: uid).count().get();
-    if ((owned.count ?? 0) >= GroupLimits.maxGroupsAsOwner) {
+    // Лимит: макс. групи като owner. ВАЖНО: rules пускат четене на групи само по
+    // `members` (не по `ownerId`) → заявка where('ownerId'==uid) би дала
+    // permission-denied. Затова четем моите групи (members arrayContains) и
+    // броим клиентски тези, на които съм owner.
+    final mine = await _groups.where('members', arrayContains: uid).get();
+    final ownedCount =
+        mine.docs.where((d) => d.data()['ownerId'] == uid).length;
+    if (ownedCount >= GroupLimits.maxGroupsAsOwner) {
       throw GroupException('owner-limit');
     }
 

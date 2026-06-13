@@ -176,6 +176,8 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
       }
     } on GroupException catch (e) {
       await _showError(e);
+    } catch (_) {
+      await _showError(GroupException('generic'));
     }
   }
 
@@ -215,6 +217,8 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
       if (mounted) Navigator.of(context).pop();
     } on GroupException catch (e) {
       await _showError(e);
+    } catch (_) {
+      await _showError(GroupException('generic'));
     }
   }
 
