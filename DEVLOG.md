@@ -6,6 +6,17 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-14 · Mac — „Разбий на стъпки" на СПОДЕЛЕНАТА КАРТА (вярната диагноза) · v1.0.44+**52**
+Скрийншоти от Toto разкриха истинския проблем: потребителят имаше предвид бутона **върху картата**
+(разгъната задача), не в редактора. Личната карта (`ExpandableTaskCard`) показва „Разбий на стъпки"
+през `onBreakdown`; груповата (`TaskCardView`, който ГО ПОДДЪРЖА) просто не получаваше callback-а.
+- `group_tasks_screen`: подаден `onBreakdown: () => _breakdown(gt)`. Нов `_breakdown()` — Pro/лимит
+  проверки → `AiService.breakdownTask` → loader → диалог за преглед → запис във **Firestore** през
+  `_service.updateTask` (merge на подзадачите; `_taskToMap` не пипа completedBy/createdBy). Показва се
+  само при 0 подзадачи (като личните карти). Добавени импорти: ProService/AiService/AiUsageService/paywall.
+- Редакторският breakdown бутон (от +51) остава — допълва картата при редакция.
+- Build +52, потвърден на Toto, нов процес стартиран на чисто (`process launch --terminate-existing`).
+
 ## 2026-06-14 · Mac — Поправки на 2-та фикса (breakdown бутон + цвят на живо) · v1.0.44+**51**
 Потребителят тества на Toto: breakdown бутонът липсваше в споделените задачи + цветът не се
 обновяваше. Двата ми фикса имаха реални дефекти — поправени:

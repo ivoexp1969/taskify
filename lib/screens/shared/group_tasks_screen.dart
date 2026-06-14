@@ -8,9 +8,13 @@ import '../../models/category.dart';
 import '../../models/task.dart';
 import '../../services/auth_service.dart';
 import '../../services/group_service.dart';
+import '../../services/pro_service.dart';
+import '../../services/ai_service.dart';
+import '../../services/ai_usage_service.dart';
 import '../../utils/localization.dart';
 import '../../widgets/task_card_styles.dart';
 import '../../utils/category_colors.dart';
+import '../paywall/paywall_screen.dart';
 import '../task/task_screen.dart';
 import 'group_invite_screen.dart';
 
@@ -155,6 +159,95 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
       _ => t.groupErrGeneric,
     };
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  /// AI „Разбий на стъпки" за СПОДЕЛЕНА задача — като личните карти, но записва
+  /// във Firestore (GroupTask), не в Hive. Показва се само при 0 подзадачи.
+  Future<void> _breakdown(GroupTask gt) async {
+    final t = AppText.of(context);
+    if (!ProService().isPro) {
+      await showPaywallIfNeeded(context, isFeatureAvailable: false);
+      return;
+    }
+    if (!await AiUsageService.instance.canUse()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(t.aiLimitReached)));
+      }
+      return;
+    }
+    final lang = LanguageScope.of(context).locale.languageCode;
+    final catNames = _cats.map((c) => c.name).toList();
+
+    // Зареждащ индикатор, докато AI генерира.
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+    final r = await AiService.breakdownTask(gt.title, catNames, lang);
+    if (mounted) Navigator.of(context).pop(); // махни loader-а
+    if (!mounted) return;
+    if (r == null || r.subtasks.isEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(t.aiError)));
+      return;
+    }
+    await AiUsageService.instance.recordUse();
+    if (!mounted) return;
+
+    // Преглед + потвърждение преди запис.
+    final apply = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(t.aiBreakdownTitle),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final s in r.subtasks)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Text('•  $s'),
+                ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(t.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(t.aiBreakdownApply),
+          ),
+        ],
+      ),
+    );
+    if (apply != true) return;
+
+    final merged = <String>[...?gt.subtasks, ...r.subtasks];
+    final updated = GroupTask(
+      id: gt.id,
+      title: gt.title,
+      dueDate: gt.dueDate,
+      categoryName: gt.categoryName,
+      priority: gt.priority,
+      recurrence: gt.recurrence,
+      reminders: gt.reminders,
+      subtasks: merged,
+      notes: gt.notes,
+      isCompleted: gt.isCompleted,
+    );
+    try {
+      await _service.updateTask(_group.id, gt.id, updated);
+    } on GroupException catch (e) {
+      await _showError(e);
+    } catch (_) {
+      await _showError(GroupException('generic'));
+    }
   }
 
   Future<void> _addOrEditTask({GroupTask? existing}) async {
@@ -414,6 +507,7 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                         }),
                         onToggleComplete: () => _service.toggleComplete(
                             _group.id, gt.id, !gt.isCompleted),
+                        onBreakdown: () => _breakdown(gt),
                         onEdit: () => _addOrEditTask(existing: gt),
                         onDelete: () =>
                             _service.deleteTask(_group.id, gt.id),
