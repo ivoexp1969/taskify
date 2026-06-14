@@ -177,19 +177,132 @@ struct TaskRowView: View {
     }
 }
 
+// Playful empty-state phrases — mirror of Android WidgetPhrases.kt (10 langs × 18).
+// `ja` is intentionally absent → falls back to "en".
+enum WidgetPhrases {
+    static let byLang: [String: [String]] = [
+        "bg": [
+            "🦥 Дори мързелът ти завижда", "🏖️ Плажен режим: активиран",
+            "🎮 Нула задачи. Време за игри?", "🧘 Вътрешен мир: постигнат",
+            "🦸 Всички задачи — победени!", "🍕 Няма задачи = време за пица!",
+            "🚀 Всичко чисто. Готов за излитане!", "🎵 Без задачи, само вайб",
+            "🐱 Дори котката ти е впечатлена", "🌴 Рай на земята: 0 задачи",
+            "🏆 Шампион по продуктивност!", "☕ Само кафе и спокойствие",
+            "🌟 Всичко е под контрол!", "😎 Нищо за вършене. Релакс.",
+            "🍦 Свободно време: отключено!", "📚 Може би една книга?",
+            "🌈 Чисто небе пред теб", "💆 Почивай, заслужи си го",
+        ],
+        "en": [
+            "🦥 Even sloths envy your free time", "🏖️ Beach mode: activated",
+            "🎮 Zero tasks. Game time?", "🧘 Inner peace: achieved",
+            "🦸 All tasks — defeated!", "🍕 No tasks = pizza time!",
+            "🚀 All clear. Ready for takeoff!", "🎵 No tasks, just vibes",
+            "🐱 Even your cat is impressed", "🌴 Paradise found: 0 tasks",
+            "🏆 Productivity champion!", "☕ Just coffee and calm",
+            "🌟 You're all caught up!", "😎 Nothing to do. Stay cool.",
+            "🍦 Free time unlocked!", "📚 Maybe read a book?",
+            "🌈 Clear skies ahead", "💆 Relax, you earned it",
+        ],
+        "de": [
+            "🦥 Selbst Faultiere beneiden dich", "🏖️ Strandmodus: aktiviert",
+            "🎮 Null Aufgaben. Spielzeit?", "🧘 Innerer Frieden: erreicht",
+            "🦸 Alle Aufgaben — besiegt!", "🍕 Keine Aufgaben = Pizzazeit!",
+            "🚀 Alles klar. Bereit zum Abheben!", "🎵 Keine Aufgaben, nur gute Laune",
+            "🐱 Selbst deine Katze staunt", "🌴 Paradies gefunden: 0 Aufgaben",
+            "🏆 Produktivitäts-Champion!", "☕ Nur Kaffee und Gelassenheit",
+            "🌟 Alles erledigt!", "😎 Nichts zu tun. Bleib cool.",
+            "🍦 Freizeit freigeschaltet!", "📚 Vielleicht ein Buch?",
+            "🌈 Klarer Himmel voraus", "💆 Entspann dich, du hast es verdient",
+        ],
+        "fr": [
+            "🦥 Même les paresseux t'envient", "🏖️ Mode plage : activé",
+            "🎮 Zéro tâche. On joue ?", "🧘 Paix intérieure : atteinte",
+            "🦸 Toutes les tâches — vaincues !", "🍕 Pas de tâches = pizza !",
+            "🚀 Tout est clair. Prêt au décollage !", "🎵 Pas de tâches, que du bon",
+            "🐱 Même ton chat est impressionné", "🌴 Paradis trouvé : 0 tâches",
+            "🏆 Champion de productivité !", "☕ Juste un café et du calme",
+            "🌟 Tout est à jour !", "😎 Rien à faire. Reste cool.",
+            "🍦 Temps libre débloqué !", "📚 Et si tu lisais un livre ?",
+            "🌈 Ciel dégagé devant toi", "💆 Détends-toi, tu l'as mérité",
+        ],
+        "it": [
+            "🦥 Anche i bradipi ti invidiano", "🏖️ Modalità spiaggia: attivata",
+            "🎮 Zero compiti. Si gioca?", "🧘 Pace interiore: raggiunta",
+            "🦸 Tutti i compiti — sconfitti!", "🍕 Niente compiti = pizza!",
+            "🚀 Tutto libero. Pronti al decollo!", "🎵 Niente compiti, solo relax",
+            "🐱 Anche il gatto è colpito", "🌴 Paradiso trovato: 0 compiti",
+            "🏆 Campione di produttività!", "☕ Solo caffè e tranquillità",
+            "🌟 Tutto in ordine!", "😎 Niente da fare. Stai sereno.",
+            "🍦 Tempo libero sbloccato!", "📚 Magari un libro?",
+            "🌈 Cielo sereno in vista", "💆 Rilassati, te lo sei meritato",
+        ],
+        "es": [
+            "🦥 Hasta los perezosos te envidian", "🏖️ Modo playa: activado",
+            "🎮 Cero tareas. ¿Jugamos?", "🧘 Paz interior: alcanzada",
+            "🦸 ¡Todas las tareas — vencidas!", "🍕 Sin tareas = ¡hora de pizza!",
+            "🚀 Todo listo. ¡Listos para despegar!", "🎵 Sin tareas, solo buena onda",
+            "🐱 Hasta tu gato está impresionado", "🌴 Paraíso encontrado: 0 tareas",
+            "🏆 ¡Campeón de productividad!", "☕ Solo café y tranquilidad",
+            "🌟 ¡Todo al día!", "😎 Nada que hacer. Tranqui.",
+            "🍦 ¡Tiempo libre desbloqueado!", "📚 ¿Quizás un libro?",
+            "🌈 Cielo despejado por delante", "💆 Relájate, te lo mereces",
+        ],
+        "pt": [
+            "🦥 Até as preguiças te invejam", "🏖️ Modo praia: ativado",
+            "🎮 Zero tarefas. Hora de jogar?", "🧘 Paz interior: alcançada",
+            "🦸 Todas as tarefas — vencidas!", "🍕 Sem tarefas = hora da pizza!",
+            "🚀 Tudo limpo. Pronto pra decolar!", "🎵 Sem tarefas, só boa vibe",
+            "🐱 Até o gato ficou impressionado", "🌴 Paraíso encontrado: 0 tarefas",
+            "🏆 Campeão de produtividade!", "☕ Só café e tranquilidade",
+            "🌟 Tudo em dia!", "😎 Nada a fazer. Fica tranquilo.",
+            "🍦 Tempo livre desbloqueado!", "📚 Que tal um livro?",
+            "🌈 Céu limpo à frente", "💆 Relaxa, mereceste",
+        ],
+        "ru": [
+            "🦥 Даже ленивцы тебе завидуют", "🏖️ Режим пляжа: активирован",
+            "🎮 Ноль задач. Поиграем?", "🧘 Внутренний покой: достигнут",
+            "🦸 Все задачи — повержены!", "🍕 Нет задач = время пиццы!",
+            "🚀 Всё чисто. Готов к взлёту!", "🎵 Без задач, только вайб",
+            "🐱 Даже кот впечатлён", "🌴 Рай найден: 0 задач",
+            "🏆 Чемпион продуктивности!", "☕ Только кофе и спокойствие",
+            "🌟 Всё под контролем!", "😎 Делать нечего. Расслабься.",
+            "🍦 Свободное время: открыто!", "📚 Может, книгу почитать?",
+            "🌈 Ясное небо впереди", "💆 Отдыхай, ты заслужил",
+        ],
+        "el": [
+            "🦥 Ακόμα και οι βραδύποδες σε ζηλεύουν", "🏖️ Λειτουργία παραλίας: ενεργή",
+            "🎮 Μηδέν εργασίες. Παιχνίδι;", "🧘 Εσωτερική γαλήνη: επιτεύχθηκε",
+            "🦸 Όλες οι εργασίες — νικήθηκαν!", "🍕 Καμία εργασία = ώρα για πίτσα!",
+            "🚀 Όλα καθαρά. Έτοιμοι για απογείωση!", "🎵 Χωρίς εργασίες, μόνο χαλάρωση",
+            "🐱 Ακόμα και η γάτα εντυπωσιάστηκε", "🌴 Παράδεισος: 0 εργασίες",
+            "🏆 Πρωταθλητής παραγωγικότητας!", "☕ Μόνο καφές και ηρεμία",
+            "🌟 Όλα τακτοποιημένα!", "😎 Τίποτα να κάνεις. Χαλάρωσε.",
+            "🍦 Ελεύθερος χρόνος: ξεκλείδωτος!", "📚 Μήπως ένα βιβλίο;",
+            "🌈 Καθαρός ουρανός μπροστά", "💆 Χαλάρωσε, το αξίζεις",
+        ],
+        "tr": [
+            "🦥 Tembel hayvanlar bile kıskanıyor", "🏖️ Plaj modu: aktif",
+            "🎮 Sıfır görev. Oyun zamanı?", "🧘 İç huzur: sağlandı",
+            "🦸 Tüm görevler — yenildi!", "🍕 Görev yok = pizza zamanı!",
+            "🚀 Her şey temiz. Kalkışa hazır!", "🎵 Görev yok, sadece keyif",
+            "🐱 Kedin bile etkilendi", "🌴 Cennet bulundu: 0 görev",
+            "🏆 Verimlilik şampiyonu!", "☕ Sadece kahve ve huzur",
+            "🌟 Her şey güncel!", "😎 Yapacak bir şey yok. Sakin ol.",
+            "🍦 Boş zaman açıldı!", "📚 Belki bir kitap?",
+            "🌈 Önünde açık gökyüzü", "💆 Rahatla, hak ettin",
+        ],
+    ]
+}
+
 struct TaskifyWidgetEntryView: View {
     var entry: TaskEntry
     @Environment(\.widgetFamily) var family
 
     var emptyMsg: String {
+        // Pick by hour-of-day (changes every hour, cycles through the full list).
+        // Same phrase pool as Android (WidgetPhrases.kt); ja falls back to en.
         let h = Calendar.current.component(.hour, from: Date())
-        let msgs: [String]
-        switch entry.language {
-        case "bg": msgs = ["🦥 Дори мързелът ти завижда","🏖️ Плажен режим: активиран","🎮 Нула задачи. Игри?","🧘 Вътрешен мир: постигнат","🦸 Всички задачи победени!","☕ Само кафе и спокойствие"]
-        case "de": msgs = ["🦥 Selbst Faultiere beneiden dich","🏖️ Strandmodus: aktiviert","🎮 Null Aufgaben. Spielzeit?","🧘 Innerer Frieden: erreicht","🦸 Alle Aufgaben besiegt!","☕ Nur Kaffee und Gelassenheit"]
-        case "ru": msgs = ["🦥 Даже ленивцы тебе завидуют","🏖️ Режим пляжа: активирован","🎮 Ноль задач. Поиграем?","🧘 Внутренний покой: достигнут","🦸 Все задачи повержены!","☕ Только кофе и спокойствие"]
-        default:   msgs = ["🦥 Even sloths envy you","🏖️ Beach mode: activated","🎮 Zero tasks. Game time?","🧘 Inner peace: achieved","🦸 All tasks defeated!","☕ Just coffee and calm"]
-        }
+        let msgs = WidgetPhrases.byLang[entry.language] ?? WidgetPhrases.byLang["en"]!
         return msgs[h % msgs.count]
     }
 

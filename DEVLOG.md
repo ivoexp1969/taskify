@@ -21,6 +21,10 @@ iOS home-screen widget-ът вече ползва **Caveat** (ръкописен
   (рендира 1:1 празното състояние) — изглежда коректно (дълга bg фраза пада на 3 реда, без отрязване).
 - Build с Xcode 26 (DEVELOPER_DIR) и инсталиран на **Toto** през `devicectl`
   (UUID `2A76A482-7995-5D46-9567-3C7379343835`). НЕ App Store upload — само device install.
+- **Допълнение:** iOS празните фрази бяха само 6 (bg/de/ru/en). Сега `WidgetPhrases.byLang` в
+  `TaskifyWidget.swift` е огледало на Android `WidgetPhrases.kt` — **10 езика × 18 фрази** (ja→en
+  fallback). Изборът остава „по час" (`msgs[h % count]`, нова фраза всеки час, цикъл през пълния
+  списък) — за разлика от Android, който е случаен. Втори build + reinstall на Toto.
 
 ## 2026-06-13 · PC (Android) — Споделени списъци пуснати в Play Store · v1.0.44+50 PRODUCTION
 Изпълних Android-задачата от Mac entry-то по-долу (Споделени списъци v1.0.44).
