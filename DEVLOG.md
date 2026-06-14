@@ -6,6 +6,20 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-14 · PC (Android) — изравнен с iOS · v1.0.45+53
+Целта: **Android и iOS на едно ниво.** Прод-ът беше 1.0.44+50 (build-нат ПРЕДИ днешните Mac фиксове);
+Dart кодът е споделен → след `git pull` (824e095) всички фиксове са в repo-то, оставаше само нов
+Android build.
+- `flutter analyze` → 0 грешки (само стари info/warning). `flutter build apk --release` (71 MB) +
+  `flutter build appbundle --release` (57.5 MB), версия от pubspec = **1.0.45+53** (build 53 > 50 прод
+  → монотонно, валидно за Play).
+- APK инсталиран на **Note 9** (adb WiFi 192.168.0.117:5555, `adb` извън PATH →
+  `…/AppData/Local/Android/Sdk/platform-tools/adb.exe`), стартира чисто, без signature конфликт.
+- Сега Android носи всички днешни споделени фиксове: „Разбий на стъпки" на груповата карта,
+  реален цвят+локализирано име на категориите, AI breakdown в редактора, локал на датите, Pro следва
+  акаунта (промо вкл. days-type).
+- ОСТАВА: **ръчно качване на AAB в Play Console → Production** + live тест на групите от потребителя.
+
 ## 2026-06-14 · Mac — iOS подаване в App Store · v1.0.45 (53)
 Цялата работа от деня (Споделени списъци + ръкописен widget + фиксове) подадена за ревю в App Store.
 - **ВАЖНО:** 1.0.44 вече е **READY_FOR_SALE** на iOS (train затворен) → altool 409 „train 1.0.44 closed".
