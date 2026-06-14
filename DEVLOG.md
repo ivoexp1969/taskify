@@ -6,6 +6,13 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-14 · PC — Web redeploy (Cloudflare Pages) · v1.0.45+53
+`git pull --rebase` → already up to date (repo чист, без code промени). `flutter build web --release`
+(142s, Wasm dry-run warnings само от `flutter_secure_storage_web` — игнорирани, ползваме JS build) →
+`npx wrangler pages deploy build/web --project-name=taskify-app` → ✨ Deployment complete
+(https://99c31342.taskify-app.pages.dev, live = app.taskify1969.com). Web сега носи целия споделен
+Dart код от 1.0.45 (Споделени списъци + днешните фиксове).
+
 ## 2026-06-14 · PC (Android) — изравнен с iOS · v1.0.45+53
 Целта: **Android и iOS на едно ниво.** Прод-ът беше 1.0.44+50 (build-нат ПРЕДИ днешните Mac фиксове);
 Dart кодът е споделен → след `git pull` (824e095) всички фиксове са в repo-то, оставаше само нов
