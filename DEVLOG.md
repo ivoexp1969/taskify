@@ -33,6 +33,12 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   в Firestore (правилото `promo_codes allow update: if signedIn` го позволява), а restore-ът взима
   days-промото с най-далечна валидна дата. Повторно въвеждане на собствен валиден days код също го
   възстановява (вместо „вече използван"). Стари days-redemptions без полето → остават както досега.
+- **Абонаменти (месечен/годишен) — проверени, БЕЗ промяна.** RevenueCat ги обработва: при старт
+  `getCustomerInfo()` + `addCustomerInfoUpdateListener` авто-възстановяват активен абонамент на същия
+  магазинен (Apple/Google) акаунт; има и ръчен бутон „Възстанови" в paywall-а (`restorePurchases()`).
+  Entitlement `'Taskify 1969 Pro'`. Работи → не пипаме. (Само промо-кодовете бяха дупка — оправена.)
+  Забележка: абонаментите следват МАГАЗИННИЯ акаунт, не Taskify/Firebase логина (няма `Purchases.logIn`)
+  — cross-platform (Android→iOS със същия Taskify акаунт) НЕ се споделя; засега ОК по решение на потребителя.
 - analyze: 0 грешки. Build Xcode 26 + install на Toto.
 
 ## 2026-06-14 · Mac (iOS) — Ръкописен шрифт за widget-а (като Android) · v1.0.44+50
