@@ -42,7 +42,8 @@ flutter build appbundle --release
 - Firebase: `IVA` — lifetime access, 20-user cap
 
 ## Current Version
-v1.0.44+50 (June 2026) — Споделени списъци (групи): **Android в Play Store Production**, iOS подадена за ревю; виж DEVLOG
+v1.0.44 (June 2026) — Споделени списъци (групи) + ръкописен widget + фиксове: **Android в Play Store
+Production (build 50)**, **iOS подадена за ревю (build 52)**; виж DEVLOG
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.

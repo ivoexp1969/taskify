@@ -6,6 +6,16 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-14 · Mac — iOS подаване в App Store · v1.0.44 (52)
+Цялата работа от деня (Споделени списъци + ръкописен widget + фиксове) подадена за ревю в App Store.
+- Build: `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer flutter build ipa --release
+  --export-options-plist=ExportOptions.plist` (Xcode 26). Upload: `xcrun altool --upload-app -t ios
+  -f build/ios/ipa/*.ipa --apiKey R342BR6F85 --apiIssuer 3f2713b7-...`.
+- ASC API (JWT ES256): създадена версия **1.0.44**, whatsNew (EN+BG, БЕЗ емоджита) → „Shared lists"
+  като акцент + widget подобрения; build 52 закачен (след PROCESSING→VALID); подаден за ревю.
+- App ID 6768345070. Предходна App Store версия: 1.0.43 (48) от 12.06.
+- Виж [[ios-build-appstore]] за пълния flow.
+
 ## 2026-06-14 · Mac — „Разбий на стъпки" на СПОДЕЛЕНАТА КАРТА (вярната диагноза) · v1.0.44+**52**
 Скрийншоти от Toto разкриха истинския проблем: потребителят имаше предвид бутона **върху картата**
 (разгъната задача), не в редактора. Личната карта (`ExpandableTaskCard`) показва „Разбий на стъпки"
