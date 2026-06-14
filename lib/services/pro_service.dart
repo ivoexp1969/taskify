@@ -79,6 +79,7 @@ class ProService extends ChangeNotifier {
   bool _isInitializing = false;
   bool _isTrial = false;
   bool _isPromoCode = false;
+  bool _promoListenerAttached = false;
   String? _activeSubscription;
   DateTime? _trialEndDate;
   DateTime? _promoEndDate;
@@ -132,6 +133,9 @@ class ProService extends ChangeNotifier {
 
       // Проверка за промо код
       await _checkPromoCodeStatus();
+      // Промо-Pro следва акаунта (възстановяване след реинсталация/нов телефон).
+      await _restoreAccountPromo();
+      _attachAccountPromoListener();
 
       _isInitialized = true;
       _isInitializing = false;
@@ -141,6 +145,8 @@ class ProService extends ChangeNotifier {
       await _loadFromCache();
       await _checkTrialStatus();
       await _checkPromoCodeStatus();
+      await _restoreAccountPromo();
+      _attachAccountPromoListener();
       _isInitialized = true;
       _isInitializing = false;
       notifyListeners();
@@ -207,6 +213,60 @@ class ProService extends ChangeNotifier {
     } catch (e) {
       debugPrint('Promo check error: $e');
       _isPromoCode = false;
+    }
+  }
+
+  /// Възстановява промо-Pro, който следва АКАУНТА (не устройството). При
+  /// реинсталация SharedPreferences се изтрива, но Firestore `promo_codes.usedBy[]`
+  /// пази uid-а на потребителя. Питаме облака дали текущият потребител е изкупил
+  /// lifetime промо и го връщаме автоматично — без пак да въвежда код.
+  /// Offline-safe: всяка грешка се поглъща (оставаме на локалното състояние).
+  /// Забележка: days-type промо НЕ се възстановява — облакът пази само `usedBy[]`,
+  /// без датата на изкупуване, затова не можем да изчислим оставащите дни.
+  Future<void> _restoreAccountPromo() async {
+    if (kIsWeb) return;
+    if (_isPromoCode) return; // вече активен локално → няма нужда
+
+    try {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) return;
+
+      final snap = await FirebaseFirestore.instance
+          .collection('promo_codes')
+          .where('usedBy', arrayContains: userId)
+          .get();
+
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        if (data['type'] == 'lifetime' && data['isActive'] == true) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('applied_promo_code', doc.id);
+          await prefs.setString('promo_type', 'lifetime');
+          await prefs.remove('promo_end_date');
+          _isPromoCode = true;
+          _promoEndDate = null;
+          _appliedPromoCode = doc.id;
+          notifyListeners();
+          debugPrint('Account lifetime promo restored: ${doc.id}');
+          return;
+        }
+      }
+    } catch (e) {
+      debugPrint('Restore account promo error: $e');
+    }
+  }
+
+  /// Закача еднократен слушател: при бъдещ вход (друго устройство/реинсталация)
+  /// възстановява промо-Pro, който следва акаунта. Извиква се при init.
+  void _attachAccountPromoListener() {
+    if (_promoListenerAttached) return;
+    _promoListenerAttached = true;
+    try {
+      FirebaseAuth.instance.authStateChanges().listen((user) {
+        if (user != null) _restoreAccountPromo();
+      });
+    } catch (e) {
+      debugPrint('Account promo listener error: $e');
     }
   }
 

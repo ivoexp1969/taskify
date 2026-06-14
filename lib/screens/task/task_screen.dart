@@ -984,6 +984,49 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
               });
             }
 
+            // AI разбиване на подзадачи — пълни ЛОКАЛНИЯ списък tempSubtasks (не
+            // Hive), за да работи и при редактиране, и в СПОДЕЛЕНИТЕ задачи
+            // (записът минава през onSave → Firestore GroupTask).
+            Future<void> runAiBreakdown() async {
+              final text = _titleController.text.trim();
+              if (text.isEmpty) return;
+              if (!ProService().isPro) {
+                Navigator.pop(innerContext);
+                if (context.mounted) {
+                  showPaywallIfNeeded(context, isFeatureAvailable: false);
+                }
+                return;
+              }
+              if (!await AiUsageService.instance.canUse()) {
+                if (innerContext.mounted) {
+                  ScaffoldMessenger.of(innerContext).showSnackBar(
+                      SnackBar(content: Text(t.aiLimitReached)));
+                }
+                return;
+              }
+              setSheetState(() => aiLoading = true);
+              final catNames = categories.map((c) => c.name).toList();
+              final r = await AiService.breakdownTask(text, catNames, langCode);
+              if (!innerContext.mounted) return;
+              setSheetState(() => aiLoading = false);
+              if (r == null || r.subtasks.isEmpty) {
+                if (innerContext.mounted) {
+                  ScaffoldMessenger.of(innerContext).showSnackBar(
+                      SnackBar(content: Text(t.aiError)));
+                }
+                return;
+              }
+              await AiUsageService.instance.recordUse();
+              setSheetState(() {
+                for (final s in r.subtasks) {
+                  final txt = s.trim();
+                  if (txt.isNotEmpty) {
+                    tempSubtasks.add({'done': false, 'qty': 1, 'text': txt});
+                  }
+                }
+              });
+            }
+
             return Container(
               height: MediaQuery.of(innerContext).size.height * 0.85,
               decoration: BoxDecoration(
@@ -1586,6 +1629,51 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                             theme,
                           ),
                           const SizedBox(height: 12),
+                          // AI разбиване на подзадачи (работи и в споделените задачи)
+                          if (aiParsingEnabled) ...[
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: aiLoading
+                                  ? const Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 4),
+                                      child: SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      ),
+                                    )
+                                  : GestureDetector(
+                                      onTap: () => runAiBreakdown(),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [Color(0xFF7B2FF7), Color(0xFF2196F3)],
+                                          ),
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.auto_awesome,
+                                                size: 14, color: Colors.white),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              t.aiBreakdownTitle,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
                           // Списък с подзадачи
                           ...tempSubtasks.asMap().entries.map((entry) {
                             final idx = entry.key;

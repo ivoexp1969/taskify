@@ -6,6 +6,32 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-14 · Mac — Бъгове по „Споделени списъци" (TODO-то от 13.06) · v1.0.44+50
+Минах TODO-то по ред. Важно: при одит се оказа, че **#1 и #3 вече бяха решени** в кода —
+не фабрикувах фикс, поправих само реалните дефекти.
+- **#1 Локализация — основно ОК.** Всички надписи в `screens/shared/*` + share текста
+  (`group_service.dart`) минават през `AppText`/`_t`; валидирах всичките **477 `_t` мапа → 0 с
+  липсващ език**; `LanguageScope` обвива `MaterialApp`. РЕАЛНИЯТ дефект беше **датите**:
+  `group_tasks_screen._dateStr` ползваше `DateFormat.MMMd()/yMMMd()/Hm()` БЕЗ локал → английски
+  имена на месеци сред друг език. Сменено на числов `dd.MM.yyyy · HH:mm` (като личния екран/календара,
+  езиково неутрален); махнат `intl` import.
+- **#2 Цветове на категориите.** Груповата карта оцветяваше по ХЕШ на името + показваше суровия
+  текст. Нов `_categoryFor` резолвва потребителската категория по име → `_accentFor` връща РЕАЛНИЯ
+  `colorValue` (реагира на промяна в „Управление на категории"); `_categoryDisplay` +
+  `_localizedCategoryName` (вградените по id) → името е на текущия език. Fallback: чужда категория →
+  стабилен цвят по име от палитрата; без категория → по приоритет.
+- **#3 AI в редактиране → реално „разбиване на подзадачи в СПОДЕЛЕНИТЕ".** AI parse вече работеше в
+  редактора (обединеният `TaskEditorBridge`). Липсваше breakdown: `_showAiBreakdownSheet` се вика само
+  от личния списък и пише в Hive (`task.save()`) → неприложимо за Firestore GroupTask. Добавих **бутон
+  „AI разбиване" ВЪТРЕ в редактора** (`runAiBreakdown` пълни `tempSubtasks`); при запис onSave връща
+  draft-а с `setSubtasks(tempSubtasks)` → груповият onSave пише `task.subtasks` във Firestore. Работи и
+  за лични, и за споделени.
+- **#4 Pro следва акаунта.** Нов `ProService._restoreAccountPromo()` — Firestore
+  `promo_codes where usedBy arrayContains uid` → авто-възстановяване на **lifetime** промо при
+  init/login (offline-safe, try/catch). Закачен `authStateChanges` слушател за бъдещ вход. Days-type
+  НЕ се възстановява (облакът пази само `usedBy[]`, без дата на изкупуване). Lifetime (IVA) работи.
+- analyze: 0 грешки. Build Xcode 26 + install на Toto.
+
 ## 2026-06-14 · Mac (iOS) — Ръкописен шрифт за widget-а (като Android) · v1.0.44+50
 iOS home-screen widget-ът вече ползва **Caveat** (ръкописен) за празното състояние, точно като Android.
 - Шрифтът `caveat.ttf` копиран от Android в `ios/TaskifyWidget/Caveat.ttf`; регистриран в widget

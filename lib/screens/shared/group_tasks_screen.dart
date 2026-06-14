@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:intl/intl.dart';
 
 import '../../models/group.dart';
 import '../../models/category.dart';
@@ -30,9 +29,58 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
   // Държим последно полученото състояние на групата (членове/owner) на живо.
   late Group _group = widget.group;
 
-  /// Наситен акцент за груповата карта. Категориите са текст (без цвят), затова
-  /// извеждаме стабилен цвят от името по споделената палитра; без категория → по приоритет.
+  /// Живите потребителски категории (за резолване на реален цвят + локализирано име).
+  List<Category> get _cats => Hive.isBoxOpen('categories')
+      ? Hive.box<Category>('categories').values.toList()
+      : const <Category>[];
+
+  /// Намира потребителската категория, чието ИМЕ съвпада със запазеното (текст).
+  Category? _categoryFor(GroupTask gt) {
+    final name = gt.categoryName?.trim();
+    if (name == null || name.isEmpty) return null;
+    final low = name.toLowerCase();
+    for (final c in _cats) {
+      if (c.name.toLowerCase() == low) return c;
+    }
+    return null;
+  }
+
+  /// Локализирано име на категория (вградените по id; потребителските — по име).
+  String _localizedCategoryName(Category? c, AppText t) {
+    if (c == null) return '';
+    if (c.id == 'cal_events') return t.catCalendarEvents;
+    if (c.id == 'documents') return t.catDocuments;
+    if (c.isDefault) {
+      return {
+            'work': t.catWork,
+            'personal': t.catPersonal,
+            'shopping': t.catShopping,
+            'birthday': t.catBirthdays,
+            'meeting': t.catMeeting,
+            'workout': t.catWorkout,
+            'payment': t.catPayment,
+            'travel': t.catTravel,
+            'gift': t.catGift,
+          }[c.id] ??
+          c.name;
+    }
+    return c.name;
+  }
+
+  /// Името на категорията за показване: реалната локализирана, ако я има при
+  /// потребителя; иначе суровия запазен текст (категория от друг член).
+  String _categoryDisplay(GroupTask gt, AppText t) {
+    final c = _categoryFor(gt);
+    return c != null ? _localizedCategoryName(c, t) : (gt.categoryName ?? '');
+  }
+
+  /// Наситен акцент за груповата карта. Ползваме РЕАЛНИЯ цвят на категорията от
+  /// потребителските категории (реагира на промяна в „Управление на категории").
+  /// За категория от друг член (липсва локално) → стабилен цвят по име от
+  /// палитрата; без категория → по приоритет.
   Color _accentFor(GroupTask gt) {
+    final c = _categoryFor(gt);
+    if (c != null) return Color(c.colorValue);
     final name = gt.categoryName?.trim() ?? '';
     if (name.isEmpty) return _priorityColor(gt.priority);
     final idx = name.toLowerCase().hashCode.abs() % kCategoryColors.length;
@@ -62,13 +110,16 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
   }
 
   String _dateStr(DateTime d) {
-    final now = DateTime.now();
-    final sameYear = d.year == now.year;
-    final fmt = sameYear ? DateFormat.MMMd() : DateFormat.yMMMd();
+    // Числов формат като личния екран/календара (dd.MM.yyyy · HH:mm) — езиково
+    // неутрален, за да няма английски имена на месеци сред друг език.
+    final day = d.day.toString().padLeft(2, '0');
+    final month = d.month.toString().padLeft(2, '0');
+    final dateStr = '$day.$month.${d.year}';
     final hasTime = d.hour != 0 || d.minute != 0;
-    return hasTime
-        ? '${fmt.format(d)} · ${DateFormat.Hm().format(d)}'
-        : fmt.format(d);
+    if (!hasTime) return dateStr;
+    final h = d.hour.toString().padLeft(2, '0');
+    final m = d.minute.toString().padLeft(2, '0');
+    return '$dateStr · $h:$m';
   }
 
   Future<void> _showError(GroupException e) async {
@@ -331,7 +382,7 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                         priorityColor: _priorityColor(gt.priority),
                         priorityText: _priorityLabel(gt.priority, t),
                         dateTimeStr: _dateStr(gt.dueDate),
-                        categoryName: gt.categoryName ?? '',
+                        categoryName: _categoryDisplay(gt, t),
                         onToggleExpand: () => setState(() {
                           if (_expanded.contains(gt.id)) {
                             _expanded.remove(gt.id);
