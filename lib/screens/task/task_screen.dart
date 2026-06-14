@@ -1629,9 +1629,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                             theme,
                           ),
                           const SizedBox(height: 12),
-                          // AI разбиване на подзадачи (работи и в споделените задачи)
-                          if (aiParsingEnabled) ...[
-                            Align(
+                          // AI разбиване на подзадачи — ВИНАГИ видим (работи и в
+                          // споделените задачи); Pro/лимит се проверяват в runAiBreakdown.
+                          Align(
                               alignment: Alignment.centerLeft,
                               child: aiLoading
                                   ? const Padding(
@@ -1671,9 +1671,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                         ),
                                       ),
                                     ),
-                            ),
-                            const SizedBox(height: 12),
-                          ],
+                          ),
+                          const SizedBox(height: 12),
                           // Списък с подзадачи
                           ...tempSubtasks.asMap().entries.map((entry) {
                             final idx = entry.key;

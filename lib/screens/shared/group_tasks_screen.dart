@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
@@ -28,6 +30,26 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
 
   // Държим последно полученото състояние на групата (членове/owner) на живо.
   late Group _group = widget.group;
+
+  // Слуша за промени в потребителските категории (цвят/име) → груповите карти
+  // се преоцветяват веднага при редакция в „Управление на категории".
+  StreamSubscription<BoxEvent>? _catSub;
+
+  @override
+  void initState() {
+    super.initState();
+    if (Hive.isBoxOpen('categories')) {
+      _catSub = Hive.box<Category>('categories').watch().listen((_) {
+        if (mounted) setState(() {});
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _catSub?.cancel();
+    super.dispose();
+  }
 
   /// Живите потребителски категории (за резолване на реален цвят + локализирано име).
   List<Category> get _cats => Hive.isBoxOpen('categories')
