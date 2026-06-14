@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		03BD352E141D03DAF03A9892 /* Caveat.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EE793106A937025D5D7D1AB0 /* Caveat.ttf */; };
 		109951BF13F99C0C6FE33D90 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2DD62D7206AA2EF9DB7E39E3 /* WidgetKit.framework */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		2C14BFE45E25DEA913294204 /* TaskifyWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 206D284651637CA824D444E9 /* TaskifyWidget.swift */; };
@@ -107,6 +108,7 @@
 		BB1B2C3D4E5F6789ABCD0A01 /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		CDF2BE9FAC7173FF50CB2F02 /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 		E97765D967856E731E852A61 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		EE793106A937025D5D7D1AB0 /* Caveat.ttf */ = {isa = PBXFileReference; includeInIndex = 1; name = Caveat.ttf; path = Caveat.ttf; sourceTree = "<group>"; };
 		F1501C4A1D5FCFC3E6A0B134 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -238,6 +240,7 @@
 				206D284651637CA824D444E9 /* TaskifyWidget.swift */,
 				F1501C4A1D5FCFC3E6A0B134 /* Info.plist */,
 				2977AD987178C169ED7DA41E /* TaskifyWidget.entitlements */,
+				EE793106A937025D5D7D1AB0 /* Caveat.ttf */,
 			);
 			path = TaskifyWidget;
 			sourceTree = "<group>";
@@ -366,6 +369,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				03BD352E141D03DAF03A9892 /* Caveat.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

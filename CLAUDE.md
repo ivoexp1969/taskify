@@ -46,6 +46,13 @@ v1.0.44+50 (June 2026) — Споделени списъци (групи): **And
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **iOS widget — ръкописен шрифт (Mac):** home-screen widget-ът вече ползва **Caveat** за празното
+  състояние, като Android. `caveat.ttf`→`ios/TaskifyWidget/Caveat.ttf`, рег. в widget `Info.plist`
+  (`UIAppFonts`) + Copy Bundle Resources на TaskifyWidget таргета (внимание: file ref path = само
+  `Caveat.ttf`, иначе удвоен път). `TaskifyWidget.swift`: фразата е `Font.custom("Caveat-Regular",
+  size: small?24:32)` + `lineLimit(3)` + `minimumScaleFactor(0.4)` → макс. едър, свива се по дължина,
+  без съкращения. Заглавията остават обикновен шрифт. Build Xcode 26 + `devicectl` install на Toto
+  (device only, без App Store). Виж DEVLOG.
 - **Споделени списъци — Android в Production (PC):** v1.0.44+50 (умен редактор, build 50) build-нат
   на PC (JDK 17) и **качен ръчно в Play Console → Production** (rollout стартиран). APK тестван само
   колкото да стартира на Note 9 (signature mismatch → деинсталиран Play билд, сложен локален release);

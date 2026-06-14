@@ -224,9 +224,13 @@ struct TaskifyWidgetEntryView: View {
             if entry.tasks.isEmpty {
                 Spacer()
                 Text(emptyMsg)
-                    .font(.system(size: 12))
-                    .foregroundColor(.white.opacity(0.5))
+                    // Handwritten Caveat, like Android: as large as possible but
+                    // auto-shrinks to the text length so it fits with no ellipsis.
+                    .font(.custom("Caveat-Regular", size: family == .systemSmall ? 24 : 32))
+                    .foregroundColor(.white.opacity(0.92))
                     .multilineTextAlignment(.center)
+                    .lineLimit(3)
+                    .minimumScaleFactor(0.4)
                     .frame(maxWidth: .infinity)
                 Spacer()
             } else {

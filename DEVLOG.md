@@ -6,6 +6,22 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-14 · Mac (iOS) — Ръкописен шрифт за widget-а (като Android) · v1.0.44+50
+iOS home-screen widget-ът вече ползва **Caveat** (ръкописен) за празното състояние, точно като Android.
+- Шрифтът `caveat.ttf` копиран от Android в `ios/TaskifyWidget/Caveat.ttf`; регистриран в widget
+  `Info.plist` (`UIAppFonts`) и добавен в Copy Bundle Resources на TaskifyWidget таргета
+  (`add_widget_target.rb` излиза рано → ръчно през xcodeproj ruby; внимание: file ref path трябва да е
+  само `Caveat.ttf`, не `TaskifyWidget/Caveat.ttf` — иначе удвоен път → CpResource fail).
+- `TaskifyWidget.swift`: празната фраза е `Font.custom("Caveat-Regular", size: small?24:32)` +
+  `.lineLimit(3)` + `.minimumScaleFactor(0.4)` → макс. едър ръкописен шрифт, който се **свива според
+  дължината** и се събира без съкращения (аналог на Android `autoSizeText` 9–17/10–20sp). Яркост 0.92.
+  Заглавията на задачите остават обикновен шрифт (1 ред) — пак като Android.
+- **Верификация:** изолиран `xcodebuild -target TaskifyWidget` (симулатор) → BUILD SUCCEEDED; `.appex`
+  съдържа `Caveat.ttf` + `UIAppFonts`. Визуален preview през еднократно SwiftUI host-app в симулатора
+  (рендира 1:1 празното състояние) — изглежда коректно (дълга bg фраза пада на 3 реда, без отрязване).
+- Build с Xcode 26 (DEVELOPER_DIR) и инсталиран на **Toto** през `devicectl`
+  (UUID `2A76A482-7995-5D46-9567-3C7379343835`). НЕ App Store upload — само device install.
+
 ## 2026-06-13 · PC (Android) — Споделени списъци пуснати в Play Store · v1.0.44+50 PRODUCTION
 Изпълних Android-задачата от Mac entry-то по-долу (Споделени списъци v1.0.44).
 - `git pull --rebase` → взе целия групов код + version **1.0.44+50** (умен редактор, build 50).
