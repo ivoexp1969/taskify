@@ -6,15 +6,17 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
-## 2026-06-14 · Mac — iOS подаване в App Store · v1.0.44 (52)
+## 2026-06-14 · Mac — iOS подаване в App Store · v1.0.45 (53)
 Цялата работа от деня (Споделени списъци + ръкописен widget + фиксове) подадена за ревю в App Store.
+- **ВАЖНО:** 1.0.44 вече е **READY_FOR_SALE** на iOS (train затворен) → altool 409 „train 1.0.44 closed".
+  Затова маркетинг версията е вдигната на **1.0.45** (+53). (Android прод си остава 1.0.44+50.)
 - Build: `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer flutter build ipa --release
-  --export-options-plist=ExportOptions.plist` (Xcode 26). Upload: `xcrun altool --upload-app -t ios
-  -f build/ios/ipa/*.ipa --apiKey R342BR6F85 --apiIssuer 3f2713b7-...`.
-- ASC API (JWT ES256): създадена версия **1.0.44**, whatsNew (EN+BG, БЕЗ емоджита) → „Shared lists"
-  като акцент + widget подобрения; build 52 закачен (след PROCESSING→VALID); подаден за ревю.
-- App ID 6768345070. Предходна App Store версия: 1.0.43 (48) от 12.06.
-- Виж [[ios-build-appstore]] за пълния flow.
+  --export-options-plist=ExportOptions.plist` (Xcode 26) → `xcrun altool --upload-app -t ios
+  -f build/ios/ipa/Taskify.ipa --apiKey R342BR6F85 --apiIssuer 3f2713b7-...` → UPLOAD SUCCEEDED.
+- ASC API (JWT ES256, /tmp/asc44.py): създадена версия **1.0.45** (id 7f62279c…), whatsNew en-US
+  (EN+BG, БЕЗ емоджита) → „Shared lists" акцент + widget подобрения; build 53 закачен (PROCESSING→VALID);
+  подаден за ревю.
+- App ID 6768345070. Предходни: 1.0.44, 1.0.43 — READY_FOR_SALE. Виж [[ios-build-appstore]].
 
 ## 2026-06-14 · Mac — „Разбий на стъпки" на СПОДЕЛЕНАТА КАРТА (вярната диагноза) · v1.0.44+**52**
 Скрийншоти от Toto разкриха истинския проблем: потребителят имаше предвид бутона **върху картата**
