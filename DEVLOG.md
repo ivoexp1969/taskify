@@ -27,9 +27,12 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   draft-а с `setSubtasks(tempSubtasks)` → груповият onSave пише `task.subtasks` във Firestore. Работи и
   за лични, и за споделени.
 - **#4 Pro следва акаунта.** Нов `ProService._restoreAccountPromo()` — Firestore
-  `promo_codes where usedBy arrayContains uid` → авто-възстановяване на **lifetime** промо при
-  init/login (offline-safe, try/catch). Закачен `authStateChanges` слушател за бъдещ вход. Days-type
-  НЕ се възстановява (облакът пази само `usedBy[]`, без дата на изкупуване). Lifetime (IVA) работи.
+  `promo_codes where usedBy arrayContains uid` → авто-възстановяване при init/login (offline-safe,
+  try/catch). Закачен `authStateChanges` слушател за бъдещ вход. **Lifetime** = приоритет.
+  **Days-type СЕ възстановява вече**: при изкупуване пазим `redemptions.{uid}` = крайна дата (Timestamp)
+  в Firestore (правилото `promo_codes allow update: if signedIn` го позволява), а restore-ът взима
+  days-промото с най-далечна валидна дата. Повторно въвеждане на собствен валиден days код също го
+  възстановява (вместо „вече използван"). Стари days-redemptions без полето → остават както досега.
 - analyze: 0 грешки. Build Xcode 26 + install на Toto.
 
 ## 2026-06-14 · Mac (iOS) — Ръкописен шрифт за widget-а (като Android) · v1.0.44+50

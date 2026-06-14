@@ -217,12 +217,11 @@ class ProService extends ChangeNotifier {
   }
 
   /// Възстановява промо-Pro, който следва АКАУНТА (не устройството). При
-  /// реинсталация SharedPreferences се изтрива, но Firestore `promo_codes.usedBy[]`
-  /// пази uid-а на потребителя. Питаме облака дали текущият потребител е изкупил
-  /// lifetime промо и го връщаме автоматично — без пак да въвежда код.
+  /// реинсталация SharedPreferences се изтрива, но Firestore го пази: `usedBy[]`
+  /// (кой е изкупил) + `redemptions.{uid}` (крайна дата за days-type). Питаме облака
+  /// и връщаме промото автоматично — без пак да въвежда код.
   /// Offline-safe: всяка грешка се поглъща (оставаме на локалното състояние).
-  /// Забележка: days-type промо НЕ се възстановява — облакът пази само `usedBy[]`,
-  /// без датата на изкупуване, затова не можем да изчислим оставащите дни.
+  /// Lifetime има приоритет; иначе взимаме days-промото с НАЙ-ДАЛЕЧНА валидна дата.
   Future<void> _restoreAccountPromo() async {
     if (kIsWeb) return;
     if (_isPromoCode) return; // вече активен локално → няма нужда
@@ -236,9 +235,16 @@ class ProService extends ChangeNotifier {
           .where('usedBy', arrayContains: userId)
           .get();
 
+      DateTime? bestDaysEnd;
+      String? bestDaysCode;
+
       for (final doc in snap.docs) {
         final data = doc.data();
-        if (data['type'] == 'lifetime' && data['isActive'] == true) {
+        if (data['isActive'] != true) continue;
+        final type = data['type'];
+
+        if (type == 'lifetime') {
+          // Lifetime = най-доброто → връщаме веднага.
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('applied_promo_code', doc.id);
           await prefs.setString('promo_type', 'lifetime');
@@ -249,7 +255,30 @@ class ProService extends ChangeNotifier {
           notifyListeners();
           debugPrint('Account lifetime promo restored: ${doc.id}');
           return;
+        } else if (type == 'days') {
+          // Крайната дата за този потребител е пазена per-user при изкупуване.
+          final reds = data['redemptions'];
+          if (reds is Map && reds[userId] is Timestamp) {
+            final end = (reds[userId] as Timestamp).toDate();
+            if (end.isAfter(DateTime.now()) &&
+                (bestDaysEnd == null || end.isAfter(bestDaysEnd))) {
+              bestDaysEnd = end;
+              bestDaysCode = doc.id;
+            }
+          }
         }
+      }
+
+      if (bestDaysEnd != null && bestDaysCode != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('applied_promo_code', bestDaysCode);
+        await prefs.setString('promo_type', 'days');
+        await prefs.setString('promo_end_date', bestDaysEnd.toIso8601String());
+        _isPromoCode = true;
+        _promoEndDate = bestDaysEnd;
+        _appliedPromoCode = bestDaysCode;
+        notifyListeners();
+        debugPrint('Account days promo restored: $bestDaysCode until $bestDaysEnd');
       }
     } catch (e) {
       debugPrint('Restore account promo error: $e');
@@ -322,10 +351,27 @@ class ProService extends ChangeNotifier {
           notifyListeners();
           return (success: true, message: _pm('proReactivated', lang));
         }
+        // days-type: ако още е валиден (по записаната крайна дата) → възстанови го,
+        // вместо да връщаме „вече използван" (Pro следва акаунта).
+        final reds = data['redemptions'];
+        if (reds is Map && reds[userId] is Timestamp) {
+          final end = (reds[userId] as Timestamp).toDate();
+          if (end.isAfter(DateTime.now())) {
+            await prefs.setString('applied_promo_code', codeUpper);
+            await prefs.setString('promo_type', 'days');
+            await prefs.setString('promo_end_date', end.toIso8601String());
+            _isPromoCode = true;
+            _promoEndDate = end;
+            _appliedPromoCode = codeUpper;
+            notifyListeners();
+            return (success: true, message: _pm('proReactivated', lang));
+          }
+        }
         return (success: false, message: _pm('alreadyUsed', lang));
       }
 
       final days = data['days'] as int? ?? 0;
+      DateTime? daysEndDate;
 
       await prefs.setString('applied_promo_code', codeUpper);
       await prefs.setString('promo_type', type);
@@ -335,10 +381,10 @@ class ProService extends ChangeNotifier {
         _promoEndDate = null;
         await prefs.remove('promo_end_date');
       } else if (type == 'days' && days > 0) {
-        final endDate = DateTime.now().add(Duration(days: days));
-        _promoEndDate = endDate;
+        daysEndDate = DateTime.now().add(Duration(days: days));
+        _promoEndDate = daysEndDate;
         _isPromoCode = true;
-        await prefs.setString('promo_end_date', endDate.toIso8601String());
+        await prefs.setString('promo_end_date', daysEndDate.toIso8601String());
       }
 
       _appliedPromoCode = codeUpper;
@@ -346,6 +392,9 @@ class ProService extends ChangeNotifier {
       await docRef.update({
         'usedCount': FieldValue.increment(1),
         if (userId != null) 'usedBy': FieldValue.arrayUnion([userId]),
+        // Пазим КРАЙНАТА дата per-user → days-type се възстановява на нов телефон.
+        if (userId != null && daysEndDate != null)
+          'redemptions.$userId': Timestamp.fromDate(daysEndDate),
       });
 
       notifyListeners();
