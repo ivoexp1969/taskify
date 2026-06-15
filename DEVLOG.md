@@ -6,6 +6,18 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-15 · Mac — iOS подаване в App Store + install на Toto · v1.0.46 (54)
+`git pull` (dfdc1f4) → взе PC-работата (интерактивни подзадачи, именен dataset, „За приложението",
+групови подзадачи fix). iOS публикуване:
+- 1.0.45 вече е **READY_FOR_SALE** (одобрена) → нова версия **1.0.46**. `flutter build ipa --release`
+  (Xcode 26; pod install хвана новия `package_info_plus`) → `altool` UPLOAD SUCCEEDED.
+- ASC (/tmp/asc44.py, VERSION=1.0.46/BUILD=54): създадена версия 1.0.46 (id 2502c888…), whatsNew en-US
+  (EN+BG, БЕЗ емоджита) → акцент върху **отмятане на подзадачи в картата** + именен календар + „За
+  приложението"; build 54 (PROCESSING→VALID) закачен (204) → подаден → **WAITING_FOR_REVIEW**.
+- **Toto:** `flutter build ios --release` → `devicectl install` → потвърден **1.0.46 (54)** (1-ви опит
+  падна с „Connection reset", 2-ри мина). Relaunch чакаше отключване на телефона — отваря се ръчно.
+- Android прод си остава 1.0.44+50 (PC има готов AAB 1.0.46+54 за ръчно качване).
+
 ## 2026-06-15 · PC — Интерактивни подзадачи в разгъната карта · v1.0.46+54 (без нов bump)
 Заявка: при тап/разгъване на карта с подзадачи да се виждат подзадачите с чекбокс за отмятане —
 на трите екрана (Задачи, Календар, Споделени). Реализация в `task_card_styles.dart`: нов optional
