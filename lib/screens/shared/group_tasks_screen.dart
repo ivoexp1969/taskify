@@ -12,6 +12,7 @@ import '../../services/pro_service.dart';
 import '../../services/ai_service.dart';
 import '../../services/ai_usage_service.dart';
 import '../../utils/localization.dart';
+import '../../utils/subtask_format.dart';
 import '../../widgets/task_card_styles.dart';
 import '../../utils/category_colors.dart';
 import '../paywall/paywall_screen.dart';
@@ -228,7 +229,15 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
     );
     if (apply != true) return;
 
-    final merged = <String>[...?gt.subtasks, ...r.subtasks];
+    // AI breakdown връща ЧИСТИ заглавия без префикс. Нормализираме ги към
+    // каноничния формат "0:1:заглавие" (незавършени), за да ги рендира картата
+    // и да работи броячът „X/Y" — точно както при личните задачи.
+    final newOnes = r.subtasks
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .map((s) => SubtaskCodec.format(text: s))
+        .toList();
+    final merged = <String>[...?gt.subtasks, ...newOnes];
     final updated = GroupTask(
       id: gt.id,
       title: gt.title,

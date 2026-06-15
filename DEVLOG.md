@@ -6,6 +6,29 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-15 · PC (Android) — Именен dataset + „За приложението" + групови подзадачи fix · v1.0.45+53
+Три независими задачи, без version bump (тестов билд):
+- **Част 1 — разширен именен dataset:** `assets/data/bg_name_days.json` заменен с пълния
+  Wikipedia извлек (CC BY-SA 4.0): **120 фиксирани + 6 подвижни, ~769 имена** (старо: 26 дати,
+  ~141). Доротея (6 фев), Никулден (6 дек) и стотици други вече присъстват. Новият формат ползва
+  поле `offset` (старо беше `offsetFromOrthodoxEaster`) → `name_days_service.dart` приема и двете.
+  `_full.json` изтрит (избягваме двоен asset в `assets/data/`). Тест `orthodox_easter_test.dart`
+  минава (Великден 2026=12.4, Тодоровден 28.2 = offset -43 ✓).
+- **Част 2 — секция „За приложението"** (най-долу в Настройки, 11 езика, inline `tr()` карти):
+  динамична **Версия/билд чрез `package_info_plus`** (добавено в pubspec `^8.0.0`); подекран
+  **„Как се ползва"** (`how_to_use_screen.dart`, 6 дружелюбни точки на „ти": добавяне на задача/NL,
+  подзадачи+приоритет+повторение, Матрица, Календар+GCal, празници/именни дни/документи, споделени
+  списъци); линкове Поверителност/Условия (`url_launcher`) + ред за лиценза на именните дни
+  (Уикипедия CC BY-SA, линк към статията).
+- **Част 3 — групови подзадачи fix:** AI breakdown за СПОДЕЛЕНА задача пазеше сурови заглавия без
+  префикс → UI/броячът „X/Y" се чупеха. Нов общ helper `utils/subtask_format.dart` (`SubtaskCodec`
+  parse/format/normalize за формата `"done:qty:text"`, толерира и legacy без префикс). `Task.subtasksList/
+  setSubtasks/completedSubtasksCount` минават през него; `group_tasks_screen._breakdown` нормализира
+  новите заглавия към `0:1:title`. Лични задачи непроменени.
+- VERIFY: `flutter analyze` (само предходни info/deprecation, 0 нови грешки); web build ✅; Android
+  APK ✅ (71MB); инсталиран по WiFi adb на **Note 9** (192.168.0.117:5555) и стартиран без крашове.
+  (Потребителят каза „качи на Тото за тест" → достъпен беше само Note 9 на познатия WiFi adb адрес.)
+
 ## 2026-06-14 · PC — Web redeploy (Cloudflare Pages) · v1.0.45+53
 `git pull --rebase` → already up to date (repo чист, без code промени). `flutter build web --release`
 (142s, Wasm dry-run warnings само от `flutter_secure_storage_web` — игнорирани, ползваме JS build) →

@@ -74,7 +74,9 @@ class NameDaysService {
       final movableList = (data['movable'] as List?) ?? const [];
       for (final item in movableList) {
         final m = item as Map<String, dynamic>;
-        final offset = m['offsetFromOrthodoxEaster'];
+        // Новият Wikipedia dataset ползва поле "offset"; стария — "offsetFromOrthodoxEaster".
+        // Приемаме и двете, за да е консистентно при бъдеща смяна на източника.
+        final offset = m['offset'] ?? m['offsetFromOrthodoxEaster'];
         if (offset is! int) continue;
         _movable.add((
           offset: offset,

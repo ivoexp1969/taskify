@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
 
 import '../utils/uuid.dart';
+import '../utils/subtask_format.dart';
 
 part 'task.g.dart';
 
@@ -203,36 +204,26 @@ class Task extends HiveObject with EquatableMixin {
   /// Проверка дали има бележки
   bool get hasNotes => notes != null && notes!.trim().isNotEmpty;
 
-  /// Помощни методи за подзадачи
+  /// Помощни методи за подзадачи. Форматът е единен между лични и групови
+  /// задачи — виж [SubtaskCodec] (толерира и суров текст без префикс).
   List<Map<String, dynamic>> get subtasksList {
     if (subtasks == null || subtasks!.isEmpty) return [];
-    return subtasks!.map((s) {
-      final parts = s.split(':');
-      final done = parts[0] == '1';
-      int qty = 1;
-      String text = '';
-      if (parts.length >= 3) {
-        qty = int.tryParse(parts[1]) ?? 1;
-        text = parts.sublist(2).join(':');
-      } else if (parts.length == 2) {
-        text = parts[1];
-      }
-      return {'done': done, 'text': text, 'qty': qty};
-    }).toList();
+    return subtasks!.map(SubtaskCodec.parse).toList();
   }
 
   void setSubtasks(List<Map<String, dynamic>> list) {
-    subtasks = list.map((item) {
-      final done = item['done'] == true ? '1' : '0';
-      final qty = (item['qty'] as int?) ?? 1;
-      final text = item['text'] ?? '';
-      return '$done:$qty:$text';
-    }).toList();
+    subtasks = list
+        .map((item) => SubtaskCodec.format(
+              done: item['done'] == true,
+              qty: (item['qty'] as int?) ?? 1,
+              text: (item['text'] ?? '').toString(),
+            ))
+        .toList();
   }
 
   int get completedSubtasksCount {
     if (subtasks == null) return 0;
-    return subtasks!.where((s) => s.startsWith('1:')).length;
+    return subtasks!.where((s) => SubtaskCodec.parse(s)['done'] == true).length;
   }
 
   int get totalSubtasksCount => subtasks?.length ?? 0;

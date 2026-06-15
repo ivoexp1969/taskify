@@ -48,6 +48,16 @@ build-нат и тестван на Note 9, чака ръчно качване �
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **Именен dataset + „За приложението" + групови подзадачи fix (PC, без bump, още v1.0.45+53):**
+  (1) `assets/data/bg_name_days.json` заменен с пълния Wikipedia извлек (CC BY-SA 4.0) — **120 фикс. +
+  6 подвижни, ~769 имена** (Доротея 6 фев, и др.); новият формат ползва `offset` →
+  `name_days_service.dart` приема и `offset`, и стария `offsetFromOrthodoxEaster`; `_full.json` изтрит.
+  (2) Нова секция **„За приложението"** най-долу в Настройки (11 ез., inline `tr()`): динамична версия/билд
+  чрез **`package_info_plus`** (нов pubspec dep); подекран **„Как се ползва"** (`how_to_use_screen.dart`,
+  6 точки); линкове Поверителност/Условия + лиценз на именните дни (Уикипедия). (3) **Fix групови
+  подзадачи:** AI breakdown пазеше сурови заглавия без префикс → счупен UI/брояч; нов общ helper
+  `utils/subtask_format.dart` (`SubtaskCodec`), ползван от `Task` и от `group_tasks_screen` (нормализира
+  към `0:1:title`). analyze 0 нови грешки; web+APK билд ✅; APK инсталиран и стартиран на Note 9. Виж DEVLOG.
 - **iOS widget — ръкописен шрифт (Mac):** home-screen widget-ът вече ползва **Caveat** за празното
   състояние, като Android. `caveat.ttf`→`ios/TaskifyWidget/Caveat.ttf`, рег. в widget `Info.plist`
   (`UIAppFonts`) + Copy Bundle Resources на TaskifyWidget таргета (внимание: file ref path = само
