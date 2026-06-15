@@ -143,6 +143,9 @@ class ExpandableTaskCard extends StatelessWidget {
   final VoidCallback onDelete;
   final VoidCallback? onStartPomodoro;
   final VoidCallback? onBreakdown;
+  /// Отбелязване на ЕДНА подзадача (по индекс) при разгъната карта. Ако е null,
+  /// разгънатата карта показва само лентата с прогрес (без чекбоксове).
+  final void Function(int index)? onToggleSubtask;
   final String dateTimeStr;
   final String priorityText;
   final Color priorityColor;
@@ -163,6 +166,7 @@ class ExpandableTaskCard extends StatelessWidget {
     required this.onDelete,
     this.onStartPomodoro,
     this.onBreakdown,
+    this.onToggleSubtask,
     required this.dateTimeStr,
     required this.priorityText,
     required this.priorityColor,
@@ -432,6 +436,14 @@ class ExpandableTaskCard extends StatelessWidget {
                                   total: task.totalSubtasksCount,
                                   color: theme.colorScheme.primary,
                                 ),
+                                if (onToggleSubtask != null) ...[
+                                  const SizedBox(height: 6),
+                                  _SubtaskChecklist(
+                                    task: task,
+                                    color: theme.colorScheme.primary,
+                                    onToggle: onToggleSubtask!,
+                                  ),
+                                ],
                               ],
                               const SizedBox(height: 10),
                               if (onBreakdown != null && !isCompleted && task.totalSubtasksCount == 0) ...[
@@ -594,6 +606,87 @@ class _ModernCheckbox extends StatelessWidget {
         ),
         child: isChecked ? const Icon(Icons.check_rounded, size: 15, color: Colors.white) : null,
       ),
+    );
+  }
+}
+
+/// Интерактивен списък с подзадачи в разгъната карта — всеки ред с чекбокс за
+/// отбелязване като завършена. Ползва се и от класическата, и от билетната кожа,
+/// и от трите екрана (Задачи, Календар, Споделени). Чете `task.subtasksList`
+/// (единен формат — виж [SubtaskCodec]); `onToggle(index)` сменя 0:↔1: за реда.
+class _SubtaskChecklist extends StatelessWidget {
+  final Task task;
+  final Color color;
+  final void Function(int index) onToggle;
+  const _SubtaskChecklist(
+      {required this.task, required this.color, required this.onToggle});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final subs = task.subtasksList;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int i = 0; i < subs.length; i++)
+          InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () => onToggle(i),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _MiniCheck(checked: subs[i]['done'] == true, color: color),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      (subs[i]['text'] ?? '').toString(),
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.3,
+                        color: subs[i]['done'] == true
+                            ? theme.colorScheme.onSurface.withValues(alpha: 0.4)
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                        decoration: subs[i]['done'] == true
+                            ? TextDecoration.lineThrough
+                            : null,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Компактен чекбокс за подзадача (по-малък от [_ModernCheckbox]).
+class _MiniCheck extends StatelessWidget {
+  final bool checked;
+  final Color color;
+  const _MiniCheck({required this.checked, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOutCubic,
+      width: 18,
+      height: 18,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5),
+        color: checked ? Colors.green.shade500 : null,
+        border: Border.all(
+          color: checked ? Colors.transparent : color.withValues(alpha: 0.4),
+          width: 2,
+        ),
+      ),
+      child: checked
+          ? const Icon(Icons.check_rounded, size: 13, color: Colors.white)
+          : null,
     );
   }
 }
@@ -857,6 +950,7 @@ class TaskCardView extends StatelessWidget {
   final VoidCallback onDelete;
   final VoidCallback? onStartPomodoro;
   final VoidCallback? onBreakdown;
+  final void Function(int index)? onToggleSubtask;
   final String dateTimeStr;
   final String priorityText;
   final Color priorityColor;
@@ -877,6 +971,7 @@ class TaskCardView extends StatelessWidget {
     required this.onDelete,
     this.onStartPomodoro,
     this.onBreakdown,
+    this.onToggleSubtask,
     required this.dateTimeStr,
     required this.priorityText,
     required this.priorityColor,
@@ -897,7 +992,8 @@ class TaskCardView extends StatelessWidget {
             isCompleted: isCompleted, isExpanded: isExpanded,
             onToggleExpand: onToggleExpand, onToggleComplete: onToggleComplete,
             onEdit: onEdit, onDelete: onDelete, onStartPomodoro: onStartPomodoro,
-            onBreakdown: onBreakdown, dateTimeStr: dateTimeStr,
+            onBreakdown: onBreakdown, onToggleSubtask: onToggleSubtask,
+            dateTimeStr: dateTimeStr,
             priorityText: priorityText, priorityColor: priorityColor,
             accentColor: accentColor, categoryName: categoryName,
             recurrenceText: recurrenceText,
@@ -908,7 +1004,8 @@ class TaskCardView extends StatelessWidget {
           isCompleted: isCompleted, isExpanded: isExpanded,
           onToggleExpand: onToggleExpand, onToggleComplete: onToggleComplete,
           onEdit: onEdit, onDelete: onDelete, onStartPomodoro: onStartPomodoro,
-          onBreakdown: onBreakdown, dateTimeStr: dateTimeStr,
+          onBreakdown: onBreakdown, onToggleSubtask: onToggleSubtask,
+          dateTimeStr: dateTimeStr,
           priorityText: priorityText, priorityColor: priorityColor,
           accentColor: accentColor, categoryName: categoryName,
           recurrenceText: recurrenceText,
@@ -935,6 +1032,7 @@ class TicketTaskCard extends StatefulWidget {
   final VoidCallback onDelete;
   final VoidCallback? onStartPomodoro;
   final VoidCallback? onBreakdown;
+  final void Function(int index)? onToggleSubtask;
   final String dateTimeStr;
   final String priorityText;
   final Color priorityColor;
@@ -955,6 +1053,7 @@ class TicketTaskCard extends StatefulWidget {
     required this.onDelete,
     this.onStartPomodoro,
     this.onBreakdown,
+    this.onToggleSubtask,
     required this.dateTimeStr,
     required this.priorityText,
     required this.priorityColor,
@@ -1405,6 +1504,14 @@ class _TicketTaskCardState extends State<TicketTaskCard>
           total: task.totalSubtasksCount,
           color: theme.colorScheme.primary,
         ),
+        if (widget.onToggleSubtask != null) ...[
+          const SizedBox(height: 6),
+          _SubtaskChecklist(
+            task: task,
+            color: theme.colorScheme.primary,
+            onToggle: widget.onToggleSubtask!,
+          ),
+        ],
       ],
       const SizedBox(height: 10),
       if (widget.onBreakdown != null && !widget.isCompleted && task.totalSubtasksCount == 0) ...[

@@ -6,6 +6,17 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-15 · PC — Интерактивни подзадачи в разгъната карта · v1.0.46+54 (без нов bump)
+Заявка: при тап/разгъване на карта с подзадачи да се виждат подзадачите с чекбокс за отмятане —
+на трите екрана (Задачи, Календар, Споделени). Реализация в `task_card_styles.dart`: нов optional
+callback `onToggleSubtask(index)` на `TaskCardView` (предаван към `ExpandableTaskCard` и `TicketTaskCard`)
++ нови widget-и `_SubtaskChecklist` (ред с `_MiniCheck` + текст, strike-through при завършена) — показва
+се под прогрес-лентата при разгъване, само ако callback-ът е подаден. Call sites: `task_screen` и
+`calendar_screen` (Hive: `subtasksList`→flip→`setSubtasks`→`save`→widget refresh); `group_tasks_screen`
+(`_toggleSubtask` → `SubtaskCodec.parse/format` → `_service.updateTask`, живо синхронизиране към другите
+членове). Версията остава 1.0.46+54 (потребителят: още не е качена в конзолата → ползвай същия номер).
+AAB+web rebuild ✅, web deploy-нат (b7a69cc4), APK тестван на Note 9 (без крашове). analyze 0 нови грешки.
+
 ## 2026-06-15 · PC — Release bump + AAB + web deploy · v1.0.46+54
 След теста на Note 9: bump **1.0.45+53 → 1.0.46+54**. `flutter build appbundle --release` → AAB 57.5MB
 (чака ръчно качване в Play Console → Production). `flutter build web --release` → `npx wrangler pages

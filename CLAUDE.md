@@ -50,6 +50,14 @@ v1.0.46+54 (June 2026) — Пълен именен dataset (~769 имена) + �
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **Интерактивни подзадачи в разгъната карта (PC, в същата v1.0.46+54 — още НЕ качена в конзолата):**
+  при разгъване на карта с подзадачи вече се показва списък с **чекбокс на всеки ред** (отмятане
+  завършена/не), на трите екрана — Задачи, Календар, Споделени. Нови споделени widget-и в
+  `task_card_styles.dart`: `_SubtaskChecklist` + `_MiniCheck`; нов optional callback `onToggleSubtask(index)`
+  на `TaskCardView`/`ExpandableTaskCard`/`TicketTaskCard` (запазва се прогрес-лентата като header).
+  Имплементиран на 3-те екрана: лични (Hive `setSubtasks`+`save`), календар (същото), групови
+  (`group_tasks_screen._toggleSubtask` → `SubtaskCodec` + `_service.updateTask`, живо към Firestore).
+  AAB+web rebuild-нати (същата версия), web deploy-нат, APK тестван на Note 9 (стартира без крашове).
 - **Именен dataset + „За приложението" + групови подзадачи fix → release v1.0.46+54 (PC):**
   Bump 1.0.45+53 → **1.0.46+54**; AAB build-нат за Play Console (ръчно качване → Production);
   **web deploy-нат** (Cloudflare Pages чрез `npx wrangler pages deploy build/web --project-name=taskify-app`).

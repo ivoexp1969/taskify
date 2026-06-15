@@ -3200,6 +3200,16 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                 },
                                 onStartPomodoro: () => PomodoroTimerSheet.show(context, task),
                                 onBreakdown: () => _showAiBreakdownSheet(task),
+                                onToggleSubtask: (index) async {
+                                  final list = task.subtasksList;
+                                  if (index < 0 || index >= list.length) return;
+                                  list[index]['done'] =
+                                      !(list[index]['done'] == true);
+                                  task.setSubtasks(list);
+                                  await task.save();
+                                  await WidgetService.updateWidget();
+                                  if (mounted) setState(() {});
+                                },
                                 dateTimeStr: dateTimeStr,
                                 priorityText: priorityText,
                                 priorityColor: priorityColor,

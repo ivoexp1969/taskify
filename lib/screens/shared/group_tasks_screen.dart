@@ -259,6 +259,39 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
     }
   }
 
+  /// Отбелязва ЕДНА подзадача (по индекс) на групова задача като завършена/не и
+  /// записва във Firestore (живо синхронизиране към другите членове). Индексът
+  /// съответства на реда в `gt.subtasks` (= реда в картата).
+  Future<void> _toggleSubtask(GroupTask gt, int index) async {
+    final subs = List<String>.from(gt.subtasks ?? const <String>[]);
+    if (index < 0 || index >= subs.length) return;
+    final p = SubtaskCodec.parse(subs[index]);
+    subs[index] = SubtaskCodec.format(
+      done: !(p['done'] as bool),
+      qty: p['qty'] as int,
+      text: p['text'] as String,
+    );
+    final updated = GroupTask(
+      id: gt.id,
+      title: gt.title,
+      dueDate: gt.dueDate,
+      categoryName: gt.categoryName,
+      priority: gt.priority,
+      recurrence: gt.recurrence,
+      reminders: gt.reminders,
+      subtasks: subs,
+      notes: gt.notes,
+      isCompleted: gt.isCompleted,
+    );
+    try {
+      await _service.updateTask(_group.id, gt.id, updated);
+    } on GroupException catch (e) {
+      await _showError(e);
+    } catch (_) {
+      await _showError(GroupException('generic'));
+    }
+  }
+
   Future<void> _addOrEditTask({GroupTask? existing}) async {
     // Отваряме ТОЧНО СЪЩИЯ редактор като таб „Задачи" (TaskEditorBridge), но
     // запазваме във Firestore (GroupTask), не в Hive.
@@ -517,6 +550,7 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                         onToggleComplete: () => _service.toggleComplete(
                             _group.id, gt.id, !gt.isCompleted),
                         onBreakdown: () => _breakdown(gt),
+                        onToggleSubtask: (index) => _toggleSubtask(gt, index),
                         onEdit: () => _addOrEditTask(existing: gt),
                         onDelete: () =>
                             _service.deleteTask(_group.id, gt.id),
