@@ -6,6 +6,10 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-15 · Android — AAB качен в Play Console → Production · v1.0.46+54
+Потребителят качи ръчно готовия AAB (1.0.46+54) в Play Console → Production (rollout). С това и трите
+платформи са на 1.0.46: **Android в Production**, **iOS 1.0.46 (54) в App Store ревю**, **web деплойнат**.
+
 ## 2026-06-15 · Mac — iOS подаване в App Store + install на Toto · v1.0.46 (54)
 `git pull` (dfdc1f4) → взе PC-работата (интерактивни подзадачи, именен dataset, „За приложението",
 групови подзадачи fix). iOS публикуване:

@@ -43,10 +43,9 @@ flutter build appbundle --release
 
 ## Current Version
 v1.0.46+54 (June 2026) — Пълен именен dataset (~769 имена) + секция „За приложението" (динамична версия,
-„Как се ползва", лиценз) + fix групови AI подзадачи. **Android: AAB build 54 build-нат, чака ръчно качване
-в Play Console → Production** (прод все още 1.0.44+50). **Web deploy-нат** (Cloudflare Pages, wrangler).
-**iOS: подготвено в repo-то — остава само билд на Mac + качване в App Store** (бел.: 1.0.45/53 беше в ревю —
-ако още е, изчакай или подай 1.0.46 като нова версия). Android и iOS на едно ниво. Виж DEVLOG
+„Как се ползва", лиценз) + fix групови AI подзадачи + интерактивни подзадачи в картата.
+**Android: качен в Play Console → Production** (rollout). **iOS: 1.0.46 (54) в App Store ревю**
+(1.0.45 е READY_FOR_SALE). **Web deploy-нат** (Cloudflare Pages). И трите платформи на 1.0.46. Виж DEVLOG
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
