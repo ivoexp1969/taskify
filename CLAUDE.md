@@ -42,13 +42,18 @@ flutter build appbundle --release
 - Firebase: `IVA` — lifetime access, 20-user cap
 
 ## Current Version
-v1.0.45+53 (June 2026) — Споделени списъци (групи) + ръкописен widget + фиксове: **Android build 53
-build-нат и тестван на Note 9, чака ръчно качване в Play Console → Production** (прод все още 1.0.44+50);
-**iOS подадена за ревю като 1.0.45 (build 53); 1.0.44 e READY_FOR_SALE**. Android и iOS на едно ниво. Виж DEVLOG
+v1.0.46+54 (June 2026) — Пълен именен dataset (~769 имена) + секция „За приложението" (динамична версия,
+„Как се ползва", лиценз) + fix групови AI подзадачи. **Android: AAB build 54 build-нат, чака ръчно качване
+в Play Console → Production** (прод все още 1.0.44+50). **Web deploy-нат** (Cloudflare Pages, wrangler).
+**iOS: подготвено в repo-то — остава само билд на Mac + качване в App Store** (бел.: 1.0.45/53 беше в ревю —
+ако още е, изчакай или подай 1.0.46 като нова версия). Android и iOS на едно ниво. Виж DEVLOG
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
-- **Именен dataset + „За приложението" + групови подзадачи fix (PC, без bump, още v1.0.45+53):**
+- **Именен dataset + „За приложението" + групови подзадачи fix → release v1.0.46+54 (PC):**
+  Bump 1.0.45+53 → **1.0.46+54**; AAB build-нат за Play Console (ръчно качване → Production);
+  **web deploy-нат** (Cloudflare Pages чрез `npx wrangler pages deploy build/web --project-name=taskify-app`).
+  iOS: всичко е в repo-то (cross-platform Dart + assets) → остава само Mac билд + App Store.
   (1) `assets/data/bg_name_days.json` заменен с пълния Wikipedia извлек (CC BY-SA 4.0) — **120 фикс. +
   6 подвижни, ~769 имена** (Доротея 6 фев, и др.); новият формат ползва `offset` →
   `name_days_service.dart` приема и `offset`, и стария `offsetFromOrthodoxEaster`; `_full.json` изтрит.

@@ -6,6 +6,14 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-15 · PC — Release bump + AAB + web deploy · v1.0.46+54
+След теста на Note 9: bump **1.0.45+53 → 1.0.46+54**. `flutter build appbundle --release` → AAB 57.5MB
+(чака ръчно качване в Play Console → Production). `flutter build web --release` → `npx wrangler pages
+deploy build/web --project-name=taskify-app` → ✨ Deployment complete (62af210b.taskify-app.pages.dev →
+app.taskify1969.com). **iOS:** всичко е cross-platform Dart + споделени assets → на Mac остава само
+`git pull` → `flutter build ipa` (pod install за package_info_plus) → качване в App Store. Release notes
+(Какво е новото) подготвени BG+EN — виж commit message / по-долу.
+
 ## 2026-06-15 · PC (Android) — Именен dataset + „За приложението" + групови подзадачи fix · v1.0.45+53
 Три независими задачи, без version bump (тестов билд):
 - **Част 1 — разширен именен dataset:** `assets/data/bg_name_days.json` заменен с пълния
