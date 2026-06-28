@@ -9,6 +9,7 @@ import '../../services/contact_name_index.dart';
 import '../../services/holidays_service.dart';
 import 'package:hive/hive.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -1944,7 +1945,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     // Контакти с имен ден днес (само ако функцията е вкл.; on-device).
     final contacts = ContactNameIndex().isEnabled
         ? ContactNameIndex().contactsForNames(nameDay.names)
-        : const <String>[];
+        : const <ContactMatch>[];
     const fromContacts = {
       'en': 'From your contacts:', 'bg': 'От твоите контакти:',
       'de': 'Aus deinen Kontakten:', 'fr': 'Parmi tes contacts :',
@@ -1991,31 +1992,41 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ],
                 if (contacts.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  Text(
-                    fromContacts[lang] ?? fromContacts['en']!,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color:
-                          theme.colorScheme.onSurface.withValues(alpha: 0.85),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 4,
-                    children: [
-                      for (final name in contacts)
-                        ActionChip(
-                          avatar: const Icon(Icons.celebration_rounded,
-                              size: 16, color: Color(0xFF8E24AA)),
-                          label: Text(name, style: const TextStyle(fontSize: 12)),
-                          visualDensity: VisualDensity.compact,
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                          onPressed: () => _shareNameDayWish(name, lang),
+                  // Списъкът е в изскачащ прозорец — побира произволен брой
+                  // контакти, без да се чупи банерът при повече от два.
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Material(
+                      color: _nameDayColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () => _showNameDayContacts(
+                            contacts, nameDay.feast, lang),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 7),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.celebration_rounded,
+                                  size: 16, color: Color(0xFF8E24AA)),
+                              const SizedBox(width: 6),
+                              Text(
+                                '${fromContacts[lang] ?? fromContacts['en']!} ${contacts.length}',
+                                style: const TextStyle(
+                                    fontSize: 12, fontWeight: FontWeight.w600),
+                              ),
+                              const SizedBox(width: 2),
+                              Icon(Icons.chevron_right_rounded,
+                                  size: 18,
+                                  color: theme.colorScheme.onSurface
+                                      .withValues(alpha: 0.6)),
+                            ],
+                          ),
                         ),
-                    ],
+                      ),
+                    ),
                   ),
                 ],
               ],
@@ -2026,9 +2037,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  /// Отваря системния share лист с честитка за имен ден. Нищо не се праща
-  /// автоматично — потребителят сам избира приложение/получател.
-  Future<void> _shareNameDayWish(String contactName, String lang) async {
+  /// Готовата честитка за имен ден (локализирана).
+  String _wishText(String name, String lang) {
     const wishTpl = {
       'en': 'Happy name day, {name}! 🎉', 'bg': 'Честит имен ден, {name}! 🎉',
       'de': 'Alles Gute zum Namenstag, {name}! 🎉',
@@ -2038,8 +2048,233 @@ class _CalendarScreenState extends State<CalendarScreen> {
       'tr': 'İsim günün kutlu olsun, {name}! 🎉',
       'ja': '{name}さん、聖名祝日おめでとう！🎉',
     };
-    final tpl = wishTpl[lang] ?? wishTpl['en']!;
-    final text = tpl.replaceAll('{name}', contactName);
+    return (wishTpl[lang] ?? wishTpl['en']!).replaceAll('{name}', name);
+  }
+
+  /// Изскачащ прозорец със списъка на контактите, които празнуват днес.
+  /// Побира произволен брой (скролва), за разлика от стария вграден списък.
+  Future<void> _showNameDayContacts(
+      List<ContactMatch> contacts, String feast, String lang) {
+    final theme = Theme.of(context);
+    const closeLbl = {
+      'en': 'Close', 'bg': 'Затвори', 'de': 'Schließen', 'fr': 'Fermer',
+      'it': 'Chiudi', 'el': 'Κλείσιμο', 'es': 'Cerrar', 'pt': 'Fechar',
+      'ru': 'Закрыть', 'tr': 'Kapat', 'ja': '閉じる',
+    };
+    return showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            const Text('🎉', style: TextStyle(fontSize: 20)),
+            const SizedBox(width: 8),
+            Expanded(
+                child: Text(feast,
+                    style: const TextStyle(fontSize: 16))),
+          ],
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 360),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: contacts.length,
+              itemBuilder: (_, i) {
+                final c = contacts[i];
+                final initial =
+                    c.name.isNotEmpty ? c.name.characters.first : '?';
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor:
+                        const Color(0xFF8E24AA).withValues(alpha: 0.15),
+                    child: Text(initial,
+                        style: const TextStyle(
+                            color: Color(0xFF8E24AA),
+                            fontWeight: FontWeight.bold)),
+                  ),
+                  title: Text(c.name),
+                  trailing: Icon(Icons.more_horiz_rounded,
+                      color:
+                          theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    _onContactTap(c, lang);
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(closeLbl[lang] ?? closeLbl['en']!),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Тегли телефоните на контакта (при нужда) и показва менюто с действия.
+  Future<void> _onContactTap(ContactMatch c, String lang) async {
+    final phones = await ContactNameIndex().phonesForContact(c.id);
+    if (!mounted) return;
+    _showContactActions(c, phones, lang);
+  }
+
+  /// Меню с действия за контакт: Обаждане / SMS / WhatsApp / Viber + Сподели.
+  /// Нищо не се праща автоматично — потребителят избира действие.
+  void _showContactActions(
+      ContactMatch c, List<String> phones, String lang) {
+    final theme = Theme.of(context);
+    final phone = phones.isNotEmpty ? phones.first : null;
+    final intl = phone != null ? _phoneDigitsIntl(phone) : null;
+    final wish = _wishText(c.name, lang);
+
+    const callLbl = {
+      'en': 'Call', 'bg': 'Обаждане', 'de': 'Anrufen', 'fr': 'Appeler',
+      'it': 'Chiama', 'el': 'Κλήση', 'es': 'Llamar', 'pt': 'Ligar',
+      'ru': 'Позвонить', 'tr': 'Ara', 'ja': '電話',
+    };
+    const smsLbl = {
+      'en': 'Message', 'bg': 'Съобщение', 'de': 'Nachricht', 'fr': 'SMS',
+      'it': 'Messaggio', 'el': 'Μήνυμα', 'es': 'Mensaje', 'pt': 'Mensagem',
+      'ru': 'Сообщение', 'tr': 'Mesaj', 'ja': 'メッセージ',
+    };
+    const shareLbl = {
+      'en': 'Share wish', 'bg': 'Сподели честитка', 'de': 'Glückwunsch teilen',
+      'fr': 'Partager', 'it': 'Condividi', 'el': 'Κοινοποίηση',
+      'es': 'Compartir', 'pt': 'Partilhar', 'ru': 'Поделиться',
+      'tr': 'Paylaş', 'ja': '共有',
+    };
+    const noPhoneLbl = {
+      'en': 'No phone number', 'bg': 'Няма телефонен номер',
+      'de': 'Keine Telefonnummer', 'fr': 'Pas de numéro',
+      'it': 'Nessun numero', 'el': 'Χωρίς αριθμό', 'es': 'Sin número',
+      'pt': 'Sem número', 'ru': 'Нет номера', 'tr': 'Numara yok',
+      'ja': '電話番号なし',
+    };
+
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) {
+        Widget action(IconData icon, Color color, String label,
+            VoidCallback onTap) {
+          return ListTile(
+            leading: Icon(icon, color: color),
+            title: Text(label),
+            onTap: () {
+              Navigator.of(ctx).pop();
+              onTap();
+            },
+          );
+        }
+
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Row(
+                  children: [
+                    const Text('🎉', style: TextStyle(fontSize: 18)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(c.name,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
+                    ),
+                  ],
+                ),
+              ),
+              if (phone != null) ...[
+                action(Icons.call_rounded, Colors.green,
+                    callLbl[lang] ?? callLbl['en']!,
+                    () => _launchExternal('tel:$phone')),
+                action(Icons.sms_rounded, Colors.blue,
+                    smsLbl[lang] ?? smsLbl['en']!,
+                    () => _launchExternal(
+                        'sms:$phone?body=${Uri.encodeComponent(wish)}')),
+                action(Icons.chat_rounded, const Color(0xFF25D366),
+                    'WhatsApp',
+                    () => _launchExternal(
+                        'https://wa.me/$intl?text=${Uri.encodeComponent(wish)}')),
+                action(Icons.phone_in_talk_rounded, const Color(0xFF7360F2),
+                    'Viber',
+                    () => _launchExternal(
+                        'viber://chat?number=${Uri.encodeComponent('+$intl')}')),
+              ] else
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline_rounded,
+                          size: 18,
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.5)),
+                      const SizedBox(width: 8),
+                      Text(noPhoneLbl[lang] ?? noPhoneLbl['en']!,
+                          style: TextStyle(
+                              color: theme.colorScheme.onSurface
+                                  .withValues(alpha: 0.6))),
+                    ],
+                  ),
+                ),
+              action(Icons.celebration_rounded, const Color(0xFF8E24AA),
+                  shareLbl[lang] ?? shareLbl['en']!,
+                  () => _shareNameDayWish(c.name, lang)),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Нормализира телефон към международни цифри без „+" (BG по подразбиране).
+  /// За WhatsApp/Viber, които искат международен формат.
+  String _phoneDigitsIntl(String raw) {
+    var d = raw.replaceAll(RegExp(r'[^\d+]'), '');
+    if (d.startsWith('+')) return d.substring(1);
+    if (d.startsWith('00')) return d.substring(2);
+    if (d.startsWith('0')) return '359${d.substring(1)}'; // нац. → межд.
+    return d;
+  }
+
+  /// Отваря външно приложение (dialer/SMS/WhatsApp/Viber). Тих toast при отказ.
+  Future<void> _launchExternal(String url) async {
+    final lang = LanguageScope.of(context).locale.languageCode;
+    const failLbl = {
+      'en': 'Could not open the app', 'bg': 'Приложението не може да се отвори',
+      'de': 'App konnte nicht geöffnet werden', 'fr': "Impossible d'ouvrir",
+      'it': "Impossibile aprire l'app", 'el': 'Δεν άνοιξε η εφαρμογή',
+      'es': 'No se pudo abrir la app', 'pt': 'Não foi possível abrir',
+      'ru': 'Не удалось открыть приложение', 'tr': 'Uygulama açılamadı',
+      'ja': 'アプリを開けませんでした',
+    };
+    bool ok = false;
+    try {
+      ok = await launchUrl(Uri.parse(url),
+          mode: LaunchMode.externalApplication);
+    } catch (_) {
+      ok = false;
+    }
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(failLbl[lang] ?? failLbl['en']!)),
+      );
+    }
+  }
+
+  /// Отваря системния share лист с честитка за имен ден. Нищо не се праща
+  /// автоматично — потребителят сам избира приложение/получател.
+  Future<void> _shareNameDayWish(String contactName, String lang) async {
+    final text = _wishText(contactName, lang);
 
     // iOS popover anchor (share_plus иска non-zero sharePositionOrigin на iPad).
     final box = context.findRenderObject() as RenderBox?;

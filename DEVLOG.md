@@ -24,6 +24,15 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   по adb → живият тест (реален адресник, разрешение, share) ОСТАВА за потребителя. **НЕ committ-нато още.**
 - ⚠️ **Play Console:** `READ_CONTACTS` е чувствително разрешение → при следващо качване ще трябва
   Permissions Declaration / Data safety ъпдейт (контакти се ползват само on-device, не се споделят).
+- **UX итерация (същия ден, инсталирано на Note 9 по WiFi adb):** Красимир/Красимира НЕ беше dataset
+  пропуск (и двете са на 1 юли), а overflow — старият вграден списък не се събираше при >2 контакта.
+  Решено: списъкът вече е в **изскачащ прозорец** (`_showNameDayContacts`); банерът показва само бутон
+  „От твоите контакти: N". Натискане на контакт → bottom sheet с **Обаждане/SMS/WhatsApp/Viber +
+  „Сподели честитка"** (`url_launcher`). Телефонът се **тегли при нужда** (`ContactNameIndex.phonesForContact`,
+  чрез `flutter_contacts getContact withProperties`), НЕ се кешира (индексът пази contactId+display name,
+  ключове `index_v2`/`names_v2`). Norm. на номера към межд. формат за WA/Viber (BG `0…`→`359…`).
+  **Messenger махнат** (Facebook няма phone-таргет). Android `<queries>` tel/sms/https/viber. analyze 0
+  нови грешки; APK билд+install OK, стартира без краж. Живият тест с реален Красимира контакт + Pro чака.
 
 ## 2026-06-15 · Android — AAB качен в Play Console → Production · v1.0.46+54
 Потребителят качи ръчно готовия AAB (1.0.46+54) в Play Console → Production (rollout). С това и трите
