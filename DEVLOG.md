@@ -6,6 +6,25 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-28 · PC — Контакти с имен ден (on-device, латиница) · v1.0.46+54 (нова работа, НЕ качена)
+Нова опционална premium функция: в банера за имен ден (Календар) се показва кои от контактите празнуват
+днес + бутон „Честит имен ден!" (share_plus). **100% on-device** — нищо не напуска телефона, нищо в облака.
+- **Match с латиница без транслитерация лат→кир** (многозначно): нов `lib/utils/bg_translit.dart` дава
+  официална бг транслитерация (кир→лат) + фонетичен скелет `canonLatin` (слива ts↔c, ch↔h, ya↔ia, yu↔iu,
+  y↔i↔j, kh→h, zh→z) + симетричен `keysFor()` (`c:`/`l:`). Ivan=Иван, Tsvetan=Cvetan=Цветан,
+  Iordan=Yordan=Jordan, Christo=Hristo. 13/13 unit match теста OK (вкл. без фалшиви: Петров, Hristo↛Иван).
+- **Индекс/кеш:** `lib/services/contact_name_index.dart` (`flutter_contacts`) гради ЕДНОКРАТНО локален
+  индекс ключ→display names, кешира в Hive box `bg_contact_index`; заявката е синхронна (1000+ контакта не
+  блокират UI). По подразбиране ИЗКЛ.; разрешение се иска само при вкл.; при изкл. кешът се ТРИЕ.
+- **UI:** toggle Настройки → „България" → „Контакти с имен ден" (premium, само мобилни, само ако именните
+  дни са вкл.) + бутон „Опресни контактите". Банер в Календара „От твоите контакти:" с чипове.
+- **Permissions/privacy:** нов dep `flutter_contacts ^1.1.9`; Android `READ_CONTACTS`; iOS
+  `NSContactsUsageDescription`; Privacy Policy (root + `docs/`) → нов раздел „1.3 Contacts".
+- **Верификация:** analyze 0 нови грешки; **release APK билднат OK (71.4MB)**. Телефонът НЕ беше свързан
+  по adb → живият тест (реален адресник, разрешение, share) ОСТАВА за потребителя. **НЕ committ-нато още.**
+- ⚠️ **Play Console:** `READ_CONTACTS` е чувствително разрешение → при следващо качване ще трябва
+  Permissions Declaration / Data safety ъпдейт (контакти се ползват само on-device, не се споделят).
+
 ## 2026-06-15 · Android — AAB качен в Play Console → Production · v1.0.46+54
 Потребителят качи ръчно готовия AAB (1.0.46+54) в Play Console → Production (rollout). С това и трите
 платформи са на 1.0.46: **Android в Production**, **iOS 1.0.46 (54) в App Store ревю**, **web деплойнат**.

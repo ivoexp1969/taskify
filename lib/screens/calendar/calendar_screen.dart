@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import '../../services/google_calendar_service.dart';
 import '../../services/ios_calendar_service.dart';
 import '../../services/name_days_service.dart';
+import '../../services/contact_name_index.dart';
 import '../../services/holidays_service.dart';
 import 'package:hive/hive.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -73,6 +75,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     NameDaysService.enabledNotifier.addListener(_onNameDaysToggle);
     HolidaysService.enabledNotifier.addListener(_onNameDaysToggle);
     HolidaysService.revision.addListener(_onNameDaysToggle);
+    // Контакти с имен ден (опционално, on-device) — банерът ги показва.
+    ContactNameIndex().enabledNotifier.addListener(_onNameDaysToggle);
 
     if (categoryBox.isEmpty) {
       _needsDefaults = true;
@@ -118,6 +122,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     NameDaysService.enabledNotifier.removeListener(_onNameDaysToggle);
     HolidaysService.enabledNotifier.removeListener(_onNameDaysToggle);
     HolidaysService.revision.removeListener(_onNameDaysToggle);
+    ContactNameIndex().enabledNotifier.removeListener(_onNameDaysToggle);
     super.dispose();
   }
 
@@ -142,6 +147,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Future<void> _loadNameDays() async {
     await NameDaysService().load();
     await NameDaysService().loadEnabled();
+    // Зарежда кешираните контакти (без сканиране), за да са готови за банера.
+    if (await ContactNameIndex().loadEnabled()) {
+      await ContactNameIndex().ensureLoaded();
+    }
     if (mounted) setState(() {});
   }
 
@@ -1932,6 +1941,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
     };
     final theme = Theme.of(context);
 
+    // Контакти с имен ден днес (само ако функцията е вкл.; on-device).
+    final contacts = ContactNameIndex().isEnabled
+        ? ContactNameIndex().contactsForNames(nameDay.names)
+        : const <String>[];
+    const fromContacts = {
+      'en': 'From your contacts:', 'bg': 'От твоите контакти:',
+      'de': 'Aus deinen Kontakten:', 'fr': 'Parmi tes contacts :',
+      'it': 'Dai tuoi contatti:', 'el': 'Από τις επαφές σου:',
+      'es': 'De tus contactos:', 'pt': 'Dos teus contactos:',
+      'ru': 'Из твоих контактов:', 'tr': 'Kişilerinden:',
+      'ja': '連絡先から：',
+    };
+
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -1967,12 +1989,70 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ),
                   ),
                 ],
+                if (contacts.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    fromContacts[lang] ?? fromContacts['en']!,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color:
+                          theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      for (final name in contacts)
+                        ActionChip(
+                          avatar: const Icon(Icons.celebration_rounded,
+                              size: 16, color: Color(0xFF8E24AA)),
+                          label: Text(name, style: const TextStyle(fontSize: 12)),
+                          visualDensity: VisualDensity.compact,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          onPressed: () => _shareNameDayWish(name, lang),
+                        ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  /// Отваря системния share лист с честитка за имен ден. Нищо не се праща
+  /// автоматично — потребителят сам избира приложение/получател.
+  Future<void> _shareNameDayWish(String contactName, String lang) async {
+    const wishTpl = {
+      'en': 'Happy name day, {name}! 🎉', 'bg': 'Честит имен ден, {name}! 🎉',
+      'de': 'Alles Gute zum Namenstag, {name}! 🎉',
+      'fr': 'Bonne fête, {name} ! 🎉', 'it': 'Buon onomastico, {name}! 🎉',
+      'el': 'Χρόνια πολλά, {name}! 🎉', 'es': '¡Feliz santo, {name}! 🎉',
+      'pt': 'Feliz dia do nome, {name}! 🎉', 'ru': 'С именинами, {name}! 🎉',
+      'tr': 'İsim günün kutlu olsun, {name}! 🎉',
+      'ja': '{name}さん、聖名祝日おめでとう！🎉',
+    };
+    final tpl = wishTpl[lang] ?? wishTpl['en']!;
+    final text = tpl.replaceAll('{name}', contactName);
+
+    // iOS popover anchor (share_plus иска non-zero sharePositionOrigin на iPad).
+    final box = context.findRenderObject() as RenderBox?;
+    final size = MediaQuery.of(context).size;
+    final origin = (box != null && box.hasSize)
+        ? box.localToGlobal(Offset.zero) & box.size
+        : Rect.fromCenter(
+            center: Offset(size.width / 2, size.height / 2),
+            width: 1,
+            height: 1,
+          );
+
+    await Share.share(text, sharePositionOrigin: origin);
   }
 }
 

@@ -33,6 +33,7 @@ import '../../services/calendar_import_service.dart';
 import '../../services/ios_calendar_service.dart';
 import '../../services/morning_briefing_service.dart';
 import '../../services/name_days_service.dart';
+import '../../services/contact_name_index.dart';
 import '../../services/holidays_service.dart';
 import '../../services/pro_service.dart';
 import '../paywall/paywall_screen.dart';
@@ -62,6 +63,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   int _briefingHour = 8;
   int _briefingMinute = 0;
   bool _nameDaysEnabled = false;
+  bool _contactsNameDayEnabled = false;
   bool _holidaysEnabled = false;
   String _holidaysCountry = 'BG';
   StreamSubscription<dynamic>? _authSub;
@@ -125,9 +127,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadNameDaysSetting() async {
     final prefs = await SharedPreferences.getInstance();
+    final contactsOn = await ContactNameIndex().loadEnabled();
     if (!mounted) return;
     setState(() {
       _nameDaysEnabled = prefs.getBool('name_days_enabled') ?? false;
+      _contactsNameDayEnabled = contactsOn;
     });
   }
 
@@ -170,6 +174,68 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'pt': 'Dias do nome búlgaros no calendário',
       'ru': 'Болгарские именины в календаре',
       'tr': 'Takvimde Bulgarca isim günleri', 'ja': 'カレンダーにブルガリアの聖名祝日を表示',
+    };
+    const contactsTitle = {
+      'en': 'Contacts celebrating', 'bg': 'Контакти с имен ден',
+      'de': 'Feiernde Kontakte', 'fr': 'Contacts en fête',
+      'it': 'Contatti in festa', 'el': 'Επαφές που γιορτάζουν',
+      'es': 'Contactos que celebran', 'pt': 'Contactos em festa',
+      'ru': 'Контакты с именинами', 'tr': 'İsim günü olan kişiler',
+      'ja': '記念日の連絡先',
+    };
+    const contactsSubtitle = {
+      'en': 'Show which of your contacts have a name day — stays on your device',
+      'bg': 'Покажи кои от контактите ти празнуват — остава на устройството',
+      'de': 'Zeigt, welche Kontakte Namenstag haben — bleibt auf dem Gerät',
+      'fr': "Affiche quels contacts fêtent leur prénom — reste sur l'appareil",
+      'it': 'Mostra quali contatti festeggiano — resta sul dispositivo',
+      'el': 'Δείχνει ποιες επαφές γιορτάζουν — μένει στη συσκευή',
+      'es': 'Muestra qué contactos celebran su santo — no sale del dispositivo',
+      'pt': 'Mostra que contactos fazem anos do nome — fica no dispositivo',
+      'ru': 'Показывает, у кого из контактов именины — остаётся на устройстве',
+      'tr': 'Hangi kişilerin isim günü olduğunu gösterir — cihazda kalır',
+      'ja': '記念日の連絡先を表示 — データは端末内のみ',
+    };
+    const contactsPermDenied = {
+      'en': 'Contacts permission is required for this feature',
+      'bg': 'Нужно е разрешение за контакти',
+      'de': 'Kontaktberechtigung erforderlich',
+      'fr': 'Autorisation des contacts requise',
+      'it': 'Autorizzazione ai contatti necessaria',
+      'el': 'Απαιτείται άδεια επαφών',
+      'es': 'Se necesita permiso de contactos',
+      'pt': 'É necessária permissão de contactos',
+      'ru': 'Требуется доступ к контактам',
+      'tr': 'Kişiler izni gerekli', 'ja': '連絡先へのアクセス許可が必要です',
+    };
+    const contactsRefresh = {
+      'en': 'Refresh contacts', 'bg': 'Опресни контактите',
+      'de': 'Kontakte aktualisieren', 'fr': 'Actualiser les contacts',
+      'it': 'Aggiorna i contatti', 'el': 'Ανανέωση επαφών',
+      'es': 'Actualizar contactos', 'pt': 'Atualizar contactos',
+      'ru': 'Обновить контакты', 'tr': 'Kişileri yenile',
+      'ja': '連絡先を更新',
+    };
+    const contactsRefreshHint = {
+      'en': 'Rebuild the local index after contact changes',
+      'bg': 'Преизгражда локалния индекс след промени',
+      'de': 'Lokalen Index nach Änderungen neu aufbauen',
+      'fr': "Reconstruit l'index local après modifications",
+      'it': "Ricostruisce l'indice locale dopo le modifiche",
+      'el': 'Αναδημιουργεί τον τοπικό δείκτη μετά από αλλαγές',
+      'es': 'Reconstruye el índice local tras los cambios',
+      'pt': 'Reconstrói o índice local após alterações',
+      'ru': 'Перестроить локальный индекс после изменений',
+      'tr': 'Değişikliklerden sonra yerel dizini yeniden oluştur',
+      'ja': '変更後にローカル索引を再構築',
+    };
+    const contactsRefreshed = {
+      'en': 'Contacts refreshed', 'bg': 'Контактите са обновени',
+      'de': 'Kontakte aktualisiert', 'fr': 'Contacts actualisés',
+      'it': 'Contatti aggiornati', 'el': 'Οι επαφές ανανεώθηκαν',
+      'es': 'Contactos actualizados', 'pt': 'Contactos atualizados',
+      'ru': 'Контакты обновлены', 'tr': 'Kişiler yenilendi',
+      'ja': '連絡先を更新しました',
     };
 
     String tr(Map<String, String> m) => m[lang] ?? m['en']!;
@@ -230,6 +296,103 @@ class _SettingsScreenState extends State<SettingsScreen> {
           },
         ),
       ),
+      // „Контакти с имен ден" — само на мобилни (уеб няма контакти) и само
+      // когато именните дни са включени (функцията ги допълва). On-device.
+      if (_nameDaysEnabled && !kIsWeb) ...[
+        const SizedBox(height: 8),
+        Card(
+          child: Column(
+            children: [
+              SwitchListTile(
+                secondary: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF8E24AA).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.contacts_rounded,
+                      color: Color(0xFF8E24AA)),
+                ),
+                title: Row(
+                  children: [
+                    Flexible(child: Text(tr(contactsTitle))),
+                    if (!isPro) ...[
+                      const SizedBox(width: 6),
+                      Icon(Icons.lock,
+                          size: 14, color: theme.colorScheme.primary),
+                    ],
+                  ],
+                ),
+                subtitle: Text(
+                  tr(contactsSubtitle),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+                value: _contactsNameDayEnabled,
+                onChanged: (value) async {
+                  if (value) {
+                    if (!isPro) {
+                      final upgraded = await showPaywallIfNeeded(
+                        context,
+                        isFeatureAvailable: false,
+                        featureName: tr(contactsTitle),
+                      );
+                      if (!upgraded) return;
+                    }
+                    final granted =
+                        await ContactNameIndex().requestPermission();
+                    if (!granted) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(tr(contactsPermDenied))),
+                        );
+                      }
+                      return;
+                    }
+                    await ContactNameIndex().setEnabled(true);
+                    if (mounted) {
+                      setState(() => _contactsNameDayEnabled = true);
+                    }
+                    // Индексът се гради във фон (1000+ контакта не блокират UI).
+                    unawaited(ContactNameIndex().rebuild());
+                  } else {
+                    await ContactNameIndex().setEnabled(false);
+                    if (mounted) {
+                      setState(() => _contactsNameDayEnabled = false);
+                    }
+                  }
+                },
+              ),
+              if (_contactsNameDayEnabled) ...[
+                const Divider(height: 0),
+                ListTile(
+                  leading: const Icon(Icons.refresh_rounded,
+                      color: Color(0xFF8E24AA)),
+                  title: Text(tr(contactsRefresh)),
+                  subtitle: Text(
+                    tr(contactsRefreshHint),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color:
+                          theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  onTap: () async {
+                    await ContactNameIndex().rebuild();
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(tr(contactsRefreshed))),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     ];
   }
 
