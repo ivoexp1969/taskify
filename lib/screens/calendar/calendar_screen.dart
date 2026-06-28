@@ -6,6 +6,7 @@ import '../../services/google_calendar_service.dart';
 import '../../services/ios_calendar_service.dart';
 import '../../services/name_days_service.dart';
 import '../../services/contact_name_index.dart';
+import '../../utils/name_day_card.dart';
 import '../../services/holidays_service.dart';
 import 'package:hive/hive.dart';
 import 'package:share_plus/share_plus.dart';
@@ -78,6 +79,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     HolidaysService.revision.addListener(_onNameDaysToggle);
     // Контакти с имен ден (опционално, on-device) — банерът ги показва.
     ContactNameIndex().enabledNotifier.addListener(_onNameDaysToggle);
+    // Обнови банера, щом фоновото изграждане на индекса завърши.
+    ContactNameIndex().revision.addListener(_onNameDaysToggle);
 
     if (categoryBox.isEmpty) {
       _needsDefaults = true;
@@ -124,6 +127,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     HolidaysService.enabledNotifier.removeListener(_onNameDaysToggle);
     HolidaysService.revision.removeListener(_onNameDaysToggle);
     ContactNameIndex().enabledNotifier.removeListener(_onNameDaysToggle);
+    ContactNameIndex().revision.removeListener(_onNameDaysToggle);
     super.dispose();
   }
 
@@ -2132,6 +2136,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final phone = phones.isNotEmpty ? phones.first : null;
     final intl = phone != null ? _phoneDigitsIntl(phone) : null;
     final wish = _wishText(c.name, lang);
+    final feast = NameDaysService().forDate(_selectedDay)?.feast ?? '';
 
     const callLbl = {
       'en': 'Call', 'bg': 'Обаждане', 'de': 'Anrufen', 'fr': 'Appeler',
@@ -2142,6 +2147,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
       'en': 'Message', 'bg': 'Съобщение', 'de': 'Nachricht', 'fr': 'SMS',
       'it': 'Messaggio', 'el': 'Μήνυμα', 'es': 'Mensaje', 'pt': 'Mensagem',
       'ru': 'Сообщение', 'tr': 'Mesaj', 'ja': 'メッセージ',
+    };
+    const cardLbl = {
+      'en': 'Greeting card', 'bg': 'Картичка', 'de': 'Grußkarte',
+      'fr': 'Carte', 'it': 'Cartolina', 'el': 'Κάρτα', 'es': 'Tarjeta',
+      'pt': 'Cartão', 'ru': 'Открытка', 'tr': 'Kart', 'ja': 'カード',
     };
     const shareLbl = {
       'en': 'Share wish', 'bg': 'Сподели честитка', 'de': 'Glückwunsch teilen',
@@ -2200,13 +2210,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     () => _launchExternal(
                         'sms:$phone?body=${Uri.encodeComponent(wish)}')),
                 action(Icons.chat_rounded, const Color(0xFF25D366),
-                    'WhatsApp',
-                    () => _launchExternal(
-                        'https://wa.me/$intl?text=${Uri.encodeComponent(wish)}')),
+                    'WhatsApp', () => _launchWhatsApp(intl!, wish)),
                 action(Icons.phone_in_talk_rounded, const Color(0xFF7360F2),
                     'Viber',
                     () => _launchExternal(
-                        'viber://chat?number=${Uri.encodeComponent('+$intl')}')),
+                        'viber://forward?text=${Uri.encodeComponent(wish)}')),
               ] else
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -2225,6 +2233,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ],
                   ),
                 ),
+              action(Icons.card_giftcard_rounded, const Color(0xFFAB47BC),
+                  cardLbl[lang] ?? cardLbl['en']!,
+                  () => NameDayCardUtil.show(
+                        context: context,
+                        name: c.name,
+                        feast: feast,
+                        wish: wish,
+                        lang: lang,
+                      )),
               action(Icons.celebration_rounded, const Color(0xFF8E24AA),
                   shareLbl[lang] ?? shareLbl['en']!,
                   () => _shareNameDayWish(c.name, lang)),
@@ -2246,8 +2263,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return d;
   }
 
-  /// Отваря външно приложение (dialer/SMS/WhatsApp/Viber). Тих toast при отказ.
-  Future<void> _launchExternal(String url) async {
+  /// Опитва да отвори URL във външно приложение; връща дали е успяло.
+  Future<bool> _tryLaunch(String url) async {
+    try {
+      return await launchUrl(Uri.parse(url),
+          mode: LaunchMode.externalApplication);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  void _toastLaunchFail() {
     final lang = LanguageScope.of(context).locale.languageCode;
     const failLbl = {
       'en': 'Could not open the app', 'bg': 'Приложението не може да се отвори',
@@ -2257,18 +2283,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
       'ru': 'Не удалось открыть приложение', 'tr': 'Uygulama açılamadı',
       'ja': 'アプリを開けませんでした',
     };
-    bool ok = false;
-    try {
-      ok = await launchUrl(Uri.parse(url),
-          mode: LaunchMode.externalApplication);
-    } catch (_) {
-      ok = false;
-    }
-    if (!ok && mounted) {
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(failLbl[lang] ?? failLbl['en']!)),
       );
     }
+  }
+
+  /// Отваря външно приложение (dialer/SMS/Viber). Тих toast при отказ.
+  Future<void> _launchExternal(String url) async {
+    if (!await _tryLaunch(url)) _toastLaunchFail();
+  }
+
+  /// WhatsApp: първо app-схемата (директно приложението), после уеб fallback.
+  Future<void> _launchWhatsApp(String intl, String wish) async {
+    final enc = Uri.encodeComponent(wish);
+    if (await _tryLaunch('whatsapp://send?phone=$intl&text=$enc')) return;
+    if (await _tryLaunch('https://wa.me/$intl?text=$enc')) return;
+    _toastLaunchFail();
   }
 
   /// Отваря системния share лист с честитка за имен ден. Нищо не се праща

@@ -33,6 +33,18 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   ключове `index_v2`/`names_v2`). Norm. на номера към межд. формат за WA/Viber (BG `0…`→`359…`).
   **Messenger махнат** (Facebook няма phone-таргет). Android `<queries>` tel/sms/https/viber. analyze 0
   нови грешки; APK билд+install OK, стартира без краж. Живият тест с реален Красимира контакт + Pro чака.
+- **Поправки след жив тест на Note 9 (Петровден 29 юни — Петър/Павел):**
+  (1) ★БЪГ★ списъкът с контакти беше празен → причина: смених кеш ключа `index`→`index_v2` при
+  reinstall + НЯМАШЕ авто-rebuild на стартиране. Fix: нов `revision` `ValueNotifier` (банерът слуша) +
+  `ensureLoaded` авто-преизгражда индекса при празен кеш ВЕДНЪЖ на сесия (`_autoRebuildTried`). Потребителят
+  потвърди, че проработи (бе ползвал ръчния „Опресни").
+  (2) **Viber** `viber://chat?number=` даваше грешка → сменено на `viber://forward?text=` (отваря Viber
+  picker с готова честитка). (3) **WhatsApp** да отваря APP-а, не сайта: `whatsapp://send?phone=&text=`
+  първо, после fallback `https://wa.me/`; `<package>` видимост com.whatsapp/.w4b/com.viber.voip + whatsapp
+  схема в `<queries>`. (4) **Готова картичка** „Честит имен ден" (`lib/utils/name_day_card.dart`): преглед
+  в диалог + споделяне като PNG (RepaintBoundary→`toImage` pixelRatio 3→temp файл→`Share.shareXFiles`); 7
+  градиента (избор по hash на името = „оригинална"), Caveat (google_fonts), конфети, феаст, воден знак.
+  Нов бутон „Картичка" в action sheet-а на контакта. analyze 0 грешки; APK 71.6MB install+launch OK на Note 9.
 
 ## 2026-06-15 · Android — AAB качен в Play Console → Production · v1.0.46+54
 Потребителят качи ръчно готовия AAB (1.0.46+54) в Play Console → Production (rollout). С това и трите

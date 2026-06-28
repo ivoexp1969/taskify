@@ -35,11 +35,16 @@ class ContactNameIndex {
   /// Реактивен флаг за UI (банерът в календара слуша този notifier).
   final ValueNotifier<bool> enabledNotifier = ValueNotifier<bool>(false);
 
+  /// Брояч, който се увеличава щом индексът се промени (изграждане/презареждане).
+  /// Банерът слуша това, за да се обнови, когато фоновото изграждане завърши.
+  final ValueNotifier<int> revision = ValueNotifier<int>(0);
+
   /// In-memory индекс: ключ (`c:`/`l:`) → множество contact id-та.
   Map<String, Set<String>>? _index;
   // id → display name (за показване).
   Map<String, String> _names = {};
   bool _building = false;
+  bool _autoRebuildTried = false; // авто-rebuild само веднъж на сесия
   int _builtAt = 0;
 
   bool get isEnabled => enabledNotifier.value;
@@ -65,6 +70,9 @@ class ContactNameIndex {
       _names = {};
       _builtAt = 0;
       await _clearCache();
+      revision.value++;
+    } else {
+      _autoRebuildTried = false; // позволи ново авто-изграждане при нужда
     }
   }
 
@@ -92,31 +100,46 @@ class ContactNameIndex {
     } catch (_) {}
   }
 
-  /// Зарежда кешираните данни в паметта (без сканиране на контакти).
+  /// Зарежда кешираните данни в паметта (без сканиране на контакти). Ако
+  /// функцията е включена, но кешът е празен (сменен формат на кеша, ново
+  /// устройство, изтрит кеш) — преизгражда индекса автоматично ВЕДНЪЖ на сесия,
+  /// иначе списъкът остава празен до ръчен „Опресни".
   Future<void> ensureLoaded() async {
-    if (_index != null || kIsWeb) return;
-    try {
-      final b = await _box();
-      _builtAt = (b.get(_kBuiltAt) as int?) ?? 0;
-      final rawIdx = b.get(_kIndex);
-      final rawNames = b.get(_kNames);
-      final idx = <String, Set<String>>{};
-      if (rawIdx is Map) {
-        rawIdx.forEach((k, v) {
-          if (v is List) {
-            idx[k.toString()] = v.map((e) => e.toString()).toSet();
-          }
-        });
+    if (kIsWeb) {
+      _index ??= <String, Set<String>>{};
+      return;
+    }
+    if (_index == null) {
+      try {
+        final b = await _box();
+        _builtAt = (b.get(_kBuiltAt) as int?) ?? 0;
+        final rawIdx = b.get(_kIndex);
+        final rawNames = b.get(_kNames);
+        final idx = <String, Set<String>>{};
+        if (rawIdx is Map) {
+          rawIdx.forEach((k, v) {
+            if (v is List) {
+              idx[k.toString()] = v.map((e) => e.toString()).toSet();
+            }
+          });
+        }
+        final names = <String, String>{};
+        if (rawNames is Map) {
+          rawNames.forEach((k, v) => names[k.toString()] = v.toString());
+        }
+        _index = idx;
+        _names = names;
+      } catch (_) {
+        _index = <String, Set<String>>{};
+        _names = {};
       }
-      final names = <String, String>{};
-      if (rawNames is Map) {
-        rawNames.forEach((k, v) => names[k.toString()] = v.toString());
-      }
-      _index = idx;
-      _names = names;
-    } catch (_) {
-      _index = <String, Set<String>>{};
-      _names = {};
+    }
+    if (isEnabled &&
+        (_index == null || _index!.isEmpty) &&
+        !_building &&
+        !_autoRebuildTried) {
+      _autoRebuildTried = true;
+      await rebuild();
     }
   }
 
@@ -153,6 +176,8 @@ class ContactNameIndex {
       // тих fail
     } finally {
       _building = false;
+      // Уведоми UI (банера), че индексът е готов — независимо дали успешно.
+      revision.value++;
     }
   }
 

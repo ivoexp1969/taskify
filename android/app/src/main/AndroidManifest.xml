@@ -34,6 +34,14 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="viber" />
         </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="whatsapp" />
+        </intent>
+        <!-- Видимост на конкретните приложения (Android 11+) -->
+        <package android:name="com.whatsapp" />
+        <package android:name="com.whatsapp.w4b" />
+        <package android:name="com.viber.voip" />
     </queries>
 
     <application

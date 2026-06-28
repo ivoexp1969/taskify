@@ -71,7 +71,14 @@ Keep this current — it is the shared cross-machine context (see Cross-Machine 
   само бутон „От твоите контакти: N"); натискане на контакт отваря bottom sheet с **Обаждане/SMS/WhatsApp/
   Viber + „Сподели честитка"** (`url_launcher`; телефонът се тегли ПРИ НУЖДА през `phonesForContact`, НЕ се
   кешира; индексът вече пази contactId, не само име). Messenger няма phone-таргет (Facebook) → махнат по
-  избор на потребителя. Android `<queries>` за tel/sms/https/viber. Виж DEVLOG.
+  избор на потребителя. Android `<queries>` за tel/sms/https/viber. **Поправки след тест на живо:**
+  (1) ★БЪГ★ списъкът беше празен след reinstall — смененият кеш ключ (`index`→`index_v2`) + липса на
+  авто-rebuild → нов `revision` ValueNotifier + `ensureLoaded` авто-преизгражда при празен индекс веднъж
+  на сесия (банерът слуша revision). (2) Viber `chat?number=` гърмеше → `viber://forward?text=`. (3)
+  WhatsApp да отваря APP-а: `whatsapp://send?phone=&text=` + fallback `wa.me` + `<package>` видимост
+  (com.whatsapp/.w4b/com.viber.voip). (4) Нова **готова картичка** „Честит имен ден" (`utils/name_day_card.dart`)
+  — преглед в диалог + споделяне като PNG (RepaintBoundary→toImage→`shareXFiles`); 7 градиента по
+  hash на името, Caveat шрифт (google_fonts), конфети, феаст, воден знак Taskify. Виж DEVLOG.
 - **Интерактивни подзадачи в разгъната карта (PC, в същата v1.0.46+54 — още НЕ качена в конзолата):**
   при разгъване на карта с подзадачи вече се показва списък с **чекбокс на всеки ред** (отмятане
   завършена/не), на трите екрана — Задачи, Календар, Споделени. Нови споделени widget-и в
