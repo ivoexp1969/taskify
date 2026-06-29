@@ -42,7 +42,11 @@ flutter build appbundle --release
 - Firebase: `IVA` — lifetime access, 20-user cap
 
 ## Current Version
-v1.0.46+54 (June 2026) — Пълен именен dataset (~769 имена) + секция „За приложението" (динамична версия,
+v1.0.47+55 (June 2026) — **Контакти с имен ден** (on-device match с латиница, изскачащ списък,
+Обаждане/SMS/WhatsApp/Viber + готова PNG картичка). AAB качен в Play Console чрез **service account**
+(`~/keys/play-service-account.json` + androidpublisher API — НЕ ръчно!); READ_CONTACTS иска Permissions
+Declaration. Release notes: `release_notes/1.0.47.md`. ПРЕДИШНО:
+v1.0.46+54 — Пълен именен dataset (~769 имена) + секция „За приложението" (динамична версия,
 „Как се ползва", лиценз) + fix групови AI подзадачи + интерактивни подзадачи в картата.
 **Android: качен в Play Console → Production** (rollout). **iOS: 1.0.46 (54) в App Store ревю**
 (1.0.45 е READY_FOR_SALE). **Web deploy-нат** (Cloudflare Pages). И трите платформи на 1.0.46. Виж DEVLOG
