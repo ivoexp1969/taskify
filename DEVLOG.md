@@ -6,6 +6,25 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-29 · PC — v1.0.47+55 качен в Play Console (Production **draft**) през service account
+Довърших handoff-а от 06-28: bump-ът 1.0.47+55 беше некомитнат + AAB от снощи с двусмислена версия.
+- **Ребилд** на чист AAB → `flutter build appbundle --release` = **1.0.47+55, 57.7MB**.
+- ★Първо авто-качване през Play Developer API★ (вече има service account — паметта от 06-28 беше остаряла,
+  че няма). Ключ `~/keys/play-service-account.json` (`play-upload@taskify-1969.iam.gserviceaccount.com`,
+  проект `taskify-1969`). Python `google-api-python-client` + `google.oauth2` вече инсталирани.
+- Нов **`tools/play_upload.py`** (androidpublisher v3: edits.insert→bundles.upload→tracks.update→commit;
+  чете release notes от файл за да не чупи кирилица в shell args; `--dry-run` показва текущия track; status
+  по подразбиране **`draft`** = НЕ пуска rollout). Качено в **Production track като draft**, versionCode 55,
+  release notes BG+EN (от `release_notes/1.0.47.md`). Живата версия остава 54; 55 чака ръчно пускане.
+- ★КАПАН★ (документиран на потребителя): **Data safety + Permissions Declaration НЯМАТ публичен API** —
+  попълват се само ръчно в Console. Дадох му стъпки. За **Contacts**: четат се само on-device и НЕ напускат
+  телефона → по дефиницията на Google („collected" = изпратено извън устройството) → **НЕ се събира/споделя**
+  в Data safety (честно, защото е 100% on-device). Обосновка за READ_CONTACTS (ако Console я поиска) +
+  App access инструкция (функцията е зад Pro → промо код IVA) — текстовете са в чата.
+- Commit **4f4719a** push-нат (pubspec +55, CLAUDE.md, release_notes/1.0.47.md, tools/play_upload.py).
+- **ОСТАВА за потребителя (ръчно в Console):** Data safety Complete → (евент. Permissions declaration) →
+  Release → Production → Edit/Review → Start rollout. После iOS на Mac (1.0.47 за паритет).
+
 ## 2026-06-28 · PC — Контакти с имен ден (on-device, латиница) · v1.0.46+54 (нова работа, НЕ качена)
 Нова опционална premium функция: в банера за имен ден (Календар) се показва кои от контактите празнуват
 днес + бутон „Честит имен ден!" (share_plus). **100% on-device** — нищо не напуска телефона, нищо в облака.
