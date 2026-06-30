@@ -6,6 +6,24 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-30 · Mac — iOS 1.0.47 (55) подадена в App Store + Toto + privacy fix
+`git pull` → взе PC-работата „Контакти с имен ден" (1.0.47+55). Анализ преди действие: `flutter analyze`
+0 грешки; iOS `NSContactsUsageDescription` налично; `flutter_contacts ^1.1.9` в pubspec; ASC чист
+(1.0.46 READY_FOR_SALE). После публикувах:
+- `flutter build ipa --release` (Xcode 26, pod install за flutter_contacts) → `altool` UPLOAD SUCCEEDED.
+- ASC (/tmp/asc44.py, VERSION=1.0.47/BUILD=55): създадена версия 1.0.47 (id 2ceed936…), whatsNew en-US
+  (EN+BG, БЕЗ емоджита, от `release_notes/1.0.47.md`); build 55 (VALID) закачен (204) → подаден →
+  **WAITING_FOR_REVIEW**.
+- **Toto:** `flutter build ios --release` → `devicectl install` (Toto се появи „connected (no DDI)" след
+  няколко опита) → потвърден **1.0.47 (55)**, стартиран на чисто.
+- ★PRIVACY FIX★: политиката твърдеше „we do not access phone numbers", но функцията ЧЕТЕ телефони (при
+  тап → Обаждане/SMS/WA/Viber, on-device, при изрично действие). Коригирах `privacy-policy.html` +
+  `docs/privacy-policy.html` (GitHub Pages, paywall линка) → точен текст. Commit 4dfc84f.
+- **ОСТАВА за потребителя (ръчно):** (1) App Store App Privacy (on-device → Data Not Collected, обикн. без
+  промяна) — `appstoreconnect.apple.com/apps/6768345070/distribution/privacy`; (2) **сайтът
+  `taskify1969.com/privacy`** (отделен Cloudflare Pages проект `taskify`, НЕ в repo) да се обнови със същия
+  текст за контактите; (3) Play Data safety + Permissions Declaration (READ_CONTACTS) + Start rollout (55).
+
 ## 2026-06-29 · PC — v1.0.47+55 качен в Play Console (Production **draft**) през service account
 Довърших handoff-а от 06-28: bump-ът 1.0.47+55 беше некомитнат + AAB от снощи с двусмислена версия.
 - **Ребилд** на чист AAB → `flutter build appbundle --release` = **1.0.47+55, 57.7MB**.
