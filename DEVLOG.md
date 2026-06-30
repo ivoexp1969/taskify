@@ -6,6 +6,17 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-06-30 · Android — 1.0.47 (55) ЖИВА в Production + iOS статус
+- **Android:** Play Console „Стандартен канал" → **Активни, най-нова публикувана версия 1.0.47**, 177
+  държави, 26 инсталирания. Тоест **build 55 (1.0.47) е публикуван на 100%** — rollout-ът мина (драфтът
+  от 06-29 е пуснат). Нищо не е блокирано/прекратено.
+- **Data safety / Permissions (READ_CONTACTS):** НЕ изискаха блокираща декларация — публикува се чисто.
+  Контактите са on-device → „не се събират" (consistent с iOS App Privacy, където махнахме „Contacts").
+- ★TODO (бъдеща версия, не спешно):★ Play показва 2 препоръчителни действия за **edge-to-edge показване**
+  (оттеглени API, Android 15) — козметично, код-промяна за следващ билд, НЕ свързано с контактите.
+- **iOS:** 1.0.47 (55) все още WAITING_FOR_REVIEW (виж по-долу). Сайтът taskify1969.com/privacy — пак
+  отложен (виж предходния запис).
+
 ## 2026-06-30 · Mac — iOS 1.0.47 (55) подадена в App Store + Toto + privacy fix
 `git pull` → взе PC-работата „Контакти с имен ден" (1.0.47+55). Анализ преди действие: `flutter analyze`
 0 грешки; iOS `NSContactsUsageDescription` налично; `flutter_contacts ^1.1.9` в pubspec; ASC чист
