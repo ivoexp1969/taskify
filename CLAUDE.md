@@ -43,9 +43,14 @@ flutter build appbundle --release
 
 ## Current Version
 v1.0.47+55 (June 2026) — **Контакти с имен ден** (on-device match с латиница, изскачащ списък,
-Обаждане/SMS/WhatsApp/Viber + готова PNG картичка). AAB качен в Play Console чрез **service account**
-(`~/keys/play-service-account.json` + androidpublisher API — НЕ ръчно!); READ_CONTACTS иска Permissions
-Declaration. Release notes: `release_notes/1.0.47.md`. ПРЕДИШНО:
+Обаждане/SMS/WhatsApp/Viber + готова PNG картичка). AAB качен чрез **service account**
+(`~/keys/play-service-account.json` + `tools/play_upload.py` androidpublisher API — НЕ ръчно!).
+**Android: ЖИВА в Production** (rollout мина 100%, заменя 54). **iOS: 1.0.47 (55) подадена в App Store
+→ WAITING_FOR_REVIEW** (инсталирана на Toto). READ_CONTACTS се оказа БЕЗ нужда от декларация (Data
+safety вече Complete, контактите on-device → не се събират; не е SMS/Call-Log). Privacy политика
+коригирана (чете телефони само при изрично действие). Release notes: `release_notes/1.0.47.md`.
+**TODO (не спешно):** edge-to-edge fix (Android 15) + сайт taskify1969.com/privacy (стар, Cloudflare
+Direct Upload — източникът вероятно на PC). ПРЕДИШНО:
 v1.0.46+54 — Пълен именен dataset (~769 имена) + секция „За приложението" (динамична версия,
 „Как се ползва", лиценз) + fix групови AI подзадачи + интерактивни подзадачи в картата.
 **Android: качен в Play Console → Production** (rollout). **iOS: 1.0.46 (54) в App Store ревю**
@@ -53,6 +58,13 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **v1.0.47+55 ЖИВА на двете платформи (Android Production / iOS в ревю):** Android 1.0.47 (55) **публикувана
+  на 100% в Production** (rollout мина; 177 държави) — READ_CONTACTS не изиска блокираща декларация (on-device
+  → „не се събира"). iOS 1.0.47 (55) (Mac) **подадена в App Store → WAITING_FOR_REVIEW**, инсталирана на Toto.
+  Privacy политика коригирана (`privacy-policy.html` + `docs/`) — функцията чете телефони само при изрично
+  действие (Обаждане/SMS/WA/Viber), on-device, без съхранение/предаване. **TODO (не спешно):** edge-to-edge
+  fix (оттеглени API, Android 15) за следващ билд; сайт taskify1969.com/privacy е стар (Cloudflare Direct
+  Upload без Git, източникът вероятно на PC) → добави раздел „Contacts" + `wrangler pages deploy`. Виж DEVLOG.
 - **Контакти с имен ден — on-device, с латиница (PC, нова работа в същата v1.0.46+54 — НЕ качена):**
   Нова опционална premium функция. В банера за имен ден (Календар) се показва „От твоите контакти: …"
   с контактите, които празнуват ДНЕС + чип-бутон „Честит имен ден!" (share_plus, ръчно споделяне).
