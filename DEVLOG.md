@@ -19,10 +19,17 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 - ★PRIVACY FIX★: политиката твърдеше „we do not access phone numbers", но функцията ЧЕТЕ телефони (при
   тап → Обаждане/SMS/WA/Viber, on-device, при изрично действие). Коригирах `privacy-policy.html` +
   `docs/privacy-policy.html` (GitHub Pages, paywall линка) → точен текст. Commit 4dfc84f.
-- **ОСТАВА за потребителя (ръчно):** (1) App Store App Privacy (on-device → Data Not Collected, обикн. без
-  промяна) — `appstoreconnect.apple.com/apps/6768345070/distribution/privacy`; (2) **сайтът
-  `taskify1969.com/privacy`** (отделен Cloudflare Pages проект `taskify`, НЕ в repo) да се обнови със същия
-  текст за контактите; (3) Play Data safety + Permissions Declaration (READ_CONTACTS) + Start rollout (55).
+- **ОСТАВА за потребителя (ръчно):** (1) App Store App Privacy — ✅ ГОТОВО (потребителят махна „Contacts"
+  → 11 типа, коректно, on-device не се декларира); (2) Play Data safety + Permissions Declaration
+  (READ_CONTACTS) + Start rollout (55).
+- **САЙТЪТ taskify1969.com/privacy — ОТЛОЖЕН (TODO, най-добре от PC):** липсва раздел за функцията с
+  контактите (стар е). Проектът `taskify` в Cloudflare е **Direct Upload (без Git)**, многостраничен
+  (EN+BG: /privacy /terms + /bg/* + /bg/vs/{microsoft-to-do,ticktick,todoist} SEO стр.). **Източникът НЕ
+  е на Mac** (вероятно на PC). НЕ блокира ревюто (ASC сочи към github.io, който е коректен). Когато се
+  стигне: редактирай `privacy.html` + `bg/privacy.html` в ИЗТОЧНИКА (добави раздел „Contacts": имена за
+  match + телефон само при изрично действие, on-device, без съхранение/предаване — текстът е в
+  `docs/privacy-policy.html` на това repo) → `wrangler pages deploy <dir> --project-name=taskify`.
+  Унифицирай и двата линка в приложението (Настройки→taskify1969.com, paywall→github.io) към един.
 
 ## 2026-06-29 · PC — v1.0.47+55 качен в Play Console (Production **draft**) през service account
 Довърших handoff-а от 06-28: bump-ът 1.0.47+55 беше некомитнат + AAB от снощи с двусмислена версия.
