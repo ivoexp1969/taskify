@@ -32,11 +32,24 @@ class _RenewalCtaState extends State<RenewalCta> {
   @override
   void initState() {
     super.initState();
+    // Пре-оценка щом офертите се сменят (фоново теглене от Firestore) → бутонът
+    // лъсва без рестарт.
+    RenewalService.revision.addListener(_resolve);
     _init();
+  }
+
+  @override
+  void dispose() {
+    RenewalService.revision.removeListener(_resolve);
+    super.dispose();
   }
 
   Future<void> _init() async {
     await RenewalService().load();
+    _resolve();
+  }
+
+  void _resolve() {
     if (!mounted) return;
     setState(() {
       _offer = RenewalService()

@@ -92,6 +92,11 @@ class RenewalService {
   /// Колко дълго кешираният remote се смята за пресен (24 часа).
   static const Duration cacheTtl = Duration(hours: 24);
 
+  /// Бумва се щом офертите се сменят (напр. след фоново теглене от Firestore),
+  /// за да могат вече изградените CTA-та да се пре-оценят и бутонът да лъсне
+  /// БЕЗ рестарт (виж [RenewalCta]).
+  static final ValueNotifier<int> revision = ValueNotifier<int>(0);
+
   List<RenewalOffer> _offers = const [];
   bool _loaded = false;
 
@@ -152,6 +157,7 @@ class RenewalService {
           _kCacheJson, json.encode({'version': 1, 'offers': list}));
       await prefs.setInt(_kCacheTs, DateTime.now().millisecondsSinceEpoch);
       _offers = parsed; // важи и за текущата сесия
+      revision.value++; // → CTA-тата се пре-оценяват веднага
     } catch (e) {
       debugPrint('RenewalService: remote refresh skipped → $e');
     }

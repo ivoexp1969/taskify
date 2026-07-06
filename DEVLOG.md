@@ -50,10 +50,17 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   при `existing==null && !isPro && count>=2` → paywall (редакция на съществуващ винаги позволена; на web
   isPro=true → без гейт). Така partner CTA-то „Поднови сега" стига до цялата база, а Pro стимулът остава.
   `flutter analyze` цял проект → **0 error**; тестове 20/20.
-- ★TODO за go-live★: (1) включи Anonymous доставчик в Firebase Console → Authentication; (2) реален
-  affiliate партньор + URL за ГО → създай документ в `renewal_offers` (`doctype:"insurance"`,
-  `countries:["bg"]`, `enabled:true`, `{subid}` остава буквално). Не е тествано на устройство (нищо не
-  се вижда, докато офертите са `enabled:false`). Опция Фаза 3.1: rewarded реклама за +1 документ над лимита.
+- **ТЕСТ НА ЖИВО (Note 9, release APK):** Anonymous доставчик включен в конзолата; създадена тестова
+  оферта в `renewal_offers` (`doctype:insurance`, `countries:[bg]`, `enabled:true`, тестов URL
+  boleron.bg). Добавен документ „Гражданска отговорност" (изтича след 9 дни) → **бутонът „Поднови сега"
+  се показа и линкът се отвори ✅** (потвърден целият поток с реални данни).
+- **★БЪГ намерен и фикснат (Фаза 1.1):** бутонът НЕ се появяваше при първото отваряне — само след рестарт.
+  `RenewalCta` оценяваше офертата веднъж в `initState`, а Firestore тегленето е фоново СЛЕД това. Фикс:
+  `RenewalService.revision` (ValueNotifier, като `DocumentsService.revision`) се бумва в `refreshFromRemote`
+  щом офертите дойдат; `RenewalCta` слуша го и се пре-оценява (`_resolve`) → бутонът лъсва без рестарт.
+  0 analyze грешки; тестове 20/20.
+- ★TODO за go-live★: (1) ✓ Anonymous включен; (2) замени тестовия boleron.bg URL с реален affiliate линк
+  (`{subid}` остава буквално). Опция Фаза 3.1: rewarded реклама за +1 документ над лимита.
 
 ## 2026-06-30 · Android — 1.0.47 (55) ЖИВА в Production + iOS статус
 - **Android:** Play Console „Стандартен канал" → **Активни, най-нова публикувана версия 1.0.47**, 177
