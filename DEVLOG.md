@@ -44,11 +44,16 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   `renew_pending_route`, `home_screen._consumePendingConversionRoute` го консумира след първия кадър →
   push DocumentsScreen. Само Pro имат документи → без gating конфликт. Stub (web) получи no-op
   `setRenewTapCallback`. `flutter analyze` цял проект → **0 error**; тестове 20/20.
+- **Фаза 3 (разгейтване за free с лимит):** „Документи" вече е достъпен и за free — премахнат paywall
+  гейтът на входа на таба (`home_screen._onDestinationSelected`; изтрит и вече мъртвият `_documentsIndex`).
+  Лимитът се пренесе на БРОЯ документи при СЪЗДАВАНЕ: `DocumentDialog.freeLimit = 2` (Pro неограничено);
+  при `existing==null && !isPro && count>=2` → paywall (редакция на съществуващ винаги позволена; на web
+  isPro=true → без гейт). Така partner CTA-то „Поднови сега" стига до цялата база, а Pro стимулът остава.
+  `flutter analyze` цял проект → **0 error**; тестове 20/20.
 - ★TODO за go-live★: (1) включи Anonymous доставчик в Firebase Console → Authentication; (2) реален
   affiliate партньор + URL за ГО → създай документ в `renewal_offers` (`doctype:"insurance"`,
-  `countries:["bg"]`, `enabled:true`, `{subid}` остава буквално). Опция Фаза 3: разгейтване на „Документи"
-  за free с лимит (`home_screen.dart:255`) → по-широк affiliate обхват. Не е тествано на устройство
-  (нищо не се вижда, докато офертите са `enabled:false`).
+  `countries:["bg"]`, `enabled:true`, `{subid}` остава буквално). Не е тествано на устройство (нищо не
+  се вижда, докато офертите са `enabled:false`). Опция Фаза 3.1: rewarded реклама за +1 документ над лимита.
 
 ## 2026-06-30 · Android — 1.0.47 (55) ЖИВА в Production + iOS статус
 - **Android:** Play Console „Стандартен канал" → **Активни, най-нова публикувана версия 1.0.47**, 177

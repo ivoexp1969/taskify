@@ -38,9 +38,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         const SettingsScreen(),
       ];
 
-  /// Индекс на „Документи" таба (или -1, ако не се показва).
-  int get _documentsIndex => _showDocuments ? 3 : -1;
-
   @override
   void initState() {
     super.initState();
@@ -264,15 +261,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (!upgraded) return;
     }
 
-    // Раздел „Документи" е premium функция.
-    if (!kIsWeb && index == _documentsIndex && !_proService.isPro) {
-      final upgraded = await showPaywallIfNeeded(
-        context,
-        isFeatureAvailable: false,
-        featureName: AppText.of(context).documents,
-      );
-      if (!upgraded) return;
-    }
+    // Идея 1 / Фаза 3: „Документи" вече е достъпен и за free потребители — така
+    // partner CTA-то „Поднови сега" стига до цялата база. Лимитът е на БРОЯ
+    // документи и се налага при СЪЗДАВАНЕ (виж DocumentDialog), не на входа.
 
     setState(() {
       _currentIndex = index;

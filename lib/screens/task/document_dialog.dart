@@ -6,7 +6,9 @@ import '../../utils/localization.dart';
 import '../../services/notification_service.dart';
 import '../../services/widget_service.dart';
 import '../../services/documents_service.dart';
+import '../../services/pro_service.dart';
 import '../../widgets/reminder_selector.dart';
+import '../paywall/paywall_screen.dart';
 
 /// Диалог за документ с изтичащ срок. Документът се пази като обикновена [Task]
 /// (template `document`, категория `documents`) → получава наготово напомняния,
@@ -24,6 +26,11 @@ class DocumentDialog {
   static const List<String> reminderKeys = [
     'minus_1mo', 'minus_2w', 'minus_1w', 'minus_3d', 'minus_1d',
   ];
+
+  /// Фаза 3: free потребители могат да следят до толкова документа; Pro е
+  /// неограничено. Лимитът пази Pro стимула, а разгейтването отваря partner
+  /// CTA-то „Поднови сега" към цялата база (Идея 1).
+  static const int freeLimit = 2;
 
   /// Гарантира, че категорията „Документи" съществува (локализира се по id навсякъде).
   static Category ensureCategory(Box<Category> categoryBox) {
@@ -44,6 +51,23 @@ class DocumentDialog {
     final categoryBox = Hive.box<Category>('categories');
     ensureCategory(categoryBox);
 
+    // Фаза 3: лимит на БРОЯ документи за free (Pro неограничено). Редакцията на
+    // съществуващ винаги е позволена; ограничаваме само СЪЗДАВАНЕТО на нов. На
+    // web isPro е true → гейтът се прескача.
+    if (existing == null && !ProService().isPro) {
+      final count = taskBox.values
+          .where((task) => task.template == 'document' && !task.isArchived)
+          .length;
+      if (count >= freeLimit) {
+        final upgraded = await showPaywallIfNeeded(
+          context,
+          isFeatureAvailable: false,
+          featureName: AppText.of(context).documents,
+        );
+        if (!upgraded) return;
+      }
+    }
+
     // Начални стойности (от съществуваща задача или разумни по подразбиране).
     String selectedType = 'id_card';
     String initialLabel = '';
@@ -62,6 +86,7 @@ class DocumentDialog {
         existing?.remindersList ?? const ['minus_1mo', 'minus_1w', 'minus_1d']);
     bool annual = existing?.recurrence == 'yearly';
 
+    if (!context.mounted) return; // след евент. await на paywall гейта (Фаза 3)
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
