@@ -49,6 +49,38 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!kIsWeb) {
       _initAndShowWelcome();
       _maybeShowHolidaysPrompt();
+      // ФАЗА 4: cold-start routing на ден-3/ден-7 нотификация (app беше убит).
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _consumePendingConversionRoute());
+    }
+  }
+
+  /// Консумира маршрута, оставен от notification tap при студен старт.
+  Future<void> _consumePendingConversionRoute() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Идея 1: cold-start от напомняне за документ → отваря „Документи" (там е CTA-то).
+    final renew = prefs.getString('renew_pending_route');
+    if (renew != null) {
+      await prefs.remove('renew_pending_route');
+      if (context.mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const DocumentsScreen()),
+        );
+      }
+      return;
+    }
+
+    final route = prefs.getString('conv_pending_route');
+    if (route == null) return;
+    await prefs.remove('conv_pending_route');
+    if (!context.mounted) return;
+    if (route == 'conv_day7') {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const PaywallScreen()),
+      );
+    } else {
+      await TaskEditorBridge.openNewSelfManaged();
     }
   }
 

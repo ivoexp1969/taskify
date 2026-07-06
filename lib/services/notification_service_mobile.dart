@@ -133,8 +133,28 @@ class NotificationService {
       if (payload == 'morning_briefing') {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('show_morning_briefing', true);
+      } else if (payload == 'conv_day3' || payload == 'conv_day7') {
+        // Cold-start: пазим маршрута, HomeScreen го консумира след първия кадър.
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('conv_pending_route', payload!);
+      } else if (payload != null && payload.startsWith('renew:')) {
+        // Cold-start от напомняне за документ → отваряме „Документи" с CTA (Идея 1).
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('renew_pending_route', payload);
       }
     }
+  }
+
+  /// Изважда `doctype:` от notes на document-задача (или null).
+  String? _doctypeFromNotes(String? notes) {
+    if (notes == null) return null;
+    for (final line in notes.split('\n')) {
+      if (line.startsWith('doctype:')) {
+        final v = line.replaceFirst('doctype:', '').trim();
+        return v.isEmpty ? null : v;
+      }
+    }
+    return null;
   }
 
   Future<void> _initIfNeeded() async {
@@ -162,6 +182,12 @@ class NotificationService {
       onDidReceiveNotificationResponse: (details) {
         if (details.payload == 'morning_briefing') {
           _handleMorningBriefingTap();
+        } else if (details.payload == 'conv_day3' ||
+            details.payload == 'conv_day7') {
+          _handleConversionTap(details.payload!);
+        } else if (details.actionId == 'renew' ||
+            (details.payload?.startsWith('renew:') ?? false)) {
+          _handleRenewTap(details.payload);
         } else if (details.actionId == 'snooze') {
           _onNotificationActionBackground(details);
         }
@@ -261,13 +287,30 @@ class NotificationService {
     return map[lang] ?? map['en'] ?? 'Reminder';
   }
 
-  NotificationDetails _buildNotificationDetails({String? lang}) {
+  NotificationDetails _buildNotificationDetails({String? lang, String? renewDoctype}) {
     const snoozeLabels = {
       'en': '⏰ +30 min', 'bg': '⏰ +30 мин', 'de': '⏰ +30 Min', 'fr': '⏰ +30 min',
       'it': '⏰ +30 min', 'el': '⏰ +30 λεπτά', 'es': '⏰ +30 min',
       'pt': '⏰ +30 min', 'ru': '⏰ +30 мин', 'tr': '⏰ +30 dk', 'ja': '⏰ +30分',
     };
-    final snoozeLabel = snoozeLabels[lang ?? 'en'] ?? snoozeLabels['en']!;
+    const renewLabels = {
+      'en': '🔄 Renew', 'bg': '🔄 Поднови', 'de': '🔄 Verlängern', 'fr': '🔄 Renouveler',
+      'it': '🔄 Rinnova', 'el': '🔄 Ανανέωση', 'es': '🔄 Renovar',
+      'pt': '🔄 Renovar', 'ru': '🔄 Продлить', 'tr': '🔄 Yenile', 'ja': '🔄 更新',
+    };
+    final l = lang ?? 'en';
+
+    // Документите имат дълъг хоризонт → „+30 мин" snooze е безсмислен; вместо
+    // него слагаме action „Поднови", която отваря екрана с partner CTA-то (Идея 1).
+    final List<AndroidNotificationAction> actions = renewDoctype != null
+        ? [
+            AndroidNotificationAction('renew', renewLabels[l] ?? renewLabels['en']!,
+                showsUserInterface: true),
+          ]
+        : [
+            AndroidNotificationAction('snooze', snoozeLabels[l] ?? snoozeLabels['en']!,
+                cancelNotification: true),
+          ];
 
     final androidDetails = AndroidNotificationDetails(
       'task_reminders',
@@ -279,9 +322,7 @@ class NotificationService {
       enableVibration: true,
       playSound: true,
       category: AndroidNotificationCategory.reminder,
-      actions: [
-        AndroidNotificationAction('snooze', snoozeLabel, cancelNotification: true),
-      ],
+      actions: actions,
     );
     const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
@@ -325,6 +366,11 @@ class NotificationService {
       final lang = prefs.getString('app_language') ?? 'en';
       final newIds = <int>[];
 
+      // Документ (винетка/ГО/…) → напомнянето получава action „Поднови" +
+      // payload `renew:<doctype>` за deep-link към partner CTA-то (Идея 1).
+      final renewDoctype =
+          task.template == 'document' ? _doctypeFromNotes(task.notes) : null;
+
       for (final reminderType in remindersList) {
         final scheduled = _computeReminderTime(task.dueDate, reminderType);
         if (scheduled == null) continue;
@@ -341,10 +387,11 @@ class NotificationService {
           task.title,
           label,
           tzScheduled,
-          _buildNotificationDetails(lang: lang),
+          _buildNotificationDetails(lang: lang, renewDoctype: renewDoctype),
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
+          payload: renewDoctype != null ? 'renew:$renewDoctype' : null,
         );
         newIds.add(id);
       }
@@ -415,6 +462,36 @@ class NotificationService {
 
   static void setMorningBriefingCallback(Function(BuildContext) callback) {
     _showBriefingCallback = callback;
+  }
+
+  // ФАЗА 4: routing на тап от ден-3/ден-7 engagement нотификациите (warm/
+  // background). Cold-start (убито приложение) минава през prefs флаг в init().
+  static Function(BuildContext, String)? _convTapCallback;
+
+  static void setConversionTapCallback(Function(BuildContext, String) callback) {
+    _convTapCallback = callback;
+  }
+
+  void _handleConversionTap(String route) {
+    final context = MyApp.navigatorKey.currentContext;
+    if (context != null) {
+      _convTapCallback?.call(context, route);
+    }
+  }
+
+  // Идея 1: routing на тап от напомняне за документ (warm/background). Cold-start
+  // (убито приложение) минава през `renew_pending_route` в init().
+  static Function(BuildContext, String)? _renewTapCallback;
+
+  static void setRenewTapCallback(Function(BuildContext, String) callback) {
+    _renewTapCallback = callback;
+  }
+
+  void _handleRenewTap(String? payload) {
+    final context = MyApp.navigatorKey.currentContext;
+    if (context != null) {
+      _renewTapCallback?.call(context, payload ?? 'renew:');
+    }
   }
 
   Future<void> scheduleTrialCountdownNotification(DateTime trialEndDate) async {

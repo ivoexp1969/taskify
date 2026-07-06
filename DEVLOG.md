@@ -6,6 +6,50 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-06 · PC — Монетизация „Идея 1": affiliate слой „Поднови сега" върху Документи (Фаза 0+1, rules ЖИВИ)
+Нова приходна линия, независима от абонамента: при изтичащ документ (ГО/винетка/тех.преглед…) показваме
+партньорска препратка „Поднови сега" → комисиона. Приложението вече знае точната дата на изтичане на
+скъпи повтарящи се покупки. Държавните документи (лична карта/паспорт/книжка) получават неутрален инфо
+линк (`commercial:false`), не affiliate — пази доверието.
+- **Обосновка от кода:** живите Документи са `Task` с `template=='document'` + `doctype:` в notes (НЕ
+  `ExpiringDocument`/`DocumentsService` — те са паралелен неизползван код). Документите са Pro-gated
+  (`home_screen.dart:255`) → Фаза 3 предлага разгейтване за free с лимит, за да расте affiliate обхватът.
+- **Фаза 0 (данни):** нов `services/renewal_service.dart` (+`RenewalOffer`); `assets/data/renewal_offers.json`
+  (fallback, всички `enabled:false`, placeholder URL-и); remote config през Firestore `renewal_offers` +
+  24ч кеш + вграден fallback; анонимен `renewal_anon_id` → `subid=anon-doctype-epoch` за атрибуция.
+  Pure функции (`resolveOffer`/`buildUrl`/`makeSubid`/`parseOffers`/`normalizeCountry`) + `test/renewal_service_test.dart`
+  **20/20 ✅**.
+- **Фаза 1 (UI):** нов `widgets/renewal_cta.dart` — self-hiding `RenewalCta` (SizedBox.shrink при липса на
+  оферта), закачен в `documents_screen.dart` `_buildCard` при `daysLeft<=30`. Еднократен disclosure sheet
+  (prefs `renewal_disclosure_shown`, 11 езика) за commercial оферти; `registerClickAndBuildUrl` логва клик в
+  Firestore `renewal_clicks` (guard-нат) + локален брояч, после `launchUrl` external. `lang` = proxy за държава.
+- **Firestore rules (ЖИВИ, деплойнати днес):** нови блокове след `promo_codes` — `renewal_offers` (публичен
+  read, без клиентски write) + `renewal_clicks` (само create от логнат, append-only). `firebase deploy
+  --only firestore:rules --project taskify-1969` → compiled + released ✅.
+- **Верификация:** `flutter analyze` цял проект → **0 error** (само заварени info/warning); тестове 20/20.
+  Нищо не се вижда в приложението още — всички оферти са `enabled:false`.
+- **Anonymous Auth (за да се логват и анонимните кликове):** нов `AuthService.ensureAuthedForLogging()` —
+  ЛЕНИВ тих анонимен вход, извикван САМО при клик на affiliate CTA от нелогнат потребител (не при старт).
+  За да НЕ протекат лични данни в облака, анонимните сесии са изключени навсякъде: `isLoggedIn` вече
+  = `currentUser != null && !isAnonymous`; `_userId` в `sync_service` + `firestore_service` връща null за
+  анонимни (→ `mergeWithCloud` дава „not-signed-in", нула sync); настройки показват вход, не профил
+  (guard на `user`); `pro_service` промо-listener пропуска анонимни. `flutter analyze` → 0 error; тестове 20/20.
+  ⚠️ **Trябва ръчно да се включи доставчик „Anonymous"** в Firebase Console → Authentication (кодът е
+  безопасен и без това — `signInAnonymously` пада тихо → само локален брояч).
+- **Фаза 2 (нотификация → deep-link):** напомнянията за document-задачи вече носят payload `renew:<doctype>`
+  и Android action **„🔄 Поднови"** (вместо безсмисления „+30 мин" snooze — документите имат дълъг хоризонт).
+  `_buildNotificationDetails` приема `renewDoctype`; `scheduleForTask` вади doctype от notes
+  (`_doctypeFromNotes`) и подава payload. Тап (warm) → нов callback `setRenewTapCallback` (рег. в `main.dart`)
+  → отваря `DocumentsScreen` (там е partner CTA-то). Cold-start (убито приложение) → `init()` пази
+  `renew_pending_route`, `home_screen._consumePendingConversionRoute` го консумира след първия кадър →
+  push DocumentsScreen. Само Pro имат документи → без gating конфликт. Stub (web) получи no-op
+  `setRenewTapCallback`. `flutter analyze` цял проект → **0 error**; тестове 20/20.
+- ★TODO за go-live★: (1) включи Anonymous доставчик в Firebase Console → Authentication; (2) реален
+  affiliate партньор + URL за ГО → създай документ в `renewal_offers` (`doctype:"insurance"`,
+  `countries:["bg"]`, `enabled:true`, `{subid}` остава буквално). Опция Фаза 3: разгейтване на „Документи"
+  за free с лимит (`home_screen.dart:255`) → по-широк affiliate обхват. Не е тествано на устройство
+  (нищо не се вижда, докато офертите са `enabled:false`).
+
 ## 2026-06-30 · Android — 1.0.47 (55) ЖИВА в Production + iOS статус
 - **Android:** Play Console „Стандартен канал" → **Активни, най-нова публикувана версия 1.0.47**, 177
   държави, 26 инсталирания. Тоест **build 55 (1.0.47) е публикуван на 100%** — rollout-ът мина (драфтът

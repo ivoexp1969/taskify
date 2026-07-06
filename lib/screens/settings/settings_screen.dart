@@ -1927,7 +1927,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     final currentLocale = languageController.locale;
     final currentMode = themeController.mode;
-    final user = _authService.currentUser;
+    // Анонимните сесии (създадени само за affiliate-attribution лог) НЕ са
+    // „акаунт" → показваме им секцията за вход, не панел за профил.
+    final rawUser = _authService.currentUser;
+    final user =
+        (rawUser != null && !rawUser.isAnonymous) ? rawUser : null;
 
     return Scaffold(
       appBar: AppBar(

@@ -34,6 +34,14 @@ class NotificationService {
     // No-op на web
   }
 
+  static void setConversionTapCallback(Function(BuildContext, String) callback) {
+    // No-op на web
+  }
+
+  static void setRenewTapCallback(Function(BuildContext, String) callback) {
+    // No-op на web
+  }
+
   Future<void> scheduleTrialCountdownNotification(DateTime trialEndDate) async {
     // No-op на web
   }

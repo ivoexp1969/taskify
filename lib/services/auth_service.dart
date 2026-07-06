@@ -83,8 +83,31 @@ class AuthService {
     }
   }
   
-  // Дали е логнат
-  bool get isLoggedIn => _auth.currentUser != null;
+  // Дали е логнат с РЕАЛЕН акаунт. Анонимните сесии (създадени само за да се
+  // логне affiliate клик — виж [ensureAuthedForLogging]) НЕ се броят за логнати:
+  // те не синхронизират лични данни и не отключват акаунт-функции.
+  bool get isLoggedIn =>
+      _auth.currentUser != null && !_auth.currentUser!.isAnonymous;
+
+  /// Дали текущата сесия е анонимна (създадена за attribution лог).
+  bool get isAnonymous => _auth.currentUser?.isAnonymous ?? false;
+
+  /// Гарантира auth контекст за писане на некритичен лог (напр. affiliate
+  /// клик в `renewal_clicks`, чиито правила искат `request.auth != null`).
+  /// Ако вече има сесия (реална или анонимна) → нищо. Иначе прави ТИХ анонимен
+  /// вход. Guard-нат: при неуспех (офлайн / изключен доставчик) връща false и
+  /// извикващият просто пропуска отдалечения лог. Не се ползва на web.
+  Future<bool> ensureAuthedForLogging() async {
+    if (kIsWeb) return _auth.currentUser != null;
+    if (_auth.currentUser != null) return true;
+    try {
+      final cred = await _auth.signInAnonymously();
+      return cred.user != null;
+    } catch (e) {
+      debugPrint('Anonymous sign-in for logging failed: $e');
+      return false;
+    }
+  }
   
   // Дали имейлът е верифициран
   bool get isEmailVerified => _auth.currentUser?.emailVerified ?? false;

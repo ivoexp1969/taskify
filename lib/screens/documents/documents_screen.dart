@@ -5,6 +5,7 @@ import '../../models/task.dart';
 import '../../services/notification_service.dart';
 import '../../services/tombstone_service.dart';
 import '../../utils/localization.dart';
+import '../../widgets/renewal_cta.dart';
 import '../task/document_dialog.dart';
 
 /// Универсален раздел „Документи" — изтичащи документи (лична карта, паспорт,
@@ -113,31 +114,40 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: urgencyColor.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: urgencyColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(_iconFor(_docType(task)), color: urgencyColor),
+            ),
+            title: Text(task.title),
+            subtitle: Text(
+              _statusLine(task, daysLeft),
+              style: TextStyle(fontSize: 12, color: urgencyColor, fontWeight: FontWeight.w500),
+            ),
+            trailing: PopupMenuButton<String>(
+              onSelected: (v) {
+                if (v == 'edit') DocumentDialog.show(context, existing: task);
+                if (v == 'delete') _confirmDelete(task, t);
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(value: 'edit', child: Text(t.edit)),
+                PopupMenuItem(value: 'delete', child: Text(t.delete)),
+              ],
+            ),
+            onTap: () => DocumentDialog.show(context, existing: task),
           ),
-          child: Icon(_iconFor(_docType(task)), color: urgencyColor),
-        ),
-        title: Text(task.title),
-        subtitle: Text(
-          _statusLine(task, daysLeft),
-          style: TextStyle(fontSize: 12, color: urgencyColor, fontWeight: FontWeight.w500),
-        ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (v) {
-            if (v == 'edit') DocumentDialog.show(context, existing: task);
-            if (v == 'delete') _confirmDelete(task, t);
-          },
-          itemBuilder: (_) => [
-            PopupMenuItem(value: 'edit', child: Text(t.edit)),
-            PopupMenuItem(value: 'delete', child: Text(t.delete)),
-          ],
-        ),
-        onTap: () => DocumentDialog.show(context, existing: task),
+          // „Поднови сега" — само близо до/след изтичане; сам се скрива, ако
+          // няма партньорска оферта за този тип документ и държава (Идея 1).
+          if (daysLeft <= 30)
+            RenewalCta(doctype: _docType(task), lang: _lang),
+        ],
       ),
     );
   }

@@ -33,6 +33,25 @@ service cloud.firestore {
       allow update: if request.auth != null;
     }
 
+    // ─────────── ОФЕРТИ ЗА ПОДНОВЯВАНЕ (Идея 1 — монетизация) ──────────
+    // renewal_offers/{id} → { doctype, partner, urlTemplate, commercial,
+    // countries[], enabled, labelKey }. Четене за ВСИЧКИ (клиентът резолвира
+    // оферта по doctype+държава). Писане само от конзола/админ (remote config).
+    match /renewal_offers/{offerId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // renewal_clicks/{id} — append-only лог за атрибуция/CTR. Клиентът само
+    // СЪЗДАВА (никакъв read/update/delete). Изисква логнат потребител, за да не
+    // се спами (анонимните кликове падат тихо в try/catch → само локален брояч).
+    match /renewal_clicks/{clickId} {
+      allow create: if signedIn()
+                    && request.resource.data.doctype is string
+                    && request.resource.data.subid is string;
+      allow read, update, delete: if false;
+    }
+
     // ─────────────────────────── ПОКАНИ ───────────────────────────────
     // invites/{inviteCode} → { groupId }. GET по точен код за всеки логнат
     // (резолвва groupId). LIST забранен (без enumerate на кодове).

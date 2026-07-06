@@ -14,7 +14,13 @@ class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final AuthService _auth = AuthService();
 
-  String? get _userId => _auth.currentUser?.uid;
+  // Анонимните сесии (само за affiliate-attribution лог) НЕ докосват личните
+  // облачни данни → третираме ги като „не-логнат".
+  String? get _userId {
+    final u = _auth.currentUser;
+    if (u == null || u.isAnonymous) return null;
+    return u.uid;
+  }
 
   CollectionReference<Map<String, dynamic>>? get _tasksRef {
     if (_userId == null) return null;

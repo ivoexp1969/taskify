@@ -292,7 +292,8 @@ class ProService extends ChangeNotifier {
     _promoListenerAttached = true;
     try {
       FirebaseAuth.instance.authStateChanges().listen((user) {
-        if (user != null) _restoreAccountPromo();
+        // Анонимните сесии (affiliate-attribution лог) нямат промо да следват.
+        if (user != null && !user.isAnonymous) _restoreAccountPromo();
       });
     } catch (e) {
       debugPrint('Account promo listener error: $e');

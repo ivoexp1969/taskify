@@ -59,7 +59,13 @@ class SyncService {
   int _lastSyncMs = 0;
   static const int _minAutoSyncGapMs = 15000;
 
-  String? get _userId => _auth.currentUser?.uid;
+  // Анонимните сесии (само за affiliate-attribution лог) НЕ синхронизират
+  // лични данни → третираме ги като „не-логнат".
+  String? get _userId {
+    final u = _auth.currentUser;
+    if (u == null || u.isAnonymous) return null;
+    return u.uid;
+  }
 
   CollectionReference<Map<String, dynamic>>? get _tasksRef {
     final uid = _userId;

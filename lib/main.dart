@@ -18,6 +18,10 @@ import 'services/pro_service.dart';
 import 'services/ad_service.dart';
 import 'services/task_view_preference.dart';
 import 'services/notification_service.dart';
+import 'services/conversion_service.dart';
+import 'screens/paywall/paywall_screen.dart';
+import 'screens/documents/documents_screen.dart';
+import 'screens/task/task_screen.dart';
 import 'widgets/morning_briefing_dialog.dart';
 import 'services/google_calendar_service.dart';
 import 'services/ios_calendar_service.dart';
@@ -104,6 +108,25 @@ Future<void> main() async {
     MorningBriefingDialog.show(context);
   });
 
+  // ФАЗА 4: routing на тап от ден-3/ден-7 engagement нотификациите.
+  NotificationService.setConversionTapCallback((BuildContext context, String route) {
+    if (route == 'conv_day7') {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const PaywallScreen()),
+      );
+    } else {
+      // ден-3 → отваря редактора за нова задача (с AI полето).
+      TaskEditorBridge.openNewSelfManaged();
+    }
+  });
+
+  // Идея 1: тап на напомняне за документ → отваря „Документи" (там е partner CTA-то).
+  NotificationService.setRenewTapCallback((BuildContext context, String route) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const DocumentsScreen()),
+    );
+  });
+
   // Pro и Ad сервизи — fire-and-forget, не блокират UI
   // Trial notification се планира след като ProService завърши инициализацията
   ProService().initialize().then((_) {
@@ -113,6 +136,10 @@ Future<void> main() async {
         NotificationService().scheduleTrialCountdownNotification(trialEnd);
       }
     }
+    // ФАЗА 4: записва first-launch дата + (пре)насрочва ден-3/ден-7 (само не за
+    // реално платили — виж ConversionService). Вика се СЛЕД ProService init, за
+    // да е точен isPaid.
+    if (!kIsWeb) ConversionService.instance.ensureFirstLaunchAndSchedule();
   });
   AdService().initialize();
 

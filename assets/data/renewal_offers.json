@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "note": "PLACEHOLDER offers. Replace urlTemplate with real affiliate/partner links before go-live. This bundled file is the offline fallback; live values come from Firestore collection 'renewal_offers'. {subid} is substituted at click time for attribution.",
+  "offers": [
+    {
+      "doctype": "insurance",
+      "partner": "placeholder_insurance_bg",
+      "urlTemplate": "https://partner.example/insurance?ref=taskify&subid={subid}",
+      "commercial": true,
+      "countries": ["bg"],
+      "enabled": false,
+      "labelKey": "renewNow"
+    },
+    {
+      "doctype": "vignette",
+      "partner": "placeholder_vignette_bg",
+      "urlTemplate": "https://partner.example/vignette?ref=taskify&subid={subid}",
+      "commercial": true,
+      "countries": ["bg"],
+      "enabled": false,
+      "labelKey": "renewNow"
+    },
+    {
+      "doctype": "id_card",
+      "partner": "gov_info_bg",
+      "urlTemplate": "https://partner.example/id-card-info",
+      "commercial": false,
+      "countries": ["bg"],
+      "enabled": false,
+      "labelKey": "howToRenew"
+    }
+  ]
+}
