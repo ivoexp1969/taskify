@@ -6,6 +6,25 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-07 · PC — Идея 1: affiliate оферта „Поднови сега" и за ВИНЕТКИ (Boleron, ЖИВА)
+Разширих affiliate слоя от ГО и върху винетките. **Без нито ред код** — водопроводната инсталация от
+Фаза 1 вече е doctype-агностична: `documents_screen` подава `RenewalCta(doctype: _docType(task), …)`,
+а `RenewalService.resolveOffer` търси оферта per-doctype. Липсваше само активна Firestore оферта за
+`vignette/bg`.
+- **Нова Firestore оферта** в колекция `renewal_offers` (doc id `vignette_bg`): `doctype:vignette`,
+  `partner:boleron_bg`, `urlTemplate:https://www.boleron.bg/workflow/init-workflow/?product=VIG&subid={subid}`,
+  `commercial:true`, `countries:[bg]`, `enabled:true`, `labelKey:renewNow`. Boleron продава и е-винетки
+  (същият партньор като ГО → по-лесна бъдеща сделка). Тестов URL, докато дойде реален affiliate линк
+  (както е и при ГО сега). Документът е създаден от потребителя в Firebase Console.
+- **Проверено на живо** чрез публичен Firestore REST прочит (колекцията е публично четима по правилата —
+  service-account достъпът е блокиран от safety класификатора, не е нужен): **2 живи оферти** — insurance
+  (ГО) + vignette — резолвват се независимо per-doctype. Всички низови полета минават през `.trim()` в
+  `RenewalOffer.fromJson`, така че водещи интервали от копирането в конзолата са безобидни.
+- **Само данни (Firestore) → важи без нов app билд**: офертата се дърпа при `refreshFromRemote` (24ч кеш)
+  + `revision` ValueNotifier → бутонът лъсва без рестарт (същият Фаза 1.1 механизъм като ГО).
+- ★GO-LIVE TODO (важи и за ГО, и за винетка):★ замени тестовите Boleron URL-и с реални affiliate линкове
+  (`{subid}` остава буквално). **За други държави НЯМА да правим affiliate програми** (решение на потребителя).
+
 ## 2026-07-06 · PC — Монетизация „Идея 1": affiliate слой „Поднови сега" върху Документи (Фаза 0+1, rules ЖИВИ)
 Нова приходна линия, независима от абонамента: при изтичащ документ (ГО/винетка/тех.преглед…) показваме
 партньорска препратка „Поднови сега" → комисиона. Приложението вече знае точната дата на изтичане на
