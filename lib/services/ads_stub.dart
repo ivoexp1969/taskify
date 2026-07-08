@@ -29,6 +29,13 @@ class AdSize {
   final int width;
   final int height;
   const AdSize._(this.width, this.height);
+
+  // Web стъб — adaptive размерът никога не се ползва (kIsWeb short-circuit).
+  static Future<AdSize?> getAnchoredAdaptiveBannerAdSize(
+    Orientation orientation,
+    int width,
+  ) async =>
+      null;
 }
 
 class AdRequest {
@@ -82,4 +89,35 @@ class InterstitialAd extends Ad {
   FullScreenContentCallback? fullScreenContentCallback;
   static Future<void> load({required String adUnitId, required dynamic request, required InterstitialAdLoadCallback adLoadCallback}) async {}
   Future<void> show() async {}
+}
+
+// --- UMP (User Messaging Platform) stubs за web ---
+// На web рекламите изобщо не се инициализират (kIsWeb short-circuit), тези
+// класове съществуват само за да компилира условният import.
+class ConsentInformation {
+  static final ConsentInformation instance = ConsentInformation._();
+  ConsentInformation._();
+  void requestConsentInfoUpdate(
+    ConsentRequestParameters params,
+    void Function() onSuccess,
+    void Function(FormError) onError,
+  ) {}
+  Future<bool> canRequestAds() async => false;
+  Future<bool> isConsentFormAvailable() async => false;
+  void reset() {}
+}
+
+class ConsentForm {
+  static Future<void> loadAndShowConsentFormIfRequired(
+    void Function(FormError?) onDismissed,
+  ) async {}
+}
+
+class ConsentRequestParameters {
+  ConsentRequestParameters();
+}
+
+class FormError {
+  final String message;
+  const FormError({this.message = ''});
 }

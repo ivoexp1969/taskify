@@ -1364,6 +1364,23 @@ class AppText {
     'tr': 'Bugün kullanılan: $used/$limit', 'ja': '本日の使用: $used/$limit',
   });
   String get aiLimitReached => _t({'en': "You've reached today's AI limit, try again tomorrow", 'bg': 'Достигна дневния лимит за AI, опитай утре', 'de': 'Tägliches KI-Limit erreicht, versuche es morgen', 'fr': "Limite IA quotidienne atteinte, réessaie demain", 'it': "Limite IA giornaliero raggiunto, riprova domani", 'el': 'Έφτασες το ημερήσιο όριο AI, δοκίμασε αύριο', 'es': 'Has alcanzado el límite diario de IA, inténtalo mañana', 'pt': 'Atingiste o limite diário de IA, tenta amanhã', 'ru': 'Достигнут дневной лимит AI, попробуйте завтра', 'tr': 'Günlük AI sınırına ulaştın, yarın tekrar dene', 'ja': '本日のAI上限に達しました。明日もう一度お試しください'});
+  // ----- ФАЗА 2: мек AI limit UI (free) -----
+  String get aiLimitTitle => _t({'en': 'Daily AI limit reached', 'bg': 'Достигна дневния AI лимит', 'de': 'Tägliches KI-Limit erreicht', 'fr': 'Limite IA quotidienne atteinte', 'it': 'Limite IA giornaliero raggiunto', 'el': 'Έφτασες το ημερήσιο όριο AI', 'es': 'Límite diario de IA alcanzado', 'pt': 'Limite diário de IA atingido', 'ru': 'Достигнут дневной лимит AI', 'tr': 'Günlük AI sınırına ulaşıldı', 'ja': '本日のAI上限に達しました'});
+  String aiLimitBody(int n) => _t({
+    'en': "You've used your $n free AI recognitions for today. With Premium they're unlimited.",
+    'bg': 'Използва $n-те безплатни AI разпознавания за днес. С Premium са неограничени.',
+    'de': 'Du hast deine $n kostenlosen KI-Erkennungen für heute genutzt. Mit Premium sind sie unbegrenzt.',
+    'fr': "Vous avez utilisé vos $n reconnaissances IA gratuites pour aujourd'hui. Avec Premium, elles sont illimitées.",
+    'it': 'Hai usato i tuoi $n riconoscimenti IA gratuiti per oggi. Con Premium sono illimitati.',
+    'el': 'Χρησιμοποίησες τις $n δωρεάν αναγνωρίσεις AI για σήμερα. Με το Premium είναι απεριόριστες.',
+    'es': 'Has usado tus $n reconocimientos de IA gratuitos de hoy. Con Premium son ilimitados.',
+    'pt': 'Usaste os teus $n reconhecimentos de IA gratuitos de hoje. Com Premium são ilimitados.',
+    'ru': 'Вы использовали свои $n бесплатных AI-распознаваний на сегодня. С Premium они безлимитны.',
+    'tr': 'Bugünkü $n ücretsiz AI tanımanı kullandın. Premium ile sınırsız.',
+    'ja': '本日の無料AI認識$n回を使い切りました。Premiumなら無制限です。',
+  });
+  String get aiSeePremium => _t({'en': 'See Premium', 'bg': 'Виж Premium', 'de': 'Premium ansehen', 'fr': 'Voir Premium', 'it': 'Scopri Premium', 'el': 'Δες το Premium', 'es': 'Ver Premium', 'pt': 'Ver Premium', 'ru': 'Открыть Premium', 'tr': "Premium'u gör", 'ja': 'Premiumを見る'});
+  String get aiTomorrowAgain => _t({'en': 'Again tomorrow', 'bg': 'Утре отново', 'de': 'Morgen wieder', 'fr': 'Demain à nouveau', 'it': 'Di nuovo domani', 'el': 'Ξανά αύριο', 'es': 'Mañana otra vez', 'pt': 'Amanhã de novo', 'ru': 'Завтра снова', 'tr': 'Yarın tekrar', 'ja': 'また明日'});
 
   // ==================== VOICE INPUT ====================
   String get voiceListening => _t({'en': 'Listening...', 'bg': 'Слушам...', 'de': 'Höre zu...', 'fr': 'Écoute...', 'it': 'Ascolto...', 'el': 'Ακούω...', 'es': 'Escuchando...', 'pt': 'Ouvindo...', 'ru': 'Слушаю...', 'tr': 'Dinliyorum...', 'ja': '聞き取り中...'});

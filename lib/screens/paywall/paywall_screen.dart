@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/pro_service.dart';
@@ -41,11 +42,38 @@ const _p = {
   'save50': {'en': 'Save 50%', 'bg': 'Спестяваш 50%', 'de': '50% sparen', 'fr': 'Économisez 50%', 'it': 'Risparmia il 50%', 'el': 'Εξοικονομήστε 50%', 'es': 'Ahorra 50%', 'pt': 'Economize 50%', 'ru': 'Скидка 50%', 'tr': '%50 tasarruf', 'ja': '50%お得'},
   'cancelAnytime': {'en': 'Cancel anytime', 'bg': 'Отказ по всяко време', 'de': 'Jederzeit kündbar', 'fr': "Annulez à tout moment", 'it': 'Annulla in qualsiasi momento', 'el': 'Ακύρωση οποτεδήποτε', 'es': 'Cancela en cualquier momento', 'pt': 'Cancele a qualquer momento', 'ru': 'Отмена в любое время', 'tr': 'İstediğiniz zaman iptal edin', 'ja': 'いつでもキャンセル可能'},
   'popular': {'en': 'Popular', 'bg': 'Популярен', 'de': 'Beliebt', 'fr': 'Populaire', 'it': 'Popolare', 'el': 'Δημοφιλές', 'es': 'Popular', 'pt': 'Popular', 'ru': 'Популярный', 'tr': 'Popüler', 'ja': '人気'},
+  'bestValue': {'en': 'Best value', 'bg': 'Най-изгоден', 'de': 'Bester Wert', 'fr': 'Meilleure offre', 'it': 'Miglior valore', 'el': 'Καλύτερη αξία', 'es': 'Mejor valor', 'pt': 'Melhor valor', 'ru': 'Выгоднее всего', 'tr': 'En avantajlı', 'ja': '最もお得'},
+  'unlimitedAi': {'en': 'Unlimited AI', 'bg': 'Неограничен AI', 'de': 'Unbegrenzte KI', 'fr': 'IA illimitée', 'it': 'IA illimitata', 'el': 'Απεριόριστη AI', 'es': 'IA ilimitada', 'pt': 'IA ilimitada', 'ru': 'Безлимитный AI', 'tr': 'Sınırsız yapay zekâ', 'ja': '無制限のAI'},
+  // Съкращение „месец" за реда с месечна равностойност (≈ X/мес.).
+  'perMonth': {'en': 'mo', 'bg': 'мес.', 'de': 'Mon.', 'fr': 'mois', 'it': 'mese', 'el': 'μήνα', 'es': 'mes', 'pt': 'mês', 'ru': 'мес.', 'tr': 'ay', 'ja': '月'},
+  // Шаблон за trial badge; N се заменя с реалния брой дни от offering-а.
+  'daysFree': {'en': 'N days free', 'bg': 'N дни безплатно', 'de': 'N Tage gratis', 'fr': 'N jours gratuits', 'it': 'N giorni gratis', 'el': 'N ημέρες δωρεάν', 'es': 'N días gratis', 'pt': 'N dias grátis', 'ru': 'N дней бесплатно', 'tr': 'N gün ücretsiz', 'ja': 'N日間無料'},
   'termsOfUse': {'en': 'Terms of Use', 'bg': 'Условия за ползване', 'de': 'Nutzungsbedingungen', 'fr': "Conditions d'utilisation", 'it': 'Termini di utilizzo', 'el': 'Όροι Χρήσης', 'es': 'Términos de uso', 'pt': 'Termos de uso', 'ru': 'Условия использования', 'tr': 'Kullanım Koşulları', 'ja': '利用規約'},
   'privacyPolicy': {'en': 'Privacy Policy', 'bg': 'Политика за поверителност', 'de': 'Datenschutzerklärung', 'fr': 'Politique de confidentialité', 'it': 'Informativa sulla privacy', 'el': 'Πολιτική Απορρήτου', 'es': 'Política de Privacidad', 'pt': 'Política de Privacidade', 'ru': 'Политика конфиденциальности', 'tr': 'Gizlilik Politikası', 'ja': 'プライバシーポリシー'},
 };
 
 String _pt(String key, String lang) => _p[key]?[lang] ?? _p[key]?['en'] ?? '';
+
+/// „N дни безплатно" с реалния брой дни (от offering-а).
+String _daysFree(int days, String lang) =>
+    _pt('daysFree', lang).replaceAll('N', '$days');
+
+/// ФАЗА 3.3: превръща intro периода в брой ДНИ (за trial badge). Връща null при
+/// неизвестна единица.
+int? _introDays(IntroductoryPrice intro) {
+  switch (intro.periodUnit) {
+    case PeriodUnit.day:
+      return intro.periodNumberOfUnits;
+    case PeriodUnit.week:
+      return intro.periodNumberOfUnits * 7;
+    case PeriodUnit.month:
+      return intro.periodNumberOfUnits * 30;
+    case PeriodUnit.year:
+      return intro.periodNumberOfUnits * 365;
+    case PeriodUnit.unknown:
+      return null;
+  }
+}
 
 class PaywallScreen extends StatefulWidget {
   final String? featureName;
@@ -395,6 +423,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
                       const SizedBox(height: 24),
 
+                      // ФАЗА 3.5: ред на ползите — 1) Без реклами, 2) Неограничен
+                      // AI, 3) останалите съществуващи.
+                      _FeatureItem(icon: Icons.block_rounded, title: _pt('noAds', lang), highlight: true),
+                      _FeatureItem(icon: Icons.auto_awesome_rounded, title: _pt('unlimitedAi', lang), highlight: true),
                       _FeatureItem(icon: Icons.all_inclusive, title: _pt('unlimited', lang)),
                       _FeatureItem(icon: Icons.category_rounded, title: _pt('customCat', lang)),
                       _FeatureItem(icon: Icons.notifications_active_rounded, title: _pt('multiRemind', lang)),
@@ -402,10 +434,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       _FeatureItem(icon: Icons.calendar_month_rounded, title: _pt('calView', lang)),
                       _FeatureItem(icon: Icons.bar_chart_rounded, title: _pt('stats', lang)),
                       _FeatureItem(icon: Icons.cloud_sync_rounded, title: _pt('cloudSync', lang)),
-                      _FeatureItem(icon: Icons.widgets_rounded, title: 'Home screen widget'),
+                      const _FeatureItem(icon: Icons.widgets_rounded, title: 'Home screen widget'),
                       _FeatureItem(icon: Icons.mic_rounded, title: _pt('voiceInput', lang)),
                       _FeatureItem(icon: Icons.palette_rounded, title: _pt('allThemes', lang)),
-                      _FeatureItem(icon: Icons.block_rounded, title: _pt('noAds', lang), highlight: true),
 
                       const SizedBox(height: 24),
 
@@ -536,83 +567,168 @@ class _PackageCard extends StatelessWidget {
     return package.storeProduct.description;
   }
 
-  bool _isPopular() {
-    final identifier = package.identifier.toLowerCase();
-    return identifier.contains('annual') || identifier.contains('yearly');
+  bool get _isYearly {
+    final id = package.identifier.toLowerCase();
+    return id.contains('annual') || id.contains('yearly');
+  }
+
+  /// ФАЗА 3.2: месечна равностойност на годишния — ДИНАМИЧНО (price/12) с
+  /// валутата от стора. Не hardcoded (цените варират по регион).
+  String? _monthlyEquivalent() {
+    if (!_isYearly) return null;
+    final p = package.storeProduct;
+    if (p.price <= 0 || p.currencyCode.isEmpty) return null;
+    try {
+      final f = NumberFormat.simpleCurrency(locale: lang, name: p.currencyCode);
+      return '≈ ${f.format(p.price / 12.0)}/${_pt('perMonth', lang)}';
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// ФАЗА 3.3: trial badge САМО ако offering-ът връща безплатен intro offer.
+  String? _trialLabel() {
+    final intro = package.storeProduct.introductoryPrice;
+    if (intro == null || intro.price != 0) return null;
+    final days = _introDays(intro);
+    if (days == null || days <= 0) return null;
+    return _daysFree(days, lang);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isPopular = _isPopular();
+    final accent = _isYearly; // годишният план = визуален акцент
+    final monthlyEq = accent ? _monthlyEquivalent() : null;
+    final trial = accent ? _trialLabel() : null;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: accent ? 16 : 12),
       child: Material(
-        color: isPopular ? theme.colorScheme.primary.withValues(alpha: 0.1) : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        color: accent
+            ? theme.colorScheme.primary.withValues(alpha: 0.10)
+            : theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(18),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(accent ? 20 : 16),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: isPopular ? theme.colorScheme.primary : theme.colorScheme.outline.withValues(alpha: 0.3), 
-                width: isPopular ? 2 : 1,
+                color: accent
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.outline.withValues(alpha: 0.3),
+                width: accent ? 2.5 : 1,
               ),
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                if (accent) ...[
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          Text(
-                            _getPackageTitle(), 
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          if (isPopular) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primary, 
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                _pt('popular', lang), 
-                                style: TextStyle(
-                                  fontSize: 10, 
-                                  fontWeight: FontWeight.bold, 
-                                  color: theme.colorScheme.onPrimary,
-                                ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.star_rounded,
+                                size: 13, color: theme.colorScheme.onPrimary),
+                            const SizedBox(width: 4),
+                            Text(
+                              _pt('bestValue', lang),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onPrimary,
                               ),
                             ),
                           ],
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _getPackageSubtitle(), 
-                        style: TextStyle(
-                          fontSize: 13, 
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
+                      if (trial != null) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.bolt_rounded, size: 13, color: Colors.green),
+                              const SizedBox(width: 4),
+                              Text(
+                                trial,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
-                ),
-                Text(
-                  package.storeProduct.priceString, 
-                  style: TextStyle(
-                    fontSize: 20, 
-                    fontWeight: FontWeight.bold, 
-                    color: theme.colorScheme.primary,
-                  ),
+                  const SizedBox(height: 12),
+                ],
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _getPackageTitle(),
+                            style: TextStyle(
+                              fontSize: accent ? 20 : 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _getPackageSubtitle(),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          package.storeProduct.priceString,
+                          style: TextStyle(
+                            fontSize: accent ? 24 : 20,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                        if (monthlyEq != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            monthlyEq,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),

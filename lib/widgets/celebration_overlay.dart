@@ -1,6 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import '../utils/localization.dart';
+import '../services/pro_service.dart';
+import '../screens/paywall/paywall_screen.dart';
+
+// ФАЗА 4.2: дискретен Premium линк в celebration момента (вместо отделен popup —
+// моментът е техен). Показва се само на free. Локализиран ×11.
+const Map<String, String> _kUnlockPremium = {
+  'en': 'Unlock Premium', 'bg': 'Отключи Premium', 'de': 'Premium freischalten',
+  'fr': 'Débloquer Premium', 'it': 'Sblocca Premium', 'el': 'Ξεκλείδωμα Premium',
+  'es': 'Desbloquear Premium', 'pt': 'Desbloquear Premium', 'ru': 'Открыть Premium',
+  'tr': 'Premium\'u aç', 'ja': 'Premiumを解放',
+};
+
+String _unlockPremiumText(String lang) =>
+    _kUnlockPremium[lang] ?? _kUnlockPremium['en']!;
 
 class CelebrationOverlay extends StatefulWidget {
   final VoidCallback onComplete;
@@ -44,6 +58,16 @@ class _CelebrationOverlayState extends State<CelebrationOverlay>
     widget.onComplete();
   }
 
+  /// Затваря overlay-а и отваря paywall-а (ФАЗА 4.2).
+  void _openPremium() {
+    if (_isClosing || !mounted) return;
+    _isClosing = true;
+    final nav = Navigator.of(context, rootNavigator: true);
+    nav.pop();
+    widget.onComplete();
+    nav.push(MaterialPageRoute(builder: (_) => const PaywallScreen()));
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -53,8 +77,7 @@ class _CelebrationOverlayState extends State<CelebrationOverlay>
   @override
   Widget build(BuildContext context) {
     final t = AppText.of(context);
-    final theme = Theme.of(context);
-    
+
     return Material(
       color: Colors.black.withValues(alpha: 0.75),
       child: InkWell(
@@ -119,6 +142,30 @@ class _CelebrationOverlayState extends State<CelebrationOverlay>
                   ),
                 ),
               ),
+              // ФАЗА 4.2: дискретен Premium линк — само за free потребители.
+              if (!ProService().isPro)
+                FadeTransition(
+                  opacity: CurvedAnimation(
+                    parent: _controller,
+                    curve: const Interval(0.6, 0.9, curve: Curves.easeIn),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: TextButton.icon(
+                      onPressed: _openPremium,
+                      icon: const Icon(Icons.workspace_premium_rounded,
+                          color: Colors.white70, size: 18),
+                      label: Text(
+                        _unlockPremiumText(t.lang),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

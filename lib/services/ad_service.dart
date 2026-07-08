@@ -1,5 +1,8 @@
+import 'dart:async';
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/widgets.dart' show Orientation;
 
 // Условен import - stub за web, реален пакет за mobile
 import 'ads_stub.dart' if (dart.library.io) 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -13,11 +16,16 @@ class AdService extends ChangeNotifier {
   factory AdService() => _instance;
 
   bool _isInitialized = false;
+  // ФАЗА 1 (GDPR/UMP): става true само след като UMP consent процесът приключи
+  // и SDK-то разреши заявки за реклами. ВСИЧКИ load точки (банер, interstitial,
+  // app-open) го проверяват → нищо не се зарежда без consent gate.
+  bool _canRequestAds = false;
+  bool get canRequestAds => _canRequestAds;
   InterstitialAd? _interstitialAd;
   bool _isInterstitialAdLoaded = false;
   int _actionCount = 0;
-  static const int _actionsPerAd = 5;
-  static const String _lastAppOpenKey = 'last_app_open_ad';
+  // По-меко (решение на потребителя): interstitial по-рядко, за да не дразни.
+  static const int _actionsPerAd = 11;
 
   // Android production ad unit IDs
   static const String _interstitialAdUnitIdAndroid = 'ca-app-pub-4385157735120275/2061138507';
@@ -59,14 +67,27 @@ class AdService extends ChangeNotifier {
   bool get isBannerAdLoaded => _isBannerAdLoaded;
   BannerAd? get bannerAd => _bannerAd;
 
-  Future<void> loadBannerAd() async {
+  Future<void> loadBannerAd({double? width}) async {
     if (kIsWeb || ProService().isPro) return;
     if (!_isInitialized) await initialize();
+    if (!_canRequestAds) return; // UMP consent gate
     if (_isBannerAdLoaded && _bannerAd != null) return;
+
+    // ФАЗА 1.3: anchored ADAPTIVE банер — по-добър fill/вид от фиксирания
+    // 320x50. Ширината идва от екрана (подадена от BannerAdWidget). Ако SDK-то
+    // не върне adaptive размер → fallback към стандартния банер.
+    AdSize size = AdSize.banner;
+    if (width != null && width > 0) {
+      final adaptive = await AdSize.getAnchoredAdaptiveBannerAdSize(
+        Orientation.portrait,
+        width.truncate(),
+      );
+      if (adaptive != null) size = adaptive;
+    }
 
     _bannerAd = BannerAd(
       adUnitId: kDebugMode ? _testBannerAdUnitId : _bannerAdUnitId,
-      size: AdSize.banner,
+      size: size,
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
@@ -91,26 +112,103 @@ class AdService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> initialize() async {
+  // Пази consent/init да НЕ тръгне двойно при студен старт (main.dart и
+  // BannerAdWidget.initState викат initialize() почти едновременно).
+  Future<void>? _initFuture;
+  Future<void> initialize() => _initFuture ??= _initialize();
+
+  Future<void> _initialize() async {
     if (_isInitialized) return;
     if (kIsWeb) {
       _isInitialized = true;
       return;
     }
     try {
+      // ФАЗА 1: UMP (GDPR) consent ПРЕДИ MobileAds.initialize() и ПРЕДИ всяко
+      // зареждане на реклама. При студен старт main.dart вика initialize(), така
+      // че и app-open проверката минава през gate-а.
+      await _gatherConsent();
+
       await MobileAds.instance.initialize();
       _isInitialized = true;
-      debugPrint('AdService initialized');
+      debugPrint('AdService initialized (canRequestAds=$_canRequestAds)');
       await _loadInterstitialAd();
-      await _checkAppOpenAd();
     } catch (e) {
-      debugPrint('AdService init error: \$e');
+      debugPrint('AdService init error: $e');
+    }
+  }
+
+  /// Изисква UMP consent (ЕС/GDPR). Блокира докато формата приключи, после
+  /// пита SDK-то дали изобщо може да заявява реклами (`canRequestAds`). При
+  /// изключение fail-open (не блокираме рекламите завинаги заради временна
+  /// грешка), но при явен отговор `false` от SDK-то — уважаваме го.
+  Future<void> _gatherConsent() async {
+    if (kIsWeb) return;
+    try {
+      final params = ConsentRequestParameters();
+      final completer = Completer<void>();
+      ConsentInformation.instance.requestConsentInfoUpdate(
+        params,
+        () async {
+          // Показва формата за съгласие само ако е нужна (ЕС/EEA/UK).
+          try {
+            await ConsentForm.loadAndShowConsentFormIfRequired((FormError? error) {
+              if (error != null) {
+                debugPrint('UMP form error: ${error.message}');
+              }
+              if (!completer.isCompleted) completer.complete();
+            });
+          } catch (e) {
+            debugPrint('UMP loadAndShow error: $e');
+            if (!completer.isCompleted) completer.complete();
+          }
+        },
+        (FormError error) {
+          debugPrint('UMP requestConsentInfoUpdate error: ${error.message}');
+          if (!completer.isCompleted) completer.complete();
+        },
+      );
+      await completer.future;
+    } catch (e) {
+      debugPrint('UMP consent error: $e');
+    }
+    try {
+      _canRequestAds = await ConsentInformation.instance.canRequestAds();
+    } catch (_) {
+      // canRequestAds() сам хвърли → не знаем нищо от SDK-то. За EEA/UK
+      // потребител fail-CLOSED (без събран consent → без реклами; GDPR/AdMob
+      // policy). Извън EEA fail-open — не губим приход при рядък локален срив.
+      _canRequestAds = !_isLikelyEeaUser();
+    }
+  }
+
+  /// EEA/EEA-подобни държави (GDPR обхват): EU-27 + IS/LI/NO (EEA) + GB (UK
+  /// GDPR) + CH. Ползва се САМО при неопределимо consent състояние (exception),
+  /// за да решим fail-closed vs fail-open.
+  static const Set<String> _eeaCountries = {
+    'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR',
+    'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK',
+    'SI', 'ES', 'SE', 'IS', 'LI', 'NO', 'GB', 'CH',
+  };
+
+  /// Груба (device-region) евристика. Не е перфектна (VPN/пътуващ), но е
+  /// достатъчна за консервативно решение при exception. Неизвестна държава →
+  /// приемаме EEA (по-безопасно = fail-closed).
+  bool _isLikelyEeaUser() {
+    try {
+      final country =
+          ui.PlatformDispatcher.instance.locale.countryCode?.toUpperCase();
+      if (country == null) return true;
+      return _eeaCountries.contains(country);
+    } catch (_) {
+      return true;
     }
   }
 
   Future<void> _loadInterstitialAd() async {
     if (kIsWeb || ProService().isPro) return;
     if (!_isInitialized) return;
+    if (!_canRequestAds) return; // UMP consent gate
 
     await InterstitialAd.load(
       adUnitId: kDebugMode ? _testInterstitialAdUnitId : _interstitialAdUnitId,
@@ -137,18 +235,6 @@ class AdService extends ChangeNotifier {
     _actionCount++;
     if (_actionCount >= _actionsPerAd) {
       _actionCount = 0;
-      await _showInterstitial();
-    }
-  }
-
-  Future<void> _checkAppOpenAd() async {
-    if (ProService().isPro || kIsWeb) return;
-    final prefs = await SharedPreferences.getInstance();
-    final lastMs = prefs.getInt(_lastAppOpenKey) ?? 0;
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final hoursSinceLast = (now - lastMs) / 3600000;
-    if (hoursSinceLast >= 24) {
-      await prefs.setInt(_lastAppOpenKey, now);
       await _showInterstitial();
     }
   }

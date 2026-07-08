@@ -15,7 +15,7 @@ import '../../utils/localization.dart';
 import '../../utils/subtask_format.dart';
 import '../../widgets/task_card_styles.dart';
 import '../../utils/category_colors.dart';
-import '../paywall/paywall_screen.dart';
+import '../../widgets/ai_limit.dart';
 import '../task/task_screen.dart';
 import 'group_invite_screen.dart';
 
@@ -166,15 +166,9 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
   /// във Firestore (GroupTask), не в Hive. Показва се само при 0 подзадачи.
   Future<void> _breakdown(GroupTask gt) async {
     final t = AppText.of(context);
-    if (!ProService().isPro) {
-      await showPaywallIfNeeded(context, isFeatureAvailable: false);
-      return;
-    }
-    if (!await AiUsageService.instance.canUse()) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(t.aiLimitReached)));
-      }
+    // ФАЗА 2: freemium — free до 3/ден (споделен пул), Pro неограничено.
+    if (!ProService().isPro && !await AiUsageService.instance.canUse()) {
+      if (mounted) await showAiLimitSheet(context);
       return;
     }
     final lang = LanguageScope.of(context).locale.languageCode;

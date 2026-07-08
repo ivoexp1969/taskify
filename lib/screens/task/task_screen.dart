@@ -35,10 +35,12 @@ import 'gift_dialog.dart';
 import 'document_dialog.dart';
 import '../../widgets/task_card_styles.dart';
 import '../../widgets/pomodoro_timer_sheet.dart';
+import '../../widgets/ai_limit.dart';
 import '../settings/statistics_screen.dart';
 import '../../utils/natural_language_parser.dart';
 import '../../services/ai_service.dart';
 import '../../services/ai_usage_service.dart';
+import '../../services/conversion_service.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import '../paywall/paywall_screen.dart';
 import '../../services/pro_service.dart';
@@ -70,6 +72,15 @@ class TaskEditorBridge {
     final s = _current;
     if (s == null) return;
     await s._openTaskDialog(existing: existing, onSave: onSave);
+  }
+
+  /// ФАЗА 4: отваря СТАНДАРТНИЯ редактор за нова задача (self-managed запис,
+  /// точно като FAB бутона) — ползва се от ден-3 engagement нотификацията, за
+  /// да „отвори AI полето".
+  static Future<void> openNewSelfManaged() async {
+    final s = _current;
+    if (s == null) return;
+    await s._openTaskDialog();
   }
 }
 
@@ -923,17 +934,13 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
             Future<void> runAiParse({bool fromVoice = false}) async {
               final text = _titleController.text.trim();
               if (text.isEmpty) return;
-              if (!ProService().isPro) {
+              // ФАЗА 2: AI е freemium. Free → до 3/ден (споделен пул с breakdown);
+              // Pro → неограничено (canUse() винаги true). При изчерпана квота на
+              // free: тих fallback към локалния текст при глас, иначе мек limit
+              // sheet с CTA към paywall (input-ът в редактора се запазва).
+              if (!ProService().isPro && !await AiUsageService.instance.canUse()) {
                 if (fromVoice) return;
-                Navigator.pop(innerContext);
-                if (context.mounted) showPaywallIfNeeded(context, isFeatureAvailable: false);
-                return;
-              }
-              if (!await AiUsageService.instance.canUse()) {
-                if (innerContext.mounted) {
-                  ScaffoldMessenger.of(innerContext).showSnackBar(
-                      SnackBar(content: Text(t.aiLimitReached)));
-                }
+                if (context.mounted) await showAiLimitSheet(context);
                 return;
               }
               setSheetState(() => aiLoading = true);
@@ -990,18 +997,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
             Future<void> runAiBreakdown() async {
               final text = _titleController.text.trim();
               if (text.isEmpty) return;
-              if (!ProService().isPro) {
-                Navigator.pop(innerContext);
-                if (context.mounted) {
-                  showPaywallIfNeeded(context, isFeatureAvailable: false);
-                }
-                return;
-              }
-              if (!await AiUsageService.instance.canUse()) {
-                if (innerContext.mounted) {
-                  ScaffoldMessenger.of(innerContext).showSnackBar(
-                      SnackBar(content: Text(t.aiLimitReached)));
-                }
+              // ФАЗА 2: breakdown също е freemium (споделя 3/ден пула с parse).
+              if (!ProService().isPro && !await AiUsageService.instance.canUse()) {
+                if (context.mounted) await showAiLimitSheet(context);
                 return;
               }
               setSheetState(() => aiLoading = true);
@@ -1295,7 +1293,13 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                           // AI Parse button
                           if (aiParsingEnabled) Align(
                             alignment: Alignment.centerRight,
-                            child: aiLoading
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // ФАЗА 2: дискретен брояч „използвани/лимит" —
+                                // само за free (за Pro връща SizedBox.shrink).
+                                const AiQuotaChip(),
+                                aiLoading
                                 ? const SizedBox(
                                     width: 24,
                                     height: 24,
@@ -1328,6 +1332,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                       ),
                                     ),
                                   ),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 16),
 
@@ -2077,16 +2083,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
   }
 
   Future<void> _showAiBreakdownSheet(Task task) async {
-    if (!ProService().isPro) {
-      if (mounted) showPaywallIfNeeded(context, isFeatureAvailable: false);
-      return;
-    }
-
-    if (!await AiUsageService.instance.canUse()) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppText.of(context).aiLimitReached)));
-      }
+    // ФАЗА 2: freemium — free до 3/ден (споделен пул), Pro неограничено.
+    if (!ProService().isPro && !await AiUsageService.instance.canUse()) {
+      if (mounted) await showAiLimitSheet(context);
       return;
     }
 
@@ -2912,6 +2911,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                               task.completedAt = task.isCompleted ? DateTime.now() : null;
                               await task.save();
                               if (task.isCompleted) AdService().onUserAction();
+                              if (task.isCompleted && mounted) {
+                                ConversionService.instance.onTaskCompleted(context);
+                              }
 
                               if (!wasCompleted && task.isCompleted && task.recurrence != null) {
                                 final nextDate = _nextDueDate(task.dueDate, task.recurrence!);
@@ -3101,6 +3103,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                   });
                                   await task.save();
                                   if (!wasCompleted && task.isCompleted) AdService().onUserAction();
+                                  if (!wasCompleted && task.isCompleted && mounted) {
+                                    ConversionService.instance.onTaskCompleted(context);
+                                  }
                                   
                                   if (!wasCompleted && task.isCompleted && task.recurrence != null) {
                                     final nextDate = _nextDueDate(task.dueDate, task.recurrence!);

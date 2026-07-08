@@ -1,17 +1,22 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'pro_service.dart';
+
 /// Клиентски rate limit за AI заявки + AI настройки (парсване / глас).
 ///
 /// Пази се изцяло в SharedPreferences (НЕ Hive). Броячът се reset-ва в
 /// полунощ local time чрез сравнение на запазен ден-ключ (yyyy-MM-dd) с
-/// днешния — без таймери. Дневният таван е защита (не монетизация) и важи
-/// дори за Pro потребители.
+/// днешния — без таймери.
+///
+/// ФАЗА 2 (монетизация): AI е freemium. **Free** потребители имат [dailyLimit]
+/// разпознавания на ден; **Pro** е неограничен (bypass в [canUse]) и НЕ
+/// консумира квота ([recordUse] е no-op за Pro), така че броячът важи само за free.
 class AiUsageService {
   AiUsageService._();
   static final AiUsageService instance = AiUsageService._();
 
-  /// Дневен таван на AI заявки. Конфигурируема константа.
-  static const int dailyLimit = 20;
+  /// Дневен таван на AI заявки за FREE потребители. Pro е неограничен.
+  static const int dailyLimit = 3;
 
   static const String _kCount = 'ai_usage_count';
   static const String _kDate = 'ai_usage_date';
@@ -47,10 +52,16 @@ class AiUsageService {
 
   Future<int> remainingToday() async => dailyLimit - await usedToday();
 
-  Future<bool> canUse() async => (await usedToday()) < dailyLimit;
+  /// Pro → винаги true (неограничено). Free → до [dailyLimit] на ден.
+  Future<bool> canUse() async {
+    if (ProService().isPro) return true;
+    return (await usedToday()) < dailyLimit;
+  }
 
   /// Записва една успешна AI заявка. Reset-ва брояча при нов ден.
+  /// За Pro е no-op — неограничените заявки не консумират квота.
   Future<void> recordUse() async {
+    if (ProService().isPro) return;
     final prefs = await SharedPreferences.getInstance();
     final todayKey = dateKeyFor(DateTime.now());
     final current = resolveUsed(

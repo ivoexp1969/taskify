@@ -32,13 +32,39 @@ class StoreProduct {
   final String description;
   final String priceString;
   final double price;
-  
+  final String currencyCode;
+  final IntroductoryPrice? introductoryPrice;
+
   StoreProduct({
     required this.identifier,
     this.title = '',
     this.description = '',
     this.priceString = '',
     this.price = 0.0,
+    this.currencyCode = '',
+    this.introductoryPrice,
+  });
+}
+
+/// Stub за PeriodUnit
+enum PeriodUnit { day, week, month, year, unknown }
+
+/// Stub за IntroductoryPrice
+class IntroductoryPrice {
+  final double price;
+  final String priceString;
+  final String period;
+  final int cycles;
+  final PeriodUnit periodUnit;
+  final int periodNumberOfUnits;
+
+  IntroductoryPrice({
+    this.price = 0.0,
+    this.priceString = '',
+    this.period = '',
+    this.cycles = 0,
+    this.periodUnit = PeriodUnit.unknown,
+    this.periodNumberOfUnits = 0,
   });
 }
 

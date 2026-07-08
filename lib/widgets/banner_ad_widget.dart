@@ -23,7 +23,9 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
     if (!kIsWeb) {
       _adService.addListener(_onAdServiceChanged);
       _proService.addListener(_onProStatusChanged);
-      _loadAd();
+      // Ширината за adaptive банера идва от MediaQuery → чете се след първия
+      // кадър (в initState inherited widget-ите още не са налични).
+      WidgetsBinding.instance.addPostFrameCallback((_) => _loadAd());
     }
   }
 
@@ -49,7 +51,9 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   }
 
   Future<void> _loadAd() async {
-    await _adService.loadBannerAd();
+    if (!mounted) return;
+    final width = MediaQuery.of(context).size.width;
+    await _adService.loadBannerAd(width: width);
   }
 
   @override
@@ -65,8 +69,10 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
     final bannerAd = _adService.bannerAd;
 
+    // ФАЗА 1: нула резервирано място докато зарежда / при неуспех / без consent —
+    // никакъв визуален артефакт, списъкът не подскача.
     if (!_adService.isBannerAdLoaded || bannerAd == null) {
-      return const SizedBox(height: 50);
+      return const SizedBox.shrink();
     }
 
     return Container(
