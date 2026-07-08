@@ -23,6 +23,7 @@ import 'screens/paywall/paywall_screen.dart';
 import 'screens/documents/documents_screen.dart';
 import 'screens/task/task_screen.dart';
 import 'widgets/morning_briefing_dialog.dart';
+import 'widgets/gift_cta.dart';
 import 'services/google_calendar_service.dart';
 import 'services/ios_calendar_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -125,6 +126,13 @@ Future<void> main() async {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const DocumentsScreen()),
     );
+  });
+
+  // Монетизация: тап на напомняне за рожден ден → „Изпрати цветя/подарък" CTA.
+  NotificationService.setGiftTapCallback((BuildContext context, String route) {
+    GiftOffer.tap(context,
+        lang: LanguageScope.of(context).locale.languageCode,
+        kind: 'gift_birthday');
   });
 
   // Pro и Ad сервизи — fire-and-forget, не блокират UI

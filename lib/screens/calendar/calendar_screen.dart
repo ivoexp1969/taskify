@@ -1678,44 +1678,47 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
           ),
 
-          // Read-only слой: официален празник за избрания ден
-          if (_holidaysEnabled) _buildHolidayBanner(context),
-
-          // Read-only слой: имен ден за избрания ден
-          if (_nameDaysEnabled) _buildNameDayBanner(context),
-
-          // Заглавие „Задачи"
-          Padding(
-            padding:
-                const EdgeInsets.fromLTRB(12, 4, 12, 0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                t.tasks,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-
-          // Списък със задачи според изгледа
+          // Целият долен блок (банери + заглавие + задачи) е в ЕДИН скрол — при
+          // много имена на имен ден списъкът вече не изтласква бутона „От твоите
+          // контакти" / задачите извън екрана; потребителят просто скролва.
           Expanded(
-            child: tasks.isEmpty
-                ? const Center(
-                    child: Text(
-                      '—',
-                      style: TextStyle(
-                        fontSize: 28,
-                        color: Colors.black26,
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              itemCount: tasks.length + 1,
+              itemBuilder: (_, listIndex) {
+                // Хедър (index 0): празничен банер + имен-ден банер + заглавие.
+                if (listIndex == 0) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (_holidaysEnabled) _buildHolidayBanner(context),
+                      if (_nameDaysEnabled) _buildNameDayBanner(context),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            t.tasks,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: tasks.length,
-                    itemBuilder: (_, index) {
-                      final task = tasks[index];
+                      if (tasks.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 40),
+                          child: Center(
+                            child: Text('—',
+                                style: TextStyle(
+                                    fontSize: 28, color: Colors.black26)),
+                          ),
+                        ),
+                    ],
+                  );
+                }
+                final task = tasks[listIndex - 1];
                       final cat = categoriesMap[task.categoryId];
                       final categoryName =
                           _localizedCategoryName(cat, t);
@@ -2179,6 +2182,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      isScrollControlled: true, // иначе при 7+ действия долните се отрязват
       builder: (ctx) {
         Widget action(IconData icon, Color color, String label,
             VoidCallback onTap) {
@@ -2193,7 +2197,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
         }
 
         return SafeArea(
-          child: Column(
+          child: SingleChildScrollView(
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
@@ -2255,11 +2260,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   shareLbl[lang] ?? shareLbl['en']!,
                   () => _shareNameDayWish(c.name, lang)),
               // „Изпрати цветя/подарък" (монетизация — засега „Очаквайте скоро").
-              action(Icons.local_florist_rounded, const Color(0xFFAD1457),
+              action(Icons.local_florist_rounded, const Color(0xFF39FF14),
                   giftLbl[lang] ?? giftLbl['en']!,
                   () => GiftOffer.tap(context, lang: lang, kind: 'gift_nameday')),
               const SizedBox(height: 8),
             ],
+          ),
           ),
         );
       },

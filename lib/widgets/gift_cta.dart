@@ -64,10 +64,11 @@ class GiftOfferButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      child: FilledButton.tonalIcon(
-        style: FilledButton.styleFrom(
-          backgroundColor: const Color(0xFFAD1457).withValues(alpha: 0.12),
-          foregroundColor: const Color(0xFFAD1457),
+      child: OutlinedButton.icon(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF39FF14), // неоново зелен ТЕКСТ (не фон)
+          side: const BorderSide(color: Color(0xFF39FF14), width: 1.5),
+          textStyle: const TextStyle(fontWeight: FontWeight.w800),
         ),
         icon: const Icon(Icons.local_florist_rounded, size: 18),
         label: Text(_tr(_sendGift, lang)),

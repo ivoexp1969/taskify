@@ -141,6 +141,10 @@ class NotificationService {
         // Cold-start от напомняне за документ → отваряме „Документи" с CTA (Идея 1).
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('renew_pending_route', payload);
+      } else if (payload != null && payload.startsWith('gift:')) {
+        // Cold-start от напомняне за рожден ден → показваме „цветя/подарък" CTA.
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('gift_pending_route', payload);
       }
     }
   }
@@ -188,6 +192,9 @@ class NotificationService {
         } else if (details.actionId == 'renew' ||
             (details.payload?.startsWith('renew:') ?? false)) {
           _handleRenewTap(details.payload);
+        } else if (details.actionId == 'gift' ||
+            (details.payload?.startsWith('gift:') ?? false)) {
+          _handleGiftTap(details.payload);
         } else if (details.actionId == 'snooze') {
           _onNotificationActionBackground(details);
         }
@@ -287,7 +294,8 @@ class NotificationService {
     return map[lang] ?? map['en'] ?? 'Reminder';
   }
 
-  NotificationDetails _buildNotificationDetails({String? lang, String? renewDoctype}) {
+  NotificationDetails _buildNotificationDetails(
+      {String? lang, String? renewDoctype, String? giftKind}) {
     const snoozeLabels = {
       'en': '⏰ +30 min', 'bg': '⏰ +30 мин', 'de': '⏰ +30 Min', 'fr': '⏰ +30 min',
       'it': '⏰ +30 min', 'el': '⏰ +30 λεπτά', 'es': '⏰ +30 min',
@@ -298,19 +306,30 @@ class NotificationService {
       'it': '🔄 Rinnova', 'el': '🔄 Ανανέωση', 'es': '🔄 Renovar',
       'pt': '🔄 Renovar', 'ru': '🔄 Продлить', 'tr': '🔄 Yenile', 'ja': '🔄 更新',
     };
+    const giftLabels = {
+      'en': '🌸 Flowers/gift', 'bg': '🌸 Цветя/подарък', 'de': '🌸 Blumen/Geschenk',
+      'fr': '🌸 Fleurs/cadeau', 'it': '🌸 Fiori/regalo', 'el': '🌸 Λουλούδια/δώρο',
+      'es': '🌸 Flores/regalo', 'pt': '🌸 Flores/presente', 'ru': '🌸 Цветы/подарок',
+      'tr': '🌸 Çiçek/hediye', 'ja': '🌸 花・ギフト',
+    };
     final l = lang ?? 'en';
 
-    // Документите имат дълъг хоризонт → „+30 мин" snooze е безсмислен; вместо
-    // него слагаме action „Поднови", която отваря екрана с partner CTA-то (Идея 1).
+    // Документ → action „Поднови" (Идея 1); рожден ден → action „Цветя/подарък";
+    // иначе стандартният „+30 мин" snooze. И двете отварят app-а (deep-link).
     final List<AndroidNotificationAction> actions = renewDoctype != null
         ? [
             AndroidNotificationAction('renew', renewLabels[l] ?? renewLabels['en']!,
                 showsUserInterface: true),
           ]
-        : [
-            AndroidNotificationAction('snooze', snoozeLabels[l] ?? snoozeLabels['en']!,
-                cancelNotification: true),
-          ];
+        : giftKind != null
+            ? [
+                AndroidNotificationAction('gift', giftLabels[l] ?? giftLabels['en']!,
+                    showsUserInterface: true),
+              ]
+            : [
+                AndroidNotificationAction('snooze', snoozeLabels[l] ?? snoozeLabels['en']!,
+                    cancelNotification: true),
+              ];
 
     final androidDetails = AndroidNotificationDetails(
       'task_reminders',
@@ -370,6 +389,11 @@ class NotificationService {
       // payload `renew:<doctype>` за deep-link към partner CTA-то (Идея 1).
       final renewDoctype =
           task.template == 'document' ? _doctypeFromNotes(task.notes) : null;
+      // Рожден ден → action „Цветя/подарък" + payload `gift:birthday` (монетизация).
+      final giftKind = (renewDoctype == null &&
+              (task.template == 'birthday' || task.categoryId == 'birthday'))
+          ? 'birthday'
+          : null;
 
       for (final reminderType in remindersList) {
         final scheduled = _computeReminderTime(task.dueDate, reminderType);
@@ -387,11 +411,16 @@ class NotificationService {
           task.title,
           label,
           tzScheduled,
-          _buildNotificationDetails(lang: lang, renewDoctype: renewDoctype),
+          _buildNotificationDetails(
+              lang: lang, renewDoctype: renewDoctype, giftKind: giftKind),
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
-          payload: renewDoctype != null ? 'renew:$renewDoctype' : null,
+          payload: renewDoctype != null
+              ? 'renew:$renewDoctype'
+              : giftKind != null
+                  ? 'gift:$giftKind'
+                  : null,
         );
         newIds.add(id);
       }
@@ -491,6 +520,21 @@ class NotificationService {
     final context = MyApp.navigatorKey.currentContext;
     if (context != null) {
       _renewTapCallback?.call(context, payload ?? 'renew:');
+    }
+  }
+
+  // Монетизация: routing на тап от напомняне за рожден ден (warm/background).
+  // Cold-start минава през `gift_pending_route` в init().
+  static Function(BuildContext, String)? _giftTapCallback;
+
+  static void setGiftTapCallback(Function(BuildContext, String) callback) {
+    _giftTapCallback = callback;
+  }
+
+  void _handleGiftTap(String? payload) {
+    final context = MyApp.navigatorKey.currentContext;
+    if (context != null) {
+      _giftTapCallback?.call(context, payload ?? 'gift:');
     }
   }
 

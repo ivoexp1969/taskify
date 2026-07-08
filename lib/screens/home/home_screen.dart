@@ -9,6 +9,7 @@ import '../documents/documents_screen.dart';
 import '../shared/shared_groups_screen.dart';
 import '../../utils/localization.dart';
 import '../../widgets/banner_ad_widget.dart';
+import '../../widgets/gift_cta.dart';
 import '../../services/pro_service.dart';
 import '../../services/holidays_service.dart';
 import '../../services/sync_service.dart';
@@ -64,6 +65,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const DocumentsScreen()),
         );
+      }
+      return;
+    }
+
+    // Монетизация: cold-start от напомняне за рожден ден → „цветя/подарък" CTA.
+    final gift = prefs.getString('gift_pending_route');
+    if (gift != null) {
+      await prefs.remove('gift_pending_route');
+      if (context.mounted) {
+        await GiftOffer.tap(context,
+            lang: LanguageScope.of(context).locale.languageCode,
+            kind: 'gift_birthday');
       }
       return;
     }
