@@ -26,6 +26,7 @@ import '../../services/task_view_preference.dart';
 import '../../widgets/celebration_overlay.dart';
 import '../../widgets/task_card_styles.dart';
 import '../../widgets/pomodoro_timer_sheet.dart';
+import '../../widgets/gift_cta.dart';
 
 enum CalendarView { day, week, month }
 
@@ -2159,6 +2160,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
       'es': 'Compartir', 'pt': 'Partilhar', 'ru': 'Поделиться',
       'tr': 'Paylaş', 'ja': '共有',
     };
+    const giftLbl = {
+      'en': 'Send flowers / gift', 'bg': 'Изпрати цветя/подарък',
+      'de': 'Blumen / Geschenk senden', 'fr': 'Envoyer fleurs / cadeau',
+      'it': 'Invia fiori / regalo', 'el': 'Στείλε λουλούδια / δώρο',
+      'es': 'Enviar flores / regalo', 'pt': 'Enviar flores / presente',
+      'ru': 'Цветы / подарок', 'tr': 'Çiçek / hediye gönder',
+      'ja': '花・ギフトを贈る',
+    };
     const noPhoneLbl = {
       'en': 'No phone number', 'bg': 'Няма телефонен номер',
       'de': 'Keine Telefonnummer', 'fr': 'Pas de numéro',
@@ -2245,6 +2254,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
               action(Icons.celebration_rounded, const Color(0xFF8E24AA),
                   shareLbl[lang] ?? shareLbl['en']!,
                   () => _shareNameDayWish(c.name, lang)),
+              // „Изпрати цветя/подарък" (монетизация — засега „Очаквайте скоро").
+              action(Icons.local_florist_rounded, const Color(0xFFAD1457),
+                  giftLbl[lang] ?? giftLbl['en']!,
+                  () => GiftOffer.tap(context, lang: lang, kind: 'gift_nameday')),
               const SizedBox(height: 8),
             ],
           ),

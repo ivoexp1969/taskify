@@ -6,6 +6,25 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-08 · PC — „Очаквайте скоро" режим + нов слой „цветя/подарък" (монетизация)
+Докато чакаме реалните affiliate линкове (имейли до партньори пратени, чакаме отговор), направих CTA-тата
+безопасни за старт и добавих нов повод-базиран слой.
+- **„Поднови сега" → „Очаквайте скоро":** нов флаг `kRenewalComingSoon=true` в `renewal_cta.dart` — при клик
+  вместо да отваряме тестов Boleron URL, показваме диалог „Очаквайте скоро!" (11 езика). Кликът ВСЕ ОЩЕ се
+  логва (демонд сигнал). Disclosure се прескача. Обръщаш флага на `false`, щом линковете станат реални.
+- **Нов слой „Изпрати цветя/подарък":** intent-based монетизация за поводи, същия „coming soon" подход.
+  Нов `RenewalService.logInterest({kind})` (guard-нат демонд лог в `renewal_clicks`, `type:'interest'`,
+  `partner:'pending'`; правилата искат само doctype+subid string → минава). Нов `lib/widgets/gift_cta.dart`:
+  `GiftOffer.tap` (логва интерес + 🌸 „Очаквайте скоро" диалог) + `GiftOfferButton` (пълноширок бутон).
+  Флаг `kGiftComingSoon=true`.
+- **Закачен на 2 места:** (1) **рожден-ден картата** — `task_card_styles.dart` в ДВАТА стила
+  (`ExpandableTaskCard` + `TicketTaskCard`), само `template/categoryId=='birthday'` и `!isCompleted`,
+  kind=`gift_birthday`; (2) **списъка имен-ден контакти** — `calendar_screen._showContactActions` sheet,
+  ново действие след „Сподели честитка", kind=`gift_nameday`.
+- **Идеи за монетизация напред (записани):** пътуване→хотел/застраховка/eSIM (Airalo), пазар→онлайн доставка
+  (Glovo/eMAG), плащания→смяна доставчик, premium/спонсорирани картички (IAP). Affiliate само за BG (решение).
+- `flutter analyze` → 0 нови грешки/warnings; `gift_cta.dart` напълно чист. APK билднат за тест на Note 9.
+
 ## 2026-07-07 · PC — Идея 1: affiliate оферта „Поднови сега" и за ВИНЕТКИ (Boleron, ЖИВА)
 Разширих affiliate слоя от ГО и върху винетките. **Без нито ред код** — водопроводната инсталация от
 Фаза 1 вече е doctype-агностична: `documents_screen` подава `RenewalCta(doctype: _docType(task), …)`,

@@ -211,6 +211,41 @@ class RenewalService {
     return url;
   }
 
+  /// Логва „интерес" към бъдеща оферта (напр. цветя/подарък за рожден/имен ден),
+  /// докато реален партньор още няма. Мери търсенето ПРЕДИ старта — силен
+  /// аргумент в преговорите. Същият guard-нат път като [registerClickAndBuildUrl],
+  /// но без URL: локален брояч + (при логнат/анонимен вход) запис в
+  /// `renewal_clicks` с `type:'interest'`. Никога не хвърля.
+  Future<void> logInterest({required String kind}) async {
+    final anon = await _anonId();
+    final subid = makeSubid(
+      anonId: anon,
+      doctype: kind,
+      epochSeconds: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+    );
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(
+          _kClicksTotal, (prefs.getInt(_kClicksTotal) ?? 0) + 1);
+    } catch (_) {/* без значение за потока */}
+
+    try {
+      final authed = await AuthService().ensureAuthedForLogging();
+      if (!authed) return; // офлайн/изключен доставчик → само локален брояч
+      await FirebaseFirestore.instance.collection(_clicksCollection).add({
+        'anonId': anon,
+        'doctype': kind,
+        'partner': 'pending',
+        'subid': subid,
+        'type': 'interest',
+        'ts': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint('RenewalService: interest log skipped → $e');
+    }
+  }
+
   /// Общ брой кликове върху „Поднови" (локален, за бърза проверка).
   Future<int> clicksTotal() async {
     final prefs = await SharedPreferences.getInstance();

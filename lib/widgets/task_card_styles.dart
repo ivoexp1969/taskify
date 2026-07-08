@@ -6,6 +6,7 @@ import '../models/category.dart';
 import '../utils/localization.dart';
 import '../services/task_view_preference.dart';
 import '../services/pro_service.dart';
+import 'gift_cta.dart';
 
 /// Glass Morphism карта за днешни задачи
 class GlassTaskCard extends StatelessWidget {
@@ -429,6 +430,12 @@ class ExpandableTaskCard extends StatelessWidget {
                                       label: 'Calendar', color: Colors.blue),
                                 ],
                               ),
+                              // „Изпрати цветя/подарък" за рождени дни (монетизация).
+                              if ((task.template == 'birthday' || task.categoryId == 'birthday')
+                                  && !isCompleted) ...[
+                                const SizedBox(height: 10),
+                                GiftOfferButton(lang: t.lang, kind: 'gift_birthday'),
+                              ],
                               if (task.totalSubtasksCount > 0) ...[
                                 const SizedBox(height: 10),
                                 _SubtaskProgress(
@@ -1497,6 +1504,12 @@ class _TicketTaskCardState extends State<TicketTaskCard>
             const _DetailChip(icon: Icons.event_rounded, label: 'Calendar', color: Colors.blue),
         ],
       ),
+      // „Изпрати цветя/подарък" за рождени дни (монетизация).
+      if ((task.template == 'birthday' || task.categoryId == 'birthday')
+          && !widget.isCompleted) ...[
+        const SizedBox(height: 10),
+        GiftOfferButton(lang: t.lang, kind: 'gift_birthday'),
+      ],
       if (task.totalSubtasksCount > 0) ...[
         const SizedBox(height: 10),
         _SubtaskProgress(

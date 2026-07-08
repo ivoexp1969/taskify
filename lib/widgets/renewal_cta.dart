@@ -4,6 +4,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../services/renewal_service.dart';
 
+/// Докато реалните affiliate линкове не са живи: при клик показваме „Очаквайте
+/// скоро" вместо да отваряме (тестовия) партньорски URL. Кликът ВСЕ ОЩЕ се логва
+/// — така мерим реалния интерес към офертата (аргумент в преговорите с партньора).
+/// Обърни на `false`, щом Firestore urlTemplate-ите станат реални affiliate линкове.
+const bool kRenewalComingSoon = true;
+
 /// „Поднови сега" / „Как да подновя?" — CTA под картата на изтичащ документ.
 ///
 /// Само данни от [RenewalService]: ако няма активна оферта за този doctype +
@@ -63,6 +69,14 @@ class _RenewalCtaState extends State<RenewalCta> {
     if (offer == null || _busy) return;
     setState(() => _busy = true);
     try {
+      if (kRenewalComingSoon) {
+        // Линковете още не са реални → логваме интереса, но показваме „Очаквайте
+        // скоро" вместо да пращаме към тестов URL. Без disclosure — не отваряме
+        // партньорски линк.
+        await RenewalService().registerClickAndBuildUrl(offer);
+        if (mounted) await _showComingSoon();
+        return;
+      }
       // Disclosure само за commercial оферти и само първия път.
       if (offer.commercial) {
         final ok = await _ensureDisclosure();
@@ -76,6 +90,24 @@ class _RenewalCtaState extends State<RenewalCta> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  /// Временен диалог, докато партньорските линкове не са живи.
+  Future<void> _showComingSoon() async {
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.rocket_launch_rounded),
+        title: Text(_tr(_comingSoonTitle, widget.lang)),
+        content: Text(_tr(_comingSoonBody, widget.lang)),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(_tr(_ok, widget.lang)),
+          ),
+        ],
+      ),
+    );
   }
 
   /// Показва disclosure еднократно. Връща true = потребителят продължава.
@@ -232,6 +264,30 @@ const _disclosureBody = {
   'ru': 'Это партнёрская ссылка. Taskify может получить комиссию — без дополнительных затрат для вас. Ваши данные остаются на устройстве.',
   'tr': 'Bu bir ortak bağlantısıdır. Taskify komisyon alabilir — size ek maliyet olmadan. Verileriniz cihazınızda kalır.',
   'ja': 'これはパートナーリンクです。Taskifyは手数料を得る場合がありますが、追加費用はかかりません。データは端末内に留まります。',
+};
+const _comingSoonTitle = {
+  'en': 'Coming soon!', 'bg': 'Очаквайте скоро!', 'de': 'Demnächst verfügbar!',
+  'fr': 'Bientôt disponible !', 'it': 'Presto disponibile!', 'el': 'Έρχεται σύντομα!',
+  'es': '¡Muy pronto!', 'pt': 'Em breve!', 'ru': 'Скоро!',
+  'tr': 'Çok yakında!', 'ja': '近日公開！',
+};
+const _comingSoonBody = {
+  'en': 'Online renewal will be available here very soon. Thanks for your interest!',
+  'bg': 'Онлайн подновяването ще е достъпно тук съвсем скоро. Благодарим за интереса!',
+  'de': 'Die Online-Verlängerung ist hier bald verfügbar. Danke für dein Interesse!',
+  'fr': 'Le renouvellement en ligne sera bientôt disponible ici. Merci de votre intérêt !',
+  'it': 'Il rinnovo online sarà presto disponibile qui. Grazie per l\'interesse!',
+  'el': 'Η online ανανέωση θα είναι σύντομα διαθέσιμη εδώ. Ευχαριστούμε για το ενδιαφέρον!',
+  'es': 'La renovación en línea estará disponible aquí muy pronto. ¡Gracias por tu interés!',
+  'pt': 'A renovação online estará disponível aqui em breve. Obrigado pelo interesse!',
+  'ru': 'Онлайн-продление скоро появится здесь. Спасибо за интерес!',
+  'tr': 'Çevrimiçi yenileme çok yakında burada olacak. İlginiz için teşekkürler!',
+  'ja': 'オンライン更新はまもなくご利用いただけます。ご関心ありがとうございます！',
+};
+const _ok = {
+  'en': 'OK', 'bg': 'Разбрах', 'de': 'OK', 'fr': 'OK', 'it': 'OK',
+  'el': 'Εντάξει', 'es': 'Vale', 'pt': 'OK', 'ru': 'Понятно',
+  'tr': 'Tamam', 'ja': 'OK',
 };
 const _continue = {
   'en': 'Continue', 'bg': 'Продължи', 'de': 'Weiter', 'fr': 'Continuer',
