@@ -37,6 +37,15 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   `ai_limit.dart`, които са UNTRACKED (WIP на потребителя). PC билдва, защото файловете са локално. Трябва да
   се комитнат преди iOS билд на Mac.
 - `flutter analyze` → 0 нови грешки/warnings; `gift_cta.dart` напълно чист. APK билднат + инсталиран на Note 9.
+- **Сайт taskify1969.com преработен + WIP комитнат за Mac (2026-07-08, късно):** (1) сайтът вече е с
+  **български по подразбиране** (`/`) + бутон **EN → `/en/`**; английският преместен в `/en/`; стар `/bg/` →
+  301 към `/`; hreflang/canonical/sitemap обновени; описанието осъвременено (11 езика +японски, softwareVersion
+  1.0.48); добавена карта „🌸 Цветя и подаръци за празници · скоро" (BG+EN). Деплой: `cd Desktop/taskify-site-deploy
+  && npx wrangler pages deploy . --project-name=taskify` (Cloudflare Pages, живо потвърдено с curl). Източникът
+  е `Desktop/taskify-site-deploy/` (НЕ в app repo). (2) **Целият Dart WIP КОМИТНАТ** (78719bd) — AI дневен лимит
+  UI + conversion функел (`conversion_service.dart`, `ai_limit.dart` вече tracked) → **чист клон/Mac билдва без
+  липсващи файлове.** За Mac: `git pull` → `flutter pub get` → `pod install` → Xcode archive (native config +
+  GoogleService-Info.plist вече на Mac от 1.0.47).
 - **RELEASE v1.0.48+56 → Production, ПОДАДЕНА ЗА РЕВЮ (Android):** bump 1.0.47+55 → 1.0.48+56; AAB (57.9MB)
   качен през `tools/play_upload.py` (service account) със `--status completed` → Google Play production трак,
   release 1.0.48 / vc56, статус „completed" (ревю тече, 100% rollout при одобрение). Release notes BG+EN
