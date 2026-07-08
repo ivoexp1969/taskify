@@ -37,6 +37,11 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   `ai_limit.dart`, които са UNTRACKED (WIP на потребителя). PC билдва, защото файловете са локално. Трябва да
   се комитнат преди iOS билд на Mac.
 - `flutter analyze` → 0 нови грешки/warnings; `gift_cta.dart` напълно чист. APK билднат + инсталиран на Note 9.
+- **RELEASE v1.0.48+56 → Production, ПОДАДЕНА ЗА РЕВЮ (Android):** bump 1.0.47+55 → 1.0.48+56; AAB (57.9MB)
+  качен през `tools/play_upload.py` (service account) със `--status completed` → Google Play production трак,
+  release 1.0.48 / vc56, статус „completed" (ревю тече, 100% rollout при одобрение). Release notes BG+EN
+  (`release_notes/1.0.48.md`). Няма нови чувствителни разрешения. iOS (Mac) остава да се билдне отделно —
+  ⚠️ първо да се комитнат untracked `conversion_service.dart` + `ai_limit.dart` (иначе чист клон не билдва).
 
 ## 2026-07-07 · PC — Идея 1: affiliate оферта „Поднови сега" и за ВИНЕТКИ (Boleron, ЖИВА)
 Разширих affiliate слоя от ГО и върху винетките. **Без нито ред код** — водопроводната инсталация от

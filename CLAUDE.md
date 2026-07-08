@@ -42,6 +42,11 @@ flutter build appbundle --release
 - Firebase: `IVA` — lifetime access, 20-user cap
 
 ## Current Version
+**v1.0.48+56 (July 2026) — ПОДАДЕНА ЗА РЕВЮ в Google Play Production** (AAB качен през service account,
+`--status completed`; 100% rollout при одобрение). Ново: бърза опция „Изпрати цветя/подарък" за рождени/имени
+дни (soft-launch „Очаквайте скоро" + демонд лог) + скролируем имен-ден календар + рожден-ден нотификация с
+action бутон. Release notes: `release_notes/1.0.48.md`. iOS все още на 1.0.47 — ⚠️ преди Mac билд да се
+комитнат untracked `conversion_service.dart` + `ai_limit.dart`. ПРЕДИШНО:
 v1.0.47+55 (June 2026) — **Контакти с имен ден** (on-device match с латиница, изскачащ списък,
 Обаждане/SMS/WhatsApp/Viber + готова PNG картичка). AAB качен чрез **service account**
 (`~/keys/play-service-account.json` + `tools/play_upload.py` androidpublisher API — НЕ ръчно!).
