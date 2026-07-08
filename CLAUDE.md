@@ -58,6 +58,17 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **Монетизация: „Очаквайте скоро" + слой „цветя/подарък" (PC, 2026-07-08, commit `c788723`):** докато чакаме
+  реални affiliate линкове, бутонът „Поднови сега" вече показва диалог „Очаквайте скоро!" (флаг
+  `kRenewalComingSoon` в `renewal_cta.dart`) вместо тестовия Boleron URL — но кликът пак се логва. Нов
+  intent-based слой „**Изпрати цветя/подарък**" (`lib/widgets/gift_cta.dart`, флаг `kGiftComingSoon`): бутон
+  на **рожден-ден картата** (`task_card_styles.dart`, двата стила) + действие в **списъка имен-ден контакти**
+  (`calendar_screen._showContactActions`); и двете показват „Очаквайте скоро" + логват интерес
+  (`RenewalService.logInterest` → `renewal_clicks` `type:'interest'`). **iOS (Mac) handoff: ВСИЧКО е чист
+  cross-platform Dart — НЯМА нови pubspec deps, native код, assets или permissions.** Firestore вече е в iOS
+  Podfile (FirebaseFirestore 11.15.0), Anonymous Auth е включен project-wide → `logInterest` работи и на iOS
+  без промени. Coming-soon пътят не пуска нищо (без нови URL схеми/`LSApplicationQueriesSchemes`). Mac: само
+  `git pull` → `flutter pub get` → `pod install` (no-op за pods) → билд. analyze 0 нови грешки. Виж DEVLOG.
 - **v1.0.47+55 ЖИВА на двете платформи (Android Production / iOS в ревю):** Android 1.0.47 (55) **публикувана
   на 100% в Production** (rollout мина; 177 държави) — READ_CONTACTS не изиска блокираща декларация (on-device
   → „не се събира"). iOS 1.0.47 (55) (Mac) **подадена в App Store → WAITING_FOR_REVIEW**, инсталирана на Toto.
