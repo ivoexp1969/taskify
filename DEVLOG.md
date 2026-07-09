@@ -6,6 +6,22 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-09 · Mac — iOS 1.0.48 (56) подадена в App Store + Toto
+`git pull` → взе PC-работата (монетизация „цветя/подарък" + affiliate + AI лимит UI + conversion funnel;
+всичко tracked, чист клон билдва). iOS публикуване:
+- 1.0.47 е **READY_FOR_SALE** (одобрена) → нова версия **1.0.48**. `flutter build ipa --release`
+  (Xcode 26) → `altool` UPLOAD SUCCEEDED. ASC (/tmp/asc44.py, VERSION=1.0.48/BUILD=56, пресъздаден —
+  /tmp беше изчистен): версия 1.0.48 (id e592b676…), whatsNew en-US (EN+BG, БЕЗ емоджита, „Send flowers/
+  gift" + по-плавен имен-ден календар); build 56 (VALID) закачен (204) → подаден → **WAITING_FOR_REVIEW**.
+- **Toto:** `flutter build ios --release` → `devicectl install` (2-ри опит) → **1.0.48 (56)**, стартиран.
+- Няма нови чувствителни разрешения спрямо 1.0.47. Монетизационните CTA са в „Очаквайте скоро" режим.
+- ★ФАЗА 0 одит (по нов промпт за монетизация):★ инспекция показа, че **целият 6-фазен монетизационен
+  слой ВЕЧЕ Е имплементиран** (кодът носи коментари „ФАЗА 1/2/3"): `ad_service.dart` (AdMob+UMP consent,
+  production ad units), `ai_usage_service.dart` (лимит 3/ден, Pro bypass), `paywall_screen.dart` (годишен
+  акцент „Най-изгоден", price/12 месечна равностойност, introductoryPrice trial, промокод),
+  `conversion_service.dart` (7 задачи/level-up/ден3/ден7, shownPrompts, per-day cap), `renewal_service_test.dart`.
+  → НЕ реимплементирах; докладвах на потребителя (чака решение: одит / дебъг / игнор).
+
 ## 2026-07-08 · PC — „Очаквайте скоро" режим + нов слой „цветя/подарък" (монетизация)
 Докато чакаме реалните affiliate линкове (имейли до партньори пратени, чакаме отговор), направих CTA-тата
 безопасни за старт и добавих нов повод-базиран слой.
