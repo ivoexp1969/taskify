@@ -6,6 +6,26 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-09 · Mac — Маркетинг инструменти (промо + именник) · без app промяна
+Инди маркетинг с ~0 бюджет. Нови скриптове в `tools/` (само генератори; артефактите се пазят на
+Desktop, НЕ в git):
+- `tools/promo_frames.py` — вертикални PNG промо кадри 1080×1920 (Pillow, бранд лилаво #6A3DE8 +
+  зелено #0AA674, кирилица Arial Unicode, Apple Color Emoji, реален скрийншот в рамка на телефон,
+  ръчно бг флаг). `tools/build_clips.py` — ffmpeg клипчета (crossfade, всеки 15с + общ). Изход
+  `~/Desktop/taskify_promo/`. Звук се добавя после в CapCut.
+- `tools/nameday_posts.py` — дневни имен-ден постове (брандирана картичка + caption за IG/FB/TikTok)
+  от `assets/data/bg_name_days.json`. `~/Desktop/taskify_nameday/`.
+- **`tools/nameday_seo.py` — SEO именник страници за `taskify1969.com/imen-den/`** (821 стр: 700 по
+  име „Кога е имен ден на X?", 120 по дата, 1 hub с JS „днес"; JSON-LD FAQ, sitemap, canonical/OG, CTA
+  към стора). Движими празници по Orthodox Easter. Изход `~/Desktop/taskify_nameday_seo/imen-den/`.
+  ★ДЕПЛОЙ ОТ PC (сайтът е Direct Upload, източник `Desktop/taskify-site-deploy/`, НЕ в app repo):★
+  `python tools\nameday_seo.py` → копирай САМО папката `imen-den/` в `Desktop/taskify-site-deploy/`
+  (не пипай другите страници) → `cd Desktop/taskify-site-deploy && npx wrangler pages deploy .
+  --project-name=taskify` → добави `/imen-den/sitemap.xml` в Google Search Console.
+- Стратегия (за справка): острие = ИМЕННИТЕ ДНИ (уникално бг, ежедневен повод, споделяемо). Приоритети:
+  (1) ASO с бг ключови думи (имен ден/винетка/застраховка ГО/документи — нулева конкуренция);
+  (2) SEO именник (горе); (3) органично видео; (4) FB групата 197k — само founder история, не спам.
+
 ## 2026-07-09 · Mac — iOS 1.0.48 (56) подадена в App Store + Toto
 `git pull` → взе PC-работата (монетизация „цветя/подарък" + affiliate + AI лимит UI + conversion funnel;
 всичко tracked, чист клон билдва). iOS публикуване:
