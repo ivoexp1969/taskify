@@ -113,6 +113,7 @@ CARD_HTML = """
 <div class="cg-btns">
 <button id="cgDown">⬇ Свали картичка</button>
 <button id="cgShare" class="sec">Сподели</button>
+<button id="cgCopy" class="sec">🔗 Копирай линк</button>
 </div>
 </div>
 <script>
@@ -145,6 +146,8 @@ CARD_HTML = """
  inp.addEventListener('input',draw);
  document.getElementById('cgDown').addEventListener('click',function(){cv.toBlob(function(b){var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname();a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1500);});});
  document.getElementById('cgShare').addEventListener('click',function(){cv.toBlob(function(b){var f=new File([b],fname(),{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:'Честит имен ден',text:'Честит имен ден! 🎉 taskify1969.com'}).catch(function(){});}else{var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname();a.click();}});});
+ var cp=document.getElementById('cgCopy');
+ cp.addEventListener('click',function(){var u=location.href;function ok(){var t=cp.textContent;cp.textContent='Копирано ✓';setTimeout(function(){cp.textContent=t;},1600);}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(u).then(ok,function(){window.prompt('Копирай линка:',u);});}else{window.prompt('Копирай линка:',u);}});
  draw();
 })();
 </script>

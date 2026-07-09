@@ -26,6 +26,8 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   Рисува брандирана картичка (лилав градиент + конфети + голямо име + Taskify воден знак), бутони **⬇ Свали** (toBlob→
   download) и **Сподели** (Web Share API с файл, fallback download). Вирусен цикъл: SEO трафик → картичка → споделяне.
   Регенерирано (821 стр.) + деплойнато, live (`/imen-den/ime/ivan/` показва `cardgen` + `value="Иван"`).
+  По-късно добавен 3-ти бутон **„🔗 Копирай линк"** (`cgCopy`, `navigator.clipboard` + `prompt` fallback) — за десктоп,
+  където „Сподели" само сваля.
 - **`tools/nameday_posts.py` — cross-platform шрифтове:** беше hardcode-нат за macOS (`/System/Library/Fonts/...`) →
   гърмеше на PC. Нов `_find()` resolver (macOS Arial Unicode / Windows `arial.ttf`+`seguiemj.ttf`). Pillow инсталиран
   на PC (12.3.0). Пуснат → **14 картички + captions.txt** за 30 дни в `~/Desktop/taskify_nameday/`. Рендира се перфектно
