@@ -6,6 +6,18 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-09 · PC — Именник SEO ДЕПЛОЙНАТ на живо · без app промяна
+`git pull` взе Mac-овите маркетинг tools. Регенерирах именника от PC и го пуснах на живо:
+- `python tools\nameday_seo.py` → **821 стр.** (700 по име + 120 по дата + 1 hub) + sitemap в
+  `~/Desktop/taskify_nameday_seo/imen-den/`. Копирах САМО папката `imen-den/` в `Desktop/taskify-site-deploy/`
+  (другите страници непокътнати) → `npx wrangler pages deploy . --project-name=taskify` → **822 файла качени, live**.
+- Проверка: `taskify1969.com/imen-den/`, `/imen-den/ime/ivan/`, `/imen-den/sitemap.xml` → всички **200**.
+- **Discovery без Search Console login:** добавих втори ред `Sitemap: https://taskify1969.com/imen-den/sitemap.xml`
+  в `taskify-site-deploy/robots.txt` (redeploy) → Google авто-открива 821-те стр. при следващ crawl. (Google ping
+  endpoint е спрян 2023; ръчен submit в Search Console е опционален, иска интерактивен Google login.)
+- Mac handover дойде през `Desktop/iphone/` (готов `imen-den/` + `imen-den.zip` + промо PNG/MP4 за IG/FB/TikTok);
+  регенерирах вместо да разчитам на него (детерминистично, същият изход).
+
 ## 2026-07-09 · Mac — Маркетинг инструменти (промо + именник) · без app промяна
 Инди маркетинг с ~0 бюджет. Нови скриптове в `tools/` (само генератори; артефактите се пазят на
 Desktop, НЕ в git):
