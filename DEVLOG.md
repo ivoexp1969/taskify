@@ -17,6 +17,8 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   endpoint е спрян 2023; ръчен submit в Search Console е опционален, иска интерактивен Google login.)
 - Mac handover дойде през `Desktop/iphone/` (готов `imen-den/` + `imen-den.zip` + промо PNG/MP4 за IG/FB/TikTok);
   регенерирах вместо да разчитам на него (детерминистично, същият изход).
+- **Вътрешна връзка home→именник:** добавен nav бутон „Имен ден" в `index.html` (bg) и „Name Days" в `en/index.html`
+  → `/imen-den/`. По-силен crawl сигнал от sitemap + UX. Redeploy, live (curl 200 + връзката се вижда в home HTML).
 
 ## 2026-07-09 · Mac — Маркетинг инструменти (промо + именник) · без app промяна
 Инди маркетинг с ~0 бюджет. Нови скриптове в `tools/` (само генератори; артефактите се пазят на
