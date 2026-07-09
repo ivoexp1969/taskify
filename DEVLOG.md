@@ -19,6 +19,21 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   регенерирах вместо да разчитам на него (детерминистично, същият изход).
 - **Вътрешна връзка home→именник:** добавен nav бутон „Имен ден" в `index.html` (bg) и „Name Days" в `en/index.html`
   → `/imen-den/`. По-силен crawl сигнал от sitemap + UX. Redeploy, live (curl 200 + връзката се вижда в home HTML).
+  По-късно направен **забележим** (зелен pill `.nav-nameday` #0AA674 „🎉 Имен ден"/„🎉 Name Days").
+- **Sitemap приет в Search Console** (потребителят подаде `imen-den/sitemap.xml`): Състояние **Успех, 821 стр.**
+- **★НОВО: уеб генератор на картички „Честит имен ден"★** в `tools/nameday_seo.py` — client-side canvas widget
+  (`card_section()` + `CARD_HTML`), вграден в **всяка** име-страница (предварително попълнен със своето име) и в hub-а.
+  Рисува брандирана картичка (лилав градиент + конфети + голямо име + Taskify воден знак), бутони **⬇ Свали** (toBlob→
+  download) и **Сподели** (Web Share API с файл, fallback download). Вирусен цикъл: SEO трафик → картичка → споделяне.
+  Регенерирано (821 стр.) + деплойнато, live (`/imen-den/ime/ivan/` показва `cardgen` + `value="Иван"`).
+- **`tools/nameday_posts.py` — cross-platform шрифтове:** беше hardcode-нат за macOS (`/System/Library/Fonts/...`) →
+  гърмеше на PC. Нов `_find()` resolver (macOS Arial Unicode / Windows `arial.ttf`+`seguiemj.ttf`). Pillow инсталиран
+  на PC (12.3.0). Пуснат → **14 картички + captions.txt** за 30 дни в `~/Desktop/taskify_nameday/`. Рендира се перфектно
+  (кирилица + цветно емоджи).
+- **Промо клипове прегледани (ffmpeg):** портативен ffmpeg 8.1.2 (без admin). 3-те MP4 в `Desktop/iphone/`:
+  `FCGB6622` 8.9с (AI парсване, пълен разказ), `EBPW5503` 15с (документи/подновяване — нов ъгъл),
+  `BSUV1301` 4.7с (кратък хук). Всички 1080×1920 h264 30fps, **БЕЗ звук** (за озвучаване в CapCut). Готови captions
+  за IG/FB/TikTok са дадени на потребителя.
 
 ## 2026-07-09 · Mac — Маркетинг инструменти (промо + именник) · без app промяна
 Инди маркетинг с ~0 бюджет. Нови скриптове в `tools/` (само генератори; артефактите се пазят на

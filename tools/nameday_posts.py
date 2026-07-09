@@ -18,8 +18,24 @@ W, H = 1080, 1350
 MARGIN = 96
 PURPLE, PURPLE_DK = (106, 61, 232), (74, 40, 170)
 GREEN, GREEN_LT, WHITE = (10, 166, 116), (46, 196, 148), (255, 255, 255)
-FONT = "/System/Library/Fonts/Supplemental/Arial Unicode.ttf"
-EMOJI = "/System/Library/Fonts/Apple Color Emoji.ttc"
+def _find(paths):
+    for p in paths:
+        if os.path.exists(p):
+            return p
+    return paths[-1]
+
+
+# Cross-platform шрифтове (Mac dev / Windows dev)
+FONT = _find([
+    "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",  # macOS
+    "C:/Windows/Fonts/arialuni.ttf",
+    "C:/Windows/Fonts/arial.ttf",                             # Windows (кирилица OK)
+    "C:/Windows/Fonts/segoeui.ttf",
+])
+EMOJI = _find([
+    "/System/Library/Fonts/Apple Color Emoji.ttc",           # macOS
+    "C:/Windows/Fonts/seguiemj.ttf",                          # Windows (Segoe UI Emoji, COLR)
+])
 MONTHS = ["", "януари", "февруари", "март", "април", "май", "юни", "юли",
           "август", "септември", "октомври", "ноември", "декември"]
 

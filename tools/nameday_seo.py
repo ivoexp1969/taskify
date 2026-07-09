@@ -70,6 +70,13 @@ font-weight:700;font-size:1.1em;margin:26px 0 10px}
 footer{background:#1a1730;color:#cbc7dd;text-align:center;padding:26px 20px;font-size:.9em}
 footer a{color:var(--glt)}
 .lead{font-size:1.1em;color:#4a4568}
+.cardgen{background:#fff;border:1px solid #e9e6f5;border-radius:16px;padding:22px;margin:22px 0;text-align:center}
+.cardgen h2{margin-top:0}
+.cardgen input{width:100%;max-width:360px;padding:12px 16px;border:2px solid #e4e0f3;border-radius:12px;font-size:1em;margin:6px 0 16px;text-align:center}
+.cardgen canvas{width:100%;max-width:340px;height:auto;border-radius:16px;box-shadow:0 6px 24px rgba(74,40,170,.25);display:block;margin:0 auto}
+.cg-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.cg-btns button{background:var(--g);color:#fff;border:0;padding:13px 24px;border-radius:12px;font-weight:700;font-size:1em;cursor:pointer}
+.cg-btns button.sec{background:var(--p)}
 """
 
 
@@ -94,6 +101,58 @@ CTA_BLOCK = f"""
 <a class="cta" href="https://taskify1969.com">Свали Taskify — напомня ти за всеки имен ден</a>
 <div class="stores"><a href="{APP_STORE}">App Store</a><a href="{PLAY}">Google Play</a></div>
 """
+
+
+# ---- Уеб генератор на картички „Честит имен ден" (client-side canvas) ----
+CARD_HTML = """
+<div class="cardgen">
+<h2>🎨 Направи картичка „Честит имен ден"</h2>
+<p>Напиши име и си свали готова картичка за Messenger, Viber или Instagram.</p>
+<input id="cgName" type="text" value="__PREFILL__" placeholder="Име" maxlength="20">
+<canvas id="cgCanvas" width="1080" height="1350"></canvas>
+<div class="cg-btns">
+<button id="cgDown">⬇ Свали картичка</button>
+<button id="cgShare" class="sec">Сподели</button>
+</div>
+</div>
+<script>
+(function(){
+ var cv=document.getElementById('cgCanvas'),ctx=cv.getContext('2d'),inp=document.getElementById('cgName');
+ var W=1080,H=1350;
+ function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+ function hash(s){var h=0;for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))&0x7fffffff;}return h;}
+ function draw(){
+  var name=(inp.value||'').trim()||'Име';
+  var r=hash(name)||1;
+  function rnd(){r=(r*1103515245+12345)&0x7fffffff;return r/0x7fffffff;}
+  var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#6A3DE8');g.addColorStop(1,'#4A28AA');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  var cols=['#0AA674','#2EC494','#FFD23F','#FF6B6B','#4ECDC4','#ffffff'];
+  for(var i=0;i<55;i++){ctx.save();ctx.translate(rnd()*W,rnd()*H);ctx.rotate(rnd()*Math.PI);ctx.globalAlpha=.85;ctx.fillStyle=cols[i%cols.length];ctx.fillRect(0,0,14,24);ctx.restore();}
+  ctx.globalAlpha=1;
+  var cx=90,cy=260,cw=W-180,ch=H-520;
+  ctx.fillStyle='#fff';rr(cx,cy,cw,ch,44);ctx.fill();
+  ctx.textAlign='center';
+  ctx.fillStyle='#1a1730';ctx.font='130px "Segoe UI Emoji","Apple Color Emoji",sans-serif';ctx.fillText('🎉',W/2,cy+195);
+  ctx.fillStyle='#6A3DE8';ctx.font='700 48px sans-serif';ctx.fillText('ЧЕСТИТ ИМЕН ДЕН',W/2,cy+315);
+  var fs=154;ctx.fillStyle='#1a1730';
+  do{fs-=4;ctx.font='800 '+fs+'px sans-serif';}while(ctx.measureText(name).width>cw-70&&fs>44);
+  ctx.fillText(name,W/2,cy+485);
+  ctx.fillStyle='rgba(255,255,255,.96)';ctx.font='700 42px sans-serif';
+  ctx.fillText('\\u2705 Taskify \\u00b7 taskify1969.com',W/2,H-72);
+ }
+ function fname(){return 'chestit-imen-den-'+((inp.value||'ime').trim().toLowerCase().replace(/[^a-zа-я0-9]+/gi,'-')||'ime')+'.png';}
+ inp.addEventListener('input',draw);
+ document.getElementById('cgDown').addEventListener('click',function(){cv.toBlob(function(b){var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname();a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1500);});});
+ document.getElementById('cgShare').addEventListener('click',function(){cv.toBlob(function(b){var f=new File([b],fname(),{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:'Честит имен ден',text:'Честит имен ден! 🎉 taskify1969.com'}).catch(function(){});}else{var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname();a.click();}});});
+ draw();
+})();
+</script>
+"""
+
+
+def card_section(prefill):
+    return CARD_HTML.replace("__PREFILL__", esc(prefill))
 
 
 def write(path, content):
@@ -150,6 +209,7 @@ def main():
 <p class="lead">{esc(n)} празнува имен ден на:</p>
 <div><span class="date">{esc(labels)}</span></div>
 {f'<p>Църковен празник: <strong>{esc(feast)}</strong>.</p>' if feast else ''}
+{card_section(n)}
 {CTA_BLOCK}
 {('<h2>На същата дата празнуват и</h2><div class="grid">'+''.join(f'<a href="{BASE}/ime/{sl}/">{esc(x)}</a>' for x,sl in same[:40])+'</div>') if same else ''}
 <h2>Не пропускай нито един имен ден</h2>
@@ -192,6 +252,7 @@ def main():
     today_map = {mmdd: names for d, mmdd, names, fe in date_entries}
     hub_body = f"""<h1>Български именник — кой има имен ден днес?</h1>
 <p class="lead" id="today">Зареждане…</p>
+{card_section('')}
 {CTA_BLOCK}
 <h2>Търси по име</h2><div class="grid">{name_links}</div>
 <h2>По дата</h2>{months_html}
