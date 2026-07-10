@@ -6,6 +6,18 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-10 · Mac — iOS 1.0.49 (57) подадена в App Store + Toto (приходният fix)
+`git pull` взе PC приходния fix (Pro статус). iOS публикуване — чист cross-platform Dart, без нови
+native/deps → само Mac билд:
+- Анализ преди действие: `flutter analyze` 0 грешки; чист клон (некомитнати lib промени няма).
+- 1.0.48 е **READY_FOR_SALE** → нова версия **1.0.49**. `flutter build ipa --release` (Xcode 26) →
+  `altool` UPLOAD SUCCEEDED. ASC (/tmp/asc44.py пресъздаден, VERSION=1.0.49/BUILD=57): версия 1.0.49
+  (id c4c99521…), whatsNew en-US (EN+BG, БЕЗ емоджи — „Get Taskify Pro" карта + Restore + 7 дни подарък);
+  build 57 (PROCESSING→VALID) закачен → подаден → **WAITING_FOR_REVIEW**.
+- **Toto:** `flutter build ios --release` → `devicectl install` (1-ви опит) → **1.0.49 (57)**, стартиран.
+- ⚠️ Напомних на потребителя: RevenueCat Dashboard — entitlement `Taskify 1969 Pro` + offering с
+  premium_monthly/yearly/lifetime, иначе paywall празен и fix-ът без ефект (важи и за iOS, и за Android).
+
 ## 2026-07-10 · PC — ★ПРИХОДЕН FIX★ Pro статус + видим paywall + плавен преход · v1.0.49+57
 **Проблем:** RevenueCat 0 абонамента / $0 MRR при 116 активни users. След 14-дневния trial `isPro`
 оставаше `true` → никой не падаше на free/реклами/платежен път. Работено първо в отделна remote среда,
