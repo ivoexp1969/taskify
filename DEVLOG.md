@@ -17,6 +17,12 @@ native/deps → само Mac билд:
 - **Toto:** `flutter build ios --release` → `devicectl install` (1-ви опит) → **1.0.49 (57)**, стартиран.
 - ⚠️ Напомних на потребителя: RevenueCat Dashboard — entitlement `Taskify 1969 Pro` + offering с
   premium_monthly/yearly/lifetime, иначе paywall празен и fix-ът без ефект (важи и за iOS, и за Android).
+- ✅ **RevenueCat ПРОВЕРЕН — чисто (никаква корекция не е нужна):** през публичните SDK ключове →
+  REST `GET /v1/subscribers/{id}/offerings` (Authorization: Bearer <public_key>, X-Platform). И на iOS
+  (appl_), и на Android (goog_): `current_offering_id="default"` с 3 пакета
+  ($rc_monthly→premium_monthly, $rc_annual→premium_yearly, $rc_lifetime→premium_lifetime). Entitlement
+  `Taskify 1969 Pro` (dashboard) с 6 закачени продукта (3 Play + 3 App Store). Backend-ът е готов →
+  paywall НЯМА да е празен; след одобрение приходната верига е цяла и на двете платформи.
 
 ## 2026-07-10 · PC — ★ПРИХОДЕН FIX★ Pro статус + видим paywall + плавен преход · v1.0.49+57
 **Проблем:** RevenueCat 0 абонамента / $0 MRR при 116 активни users. След 14-дневния trial `isPro`
