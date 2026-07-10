@@ -6,6 +6,30 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-10 · PC — ★ПРИХОДЕН FIX★ Pro статус + видим paywall + плавен преход · v1.0.49+57
+**Проблем:** RevenueCat 0 абонамента / $0 MRR при 116 активни users. След 14-дневния trial `isPro`
+оставаше `true` → никой не падаше на free/реклами/платежен път. Работено първо в отделна remote среда,
+но онзи branch (`claude/code-analysis-I3ldN`) **никога не стигна до GitHub** (403 на push) → тук на PC
+липсваше → преработено наново.
+- **ЧАСТ 1 `lib/services/pro_service.dart`:** root cause = `initialize()` catch → `_loadFromCache()`
+  връщаше стар `is_pro` без сверка с RC. Fix: слушателят се закача ВЕДНАГА след `configure()`; нов
+  `_getCustomerInfoWithRetry()` (3 опита, backoff 1s/2s); кешът само оптимистичен, RC го бие;
+  `_readCachedIsPro`, `_wasDowngradedFromCache` флаг (кеш=Pro/RC=inactive, вкл. през слушателя),
+  `_logProSource` за дебъг. `grantEarlySupporterGrace(days)` (промо-days, изтича чисто).
+- **ЧАСТ 2 `settings_screen.dart` + `home_screen.dart`:** amber карта „Стани Pro" най-горе в Настройки
+  (`_buildGoProCard`, само `!isPro`+mobile) → PaywallScreen; „Възстанови покупки" (`_restorePurchases`);
+  дискретна лента `_buildGoProStrip` на home за не-trial/не-Pro; ProService listener в двата екрана; Pro
+  не вижда бутони. Paywall = RC offering (има „Няма продукти" fallback).
+- **ЧАСТ 3 `home_screen.dart`:** `_maybeShowDowngradeDialog` (flag `downgrade_dialog_shown`) — еднократен
+  топъл диалог за стари users (бивш кеш-Pro ИЛИ изтекъл локален trial), free vs Pro списък, данните
+  непокътнати, жест „7 дни Pro подарък". Добавяне над 50 задачи остава блокирано (`canAddTask`, без триене).
+- **Verify:** `flutter analyze` 0 грешки (само pre-existing warnings), `flutter build web` ✅,
+  `flutter build apk --release` ✅. Локализация 11 езика. **iOS: чист cross-platform Dart, БЕЗ нови
+  pubspec deps/native/assets/permissions → само Mac `git pull` → `flutter pub get` → `pod install` → билд.**
+- **⚠️ ЗА ПРОВЕРКА в RevenueCat Dashboard:** entitlement да е точно `Taskify 1969 Pro`; offering-ът
+  (current) да съдържа premium_monthly/yearly/lifetime, иначе payw* е празен.
+- Release notes: `release_notes/1.0.49.md`. AAB качен през service account (`tools/play_upload.py`).
+
 ## 2026-07-09 · PC — Именник SEO ДЕПЛОЙНАТ на живо · без app промяна
 `git pull` взе Mac-овите маркетинг tools. Регенерирах именника от PC и го пуснах на живо:
 - `python tools\nameday_seo.py` → **821 стр.** (700 по име + 120 по дата + 1 hub) + sitemap в

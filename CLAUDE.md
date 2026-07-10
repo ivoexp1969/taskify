@@ -42,8 +42,16 @@ flutter build appbundle --release
 - Firebase: `IVA` — lifetime access, 20-user cap
 
 ## Current Version
-**v1.0.48+56 (July 2026) — ПОДАДЕНА ЗА РЕВЮ в Google Play Production** (AAB качен през service account,
-`--status completed`; 100% rollout при одобрение). Ново: бърза опция „Изпрати цветя/подарък" за рождени/имени
+**v1.0.49+57 (July 2026) — ★ПРИХОДЕН FIX★ Pro статус + видим „Стани Pro" + плавен преход.**
+RevenueCat показваше $0 MRR при 116 users: след изтичане на trial isPro оставаше true от кеша (init
+catch → `_loadFromCache`) → никой не падаше на free/реклами/платежен път. ЧАСТ 1: RevenueCat = истината
+за `_isPro` (retry 3× backoff вместо сляп кеш; кешът само оптимистичен; downgrade детекция). ЧАСТ 2:
+постоянна карта „Стани Pro" в Настройки + „Възстанови покупки" (задължит. iOS) + дискретна лента на home
+за не-trial/не-Pro; Pro не вижда бутони; paywall през RC offering. ЧАСТ 3: еднократен топъл преходен
+диалог (free vs Pro, данните непокътнати, жест „7 дни Pro подарък" през promo-days машинарията). analyze
+0 грешки, web+APK билд ✅. Локализация 11 езика. Release notes: `release_notes/1.0.49.md`. **ВСИЧКО е чист
+cross-platform Dart — НЯМА нови pubspec deps/native/assets/permissions → iOS = само Mac билд.** ПРЕДИШНО:
+v1.0.48+56 (July 2026) — бърза опция „Изпрати цветя/подарък" за рождени/имени
 дни (soft-launch „Очаквайте скоро" + демонд лог) + скролируем имен-ден календар + рожден-ден нотификация с
 action бутон. Release notes: `release_notes/1.0.48.md`. **iOS все още на 1.0.47 — за Mac билд: `git pull` →
 `flutter pub get` → `pod install` → Xcode archive.** Целият Dart WIP (AI дневен лимит UI + conversion функел,
@@ -64,6 +72,25 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **★ПРИХОДЕН FIX★ Pro статус + видим paywall вход + плавен преход → v1.0.49+57 (PC, 2026-07-10):**
+  RevenueCat = $0 MRR при 116 users, защото след 14-дневния trial isPro оставаше true. Root cause:
+  `pro_service.dart initialize()` catch блок → `_loadFromCache()` връщаше стар `is_pro` БЕЗ сверка с RC;
+  освен това реалният масов Pro идва от **локалния `_isTrial`** (14 дни без покупка), който изтичаше, но
+  нямаше видим път до покупка. **ЧАСТ 1 (`pro_service.dart`):** слушателят се закача ВЕДНАГА след
+  `configure()` (преди getCustomerInfo → коригира при връщане на мрежата); нов `_getCustomerInfoWithRetry`
+  (3 опита, backoff 1s/2s) вместо сляп кеш; кешът е само оптимистичен, RC отговорът го бие; `_isPro=false`
+  при provably неактивен entitlement; нов флаг `_wasDowngradedFromCache` (кеш=Pro/RC=inactive) + `_logProSource`.
+  **ЧАСТ 2 (`settings_screen.dart` + `home_screen.dart`):** постоянна amber карта „Стани Pro" НАЙ-ГОРЕ в
+  Настройки (само `!isPro`, mobile; `workspace_premium`) → `PaywallScreen`; „Възстанови покупки"
+  (`restorePurchases`, задължит. за iOS); дискретна лента `_buildGoProStrip` на home за не-trial/не-Pro
+  (там нямаше нищо след края на trial); Pro НЕ вижда бутони; ProService listener в двата екрана. Paywall
+  вече зарежда през RC offering (`getOfferings`, има „Няма продукти" fallback → провери offering-а в RC
+  Dashboard + entitlement `Taskify 1969 Pro`). **ЧАСТ 3 (`home_screen.dart`):** еднократен топъл преходен
+  диалог `_maybeShowDowngradeDialog` (flag `downgrade_dialog_shown`) за стари users (бивш кеш-Pro ИЛИ
+  изтекъл локален trial); ясно free vs Pro, данните непокътнати; жест **„7 дни Pro подарък"**
+  (`ProService.grantEarlySupporterGrace(7)` през тестваната **promo-days** машинария → изтича чисто).
+  Добавяне над free лимит (50 задачи) остава блокирано с paywall (`canAddTask`, нищо не се трие). analyze
+  **0 грешки**, web build ✅, APK release ✅. Локализация на 11 езика. **iOS: чист Dart, само Mac билд.**
 - **Монетизация: „Очаквайте скоро" + слой „цветя/подарък" (PC, 2026-07-08, commit `c788723`):** докато чакаме
   реални affiliate линкове, бутонът „Поднови сега" вече показва диалог „Очаквайте скоро!" (флаг
   `kRenewalComingSoon` в `renewal_cta.dart`) вместо тестовия Boleron URL — но кликът пак се логва. Нов

@@ -80,6 +80,9 @@ class ProService extends ChangeNotifier {
   bool _isTrial = false;
   bool _isPromoCode = false;
   bool _promoListenerAttached = false;
+  // true когато кешът е казвал Pro, но RevenueCat потвърди неактивен статус →
+  // ползва се за еднократния „преходен" диалог към старите потребители.
+  bool _wasDowngradedFromCache = false;
   String? _activeSubscription;
   DateTime? _trialEndDate;
   DateTime? _promoEndDate;
@@ -90,6 +93,10 @@ class ProService extends ChangeNotifier {
   bool get isInitialized => _isInitialized;
   bool get isTrial => kIsWeb ? false : _isTrial;
   bool get isPromoCode => kIsWeb ? false : _isPromoCode;
+  bool get wasDowngradedFromCache => _wasDowngradedFromCache;
+  void clearDowngradeFlag() {
+    _wasDowngradedFromCache = false;
+  }
   String? get activeSubscription => _activeSubscription;
   DateTime? get trialEndDate => _trialEndDate;
   DateTime? get promoEndDate => _promoEndDate;
@@ -114,6 +121,10 @@ class ProService extends ChangeNotifier {
       return;
     }
 
+    // Кешираният is_pro служи САМО за оптимистично показване, докато RevenueCat
+    // зареди. ИСТИНАТА идва от getCustomerInfo() → _updateProStatus, който БИЕ кеша.
+    final cachedIsPro = await _readCachedIsPro();
+
     try {
       // RevenueCat API ключове — различни за Android и iOS
       const _rcAndroidKey = 'goog_OgZMwPkNQbGIxgAGLLDTUmaLTqT';
@@ -121,12 +132,30 @@ class ProService extends ChangeNotifier {
       final rcKey = (defaultTargetPlatform == TargetPlatform.iOS) ? _rcIosKey : _rcAndroidKey;
       await Purchases.configure(PurchasesConfiguration(rcKey));
 
+      // Закачаме слушателя ВЕДНАГА (преди getCustomerInfo). Ако заявката гръмне
+      // сега, слушателят пак ще коригира статуса щом RevenueCat се върне (интернет).
       Purchases.addCustomerInfoUpdateListener((customerInfo) {
         _updateProStatus(customerInfo);
       });
 
-      final customerInfo = await Purchases.getCustomerInfo();
-      _updateProStatus(customerInfo);
+      // RevenueCat отговорът БИЕ кеша. Retry с backoff при временен мрежов проблем —
+      // НЕ падаме сляпо на кеша още при първи неуспех.
+      final customerInfo = await _getCustomerInfoWithRetry();
+      if (customerInfo != null) {
+        _updateProStatus(customerInfo);
+        // Detected downgrade: кешът казваше Pro, RC потвърди неактивен → маркирай
+        // за еднократния преходен диалог (само ако няма друга валидна Pro причина).
+        if (cachedIsPro && !_isPro && !_isTrial && !_isPromoCode) {
+          _wasDowngradedFromCache = true;
+          debugPrint('ProService: downgrade detected (cache=Pro, RC=inactive)');
+        }
+      } else {
+        // След всички retries няма отговор → запази последния ИЗВЕСТЕН статус
+        // (кеша) като временно състояние. НЕ удължаваме Pro безкрайно — слушателят
+        // ще коригира при следващо успешно зареждане.
+        await _loadFromCache();
+        debugPrint('ProService: getCustomerInfo failed after retries → temporary cache');
+      }
 
       // Проверка за trial период
       await _checkTrialStatus();
@@ -139,9 +168,12 @@ class ProService extends ChangeNotifier {
 
       _isInitialized = true;
       _isInitializing = false;
+      _logProSource();
       notifyListeners();
     } catch (e) {
       debugPrint('ProService init error: $e');
+      // configure() гръмна → RevenueCat недостъпен. Кешът е временно последно
+      // известно състояние (не сляпо доверие — слушателят ще коригира по-късно).
       await _loadFromCache();
       await _checkTrialStatus();
       await _checkPromoCodeStatus();
@@ -149,8 +181,48 @@ class ProService extends ChangeNotifier {
       _attachAccountPromoListener();
       _isInitialized = true;
       _isInitializing = false;
+      _logProSource();
       notifyListeners();
     }
+  }
+
+  /// Взима CustomerInfo с до 3 опита (backoff 1s, 2s между опитите). Връща null
+  /// само ако и трите опита се провалят.
+  Future<CustomerInfo?> _getCustomerInfoWithRetry() async {
+    for (int attempt = 1; attempt <= 3; attempt++) {
+      try {
+        return await Purchases.getCustomerInfo();
+      } catch (e) {
+        debugPrint('ProService getCustomerInfo attempt $attempt failed: $e');
+        if (attempt < 3) {
+          await Future.delayed(Duration(seconds: attempt)); // 1s, 2s
+        }
+      }
+    }
+    return null;
+  }
+
+  /// Чете кеширания is_pro флаг (само за оптимистично показване при старт).
+  Future<bool> _readCachedIsPro() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool('is_pro') ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Логва откъде идва Pro статусът (за дебъг на приходния бъг).
+  void _logProSource() {
+    final String src = _isPro
+        ? 'entitlement'
+        : _isPromoCode
+            ? 'promo'
+            : _isTrial
+                ? 'trial'
+                : 'none';
+    debugPrint('ProService: isPro=$isPro source=$src '
+        '(paid=$_isPro trial=$_isTrial promo=$_isPromoCode)');
   }
 
   /// Проверява и стартира trial период
@@ -413,6 +485,28 @@ class ProService extends ChangeNotifier {
     }
   }
 
+  /// Еднократен „жест" към ранните потребители при преход към free: дава им
+  /// gratis Pro за няколко дни през СЪЩАТА тествана promo-days машинария —
+  /// изтича чисто чрез `_checkPromoCodeStatus` (не е безкраен Pro).
+  Future<void> grantEarlySupporterGrace(int days) async {
+    if (kIsWeb || days <= 0) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final end = DateTime.now().add(Duration(days: days));
+      await prefs.setString('applied_promo_code', 'EARLY_SUPPORTER');
+      await prefs.setString('promo_type', 'days');
+      await prefs.setString('promo_end_date', end.toIso8601String());
+      _isPromoCode = true;
+      _promoEndDate = end;
+      _appliedPromoCode = 'EARLY_SUPPORTER';
+      _wasDowngradedFromCache = false;
+      notifyListeners();
+      debugPrint('ProService: early-supporter grace granted for $days days');
+    } catch (e) {
+      debugPrint('ProService grace grant error: $e');
+    }
+  }
+
   void _updateProStatus(CustomerInfo customerInfo) {
     if (kIsWeb) return;
     
@@ -425,6 +519,13 @@ class ProService extends ChangeNotifier {
       _activeSubscription = entitlement?.productIdentifier;
     } else {
       _activeSubscription = null;
+    }
+
+    // Слушателят се върна с неактивен статус, след като кешът е дал Pro при старт
+    // (мрежов проблем при init) → маркирай за преходния диалог.
+    if (wasPro && !_isPro && !_isTrial && !_isPromoCode) {
+      _wasDowngradedFromCache = true;
+      debugPrint('ProService: downgrade detected via listener (was Pro, now inactive)');
     }
 
     _saveToCache();

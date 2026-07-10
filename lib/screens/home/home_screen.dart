@@ -26,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _currentIndex = 0;
   final ProService _proService = ProService();
   bool _welcomeChecked = false;
+  bool _downgradeChecked = false;
 
   /// Разделът „Документи" се показва на ВСИЧКИ (универсална функция; Pro gated).
   bool get _showDocuments => true;
@@ -196,6 +197,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (!_welcomeChecked && _proService.isInitialized) {
         _showTrialWelcome();
       }
+      // Downgrade може да дойде по-късно през RC слушателя (мрежа) → проверяваме
+      // и тук, не само при старта.
+      _maybeShowDowngradeDialog();
     }
   }
 
@@ -206,6 +210,201 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       await _proService.initialize();
     }
     _showTrialWelcome();
+    _maybeShowDowngradeDialog();
+  }
+
+  /// ЧАСТ 3: еднократен, топъл преходен диалог за старите потребители, които са
+  /// имали кеширан Pro/изтекъл trial и сега RevenueCat потвърди, че НЕ са Pro.
+  /// Показва се веднъж (flag `downgrade_dialog_shown`), не трие никакви данни,
+  /// и предлага жест (7 дни gratis Pro) като благодарност за ранната подкрепа.
+  Future<void> _maybeShowDowngradeDialog() async {
+    if (_downgradeChecked || kIsWeb) return;
+    if (!_proService.isInitialized) return;
+
+    final prefs = await SharedPreferences.getInstance();
+
+    // Кой е „стар" потребител, който току-що губи Pro?
+    //  (а) бивш ПЛАТЕЦ: кешът казваше Pro, RC потвърди неактивен, ИЛИ
+    //  (б) POST-TRIAL free: имал е локален trial, който вече е изтекъл, и сега
+    //      НЕ е Pro (нито платец, нито промо, нито активен trial).
+    // Брандновите потребители са в активен trial → isPro=true → не са допустими.
+    bool eligible = _proService.wasDowngradedFromCache;
+    if (!eligible && !_proService.isPro) {
+      final trialStartStr = prefs.getString('trial_start_date');
+      if (trialStartStr != null) {
+        final end = DateTime.tryParse(trialStartStr)
+            ?.add(const Duration(days: trialPeriodDays));
+        if (end != null && DateTime.now().isAfter(end)) {
+          eligible = true;
+        }
+      }
+    }
+    if (!eligible) return;
+    _downgradeChecked = true;
+
+    if (prefs.getBool('downgrade_dialog_shown') ?? false) {
+      _proService.clearDowngradeFlag();
+      return;
+    }
+    await prefs.setBool('downgrade_dialog_shown', true);
+    _proService.clearDowngradeFlag();
+    if (!mounted) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final lang = LanguageScope.of(context).locale.languageCode;
+      String tr(Map<String, String> m) => m[lang] ?? m['en']!;
+
+      const dTitle = {
+        'en': 'Thank you for being here 🙏',
+        'bg': 'Благодарим ти, че си с нас 🙏',
+        'de': 'Danke, dass du dabei bist 🙏',
+        'fr': 'Merci d\'être là 🙏',
+        'it': 'Grazie di esserci 🙏',
+        'el': 'Ευχαριστούμε που είσαι εδώ 🙏',
+        'es': 'Gracias por estar aquí 🙏',
+        'pt': 'Obrigado por estares aqui 🙏',
+        'ru': 'Спасибо, что ты с нами 🙏',
+        'tr': 'Burada olduğun için teşekkürler 🙏',
+        'ja': 'ご利用ありがとうございます 🙏',
+      };
+      const dBody = {
+        'en': 'Your free trial has ended. Nothing is lost — all your tasks and categories stay. Here\'s what\'s free, and what Pro unlocks:',
+        'bg': 'Пробният ти период приключи. Нищо не се губи — всичките ти задачи и категории остават. Ето какво е безплатно и какво отключва Pro:',
+        'de': 'Deine kostenlose Testphase ist vorbei. Nichts geht verloren — alle Aufgaben und Kategorien bleiben. Das ist kostenlos, das schaltet Pro frei:',
+        'fr': 'Ta période d\'essai est terminée. Rien n\'est perdu — toutes tes tâches et catégories restent. Voici ce qui est gratuit et ce que Pro débloque :',
+        'it': 'Il tuo periodo di prova è finito. Nulla è perso — tutte le tue attività e categorie restano. Ecco cosa è gratis e cosa sblocca Pro:',
+        'el': 'Η δωρεάν δοκιμή σου έληξε. Τίποτα δεν χάνεται — όλες οι εργασίες και κατηγορίες μένουν. Να τι είναι δωρεάν και τι ξεκλειδώνει το Pro:',
+        'es': 'Tu prueba gratuita ha terminado. No se pierde nada — todas tus tareas y categorías quedan. Esto es gratis y esto desbloquea Pro:',
+        'pt': 'O teu período de teste terminou. Nada se perde — todas as tuas tarefas e categorias ficam. Eis o que é grátis e o que o Pro desbloqueia:',
+        'ru': 'Твой пробный период закончился. Ничего не потеряно — все задачи и категории остаются. Вот что бесплатно и что открывает Pro:',
+        'tr': 'Ücretsiz deneme süren bitti. Hiçbir şey kaybolmaz — tüm görevlerin ve kategorilerin kalıyor. İşte ücretsiz olanlar ve Pro\'nun açtıkları:',
+        'ja': '無料トライアルが終了しました。何も失われません — タスクとカテゴリはすべて残ります。無料の内容と、Proで解除される内容はこちら:',
+      };
+      const dFree = {
+        'en': 'Free: up to 50 tasks & 10 categories, recurring tasks, voice input, themes & languages.',
+        'bg': 'Безплатно: до 50 задачи и 10 категории, повтарящи се задачи, гласово въвеждане, теми и езици.',
+        'de': 'Kostenlos: bis zu 50 Aufgaben & 10 Kategorien, wiederkehrende Aufgaben, Spracheingabe, Themes & Sprachen.',
+        'fr': 'Gratuit : jusqu\'à 50 tâches et 10 catégories, tâches récurrentes, saisie vocale, thèmes et langues.',
+        'it': 'Gratis: fino a 50 attività e 10 categorie, attività ricorrenti, input vocale, temi e lingue.',
+        'el': 'Δωρεάν: έως 50 εργασίες & 10 κατηγορίες, επαναλαμβανόμενες εργασίες, φωνητική εισαγωγή, θέματα & γλώσσες.',
+        'es': 'Gratis: hasta 50 tareas y 10 categorías, tareas recurrentes, entrada de voz, temas e idiomas.',
+        'pt': 'Grátis: até 50 tarefas e 10 categorias, tarefas recorrentes, entrada de voz, temas e idiomas.',
+        'ru': 'Бесплатно: до 50 задач и 10 категорий, повторяющиеся задачи, голосовой ввод, темы и языки.',
+        'tr': 'Ücretsiz: en fazla 50 görev ve 10 kategori, yinelenen görevler, sesli giriş, temalar ve diller.',
+        'ja': '無料: 最大50タスク・10カテゴリ、繰り返しタスク、音声入力、テーマと言語。',
+      };
+      const dPro = {
+        'en': 'Pro unlocks: Calendar, Documents, Statistics, AI, cloud sync, widgets, shared lists, name days — and removes ads.',
+        'bg': 'Pro отключва: Календар, Документи, Статистика, AI, облак, widgets, споделени списъци, именни дни — и маха рекламите.',
+        'de': 'Pro schaltet frei: Kalender, Dokumente, Statistik, KI, Cloud-Sync, Widgets, geteilte Listen, Namenstage — und entfernt Werbung.',
+        'fr': 'Pro débloque : Calendrier, Documents, Statistiques, IA, sync cloud, widgets, listes partagées, fêtes des prénoms — et retire les pubs.',
+        'it': 'Pro sblocca: Calendario, Documenti, Statistiche, IA, sync cloud, widget, liste condivise, onomastici — e rimuove la pubblicità.',
+        'el': 'Το Pro ξεκλειδώνει: Ημερολόγιο, Έγγραφα, Στατιστικά, AI, cloud sync, widgets, κοινές λίστες, ονομαστικές εορτές — και αφαιρεί τις διαφημίσεις.',
+        'es': 'Pro desbloquea: Calendario, Documentos, Estadísticas, IA, sync en la nube, widgets, listas compartidas, onomásticas — y quita los anuncios.',
+        'pt': 'Pro desbloqueia: Calendário, Documentos, Estatísticas, IA, sync na nuvem, widgets, listas partilhadas, dias do nome — e remove os anúncios.',
+        'ru': 'Pro открывает: Календарь, Документы, Статистику, ИИ, облако, виджеты, общие списки, именины — и убирает рекламу.',
+        'tr': 'Pro açar: Takvim, Belgeler, İstatistikler, AI, bulut senkronizasyonu, widget\'lar, paylaşılan listeler, isim günleri — ve reklamları kaldırır.',
+        'ja': 'Proで解除: カレンダー、ドキュメント、統計、AI、クラウド同期、ウィジェット、共有リスト、聖名祝日 — さらに広告も消えます。',
+      };
+      const dGift = {
+        'en': 'As a thank-you for your early support, here are 7 days of Pro on us. 💛',
+        'bg': 'Като благодарност за ранната ти подкрепа — 7 дни Pro от нас. 💛',
+        'de': 'Als Dank für deine frühe Unterstützung: 7 Tage Pro geschenkt. 💛',
+        'fr': 'Pour te remercier de ton soutien précoce, voici 7 jours de Pro offerts. 💛',
+        'it': 'Per ringraziarti del tuo supporto iniziale, ecco 7 giorni di Pro in regalo. 💛',
+        'el': 'Ως ευχαριστώ για την πρώιμη υποστήριξή σου, να 7 ημέρες Pro δώρο. 💛',
+        'es': 'Como agradecimiento por tu apoyo inicial, aquí tienes 7 días de Pro gratis. 💛',
+        'pt': 'Como agradecimento pelo teu apoio inicial, aqui estão 7 dias de Pro grátis. 💛',
+        'ru': 'В благодарность за раннюю поддержку — 7 дней Pro в подарок. 💛',
+        'tr': 'Erken desteğin için teşekkür olarak, 7 gün Pro bizden. 💛',
+        'ja': '早期からのご支援への感謝を込めて、7日間のProをプレゼントします。💛',
+      };
+      const bContinueFree = {
+        'en': 'Continue free', 'bg': 'Продължи безплатно', 'de': 'Kostenlos weiter',
+        'fr': 'Continuer gratuit', 'it': 'Continua gratis', 'el': 'Συνέχεια δωρεάν',
+        'es': 'Seguir gratis', 'pt': 'Continuar grátis', 'ru': 'Продолжить бесплатно',
+        'tr': 'Ücretsiz devam', 'ja': '無料で続ける',
+      };
+      const bGetPro = {
+        'en': 'Get Pro', 'bg': 'Вземи Pro', 'de': 'Pro holen', 'fr': 'Obtenir Pro',
+        'it': 'Ottieni Pro', 'el': 'Απόκτηση Pro', 'es': 'Obtener Pro',
+        'pt': 'Obter Pro', 'ru': 'Получить Pro', 'tr': 'Pro al', 'ja': 'Proを入手',
+      };
+      const bAcceptGift = {
+        'en': 'Accept 7 free days', 'bg': 'Приеми 7 дни', 'de': '7 Tage annehmen',
+        'fr': 'Accepter 7 jours', 'it': 'Accetta 7 giorni', 'el': 'Δέξου 7 ημέρες',
+        'es': 'Aceptar 7 días', 'pt': 'Aceitar 7 dias', 'ru': 'Взять 7 дней',
+        'tr': '7 günü al', 'ja': '7日間を受け取る',
+      };
+      const giftSnack = {
+        'en': 'Enjoy 7 days of Pro! 💛', 'bg': 'Приятни 7 дни Pro! 💛',
+        'de': 'Viel Spaß mit 7 Tagen Pro! 💛', 'fr': 'Profite de 7 jours de Pro ! 💛',
+        'it': 'Goditi 7 giorni di Pro! 💛', 'el': 'Απόλαυσε 7 ημέρες Pro! 💛',
+        'es': '¡Disfruta 7 días de Pro! 💛', 'pt': 'Aproveita 7 dias de Pro! 💛',
+        'ru': 'Приятных 7 дней Pro! 💛', 'tr': '7 gün Pro\'nun tadını çıkar! 💛',
+        'ja': '7日間のProをお楽しみください！💛',
+      };
+
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          icon: const Icon(Icons.favorite_rounded, size: 40, color: Colors.pinkAccent),
+          title: Text(tr(dTitle)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(tr(dBody)),
+                const SizedBox(height: 12),
+                Text(tr(dFree), style: const TextStyle(fontSize: 13)),
+                const SizedBox(height: 8),
+                Text(tr(dPro),
+                    style: const TextStyle(
+                        fontSize: 13, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(tr(dGift),
+                      style: const TextStyle(fontSize: 13)),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(tr(bContinueFree)),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const PaywallScreen()),
+                );
+              },
+              child: Text(tr(bGetPro)),
+            ),
+            FilledButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                await _proService.grantEarlySupporterGrace(7);
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(tr(giftSnack))),
+                );
+              },
+              child: Text(tr(bAcceptGift)),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   void _showTrialWelcome() async {
@@ -300,7 +499,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         child: Column(
           children: [
             if (!kIsWeb && !_proService.isPaid && !_proService.isPromoCode && _proService.isTrial)
-              _buildProBanner(context),
+              _buildProBanner(context)
+            // Не-trial, не-Pro → ненатрапчива постоянна лента към paywall.
+            else if (!kIsWeb && !_proService.isPro)
+              _buildGoProStrip(context),
 
             Expanded(
               child: IndexedStack(
@@ -468,6 +670,52 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Дискретна постоянна лента към paywall за не-Pro потребители без активен
+  /// trial (иначе нямат видим път до покупка след края на пробния период).
+  Widget _buildGoProStrip(BuildContext context) {
+    final theme = Theme.of(context);
+    final lang = LanguageScope.of(context).locale.languageCode;
+    const label = {
+      'en': 'Unlock Pro features', 'bg': 'Отключи Pro функциите',
+      'de': 'Pro-Funktionen freischalten', 'fr': 'Débloquer les fonctions Pro',
+      'it': 'Sblocca le funzioni Pro', 'el': 'Ξεκλείδωσε τις λειτουργίες Pro',
+      'es': 'Desbloquea las funciones Pro', 'pt': 'Desbloqueia as funções Pro',
+      'ru': 'Открой Pro-функции', 'tr': 'Pro özellikleri aç',
+      'ja': 'Pro機能をアンロック',
+    };
+    final color = theme.colorScheme.primary;
+    return Material(
+      color: color.withValues(alpha: 0.08),
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const PaywallScreen()),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Icon(Icons.workspace_premium_rounded, size: 18, color: color),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label[lang] ?? label['en']!,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Icon(Icons.chevron_right, size: 18, color: color),
+            ],
+          ),
+        ),
       ),
     );
   }
