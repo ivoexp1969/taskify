@@ -13,7 +13,8 @@ import os, sys
 from PIL import Image, ImageOps
 
 CW, CH = 1080, 1350          # платното на картичката
-QUALITY = 82                 # JPG качество (баланс размер/вид)
+QUALITY = 82                 # начално JPG качество (сваля се адаптивно)
+TARGET_KB = 250              # таван на размера → сваля качеството докато се събере
 MAX = 8                      # максимум фонове (ротацията в кода е bg-01..bg-08)
 
 SRC = os.path.expanduser(sys.argv[1] if len(sys.argv) > 1 else "~/Desktop/nameday_bg_src")
@@ -42,10 +43,15 @@ def main():
             # cover-crop до точното съотношение на платното
             im = ImageOps.fit(im, (CW, CH), Image.LANCZOS, centering=(0.5, 0.5))
             out = os.path.join(OUT, f"bg-{i:02d}.jpg")
-            im.save(out, "JPEG", quality=QUALITY, optimize=True, progressive=True)
-            kb = os.path.getsize(out) // 1024
-            flag = "OK" if kb <= 300 else "⚠️ голям"
-            print(f"  bg-{i:02d}.jpg  {kb}KB  {flag}  (от {fn})")
+            q = QUALITY
+            while True:
+                im.save(out, "JPEG", quality=q, optimize=True, progressive=True)
+                kb = os.path.getsize(out) // 1024
+                if kb <= TARGET_KB or q <= 60:
+                    break
+                q -= 6
+            flag = "OK" if kb <= TARGET_KB else f"⚠️ {kb}KB@q{q}"
+            print(f"  bg-{i:02d}.jpg  {kb}KB (q{q})  {flag}  (от {fn})")
             made += 1
         except Exception as e:
             print(f"  ❌ {fn}: {e}")
