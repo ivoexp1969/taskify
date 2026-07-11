@@ -42,8 +42,12 @@ flutter build appbundle --release
 - Firebase: `IVA` — lifetime access, 20-user cap
 
 ## Current Version
-**v1.0.49+57 (July 2026) — ★ПРИХОДЕН FIX★ Pro статус + видим „Стани Pro" + плавен преход. ЖИВА в
-Google Play Production (публ. 10.07 17:28, заменя 1.0.48/56); iOS 1.0.49+57 WAITING_FOR_REVIEW.**
+**v1.0.50+59 (July 2026) — Картички за имен ден И рожден ден: бутон „Направи картичка" на картите отваря
+уеб генератора (име попълнено; `?type=birthday` → вярната картичка + поле за години; един източник
+`nameday_seo.py` CARD_HTML). Уеб хъб `/kartichki/` + nav бутон „Картички". Android AAB vc59 качен DRAFT
+в production (чака rollout; 1.0.49/57 остава жива); iOS +59 (Mac).** ПРЕДИШНО:
+v1.0.49+57 — ★ПРИХОДЕН FIX★ Pro статус + видим „Стани Pro" + плавен преход. ЖИВА в Google Play Production
+(публ. 10.07 17:28, заменя 1.0.48/56).
 RevenueCat показваше $0 MRR при 116 users: след изтичане на trial isPro оставаше true от кеша (init
 catch → `_loadFromCache`) → никой не падаше на free/реклами/платежен път. ЧАСТ 1: RevenueCat = истината
 за `_isPro` (retry 3× backoff вместо сляп кеш; кешът само оптимистичен; downgrade детекция). ЧАСТ 2:

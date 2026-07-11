@@ -18,6 +18,27 @@ PC е направило dedicated `/rozhden-den/` (с възраст) + хъб 
 - **★ЗА PC:★ Android 1.0.50+60** — build appbundle + Play upload (service account); същият код. (Сайтът е
   готов — PC вече деплойна `/rozhden-den/` + `/kartichki/`.)
 
+## 2026-07-11 · PC — Обединяване на картичките (вярната картичка) + Android 1.0.50+60 catch-up
+Настигнах Mac-овата работа за рожден-ден картички и я обединих в ЕДИН източник + качих Android.
+(Първо билднах +59 с `/imen-den/?type=birthday`; докато качвах, Mac push-на +60 с app бутон към PC-евата
+`/rozhden-den/` → престроих на **+60** за да съвпадне с iOS. +59 draft се презаписва от +60.)
+- **★Един източник★:** Mac направи `?type=birthday` да превключва `nameday_seo.py` CARD_HTML (заглавие/
+  емоджи/файл/share). Обединих: моят отделен `birthday_cards.py` вече **преизползва** същия CARD_HTML/CSS/
+  page (никакъв дублиран client-код). Добавих в CARD_HTML: (1) **поле за години** (само рожден ден) →
+  рисува „🎂 N години"; (2) `?type` синхронизира и **видимото заглавие h2/p** (не само canvas-а); (3)
+  плейсхолдър `__DEFAULTOCC__` → `/rozhden-den/` е birthday по подразбиране, `/imen-den/` = nameday, а
+  `?type=` в URL надделява. Така **сайтът отваря ВЯРНАТА картичка** навсякъде: app `/imen-den/?type=birthday`
+  → рожден ден; `/imen-den/` → имен ден; `/rozhden-den/` → рожден ден; `/kartichki/` хъб.
+- **Верифицирано с headless Chrome** и 4-те състояния (имен ден без години; `?type=birthday` с години и
+  сменено заглавие; `/rozhden-den/` default birthday; хъб). Регенерирах 821 имен-ден стр. + 2 картички стр.,
+  `wrangler pages deploy` → live, всички 200. commit f8ad0cf.
+- **★Android 1.0.50+60 catch-up★:** Mac committна app кода (GreetingCardButton в `gift_cta.dart` на двата
+  стила карти; рожден-ден бутон → `/rozhden-den/?name=`; +60) — Android имаше само +57 (1.0.49) в Console.
+  `flutter analyze` = 0 грешки (само pre-existing info/warn), `flutter build appbundle --release` ✅.
+  Качен през service account (`tools/play_upload.py`, **versionCode 60, status=draft** в production;
+  1.0.49/57 остава жива). Notes BG+EN (`release_notes/1.0.50.md`). **ОСТАВА:** ръчен rollout на 1.0.50 от
+  Play Console. iOS 1.0.50 (60) submitted (Mac, път Б).
+
 ## 2026-07-11 · PC — Сайт: картички за РОЖДЕН ДЕН + хъб „Картички"
 Нов генератор `tools/birthday_cards.py` (self-contained, изход `~/Desktop/taskify_cards/`) прави 2 стр.:
 - **`/rozhden-den/`** — client-side canvas генератор „Честит рожден ден": вход име + **незадължителна
