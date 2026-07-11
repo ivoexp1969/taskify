@@ -6,6 +6,12 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-11 · PC — Сайт: home nav бутон „Имен ден" → „Картички" (за бъдещи рожден-ден картички)
+Преименуван nav бутонът в home страниците (`taskify-site-deploy/index.html` + `en/index.html`,
+клас `.nav-nameday`): BG „🎉 Имен ден" → **„🎨 Картички"**, EN „🎉 Name Days" → **„🎨 Cards"**. Линкът още
+сочи `/imen-den/` (засега само имен-ден картички); по-общото име подготвя добавянето на **картички за
+рожден ден** после. `wrangler pages deploy` → live (2 файла). Верифицирано (preview URL). Само сайт, без app.
+
 ## 2026-07-11 · PC — ★v1.0.49 ЖИВА в Production★ (приходният fix е при потребителите)
 Play Console: **1.0.49 „Налице в Google Play"**, 1 код на версията, публикувано **10.07 17:28** → rollout
 мина, заменя 1.0.48/56. Приходният fix (Pro статус + видим „Стани Pro" + плавен преход) вече е при
