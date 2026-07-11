@@ -83,6 +83,14 @@ border:3px solid transparent;opacity:.85;transition:opacity .15s;scroll-snap-ali
 .cg-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
 .cg-btns button{background:var(--g);color:#fff;border:0;padding:13px 24px;border-radius:12px;font-weight:700;font-size:1em;cursor:pointer}
 .cg-btns button.sec{background:var(--p)}
+.cardgen input#cgAge{max-width:220px}
+.choices{display:flex;gap:16px;flex-wrap:wrap;margin:22px 0}
+.choice{flex:1 1 260px;display:block;background:#fff;border:1px solid #e9e6f5;border-radius:18px;
+padding:30px 22px;text-align:center;box-shadow:0 4px 18px rgba(74,40,170,.08);transition:transform .15s,box-shadow .15s}
+.choice:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(74,40,170,.16);text-decoration:none}
+.choice .emo{font-size:3em;display:block;margin-bottom:8px}
+.choice .t{font-size:1.3em;font-weight:800;color:var(--pd)}
+.choice .d{color:#6b6685;font-size:.95em;margin-top:6px}
 """
 
 
@@ -112,9 +120,10 @@ CTA_BLOCK = f"""
 # ---- Уеб генератор на картички „Честит имен ден" (client-side canvas) ----
 CARD_HTML = """
 <div class="cardgen">
-<h2>🎨 Направи картичка „Честит имен ден"</h2>
-<p>Напиши име и си свали готова картичка за Messenger, Viber или Instagram.</p>
+<h2 id="cgH2">🎨 Направи картичка „Честит имен ден"</h2>
+<p id="cgP">Напиши име и си свали готова картичка за Messenger, Viber или Instagram.</p>
 <input id="cgName" type="text" value="__PREFILL__" placeholder="Име" maxlength="20">
+<input id="cgAge" type="number" min="1" max="130" placeholder="Години (по желание)" style="display:none">
 <canvas id="cgCanvas" width="1080" height="1350"></canvas>
 <p class="cg-hint">🖼️ Избери фон:</p>
 <div id="cgPicker" class="cg-picker"></div>
@@ -127,13 +136,19 @@ CARD_HTML = """
 <script>
 (function(){
  var cv=document.getElementById('cgCanvas'),ctx=cv.getContext('2d'),inp=document.getElementById('cgName');
- var picker=document.getElementById('cgPicker');
- // Име + вид повод от URL (?name=…&type=birthday) — приложението отваря сайта попълнен.
- var OCC='nameday';
+ var picker=document.getElementById('cgPicker'),ageEl=document.getElementById('cgAge');
+ // Вид повод: подразбиране от страницата (__DEFAULTOCC__), но ?type= в URL го надделява
+ // (приложението отваря /imen-den/?name=…&type=birthday или type=nameday).
+ var OCC='__DEFAULTOCC__';
  try{var _p=new URLSearchParams(location.search);var _qn=_p.get('name');if(_qn){inp.value=_qn.slice(0,20);}
-   if(_p.get('type')==='birthday'){OCC='birthday';}}catch(e){}
+   var _t=_p.get('type');if(_t==='birthday'){OCC='birthday';}else if(_t==='nameday'){OCC='nameday';}}catch(e){}
  var TITLE=(OCC==='birthday')?'ЧЕСТИТ РОЖДЕН ДЕН':'ЧЕСТИТ ИМЕН ДЕН';
  var EMO=(OCC==='birthday')?'🎂':'🎉';
+ // Синхронизирай видимото заглавие + покажи възрастта само за рожден ден.
+ if(OCC==='birthday'){ageEl.style.display='';
+   var _h2=document.getElementById('cgH2'),_pp=document.getElementById('cgP');
+   if(_h2){_h2.textContent='🎂 Направи картичка „Честит рожден ден"';}
+   if(_pp){_pp.textContent='Напиши име (и по желание години) и си свали готова картичка за Messenger, Viber или Instagram.';}}
  var W=1080,H=1350;
  // Реални снимки-фонове (локални, същия домейн → без CORS tainting при toBlob).
  // Само наличните се ползват; при 0 заредени → fallback към градиента.
@@ -179,6 +194,10 @@ CARD_HTML = """
   do{fs-=4;ctx.font='800 '+fs+'px sans-serif';}while(ctx.measureText(name).width>W-220&&fs>44);
   ctx.strokeStyle='rgba(0,0,0,0.55)';ctx.lineWidth=Math.max(6,fs*0.05);ctx.strokeText(name,W/2,700);
   ctx.fillStyle='#fff';ctx.fillText(name,W/2,700);
+  // Възраст (само рожден ден, ако е попълнена валидно): „🎂 N години".
+  if(OCC==='birthday'){var _a=parseInt(ageEl.value,10);if(!isNaN(_a)&&_a>=1&&_a<=130){
+    ctx.font='700 54px "Segoe UI Emoji","Apple Color Emoji",sans-serif';ctx.fillStyle='#FFD23F';
+    ctx.fillText('\\ud83c\\udf82 '+_a+' '+(_a===1?'\\u0433\\u043e\\u0434\\u0438\\u043d\\u0430':'\\u0433\\u043e\\u0434\\u0438\\u043d\\u0438'),W/2,858);}}
   ctx.font='700 42px sans-serif';ctx.fillStyle='rgba(255,255,255,.97)';
   ctx.fillText('\\u2705 Taskify \\u00b7 taskify1969.com',W/2,H-72);
   ctx.restore();
@@ -186,7 +205,7 @@ CARD_HTML = """
  var SLUG=(OCC==='birthday')?'chestit-rojden-den':'chestit-imen-den';
  var WISH=(OCC==='birthday')?'Честит рожден ден':'Честит имен ден';
  function fname(){return SLUG+'-'+((inp.value||'ime').trim().toLowerCase().replace(/[^a-zа-я0-9]+/gi,'-')||'ime')+'.png';}
- inp.addEventListener('input',draw);
+ inp.addEventListener('input',draw);ageEl.addEventListener('input',draw);
  document.getElementById('cgDown').addEventListener('click',function(){cv.toBlob(function(b){var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname();a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1500);});});
  document.getElementById('cgShare').addEventListener('click',function(){cv.toBlob(function(b){var f=new File([b],fname(),{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:WISH,text:WISH+'! '+EMO+' taskify1969.com'}).catch(function(){});}else{var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname();a.click();}});});
  var cp=document.getElementById('cgCopy');
@@ -197,8 +216,8 @@ CARD_HTML = """
 """
 
 
-def card_section(prefill):
-    return CARD_HTML.replace("__PREFILL__", esc(prefill))
+def card_section(prefill, occ="nameday"):
+    return CARD_HTML.replace("__PREFILL__", esc(prefill)).replace("__DEFAULTOCC__", occ)
 
 
 def write(path, content):
