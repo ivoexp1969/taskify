@@ -6,6 +6,18 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-11 · PC — Сайт: картички за РОЖДЕН ДЕН + хъб „Картички"
+Нов генератор `tools/birthday_cards.py` (self-contained, изход `~/Desktop/taskify_cards/`) прави 2 стр.:
+- **`/rozhden-den/`** — client-side canvas генератор „Честит рожден ден": вход име + **незадължителна
+  възраст** (показва „🎂 N години/година"), избор на фон (**преизползва** същите 18 снимки от
+  `/imen-den/backgrounds/`, същия домейн → toBlob без CORS), Свали/Сподели/Копирай линк, чете `?name=`.
+- **`/kartichki/`** — хъб с 2 избора: 🎉 Имен ден (`/imen-den/`) и 🎂 Рожден ден (`/rozhden-den/`).
+- home nav бутон „Картички" пренасочен `/imen-den/` → **`/kartichki/`** (BG+EN).
+- Верифицирано с **headless Chrome** (реален рендер: снимка-фон, име, „🎂 30 години", воден знак + хъб).
+  `wrangler pages deploy` → live (4 файла). Всички живо 200 (вкл. `?name=` encoded). Само сайт, без app.
+- **Деплой отново от PC:** `python tools\birthday_cards.py` → копирай `kartichki/` + `rozhden-den/` в
+  `taskify-site-deploy/` → `wrangler pages deploy`. (Фоновете идват от имен-ден деплоя.)
+
 ## 2026-07-11 · PC — Сайт: home nav бутон „Имен ден" → „Картички" (за бъдещи рожден-ден картички)
 Преименуван nav бутонът в home страниците (`taskify-site-deploy/index.html` + `en/index.html`,
 клас `.nav-nameday`): BG „🎉 Имен ден" → **„🎨 Картички"**, EN „🎉 Name Days" → **„🎨 Cards"**. Линкът още
