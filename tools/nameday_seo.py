@@ -74,6 +74,12 @@ footer a{color:var(--glt)}
 .cardgen h2{margin-top:0}
 .cardgen input{width:100%;max-width:360px;padding:12px 16px;border:2px solid #e4e0f3;border-radius:12px;font-size:1em;margin:6px 0 16px;text-align:center}
 .cardgen canvas{width:100%;max-width:340px;height:auto;border-radius:16px;box-shadow:0 6px 24px rgba(74,40,170,.25);display:block;margin:0 auto}
+.cg-hint{margin:14px 0 6px;font-weight:600;color:#4a4568}
+.cg-picker{display:flex;gap:8px;overflow-x:auto;padding:6px 2px 10px;scroll-snap-type:x proximity}
+.cg-th{flex:0 0 auto;width:64px;height:80px;object-fit:cover;border-radius:10px;cursor:pointer;
+border:3px solid transparent;opacity:.85;transition:opacity .15s;scroll-snap-align:start}
+.cg-th:hover{opacity:1}
+.cg-th.sel{border-color:var(--g);opacity:1}
 .cg-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
 .cg-btns button{background:var(--g);color:#fff;border:0;padding:13px 24px;border-radius:12px;font-weight:700;font-size:1em;cursor:pointer}
 .cg-btns button.sec{background:var(--p)}
@@ -110,9 +116,10 @@ CARD_HTML = """
 <p>Напиши име и си свали готова картичка за Messenger, Viber или Instagram.</p>
 <input id="cgName" type="text" value="__PREFILL__" placeholder="Име" maxlength="20">
 <canvas id="cgCanvas" width="1080" height="1350"></canvas>
+<p class="cg-hint">🖼️ Избери фон:</p>
+<div id="cgPicker" class="cg-picker"></div>
 <div class="cg-btns">
 <button id="cgDown">⬇ Свали картичка</button>
-<button id="cgBg" class="sec">🔄 Смени фон</button>
 <button id="cgShare" class="sec">Сподели</button>
 <button id="cgCopy" class="sec">🔗 Копирай линк</button>
 </div>
@@ -120,13 +127,23 @@ CARD_HTML = """
 <script>
 (function(){
  var cv=document.getElementById('cgCanvas'),ctx=cv.getContext('2d'),inp=document.getElementById('cgName');
+ var picker=document.getElementById('cgPicker');
  var W=1080,H=1350;
  // Реални снимки-фонове (локални, същия домейн → без CORS tainting при toBlob).
  // Само наличните се ползват; при 0 заредени → fallback към градиента.
- var FILES=['bg-01','bg-02','bg-03','bg-04','bg-05','bg-06','bg-07','bg-08'];
- var imgs=[],bgIx=0;
+ var FILES=[];for(var k=1;k<=18;k++){FILES.push('bg-'+(k<10?'0':'')+k);}
+ var imgs=[],slots=[],bgIx=-1;
+ function selectBg(ix){bgIx=ix;draw();
+   for(var i=0;i<slots.length;i++){slots[i].el.className=(slots[i].ix===ix)?'cg-th sel':'cg-th';}}
  FILES.forEach(function(n){var im=new Image();
-   im.onload=function(){imgs.push(im);draw();};
+   im.onload=function(){
+     var ix=imgs.length;imgs.push(im);
+     // миниатюра за избор
+     var t=document.createElement('img');t.src=im.src;t.className='cg-th';t.alt='фон';
+     t.addEventListener('click',function(){selectBg(ix);});
+     picker.appendChild(t);slots.push({el:t,ix:ix});
+     if(bgIx<0){selectBg(ix);}else{draw();}
+   };
    im.onerror=function(){};
    im.src='/imen-den/backgrounds/'+n+'.jpg';});
  function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
@@ -137,8 +154,8 @@ CARD_HTML = """
   var name=(inp.value||'').trim()||'Име';
   var r=hash(name)||1;
   function rnd(){r=(r*1103515245+12345)&0x7fffffff;return r/0x7fffffff;}
-  // ФОН: реална снимка (cover) ако има заредена, иначе градиент (fallback).
-  if(imgs.length){cover(imgs[bgIx%imgs.length]);}else{grad();}
+  // ФОН: избраната реална снимка (cover) ако има заредена, иначе градиент (fallback).
+  if(imgs.length&&bgIx>=0){cover(imgs[bgIx%imgs.length]);}else{grad();}
   // Тъмен overlay → гарантира контраст на светла И тъмна снимка.
   ctx.fillStyle='rgba(0,0,0,0.42)';ctx.fillRect(0,0,W,H);
   // Дискретно конфети (само върху градиента, за да не цапа снимката).
@@ -162,7 +179,6 @@ CARD_HTML = """
  }
  function fname(){return 'chestit-imen-den-'+((inp.value||'ime').trim().toLowerCase().replace(/[^a-zа-я0-9]+/gi,'-')||'ime')+'.png';}
  inp.addEventListener('input',draw);
- document.getElementById('cgBg').addEventListener('click',function(){if(imgs.length){bgIx=(bgIx+1)%imgs.length;draw();}});
  document.getElementById('cgDown').addEventListener('click',function(){cv.toBlob(function(b){var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname();a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1500);});});
  document.getElementById('cgShare').addEventListener('click',function(){cv.toBlob(function(b){var f=new File([b],fname(),{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:'Честит имен ден',text:'Честит имен ден! 🎉 taskify1969.com'}).catch(function(){});}else{var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname();a.click();}});});
  var cp=document.getElementById('cgCopy');

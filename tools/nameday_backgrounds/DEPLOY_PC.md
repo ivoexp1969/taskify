@@ -6,7 +6,7 @@
 
 ## Какво прави
 Уеб генераторът `tools/nameday_seo.py` (canvas картичка „Честит имен ден") вече рисува реална снимка
-като фон. Снимките трябва да се сервират от `taskify1969.com/imen-den/backgrounds/bg-01..08.jpg`.
+като фон. Снимките трябва да се сервират от `taskify1969.com/imen-den/backgrounds/bg-01..18.jpg`.
 Ако папката липсва на живо → картичките ползват бранд градиента (fallback, нищо не се чупи).
 
 ## Стъпки (PC, PowerShell — нагласи пътищата към taskify-site-deploy)
@@ -15,7 +15,7 @@ git pull
 
 # 1) копирай снимките в източника на сайта
 New-Item -ItemType Directory -Force ..\taskify-site-deploy\imen-den\backgrounds
-Copy-Item tools\nameday_backgrounds\bg-0*.jpg ..\taskify-site-deploy\imen-den\backgrounds\
+Copy-Item tools\nameday_backgrounds\bg-*.jpg ..\taskify-site-deploy\imen-den\backgrounds\
 
 # 2) регенерирай 821-те страници (вече реферират backgrounds/)
 python tools\nameday_seo.py
