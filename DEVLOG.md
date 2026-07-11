@@ -15,10 +15,11 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   (лиценз ОК, без атрибуция при вграждане), визуално прегледани → без хора/лога (отхвърлени банан +
   цветарски магазин). Cover-crop 1080×1350 + адаптивна компресия <250KB (`tools/optimize_backgrounds.py`).
   Тествани с Chrome headless на светла/шарена(торта)/тъмна реална снимка → текстът е четим.
-- **Файловете са в repo:** `tools/nameday_backgrounds/bg-01..08.jpg` (+README). ★ЗА PC:★ копирай ги в
-  `taskify-site-deploy/imen-den/backgrounds/` → `python tools\nameday_seo.py` → копирай `imen-den/` в
-  site source → `npx wrangler pages deploy . --project-name=taskify`. (Не деплойнах оттук — сайтът е
-  Direct Upload, източникът е на PC; деплой без пълния източник трие сайта.)
+- **Файловете са в repo:** `tools/nameday_backgrounds/bg-01..08.jpg` (снимките) + `README.txt`.
+  ★★ЗА PC — ТОЧНИТЕ КОМАНДИ СА В `tools/nameday_backgrounds/DEPLOY_PC.md`★★ (git pull → копирай bg-*.jpg в
+  `taskify-site-deploy/imen-den/backgrounds/` → `python tools\nameday_seo.py` → копирай `imen-den/` в site
+  source → `npx wrangler pages deploy . --project-name=taskify`). Не деплойнах оттук — сайтът е Direct
+  Upload, източникът е на PC; деплой без пълния източник трие сайта.
 - Вирусен цикъл подсилен: SEO трафик → красива картичка със снимка → сваляне/споделяне.
 
 ## 2026-07-10 · Mac — iOS 1.0.49 (57) подадена в App Store + Toto (приходният fix)
