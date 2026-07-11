@@ -6,6 +6,16 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-11 · PC — Имен-ден фоновете ДЕПЛОЙНАТИ на живо (18 снимки + picker + ?name=)
+`git pull` взе Mac-овата работа (18 фона + бутон „Картичка" → уеб генератор). Деплойнах сайта от PC:
+- Копирах `tools/nameday_backgrounds/bg-01..18.jpg` → `taskify-site-deploy/imen-den/backgrounds/`.
+- `python tools\nameday_seo.py` → **821 стр.** (700 име + 120 дата + hub) + sitemap; копирах само `imen-den/`
+  в site source (backgrounds/ непокътнати). Генерираните стр. реферират `/imen-den/backgrounds/bg-01..18.jpg`
+  (JS `FILES` цикъл 1..18) + picker (`cg-picker`/`cg-th`) + `?name=` prefill — верифицирано.
+- `npx wrangler pages deploy . --project-name=taskify` → **866 файла, live** (518394c0.taskify-6x6.pages.dev).
+- Проверка: `backgrounds/bg-01.jpg`, `bg-18.jpg`, `/imen-den/`, `/ime/ivan/`, `sitemap.xml` → всички **200**.
+- App-ът пак изисква нов релийс за да сочи потребителите към уеб генератора (кодът е committnat от Mac).
+
 ## 2026-07-11 · Mac — Бутон „Картичка" в app-а отваря уеб генератора + още 8 фона (общо 18) + picker
 - **Уеб picker (18 фона):** свалени още 10 снимки (общо 18, Unsplash без хора/лога, <250KB) →
   `tools/nameday_backgrounds/bg-01..18.jpg`. `CARD_HTML` вече показва **избор на фон с миниатюри**
