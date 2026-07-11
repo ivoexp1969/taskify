@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import '../../services/google_calendar_service.dart';
 import '../../services/ios_calendar_service.dart';
 import '../../services/name_days_service.dart';
+// name_day_card.dart вече не се ползва — картичките се правят в уеб генератора.
 import '../../services/contact_name_index.dart';
-import '../../utils/name_day_card.dart';
 import '../../services/holidays_service.dart';
 import 'package:hive/hive.dart';
 import 'package:share_plus/share_plus.dart';
@@ -2249,13 +2249,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
               action(Icons.card_giftcard_rounded, const Color(0xFFAB47BC),
                   cardLbl[lang] ?? cardLbl['en']!,
-                  () => NameDayCardUtil.show(
-                        context: context,
-                        name: c.name,
-                        feast: feast,
-                        wish: wish,
-                        lang: lang,
-                      )),
+                  () async {
+                    // Отваря уеб генератора на картички (18 снимки + избор на фон)
+                    // с попълнено име. По-богат от вградения + фоновете се обновяват
+                    // без нов релийс.
+                    final url =
+                        'https://taskify1969.com/imen-den/?name=${Uri.encodeComponent(c.name)}';
+                    if (!await _tryLaunch(url)) _toastLaunchFail();
+                  }),
               action(Icons.celebration_rounded, const Color(0xFF8E24AA),
                   shareLbl[lang] ?? shareLbl['en']!,
                   () => _shareNameDayWish(c.name, lang)),

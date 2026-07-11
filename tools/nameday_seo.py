@@ -128,6 +128,8 @@ CARD_HTML = """
 (function(){
  var cv=document.getElementById('cgCanvas'),ctx=cv.getContext('2d'),inp=document.getElementById('cgName');
  var picker=document.getElementById('cgPicker');
+ // Име от URL (?name=…) — приложението отваря сайта с попълнено име на контакта.
+ try{var _qn=new URLSearchParams(location.search).get('name');if(_qn){inp.value=_qn.slice(0,20);}}catch(e){}
  var W=1080,H=1350;
  // Реални снимки-фонове (локални, същия домейн → без CORS tainting при toBlob).
  // Само наличните се ползват; при 0 заредени → fallback към градиента.

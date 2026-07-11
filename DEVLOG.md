@@ -6,6 +6,20 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-11 · Mac — Бутон „Картичка" в app-а отваря уеб генератора + още 8 фона (общо 18) + picker
+- **Уеб picker (18 фона):** свалени още 10 снимки (общо 18, Unsplash без хора/лога, <250KB) →
+  `tools/nameday_backgrounds/bg-01..18.jpg`. `CARD_HTML` вече показва **избор на фон с миниатюри**
+  (`cg-picker`/`cg-th`, кликаш преди генериране; първата е избрана; fallback градиент). Тествано Chrome.
+- **App:** `calendar_screen` бутонът „Картичка" (имен-ден контакт) вече НЕ вика вградения `NameDayCardUtil`,
+  а **отваря уеб генератора** `https://taskify1969.com/imen-den/?name=<encoded>` (`_tryLaunch`, external).
+  По-богат (18 снимки + избор), фоновете се обновяват без нов app релийс. Махнат unused import
+  `name_day_card.dart` (файлът остава за евент. бъдеща употреба). analyze 0 грешки.
+- **Site:** `CARD_HTML` чете `?name=` от URL → попълва името (работи с ВСЯКО контактно име, без 404,
+  hub винаги съществува). Тествано с Chrome (localhost, ?name=Красимира → картичката показва името).
+- ★ДВА деплоя:★ (1) **Сайт (PC, веднага):** регенерирай + копирай `imen-den/` + `wrangler pages deploy`
+  (виж `tools/nameday_backgrounds/DEPLOY_PC.md`). (2) **App: изисква нов релийс** (iOS+Android) за да
+  стигне до потребителите — текущо кодът е committnat, но живото app още отваря вградения генератор.
+
 ## 2026-07-11 · Mac — Имен-ден картички: реални снимки като фон (готови в repo)
 Уеб генераторът на картички (`tools/nameday_seo.py`, `CARD_HTML` canvas) вече рисува реална снимка
 като фон: `drawImage` cover + тъмен overlay `rgba(0,0,0,0.42)` + полупрозрачен панел + бял текст със
