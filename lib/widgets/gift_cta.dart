@@ -79,9 +79,9 @@ class GiftOfferButton extends StatelessWidget {
   }
 }
 
-/// „Направи картичка" — отваря уеб генератора (18 снимки + избор на фон) с
-/// попълнено име и вид на повода. За рожден ден `type='birthday'` → сайтът
-/// показва „Честит рожден ден"; за имен ден `type='nameday'` → „Честит имен ден".
+/// „Направи картичка" — отваря уеб генератора с попълнено име. За рожден ден
+/// отваря dedicated `/rozhden-den/` (с възраст, „Честит рожден ден"); за имен ден
+/// `/imen-den/` („Честит имен ден"). И двете имат избор от 18 снимки за фон.
 class GreetingCardButton extends StatelessWidget {
   final String lang;
   final String name;
@@ -107,8 +107,9 @@ class GreetingCardButton extends StatelessWidget {
         icon: const Icon(Icons.card_giftcard_rounded, size: 18),
         label: Text(_tr(_makeCard, lang)),
         onPressed: () async {
-          final url = 'https://taskify1969.com/imen-den/'
-              '?name=${Uri.encodeComponent(name)}&type=$type';
+          final path = type == 'birthday' ? 'rozhden-den' : 'imen-den';
+          final url =
+              'https://taskify1969.com/$path/?name=${Uri.encodeComponent(name)}';
           try {
             await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
           } catch (_) {}
