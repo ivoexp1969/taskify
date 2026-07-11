@@ -6,6 +6,18 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-11 · Mac — v1.0.50 (59→60): рожден-ден картичка → PC-евата `/rozhden-den/` + iOS релийс (път Б)
+PC е направило dedicated `/rozhden-den/` (с възраст) + хъб `/kartichki/` — по-добро от моя
+`/imen-den/?type=birthday`. Затова **app бутонът сочи към `/rozhden-den/`** (вече живо), не към imen-den.
+- **App:** нов бутон **„Направи картичка"** на рожден-ден картите (двата стила, `task_card_styles.dart`)
+  → нов `GreetingCardButton` (`gift_cta.dart`, url_launcher) отваря `taskify1969.com/rozhden-den/?name=<title>`.
+  (Имен-ден бутонът в calendar остава `/imen-den/?name=`.) Тествано на Toto.
+- **iOS РЕЛИЙС (път Б):** 1.0.49 беше WAITING_FOR_REVIEW → cancel review → rename версията на **1.0.50** →
+  whatsNew en-US (EN+BG без емоджи: картички + Pro upgrade). Build 60 (с /rozhden-den/ URL) → attach → submit.
+  1.0.50 включва И приходния fix (от 1.0.49), И картичките. `pubspec` → **1.0.50+60**.
+- **★ЗА PC:★ Android 1.0.50+60** — build appbundle + Play upload (service account); същият код. (Сайтът е
+  готов — PC вече деплойна `/rozhden-den/` + `/kartichki/`.)
+
 ## 2026-07-11 · PC — Сайт: картички за РОЖДЕН ДЕН + хъб „Картички"
 Нов генератор `tools/birthday_cards.py` (self-contained, изход `~/Desktop/taskify_cards/`) прави 2 стр.:
 - **`/rozhden-den/`** — client-side canvas генератор „Честит рожден ден": вход име + **незадължителна
