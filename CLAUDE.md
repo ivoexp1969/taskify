@@ -42,7 +42,8 @@ flutter build appbundle --release
 - Firebase: `IVA` — lifetime access, 20-user cap
 
 ## Current Version
-**v1.0.49+57 (July 2026) — ★ПРИХОДЕН FIX★ Pro статус + видим „Стани Pro" + плавен преход.**
+**v1.0.49+57 (July 2026) — ★ПРИХОДЕН FIX★ Pro статус + видим „Стани Pro" + плавен преход. ЖИВА в
+Google Play Production (публ. 10.07 17:28, заменя 1.0.48/56); iOS 1.0.49+57 WAITING_FOR_REVIEW.**
 RevenueCat показваше $0 MRR при 116 users: след изтичане на trial isPro оставаше true от кеша (init
 catch → `_loadFromCache`) → никой не падаше на free/реклами/платежен път. ЧАСТ 1: RevenueCat = истината
 за `_isPro` (retry 3× backoff вместо сляп кеш; кешът само оптимистичен; downgrade детекция). ЧАСТ 2:

@@ -6,6 +6,12 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-11 · PC — ★v1.0.49 ЖИВА в Production★ (приходният fix е при потребителите)
+Play Console: **1.0.49 „Налице в Google Play"**, 1 код на версията, публикувано **10.07 17:28** → rollout
+мина, заменя 1.0.48/56. Приходният fix (Pro статус + видим „Стани Pro" + плавен преход) вече е при
+живите Android потребители. iOS 1.0.49 (57) е WAITING_FOR_REVIEW. RevenueCat backend е проверен и чист
+(offering `default`, 3 пакета, entitlement `Taskify 1969 Pro`) → paywall не е празен. Верига приходи цяла на Android.
+
 ## 2026-07-11 · PC — Имен-ден фоновете ДЕПЛОЙНАТИ на живо (18 снимки + picker + ?name=)
 `git pull` взе Mac-овата работа (18 фона + бутон „Картичка" → уеб генератор). Деплойнах сайта от PC:
 - Копирах `tools/nameday_backgrounds/bg-01..18.jpg` → `taskify-site-deploy/imen-den/backgrounds/`.
