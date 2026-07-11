@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../services/renewal_service.dart';
 
@@ -77,6 +78,52 @@ class GiftOfferButton extends StatelessWidget {
     );
   }
 }
+
+/// „Направи картичка" — отваря уеб генератора (18 снимки + избор на фон) с
+/// попълнено име и вид на повода. За рожден ден `type='birthday'` → сайтът
+/// показва „Честит рожден ден"; за имен ден `type='nameday'` → „Честит имен ден".
+class GreetingCardButton extends StatelessWidget {
+  final String lang;
+  final String name;
+  final String type; // 'birthday' | 'nameday'
+
+  const GreetingCardButton({
+    super.key,
+    required this.lang,
+    required this.name,
+    this.type = 'birthday',
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFFAB47BC),
+          side: const BorderSide(color: Color(0xFFAB47BC), width: 1.5),
+          textStyle: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+        icon: const Icon(Icons.card_giftcard_rounded, size: 18),
+        label: Text(_tr(_makeCard, lang)),
+        onPressed: () async {
+          final url = 'https://taskify1969.com/imen-den/'
+              '?name=${Uri.encodeComponent(name)}&type=$type';
+          try {
+            await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+          } catch (_) {}
+        },
+      ),
+    );
+  }
+}
+
+const _makeCard = {
+  'en': 'Make a card', 'bg': 'Направи картичка', 'de': 'Karte erstellen',
+  'fr': 'Créer une carte', 'it': 'Crea una cartolina', 'el': 'Φτιάξε κάρτα',
+  'es': 'Crear tarjeta', 'pt': 'Criar cartão', 'ru': 'Сделать открытку',
+  'tr': 'Kart oluştur', 'ja': 'カードを作る',
+};
 
 String _tr(Map<String, String> m, String lang) => m[lang] ?? m['en']!;
 

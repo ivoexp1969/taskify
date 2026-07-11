@@ -430,9 +430,12 @@ class ExpandableTaskCard extends StatelessWidget {
                                       label: 'Calendar', color: Colors.blue),
                                 ],
                               ),
-                              // „Изпрати цветя/подарък" за рождени дни (монетизация).
+                              // „Направи картичка" + „Изпрати цветя/подарък" за рождени дни.
                               if ((task.template == 'birthday' || task.categoryId == 'birthday')
                                   && !isCompleted) ...[
+                                const SizedBox(height: 10),
+                                GreetingCardButton(
+                                    lang: t.lang, name: task.title, type: 'birthday'),
                                 const SizedBox(height: 10),
                                 GiftOfferButton(lang: t.lang, kind: 'gift_birthday'),
                               ],
@@ -1504,9 +1507,11 @@ class _TicketTaskCardState extends State<TicketTaskCard>
             const _DetailChip(icon: Icons.event_rounded, label: 'Calendar', color: Colors.blue),
         ],
       ),
-      // „Изпрати цветя/подарък" за рождени дни (монетизация).
+      // „Направи картичка" + „Изпрати цветя/подарък" за рождени дни.
       if ((task.template == 'birthday' || task.categoryId == 'birthday')
           && !widget.isCompleted) ...[
+        const SizedBox(height: 10),
+        GreetingCardButton(lang: t.lang, name: task.title, type: 'birthday'),
         const SizedBox(height: 10),
         GiftOfferButton(lang: t.lang, kind: 'gift_birthday'),
       ],
