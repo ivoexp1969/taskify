@@ -112,6 +112,7 @@ CARD_HTML = """
 <canvas id="cgCanvas" width="1080" height="1350"></canvas>
 <div class="cg-btns">
 <button id="cgDown">⬇ Свали картичка</button>
+<button id="cgBg" class="sec">🔄 Смени фон</button>
 <button id="cgShare" class="sec">Сподели</button>
 <button id="cgCopy" class="sec">🔗 Копирай линк</button>
 </div>
@@ -120,30 +121,48 @@ CARD_HTML = """
 (function(){
  var cv=document.getElementById('cgCanvas'),ctx=cv.getContext('2d'),inp=document.getElementById('cgName');
  var W=1080,H=1350;
+ // Реални снимки-фонове (локални, същия домейн → без CORS tainting при toBlob).
+ // Само наличните се ползват; при 0 заредени → fallback към градиента.
+ var FILES=['bg-01','bg-02','bg-03','bg-04','bg-05','bg-06','bg-07','bg-08'];
+ var imgs=[],bgIx=0;
+ FILES.forEach(function(n){var im=new Image();
+   im.onload=function(){imgs.push(im);draw();};
+   im.onerror=function(){};
+   im.src='/imen-den/backgrounds/'+n+'.jpg';});
  function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
  function hash(s){var h=0;for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))&0x7fffffff;}return h;}
+ function cover(im){var s=Math.max(W/im.width,H/im.height);var nw=im.width*s,nh=im.height*s;ctx.drawImage(im,(W-nw)/2,(H-nh)/2,nw,nh);}
+ function grad(){var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#6A3DE8');g.addColorStop(1,'#4A28AA');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
  function draw(){
   var name=(inp.value||'').trim()||'Име';
   var r=hash(name)||1;
   function rnd(){r=(r*1103515245+12345)&0x7fffffff;return r/0x7fffffff;}
-  var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#6A3DE8');g.addColorStop(1,'#4A28AA');
-  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-  var cols=['#0AA674','#2EC494','#FFD23F','#FF6B6B','#4ECDC4','#ffffff'];
-  for(var i=0;i<55;i++){ctx.save();ctx.translate(rnd()*W,rnd()*H);ctx.rotate(rnd()*Math.PI);ctx.globalAlpha=.85;ctx.fillStyle=cols[i%cols.length];ctx.fillRect(0,0,14,24);ctx.restore();}
-  ctx.globalAlpha=1;
-  var cx=90,cy=260,cw=W-180,ch=H-520;
-  ctx.fillStyle='#fff';rr(cx,cy,cw,ch,44);ctx.fill();
+  // ФОН: реална снимка (cover) ако има заредена, иначе градиент (fallback).
+  if(imgs.length){cover(imgs[bgIx%imgs.length]);}else{grad();}
+  // Тъмен overlay → гарантира контраст на светла И тъмна снимка.
+  ctx.fillStyle='rgba(0,0,0,0.42)';ctx.fillRect(0,0,W,H);
+  // Дискретно конфети (само върху градиента, за да не цапа снимката).
+  if(!imgs.length){var cols=['#0AA674','#2EC494','#FFD23F','#FF6B6B','#4ECDC4','#ffffff'];
+   for(var i=0;i<55;i++){ctx.save();ctx.translate(rnd()*W,rnd()*H);ctx.rotate(rnd()*Math.PI);ctx.globalAlpha=.8;ctx.fillStyle=cols[i%cols.length];ctx.fillRect(0,0,14,24);ctx.restore();}ctx.globalAlpha=1;}
+  // Полупрозрачен панел зад текста (допълнителна четимост при шарени снимки).
+  ctx.fillStyle='rgba(0,0,0,0.28)';rr(70,470,W-140,470,40);ctx.fill();
   ctx.textAlign='center';
-  ctx.fillStyle='#1a1730';ctx.font='130px "Segoe UI Emoji","Apple Color Emoji",sans-serif';ctx.fillText('🎉',W/2,cy+195);
-  ctx.fillStyle='#6A3DE8';ctx.font='700 48px sans-serif';ctx.fillText('ЧЕСТИТ ИМЕН ДЕН',W/2,cy+315);
-  var fs=154;ctx.fillStyle='#1a1730';
-  do{fs-=4;ctx.font='800 '+fs+'px sans-serif';}while(ctx.measureText(name).width>cw-70&&fs>44);
-  ctx.fillText(name,W/2,cy+485);
-  ctx.fillStyle='rgba(255,255,255,.96)';ctx.font='700 42px sans-serif';
+  // Текст: бял, със сянка + тъмен контур → четим на всякаква снимка.
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,0.75)';ctx.shadowBlur=22;ctx.lineJoin='round';
+  ctx.font='130px "Segoe UI Emoji","Apple Color Emoji",sans-serif';ctx.fillStyle='#fff';ctx.fillText('🎉',W/2,300);
+  ctx.font='700 50px sans-serif';ctx.fillStyle='#FFD23F';ctx.fillText('ЧЕСТИТ ИМЕН ДЕН',W/2,430);
+  var fs=158;
+  do{fs-=4;ctx.font='800 '+fs+'px sans-serif';}while(ctx.measureText(name).width>W-220&&fs>44);
+  ctx.strokeStyle='rgba(0,0,0,0.55)';ctx.lineWidth=Math.max(6,fs*0.05);ctx.strokeText(name,W/2,700);
+  ctx.fillStyle='#fff';ctx.fillText(name,W/2,700);
+  ctx.font='700 42px sans-serif';ctx.fillStyle='rgba(255,255,255,.97)';
   ctx.fillText('\\u2705 Taskify \\u00b7 taskify1969.com',W/2,H-72);
+  ctx.restore();
  }
  function fname(){return 'chestit-imen-den-'+((inp.value||'ime').trim().toLowerCase().replace(/[^a-zа-я0-9]+/gi,'-')||'ime')+'.png';}
  inp.addEventListener('input',draw);
+ document.getElementById('cgBg').addEventListener('click',function(){if(imgs.length){bgIx=(bgIx+1)%imgs.length;draw();}});
  document.getElementById('cgDown').addEventListener('click',function(){cv.toBlob(function(b){var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname();a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1500);});});
  document.getElementById('cgShare').addEventListener('click',function(){cv.toBlob(function(b){var f=new File([b],fname(),{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:'Честит имен ден',text:'Честит имен ден! 🎉 taskify1969.com'}).catch(function(){});}else{var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname();a.click();}});});
  var cp=document.getElementById('cgCopy');
