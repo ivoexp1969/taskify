@@ -6,6 +6,21 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-13 · Mac — iOS widget паритет с Android (3 бъга) + iOS 1.0.53 (63) в App Store
+iOS widget-ът настигна Android. `git pull` (1.0.52+62). Три бъга:
+- **БЪГ 1 (просрочени):** `widget_service._syncTasksToAppGroup` филтърът беше само днешни →
+  изравнен с Android (`d.isBefore(tomorrow)` = днешни + просрочени). `TaskifyWidget.swift loadEntry`
+  също; просрочените са **червени** (title/рамка/фон), сортът ги слага първи.
+- **БЪГ 2 (read-only → интерактивен):** нов `CompleteTaskIntent` (AppIntent) → интерактивен чекбокс
+  **iOS 17+**; записва ключа в App Group `flutter.widget_completed` + маха задачата от `widget_tasks`
+  веднага. iOS <17 → тап отваря app (без мъртъв бутон). `AppDelegate` нов `getCompletedFromWidget`.
+  `syncFromWidget` вече не е Android-only (нов `_syncFromWidgetIOS`); вика се и при resume.
+- **БЪГ 3 (подканване):** Настройки → „Добави widget" упътване (iOS only, 4 стъпки, 11 езика).
+- **Правило „Какво ново":** `_build` 62→**63** + нови точки. + **scroll** на whats_new + widget-guide диалозите.
+- Verify: analyze 0 грешки; widget таргет компилира; Android недокоснат. Тествано на Toto (1.0.53+63).
+- **iOS App Store:** 1.0.50 вече READY_FOR_SALE → нова версия **1.0.53** → build 63 → attach → submit →
+  WAITING_FOR_REVIEW. **★ЗА PC: Android 1.0.53+63** (същият код; за Android основно version bump + „Какво ново").
+
 ## 2026-07-13 · PC — ★КРАШ FIX★ мъртви `android_alarm_manager_plus` компоненти в манифеста → v1.0.52+62
 Проверка на крашовете след rollout-а на 1.0.51 извади **реален краш при рестарт на телефона**:
 `RuntimeException: Unable to instantiate receiver dev.fluttercommunity.plus.androidalarmmanager.
