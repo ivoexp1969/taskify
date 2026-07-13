@@ -32,7 +32,12 @@ Android home-screen widget-ът получи бързо добавяне и ло
 - Тествано на живо на Note 9 (USB): „+" от реалния widget при убито приложение → „Нова задача" ✅;
   същото при работещо (onNewIntent) ✅; чекване от widget → задачата изчезва и се синхронизира в Hive ✅;
   празно състояние показа „⏳ Винетка изтича след 2 дни" (реален документ на потребителя) ✅.
-  `flutter analyze` 0 нови грешки. Release notes: `release_notes/1.0.51.md`. AAB vc61 → Play (draft).
+  `flutter analyze` 0 нови грешки. Release notes: `release_notes/1.0.51.md`.
+- **★ЖИВА В PRODUCTION★:** AAB vc61 качен (`tools/play_upload.py`, draft) и **пуснат на 100%** с нов
+  **`tools/play_promote.py`** (промотира ВЕЧЕ качен versionCode — бъндълът не може да се качи два пъти;
+  `--status completed` = 100%, `--status inProgress --fraction 0.2` = staged). Потвърдено през API:
+  production = само 1.0.51/61, `status: completed`, notes BG+EN. Чакащият 1.0.50 draft отпадна
+  (1.0.51 го включва). **iOS остава на 1.0.50 — за Mac: „Какво ново" диалогът е чист Dart.**
 
 ## 2026-07-11 · Mac — v1.0.50 (59→60): рожден-ден картичка → PC-евата `/rozhden-den/` + iOS релийс (път Б)
 PC е направило dedicated `/rozhden-den/` (с възраст) + хъб `/kartichki/` — по-добро от моя
