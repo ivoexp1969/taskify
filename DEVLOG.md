@@ -6,6 +6,34 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-13 · PC — Widget „+" + локален контекст + ★НОВО ПРАВИЛО: „Какво ново" диалог★ → v1.0.51+61
+Android home-screen widget-ът получи бързо добавяне и локалния контекст (диференциаторът на Taskify).
+- **„+" бързо добавяне (и трите размера):** нов `WidgetActions.kt` (`PendingIntent.getActivity`, action
+  `ACTION_NEW_TASK` + уникална data `taskify://new_task`, `SINGLE_TOP|NEW_TASK` → доставя се в
+  `onNewIntent`). `MainActivity` прихваща в `onCreate`/`onNewIntent`, пази `pendingWidgetAction` и го
+  дава на Dart през нов канал-метод **`consumeWidgetAction`**; `home_screen` го консумира при студен
+  старт (postFrame) и при resume → таб „Задачи" + `TaskEditorBridge.openNewSelfManaged()` (същият
+  редактор като FAB). Drawable `widget_add_btn_bg.xml` беше в `res/xml/` (недостижим като `@drawable/`
+  → мъртъв) → преместен в `res/drawable/`.
+- **Локален контекст:** `WidgetService._syncContextToPrefs` пише `widget_context` JSON с ГОТОВИ
+  локализирани текстове (11 ез.): `docExpiry` (задачи `template=='document'`, изтичащи ≤14 дни, UTC
+  дневна аритметика), `nameDay` (NameDaysService, днес), `holiday` (HolidaysService, днес/утре; нов
+  `hasData` getter → не тегли излишно). Нов `WidgetContext.kt` избира по приоритет **документ > имен
+  ден > празник**. Ред `context_row` в medium/large; при празен списък контекстът ЗАМЕНЯ закачливата
+  фраза (и в трите размера) — нов `empty_context` TextView (обикновен bold шрифт, autosize 12–22sp;
+  ръкописният Caveat + малкият autosize го правеха нечетим).
+- **Gating:** контекстът се пише само при `ProService().isPro` И включени toggle-и; иначе ключът се
+  трие. `main.dart` пресинхронизира widget-а след `ProService().initialize()` (при старта Pro още не се
+  знае). Чекването (`ACTION_COMPLETE_TASK`) е недокоснато.
+- **★НОВО ПОСТОЯННО ПРАВИЛО (от потребителя):★ преди ВСЯКО качване в Google Play/App Store — изскачащ
+  „Какво ново" диалог след ъпдейта.** Нов `lib/widgets/whats_new_dialog.dart` (`WhatsNewDialog.maybeShow`,
+  flag `whats_new_seen_build`, показва се веднъж за нов билд, НЕ за нови инсталации, 11 езика,
+  версия през `package_info_plus`). **При всеки следващ релийз: вдигни `_build` + подмени точките.**
+- Тествано на живо на Note 9 (USB): „+" от реалния widget при убито приложение → „Нова задача" ✅;
+  същото при работещо (onNewIntent) ✅; чекване от widget → задачата изчезва и се синхронизира в Hive ✅;
+  празно състояние показа „⏳ Винетка изтича след 2 дни" (реален документ на потребителя) ✅.
+  `flutter analyze` 0 нови грешки. Release notes: `release_notes/1.0.51.md`. AAB vc61 → Play (draft).
+
 ## 2026-07-11 · Mac — v1.0.50 (59→60): рожден-ден картичка → PC-евата `/rozhden-den/` + iOS релийс (път Б)
 PC е направило dedicated `/rozhden-den/` (с възраст) + хъб `/kartichki/` — по-добро от моя
 `/imen-den/?type=birthday`. Затова **app бутонът сочи към `/rozhden-den/`** (вече живо), не към imen-den.

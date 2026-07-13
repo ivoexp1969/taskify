@@ -148,6 +148,9 @@ Future<void> main() async {
     // реално платили — виж ConversionService). Вика се СЛЕД ProService init, за
     // да е точен isPaid.
     if (!kIsWeb) ConversionService.instance.ensureFirstLaunchAndSchedule();
+    // Локалният контекст в widget-а зависи от Pro статуса → пресинхронизираме
+    // след като ProService знае истината (стартовият update мина преди това).
+    if (!kIsWeb) WidgetService.updateWidget();
   });
   AdService().initialize();
 

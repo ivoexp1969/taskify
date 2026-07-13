@@ -10,9 +10,11 @@ import '../shared/shared_groups_screen.dart';
 import '../../utils/localization.dart';
 import '../../widgets/banner_ad_widget.dart';
 import '../../widgets/gift_cta.dart';
+import '../../widgets/whats_new_dialog.dart';
 import '../../services/pro_service.dart';
 import '../../services/holidays_service.dart';
 import '../../services/sync_service.dart';
+import '../../services/widget_service.dart';
 import '../paywall/paywall_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -51,7 +53,29 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       // ФАЗА 4: cold-start routing на ден-3/ден-7 нотификация (app беше убит).
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _consumePendingConversionRoute());
+      // Бутонът „+" в home-screen widget-а (студен старт).
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _consumeWidgetAction());
+      _maybeShowWhatsNew();
     }
+  }
+
+  /// „Какво ново" след ъпдейт — веднъж за всеки нов билд (не за нови инсталации).
+  Future<void> _maybeShowWhatsNew() async {
+    // Изчакваме welcome/preходните диалози да минат.
+    await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
+    await WhatsNewDialog.maybeShow(
+        context, LanguageScope.of(context).locale.languageCode);
+  }
+
+  /// Бутонът „+" на Android widget-а отваря редактора за нова задача.
+  /// MainActivity пази действието; тук го консумираме при старт и при resume.
+  Future<void> _consumeWidgetAction() async {
+    final action = await WidgetService.consumePendingAction();
+    if (action != 'new_task' || !mounted) return;
+    if (_currentIndex != 0) setState(() => _currentIndex = 0); // таб „Задачи"
+    await TaskEditorBridge.openNewSelfManaged();
   }
 
   /// Консумира маршрута, оставен от notification tap при студен старт.
@@ -102,6 +126,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       SyncService().syncNow();
+      if (!kIsWeb) _consumeWidgetAction(); // „+" от widget-а, докато app-ът върви
     }
   }
 

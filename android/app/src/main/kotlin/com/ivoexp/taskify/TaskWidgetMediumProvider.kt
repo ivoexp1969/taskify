@@ -89,12 +89,28 @@ class TaskWidgetMediumProvider : AppWidgetProvider() {
             return WidgetPhrases.random(lang)
         }
 
+        /// Празно състояние: локалният контекст (четим шрифт) бие закачливата фраза.
+        private fun showEmptyState(views: RemoteViews, context: Context, contextLine: String?) {
+            if (contextLine != null) {
+                views.setViewVisibility(R.id.empty_text, View.GONE)
+                views.setViewVisibility(R.id.empty_context, View.VISIBLE)
+                views.setTextViewText(R.id.empty_context, contextLine)
+            } else {
+                views.setViewVisibility(R.id.empty_context, View.GONE)
+                views.setViewVisibility(R.id.empty_text, View.VISIBLE)
+                views.setTextViewText(R.id.empty_text, getEmptyMessage(context))
+            }
+        }
+
         fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
             val views = RemoteViews(context.packageName, R.layout.task_widget_medium)
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val tasksJson = prefs.getString(TASKS_KEY, "[]") ?: "[]"
 
             views.setTextViewText(R.id.widget_date, getDateText(context))
+
+            // Локален контекст (изтичащ документ > имен ден > празник).
+            val contextLine = WidgetContext.line(context)
 
             try {
                 val tasksArray = JSONArray(tasksJson)
@@ -113,13 +129,21 @@ class TaskWidgetMediumProvider : AppWidgetProvider() {
                     MedRow(R.id.task_row_5, R.id.task_title_5, R.id.task_checkbox_5, R.id.priority_dot_5, R.id.task_time_5))
 
                 if (tasks.isEmpty()) {
+                    // Няма задачи: контекстът (имен ден/документ) е по-полезен от фразата.
                     views.setTextViewText(R.id.widget_count, "")
                     views.setViewVisibility(R.id.empty_container, View.VISIBLE)
-                    views.setTextViewText(R.id.empty_text, getEmptyMessage(context))
+                    showEmptyState(views, context, contextLine)
+                    views.setViewVisibility(R.id.context_row, View.GONE)
                     rows.forEach { views.setViewVisibility(it.rowId, View.GONE) }
                 } else {
                     views.setTextViewText(R.id.widget_count, getCountText(tasks.size, context))
                     views.setViewVisibility(R.id.empty_container, View.GONE)
+                    if (contextLine != null) {
+                        views.setViewVisibility(R.id.context_row, View.VISIBLE)
+                        views.setTextViewText(R.id.context_row, contextLine)
+                    } else {
+                        views.setViewVisibility(R.id.context_row, View.GONE)
+                    }
                     for (i in 0 until 5) {
                         val row = rows[i]
                         if (i < tasks.size) {
@@ -148,7 +172,10 @@ class TaskWidgetMediumProvider : AppWidgetProvider() {
                 }
             } catch (e: Exception) {
                 views.setViewVisibility(R.id.empty_container, View.VISIBLE)
+                views.setViewVisibility(R.id.empty_context, View.GONE)
+                views.setViewVisibility(R.id.empty_text, View.VISIBLE)
                 views.setTextViewText(R.id.empty_text, "Error")
+                views.setViewVisibility(R.id.context_row, View.GONE)
                 listOf(R.id.task_row_1, R.id.task_row_2, R.id.task_row_3, R.id.task_row_4, R.id.task_row_5).forEach {
                     views.setViewVisibility(it, View.GONE)
                 }
@@ -157,6 +184,8 @@ class TaskWidgetMediumProvider : AppWidgetProvider() {
             context.packageManager.getLaunchIntentForPackage(context.packageName)?.let {
                 views.setOnClickPendingIntent(R.id.widget_container, PendingIntent.getActivity(context, 2, it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
             }
+            // „+" → приложението се отваря директно на редактора за нова задача.
+            views.setOnClickPendingIntent(R.id.widget_add_btn, WidgetActions.newTaskPendingIntent(context, 9002))
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 

@@ -202,6 +202,10 @@ class HolidaysService {
     return Hive.openBox(boxName);
   }
 
+  /// Има ли изобщо заредени празници в паметта (widget-ът проверява, за да не
+  /// тегли излишно при всеки синхрон).
+  bool get hasData => _byDate.isNotEmpty;
+
   /// Името на официалния празник за дадена дата (или null).
   String? forDate(DateTime date) {
     final key =

@@ -41,7 +41,19 @@ flutter build appbundle --release
 ## Promo Codes
 - Firebase: `IVA` — lifetime access, 20-user cap
 
+## Release Rule (ЗАДЪЛЖИТЕЛНО)
+**Преди ВСЯКО качване в Google Play / App Store — изскачащ „Какво ново" диалог**, който излиза на
+потребителите след ъпдейта (и Android, и iOS). Механизъм: `lib/widgets/whats_new_dialog.dart`
+(`WhatsNewDialog.maybeShow`, flag `whats_new_seen_build`, веднъж за нов билд, НЕ за нови инсталации,
+11 езика). **При всеки релийз: вдигни `_build` до новия build number + подмени точките `_items`**
+(същите точки като `release_notes/<version>.md`). Потребителите не четат release notes в магазина —
+без този диалог новите функции остават неоткрити.
+
 ## Current Version
+**v1.0.51+61 (July 2026) — Widget „+" бързо добавяне + локален контекст в widget-а (диференциаторът):
+изтичащ документ > имен ден > празник; при празен списък контекстът заменя закачливата фраза. Уважава
+Pro + toggle-ите. Нов „Какво ново" диалог след ъпдейт (11 ез.). Тествано на живо на Note 9; AAB vc61.**
+ПРЕДИШНО:
 **v1.0.50+60 (July 2026) — Картички за имен ден И рожден ден: бутон „Направи картичка" на картите отваря
 уеб генератора с попълнено име — рожден ден → `/rozhden-den/` (с поле за години), имен ден → `/imen-den/`.
 Един източник `nameday_seo.py` CARD_HTML (`?type` превключва вярната картичка). Уеб хъб `/kartichki/` +
@@ -78,6 +90,19 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **Widget „+" + локален контекст + „Какво ново" диалог → v1.0.51+61 (PC, 2026-07-13):**
+  (1) **„+" в трите размера widget** → `WidgetActions.kt` (`PendingIntent.getActivity`, action
+  `ACTION_NEW_TASK`, уникална data → `onNewIntent`); `MainActivity` пази `pendingWidgetAction` и го дава
+  на Dart през канал-метод `consumeWidgetAction`; `home_screen` го консумира (cold start + resume) →
+  таб „Задачи" + `TaskEditorBridge.openNewSelfManaged()`. Drawable `widget_add_btn_bg.xml` беше в
+  `res/xml/` (мъртъв — `@drawable/` не го вижда) → в `res/drawable/`. (2) **Локален контекст:**
+  `WidgetService._syncContextToPrefs` пише `widget_context` JSON (готови текстове, 11 ез.):
+  `docExpiry` (`template=='document'`, ≤14 дни), `nameDay`, `holiday` (нов `HolidaysService.hasData`);
+  `WidgetContext.kt` избира **документ > имен ден > празник**; ред в medium/large + при празен списък
+  заменя фразата (нов `empty_context` TextView, четим bold шрифт — Caveat autosize беше нечетим).
+  Само при `ProService().isPro` + включени toggle-и (иначе ключът се трие); `main.dart` пресинхронизира
+  widget-а след Pro init. Чекването е недокоснато. (3) **`whats_new_dialog.dart`** — виж „Release Rule".
+  Тествано на живо на Note 9. Release notes: `release_notes/1.0.51.md`.
 - **★ПРИХОДЕН FIX★ Pro статус + видим paywall вход + плавен преход → v1.0.49+57 (PC, 2026-07-10):**
   RevenueCat = $0 MRR при 116 users, защото след 14-дневния trial isPro оставаше true. Root cause:
   `pro_service.dart initialize()` catch блок → `_loadFromCache()` връщаше стар `is_pro` БЕЗ сверка с RC;

@@ -9,13 +9,27 @@
             android:layout_weight="1" android:layout_marginStart="6dp" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"/>
         <TextView android:id="@+id/widget_count" android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:textColor="#80FFFFFF" android:textSize="12sp"/>
+        <TextView android:id="@+id/widget_add_btn" android:layout_width="24dp" android:layout_height="24dp"
+            android:layout_marginStart="8dp" android:background="@drawable/widget_add_btn_bg" android:gravity="center"
+            android:text="+" android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold"
+            android:contentDescription="@string/widget_add_task"/>
     </LinearLayout>
+    <!-- Локален контекст: изтичащ документ / имен ден / празник (скрит, ако няма) -->
+    <TextView android:id="@+id/context_row" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="6dp" android:background="@drawable/widget_row_bg" android:padding="6dp"
+        android:maxLines="1" android:ellipsize="end" android:textColor="#FFFFFF" android:textSize="14sp"
+        android:textStyle="bold" android:visibility="gone"/>
     <!-- Empty state -->
     <LinearLayout android:id="@+id/empty_container" android:layout_width="match_parent" android:layout_height="0dp"
-        android:layout_weight="1" android:gravity="center" android:padding="8dp" android:visibility="gone">
+        android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:padding="8dp" android:visibility="gone">
         <TextView android:id="@+id/empty_text" android:layout_width="match_parent" android:layout_height="match_parent"
             android:gravity="center" android:maxLines="3" android:ellipsize="end" android:fontFamily="@font/caveat" android:textColor="#F2FFFFFF"
             android:autoSizeTextType="uniform" android:autoSizeMinTextSize="10sp" android:autoSizeMaxTextSize="20sp" android:autoSizeStepGranularity="1sp"/>
+        <!-- Локален контекст при празен списък: четим шрифт, не ръкописният -->
+        <TextView android:id="@+id/empty_context" android:layout_width="match_parent" android:layout_height="match_parent"
+            android:gravity="center" android:maxLines="3" android:ellipsize="end" android:textColor="#FFFFFF" android:textStyle="bold"
+            android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="20sp" android:autoSizeStepGranularity="1sp"
+            android:visibility="gone"/>
     </LinearLayout>
     <!-- Task rows -->
     <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"

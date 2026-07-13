@@ -72,6 +72,20 @@ class TaskWidgetProvider : AppWidgetProvider() {
             return WidgetPhrases.random(lang)
         }
 
+        /// Празно състояние: локалният контекст (четим шрифт) бие закачливата
+        /// фраза — по-полезен е от „време е за пица".
+        private fun showEmptyState(views: RemoteViews, context: Context, contextLine: String?) {
+            if (contextLine != null) {
+                views.setViewVisibility(R.id.empty_text, View.GONE)
+                views.setViewVisibility(R.id.empty_context, View.VISIBLE)
+                views.setTextViewText(R.id.empty_context, contextLine)
+            } else {
+                views.setViewVisibility(R.id.empty_context, View.GONE)
+                views.setViewVisibility(R.id.empty_text, View.VISIBLE)
+                views.setTextViewText(R.id.empty_text, getEmptyMessage(context))
+            }
+        }
+
         private fun getTaskCountText(count: Int, context: Context): String {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val lang = prefs.getString(LANGUAGE_KEY, "bg") ?: "bg"
@@ -94,6 +108,9 @@ class TaskWidgetProvider : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.task_widget)
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val tasksJson = prefs.getString(TASKS_KEY, "[]") ?: "[]"
+            // Локален контекст (документ/имен ден/празник) — при празен списък е
+            // по-полезен от закачливата фраза.
+            val contextLine = WidgetContext.line(context)
             try {
                 val tasksArray = JSONArray(tasksJson)
                 val tasks = mutableListOf<JSONObject>()
@@ -109,7 +126,7 @@ class TaskWidgetProvider : AppWidgetProvider() {
                 if (tasks.isEmpty()) {
                     views.setTextViewText(R.id.widget_title, "Taskify")
                     views.setViewVisibility(R.id.empty_container, View.VISIBLE)
-                    views.setTextViewText(R.id.empty_text, getEmptyMessage(context))
+                    showEmptyState(views, context, contextLine)
                     rows.forEach { views.setViewVisibility(it.rowId, View.GONE) }
                 } else {
                     views.setTextViewText(R.id.widget_title, getTaskCountText(tasks.size, context))
@@ -133,12 +150,16 @@ class TaskWidgetProvider : AppWidgetProvider() {
                 }
             } catch (e: Exception) {
                 views.setViewVisibility(R.id.empty_container, View.VISIBLE)
+                views.setViewVisibility(R.id.empty_context, View.GONE)
+                views.setViewVisibility(R.id.empty_text, View.VISIBLE)
                 views.setTextViewText(R.id.empty_text, getErrorText(context))
                 listOf(R.id.task_row_1, R.id.task_row_2, R.id.task_row_3).forEach { views.setViewVisibility(it, View.GONE) }
             }
             context.packageManager.getLaunchIntentForPackage(context.packageName)?.let {
                 views.setOnClickPendingIntent(R.id.widget_container, PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
             }
+            // „+" → приложението се отваря директно на редактора за нова задача.
+            views.setOnClickPendingIntent(R.id.widget_add_btn, WidgetActions.newTaskPendingIntent(context, 9001))
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
