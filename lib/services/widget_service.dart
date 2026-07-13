@@ -250,7 +250,9 @@ class WidgetService {
       final todayTasks = taskBox.values.where((t) {
         if (t.isCompleted) return false;
         final d = DateTime(t.dueDate.year, t.dueDate.month, t.dueDate.day);
-        return !d.isBefore(today) && d.isBefore(tomorrow);
+        // Като Android: днешни + ПРОСРОЧЕНИ (всичко до утре). Сортът слага
+        // просрочените първи; Swift ги маркира червено.
+        return d.isBefore(tomorrow);
       }).toList();
       todayTasks.sort((a, b) {
         final aOv = a.dueDate.isBefore(now), bOv = b.dueDate.isBefore(now);
@@ -304,7 +306,15 @@ class WidgetService {
     });
   }
 
+  /// Прибира отметките, направени от widget-а, обратно в Hive.
+  /// Android: чете `widget_tasks` от SharedPreferences (native пише там при чек).
+  /// iOS: чете списък с ключове на завършени задачи от App Group (AppIntent-ът
+  /// на widget-а ги пише там); native ги връща и ги изчиства.
   static Future<void> syncFromWidget() async {
+    if (_isIOS) {
+      await _syncFromWidgetIOS();
+      return;
+    }
     if (!_isAndroid) return;
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -328,6 +338,29 @@ class WidgetService {
       }
     } catch (e) {
       debugPrint('Sync from widget error: $e');
+    }
+  }
+
+  static Future<void> _syncFromWidgetIOS() async {
+    try {
+      final keys = await _channel.invokeMethod<List<dynamic>>('getCompletedFromWidget');
+      if (keys == null || keys.isEmpty) return;
+      final taskBox = Hive.box<Task>('tasks');
+      for (final k in keys) {
+        final key = k is int ? k : int.tryParse('$k');
+        if (key != null && taskBox.containsKey(key)) {
+          final task = taskBox.get(key);
+          if (task != null && !task.isCompleted) {
+            task.isCompleted = true;
+            task.completedAt = DateTime.now();
+            await task.save();
+          }
+        }
+      }
+      // Прясно състояние → widget-ът показва актуалните задачи.
+      await _syncTasksToAppGroup();
+    } catch (e) {
+      debugPrint('iOS sync from widget error: $e');
     }
   }
 }

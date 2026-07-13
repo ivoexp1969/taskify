@@ -15,77 +15,66 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Нови инсталации НЕ го виждат (те виждат welcome диалога).
 class WhatsNewDialog {
   /// Билдът, за който са точките по-долу (= `pubspec.yaml` build number).
-  static const int _build = 62;
+  static const int _build = 63;
 
   static const String _prefKey = 'whats_new_seen_build';
 
   /// Точките за текущата версия, по език.
   static const Map<String, List<String>> _items = {
     'bg': [
-      'Бутон „+" в widget-а на началния екран — нова задача с едно докосване.',
-      'Widget-ът вече показва и твоя локален контекст: изтичащ документ, имен ден или празник.',
-      'Когато нямаш задачи за деня, widget-ът показва полезното (напр. „Винетката изтича след 3 дни").',
-      'Поправен рядък краш при рестарт на телефона.',
+      'Widget-ът вече показва и просрочените задачи, маркирани в червено.',
+      'Отмятай задачи направо от widget-а (iOS 17+) — без да отваряш приложението.',
+      'Прави картички за имени и рождени дни — с истинска снимка за фон.',
     ],
     'en': [
-      'A "+" button on the home-screen widget — add a task with one tap.',
-      'The widget now shows your local context: an expiring document, a name day or a holiday.',
-      'With no tasks for the day, the widget shows what actually matters (e.g. "Insurance expires in 3 days").',
-      'Fixed a rare crash after a phone restart.',
+      'The widget now shows overdue tasks too, marked in red.',
+      'Check off tasks right from the widget (iOS 17+) — no need to open the app.',
+      'Make greeting cards for name days and birthdays — with a real photo background.',
     ],
     'de': [
-      'Ein „+"-Button im Homescreen-Widget — neue Aufgabe mit einem Tippen.',
-      'Das Widget zeigt jetzt deinen lokalen Kontext: ablaufendes Dokument, Namenstag oder Feiertag.',
-      'Ohne Aufgaben zeigt das Widget das Wichtige (z.B. „Versicherung läuft in 3 Tagen ab").',
-      'Seltener Absturz nach Neustart des Telefons behoben.',
+      'Das Widget zeigt jetzt auch überfällige Aufgaben, rot markiert.',
+      'Hake Aufgaben direkt im Widget ab (iOS 17+) — ohne die App zu öffnen.',
+      'Erstelle Grußkarten für Namenstage und Geburtstage — mit echtem Foto-Hintergrund.',
     ],
     'fr': [
-      'Un bouton « + » sur le widget — nouvelle tâche en un seul geste.',
-      'Le widget affiche votre contexte local : document qui expire, fête du prénom ou jour férié.',
-      "Sans tâches, le widget affiche l'essentiel (ex. « L'assurance expire dans 3 jours »).",
-      'Correction d’un rare plantage après le redémarrage du téléphone.',
+      'Le widget affiche aussi les tâches en retard, marquées en rouge.',
+      "Coche les tâches directement depuis le widget (iOS 17+) — sans ouvrir l'app.",
+      'Crée des cartes pour les fêtes du prénom et les anniversaires — avec une vraie photo en fond.',
     ],
     'it': [
-      'Un pulsante "+" nel widget — nuova attività con un tocco.',
-      'Il widget mostra il tuo contesto locale: documento in scadenza, onomastico o festività.',
-      'Senza attività, il widget mostra ciò che conta (es. "L\'assicurazione scade tra 3 giorni").',
-      'Corretto un raro crash dopo il riavvio del telefono.',
+      'Il widget ora mostra anche le attività scadute, segnate in rosso.',
+      "Segna le attività direttamente dal widget (iOS 17+) — senza aprire l'app.",
+      'Crea cartoline per onomastici e compleanni — con una vera foto di sfondo.',
     ],
     'el': [
-      'Κουμπί «+» στο widget — νέα εργασία με ένα άγγιγμα.',
-      'Το widget δείχνει το τοπικό σου πλαίσιο: έγγραφο που λήγει, ονομαστική εορτή ή αργία.',
-      'Χωρίς εργασίες, το widget δείχνει το χρήσιμο (π.χ. «Η ασφάλεια λήγει σε 3 ημέρες»).',
-      'Διορθώθηκε σπάνιο crash μετά την επανεκκίνηση του τηλεφώνου.',
+      'Το widget δείχνει τώρα και τις εκπρόθεσμες εργασίες, με κόκκινο.',
+      'Τσέκαρε εργασίες κατευθείαν από το widget (iOS 17+) — χωρίς να ανοίξεις την εφαρμογή.',
+      'Φτιάξε κάρτες για ονομαστικές εορτές και γενέθλια — με πραγματική φωτογραφία φόντο.',
     ],
     'es': [
-      'Botón "+" en el widget — nueva tarea con un solo toque.',
-      'El widget muestra tu contexto local: documento que caduca, onomástica o festivo.',
-      'Sin tareas, el widget muestra lo útil (p. ej. "El seguro caduca en 3 días").',
-      'Corregido un fallo poco frecuente tras reiniciar el teléfono.',
+      'El widget ahora también muestra las tareas vencidas, marcadas en rojo.',
+      'Marca tareas directamente desde el widget (iOS 17+) — sin abrir la app.',
+      'Crea tarjetas para onomásticas y cumpleaños — con una foto real de fondo.',
     ],
     'pt': [
-      'Botão "+" no widget — nova tarefa com um toque.',
-      'O widget mostra o teu contexto local: documento a expirar, dia do nome ou feriado.',
-      'Sem tarefas, o widget mostra o que importa (ex. "O seguro expira em 3 dias").',
-      'Corrigida uma falha rara após reiniciar o telemóvel.',
+      'O widget mostra agora também as tarefas atrasadas, marcadas a vermelho.',
+      'Marca tarefas diretamente no widget (iOS 17+) — sem abrir a app.',
+      'Cria cartões para dias do nome e aniversários — com uma foto real de fundo.',
     ],
     'ru': [
-      'Кнопка «+» в виджете — новая задача одним касанием.',
-      'Виджет показывает ваш локальный контекст: истекающий документ, именины или праздник.',
-      'Когда задач нет, виджет показывает полезное (напр. «Страховка истекает через 3 дня»).',
-      'Исправлен редкий сбой после перезагрузки телефона.',
+      'Виджет теперь показывает и просроченные задачи, отмеченные красным.',
+      'Отмечай задачи прямо из виджета (iOS 17+) — не открывая приложение.',
+      'Создавай открытки на именины и дни рождения — с настоящим фото на фоне.',
     ],
     'tr': [
-      'Widget\'ta "+" düğmesi — tek dokunuşla yeni görev.',
-      'Widget artık yerel bağlamını gösteriyor: süresi dolan belge, isim günü veya tatil.',
-      'Görev yoksa widget işine yarayanı gösterir (örn. "Sigorta 3 gün içinde doluyor").',
-      'Telefon yeniden başlatıldığında görülen nadir çökme giderildi.',
+      'Widget artık gecikmiş görevleri de kırmızıyla gösteriyor.',
+      "Görevleri doğrudan widget'tan işaretle (iOS 17+) — uygulamayı açmadan.",
+      'İsim günleri ve doğum günleri için kart yap — gerçek fotoğraf arka planıyla.',
     ],
     'ja': [
-      'ホーム画面ウィジェットに「+」ボタン — ワンタップで新しいタスク。',
-      'ウィジェットがローカルな文脈を表示：期限切れ間近の書類、聖名祝日、祝日。',
-      'タスクがない日は、役立つ情報を表示（例「保険は3日後に期限切れ」）。',
-      '端末の再起動後にまれに発生するクラッシュを修正。',
+      'ウィジェットが期限切れのタスクも赤で表示するようになりました。',
+      'ウィジェットから直接タスクを完了（iOS 17以降）— アプリを開かずに。',
+      '聖名祝日や誕生日のカードを作成 — 本物の写真を背景に。',
     ],
   };
 
@@ -133,26 +122,28 @@ class WhatsNewDialog {
       builder: (ctx) => AlertDialog(
         icon: const Icon(Icons.auto_awesome, size: 44, color: Colors.amber),
         title: Text(version.isEmpty ? title : '$title — $version'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (final item in items)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(top: 3, right: 8),
-                      child: Icon(Icons.check_circle, size: 18,
-                          color: Colors.green),
-                    ),
-                    Expanded(child: Text(item)),
-                  ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final item in items)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(top: 3, right: 8),
+                        child: Icon(Icons.check_circle, size: 18,
+                            color: Colors.green),
+                      ),
+                      Expanded(child: Text(item)),
+                    ],
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
         actions: [
           TextButton(

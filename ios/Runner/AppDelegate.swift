@@ -19,9 +19,9 @@ import WidgetKit
     guard let controller = window?.rootViewController as? FlutterViewController else { return }
     let channel = FlutterMethodChannel(name: "com.ivoexp.taskify/widget", binaryMessenger: controller.binaryMessenger)
     channel.setMethodCallHandler { call, result in
+      let defaults = UserDefaults(suiteName: "group.com.ivoexp.taskify")
       if call.method == "syncToAppGroup", let args = call.arguments as? [String: Any],
          let tasks = args["tasks"] as? String {
-        let defaults = UserDefaults(suiteName: "group.com.ivoexp.taskify")
         defaults?.set(tasks, forKey: "flutter.widget_tasks")
         if let lang = args["language"] as? String {
           defaults?.set(lang, forKey: "flutter.app_language")
@@ -30,6 +30,11 @@ import WidgetKit
           WidgetCenter.shared.reloadAllTimelines()
         }
         result(nil)
+      } else if call.method == "getCompletedFromWidget" {
+        // Ключовете на задачите, отметнати от widget-а (AppIntent ги записа).
+        let keys = defaults?.array(forKey: "flutter.widget_completed") as? [Int] ?? []
+        defaults?.removeObject(forKey: "flutter.widget_completed")
+        result(keys)
       } else {
         result(FlutterMethodNotImplemented)
       }

@@ -1,5 +1,20 @@
 import WidgetKit
 import SwiftUI
+import AppIntents
+
+/// Парсва датата, която Flutter записва (ISO/локална без часова зона).
+func parseTaskDate(_ ds: String?) -> Date? {
+    guard let ds = ds else { return nil }
+    let iso = ISO8601DateFormatter()
+    iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    if let d = iso.date(from: ds) { return d }
+    iso.formatOptions = [.withInternetDateTime]
+    if let d = iso.date(from: ds) { return d }
+    let df = DateFormatter()
+    df.locale = Locale(identifier: "en_US_POSIX")
+    df.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+    return df.date(from: String(ds.prefix(19)))
+}
 
 struct TaskItem: Codable, Identifiable {
     let id = UUID()
@@ -10,6 +25,12 @@ struct TaskItem: Codable, Identifiable {
     let dueDate: String?
     let template: String?
     enum CodingKeys: String, CodingKey { case key, title, priority, isCompleted, dueDate, template }
+
+    /// Просрочена = денят на падежа е преди днешния (като Android). Маркира се червено.
+    var isOverdue: Bool {
+        guard let d = parseTaskDate(dueDate) else { return false }
+        return d < Calendar.current.startOfDay(for: Date())
+    }
 
     func displayTitle(lang: String) -> String {
         switch template {
@@ -130,10 +151,12 @@ struct TaskifyProvider: TimelineProvider {
         let today = cal.startOfDay(for: Date())
         let tomorrow = cal.date(byAdding: .day, value: 1, to: today)!
 
+        // Като Android: днешни + ПРОСРОЧЕНИ (всичко до утре). Dart вече ги е
+        // сортирал просрочените първи; prefix(3) запазва реда.
         let todayTasks = all.filter { task in
             guard !task.isCompleted, let ds = task.dueDate,
                   let d = parseDate(ds) else { return false }
-            return d >= today && d < tomorrow
+            return d < tomorrow
         }.prefix(3)
 
         return TaskEntry(date: Date(), tasks: Array(todayTasks), language: lang)
@@ -149,30 +172,76 @@ func dotColor(_ priority: Int) -> Color {
     }
 }
 
+let kOverdueColor = Color(red: 0.94, green: 0.33, blue: 0.31)
+
+/// AppIntent за отмятане на задача от widget-а (iOS 16+; интерактивен бутон iOS 17+).
+/// Записва ключа в App Group (`flutter.widget_completed`) → приложението го прибира
+/// в Hive при следващ фокус (WidgetService.syncFromWidget). Маха задачата веднага
+/// от `flutter.widget_tasks`, за да изчезне от widget-а без да чака app-а.
+@available(iOS 16.0, *)
+struct CompleteTaskIntent: AppIntent {
+    static var title: LocalizedStringResource = "Complete task"
+    @Parameter(title: "Task key") var key: Int
+    init() {}
+    init(key: Int) { self.key = key }
+
+    func perform() async throws -> some IntentResult {
+        let d = UserDefaults(suiteName: "group.com.ivoexp.taskify")
+        var completed = d?.array(forKey: "flutter.widget_completed") as? [Int] ?? []
+        if !completed.contains(key) { completed.append(key) }
+        d?.set(completed, forKey: "flutter.widget_completed")
+        // Махни от списъка веднага (маркирай isCompleted) → изчезва от widget-а.
+        if let json = d?.string(forKey: "flutter.widget_tasks"),
+           let data = json.data(using: .utf8),
+           var arr = (try? JSONSerialization.jsonObject(with: data)) as? [[String: Any]] {
+            arr = arr.map { item in
+                var it = item
+                if (it["key"] as? Int) == key { it["isCompleted"] = true }
+                return it
+            }
+            if let out = try? JSONSerialization.data(withJSONObject: arr),
+               let s = String(data: out, encoding: .utf8) {
+                d?.set(s, forKey: "flutter.widget_tasks")
+            }
+        }
+        WidgetCenter.shared.reloadAllTimelines()
+        return .result()
+    }
+}
+
 struct TaskRowView: View {
     let task: TaskItem
     let lang: String
+
+    @ViewBuilder private var checkbox: some View {
+        let box = RoundedRectangle(cornerRadius: 3)
+            .stroke((task.isOverdue ? kOverdueColor : Color.white).opacity(0.6), lineWidth: 1.4)
+            .frame(width: 16, height: 16)
+        if #available(iOS 17.0, *) {
+            Button(intent: CompleteTaskIntent(key: task.key)) { box }
+                .buttonStyle(.plain)
+        } else {
+            box  // iOS <17: не-интерактивно; тап върху widget-а отваря приложението
+        }
+    }
+
     var body: some View {
         HStack(spacing: 5) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 3)
-                    .stroke(Color.white.opacity(0.5), lineWidth: 1.2)
-                    .frame(width: 14, height: 14)
-            }
+            checkbox
             if task.priority > 0 {
                 Text("●")
                     .font(.system(size: 8))
                     .foregroundColor(dotColor(task.priority))
             }
             Text(task.displayTitle(lang: lang))
-                .font(.system(size: 14, weight: .regular))
-                .foregroundColor(.white)
+                .font(.system(size: 14, weight: task.isOverdue ? .semibold : .regular))
+                .foregroundColor(task.isOverdue ? kOverdueColor : .white)
                 .lineLimit(1)
             Spacer()
         }
         .padding(.horizontal, 5)
         .padding(.vertical, 4)
-        .background(Color.white.opacity(0.07))
+        .background((task.isOverdue ? kOverdueColor.opacity(0.14) : Color.white.opacity(0.07)))
         .cornerRadius(5)
     }
 }

@@ -126,7 +126,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       SyncService().syncNow();
-      if (!kIsWeb) _consumeWidgetAction(); // „+" от widget-а, докато app-ът върви
+      if (!kIsWeb) {
+        _consumeWidgetAction(); // „+" от widget-а, докато app-ът върви
+        WidgetService.syncFromWidget(); // отметки от widget-а (iOS чек-бутон)
+      }
     }
   }
 
