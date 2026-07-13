@@ -50,7 +50,12 @@ flutter build appbundle --release
 без този диалог новите функции остават неоткрити.
 
 ## Current Version
-**v1.0.51+61 (July 2026) — ЖИВА в Google Play Production (100%). Widget „+" бързо добавяне + локален
+**v1.0.52+62 (July 2026) — ЖИВА в Google Play Production (100%). ★КРАШ FIX★: `AndroidManifest.xml`
+декларираше компоненти на `android_alarm_manager_plus` (AlarmService/AlarmBroadcastReceiver/
+RebootBroadcastReceiver), а плъгинът НЕ е зависимост → липсващи класове → `ClassNotFoundException` при
+`BOOT_COMPLETED` (5 потребители, билдове 54/55/57). Махнати. Крашовете се четат с нов
+`tools/play_vitals.py` (Play Developer Reporting API).** ПРЕДИШНО:
+**v1.0.51+61 (July 2026) — Widget „+" бързо добавяне + локален
 контекст в widget-а (диференциаторът): изтичащ документ > имен ден > празник; при празен списък
 контекстът заменя закачливата фраза. Уважава Pro + toggle-ите. Нов „Какво ново" диалог след ъпдейт
 (11 ез.). Тествано на живо на Note 9. Качване: `tools/play_upload.py` (draft) + нов

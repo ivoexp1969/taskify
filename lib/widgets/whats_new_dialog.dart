@@ -15,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Нови инсталации НЕ го виждат (те виждат welcome диалога).
 class WhatsNewDialog {
   /// Билдът, за който са точките по-долу (= `pubspec.yaml` build number).
-  static const int _build = 61;
+  static const int _build = 62;
 
   static const String _prefKey = 'whats_new_seen_build';
 
@@ -25,56 +25,67 @@ class WhatsNewDialog {
       'Бутон „+" в widget-а на началния екран — нова задача с едно докосване.',
       'Widget-ът вече показва и твоя локален контекст: изтичащ документ, имен ден или празник.',
       'Когато нямаш задачи за деня, widget-ът показва полезното (напр. „Винетката изтича след 3 дни").',
+      'Поправен рядък краш при рестарт на телефона.',
     ],
     'en': [
       'A "+" button on the home-screen widget — add a task with one tap.',
       'The widget now shows your local context: an expiring document, a name day or a holiday.',
       'With no tasks for the day, the widget shows what actually matters (e.g. "Insurance expires in 3 days").',
+      'Fixed a rare crash after a phone restart.',
     ],
     'de': [
       'Ein „+"-Button im Homescreen-Widget — neue Aufgabe mit einem Tippen.',
       'Das Widget zeigt jetzt deinen lokalen Kontext: ablaufendes Dokument, Namenstag oder Feiertag.',
       'Ohne Aufgaben zeigt das Widget das Wichtige (z.B. „Versicherung läuft in 3 Tagen ab").',
+      'Seltener Absturz nach Neustart des Telefons behoben.',
     ],
     'fr': [
       'Un bouton « + » sur le widget — nouvelle tâche en un seul geste.',
       'Le widget affiche votre contexte local : document qui expire, fête du prénom ou jour férié.',
       "Sans tâches, le widget affiche l'essentiel (ex. « L'assurance expire dans 3 jours »).",
+      'Correction d’un rare plantage après le redémarrage du téléphone.',
     ],
     'it': [
       'Un pulsante "+" nel widget — nuova attività con un tocco.',
       'Il widget mostra il tuo contesto locale: documento in scadenza, onomastico o festività.',
       'Senza attività, il widget mostra ciò che conta (es. "L\'assicurazione scade tra 3 giorni").',
+      'Corretto un raro crash dopo il riavvio del telefono.',
     ],
     'el': [
       'Κουμπί «+» στο widget — νέα εργασία με ένα άγγιγμα.',
       'Το widget δείχνει το τοπικό σου πλαίσιο: έγγραφο που λήγει, ονομαστική εορτή ή αργία.',
       'Χωρίς εργασίες, το widget δείχνει το χρήσιμο (π.χ. «Η ασφάλεια λήγει σε 3 ημέρες»).',
+      'Διορθώθηκε σπάνιο crash μετά την επανεκκίνηση του τηλεφώνου.',
     ],
     'es': [
       'Botón "+" en el widget — nueva tarea con un solo toque.',
       'El widget muestra tu contexto local: documento que caduca, onomástica o festivo.',
       'Sin tareas, el widget muestra lo útil (p. ej. "El seguro caduca en 3 días").',
+      'Corregido un fallo poco frecuente tras reiniciar el teléfono.',
     ],
     'pt': [
       'Botão "+" no widget — nova tarefa com um toque.',
       'O widget mostra o teu contexto local: documento a expirar, dia do nome ou feriado.',
       'Sem tarefas, o widget mostra o que importa (ex. "O seguro expira em 3 dias").',
+      'Corrigida uma falha rara após reiniciar o telemóvel.',
     ],
     'ru': [
       'Кнопка «+» в виджете — новая задача одним касанием.',
       'Виджет показывает ваш локальный контекст: истекающий документ, именины или праздник.',
       'Когда задач нет, виджет показывает полезное (напр. «Страховка истекает через 3 дня»).',
+      'Исправлен редкий сбой после перезагрузки телефона.',
     ],
     'tr': [
       'Widget\'ta "+" düğmesi — tek dokunuşla yeni görev.',
       'Widget artık yerel bağlamını gösteriyor: süresi dolan belge, isim günü veya tatil.',
       'Görev yoksa widget işine yarayanı gösterir (örn. "Sigorta 3 gün içinde doluyor").',
+      'Telefon yeniden başlatıldığında görülen nadir çökme giderildi.',
     ],
     'ja': [
       'ホーム画面ウィジェットに「+」ボタン — ワンタップで新しいタスク。',
       'ウィジェットがローカルな文脈を表示：期限切れ間近の書類、聖名祝日、祝日。',
       'タスクがない日は、役立つ情報を表示（例「保険は3日後に期限切れ」）。',
+      '端末の再起動後にまれに発生するクラッシュを修正。',
     ],
   };
 

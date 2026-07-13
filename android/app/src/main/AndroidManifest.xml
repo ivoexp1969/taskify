@@ -107,23 +107,13 @@
         <receiver
             android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver"
             android:exported="false" />
-        <!-- Service за android_alarm_manager_plus -->
-        <service
-            android:name="dev.fluttercommunity.plus.androidalarmmanager.AlarmService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="false" />
-        <receiver
-            android:name="dev.fluttercommunity.plus.androidalarmmanager.AlarmBroadcastReceiver"
-            android:exported="false" />
-        <receiver
-            android:name="dev.fluttercommunity.plus.androidalarmmanager.RebootBroadcastReceiver"
-            android:enabled="false"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-    
+        <!-- ★КРАШ FIX★ Тук стояха ръчно декларирани компоненти на
+             `android_alarm_manager_plus` (AlarmService / AlarmBroadcastReceiver /
+             RebootBroadcastReceiver), но плъгинът НЕ е зависимост (няма го нито в
+             pubspec, нито в кода) → класовете липсват в APK-то и при BOOT_COMPLETED
+             Android гърмеше с ClassNotFoundException („Unable to instantiate receiver").
+             Виждаше се в Play vitals (билдове 54/55/57). Не ги връщай без плъгина. -->
+
         <receiver android:name=".TaskWidgetLargeProvider" android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

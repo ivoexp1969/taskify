@@ -6,6 +6,20 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-13 · PC — ★КРАШ FIX★ мъртви `android_alarm_manager_plus` компоненти в манифеста → v1.0.52+62
+Проверка на крашовете след rollout-а на 1.0.51 извади **реален краш при рестарт на телефона**:
+`RuntimeException: Unable to instantiate receiver dev.fluttercommunity.plus.androidalarmmanager.
+RebootBroadcastReceiver` → `ClassNotFoundException`. **5 потребители**, билдове 54/55/57, Android 14–16.
+- **Root cause:** `AndroidManifest.xml` декларираше `AlarmService` + `AlarmBroadcastReceiver` +
+  `RebootBroadcastReceiver` на **`android_alarm_manager_plus`, който НЕ е зависимост** (няма го в
+  `pubspec.yaml`, `pubspec.lock`, нито в кода) → класовете липсват в APK-то, но манифестът ги обещава
+  → при `BOOT_COMPLETED` Android ги инстанцира и гърми. Махнати (с коментар да не се връщат).
+  Верифицирано в готовото APK с `aapt2 dump xmltree` (нула `androidalarmmanager` записа).
+- **Нов инструмент `tools/play_vitals.py`** — crash rate + топ крашове през Play Developer Reporting API
+  (потребителят включи API-то в GCP проекта `taskify-1969`; service account-ът НЯМА право да го включва).
+  Данните изостават ~1 ден (API-то отказва край след „freshness" датата → скриптът я чете сам).
+- v1.0.52+62 качена и **пусната на 100% в Production**; „Какво ново" точка за фикса на 11 езика.
+
 ## 2026-07-13 · PC — Widget „+" + локален контекст + ★НОВО ПРАВИЛО: „Какво ново" диалог★ → v1.0.51+61
 Android home-screen widget-ът получи бързо добавяне и локалния контекст (диференциаторът на Taskify).
 - **„+" бързо добавяне (и трите размера):** нов `WidgetActions.kt` (`PendingIntent.getActivity`, action
