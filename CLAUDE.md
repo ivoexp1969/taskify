@@ -97,6 +97,17 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **Именник SEO: значения на имена + og:image/breadcrumb/lastmod (PC, 2026-07-15, само уеб, БЕЗ app bump):**
+  Задачата „SEO страници за имена дни" — ★системата ВЕЧЕ съществуваше и е жива★: `tools/nameday_seo.py`
+  (от 2026-07-11) генерира **821 статични страници** от `assets/data/bg_name_days.json` (700 по име
+  `/imen-den/ime/{slug}/`, 120 по дата, хъб, sitemap; плаващи празници = православен Великден + offset,
+  динамично). Единствената дупка = **тънки/еднакви страници**. Добавено (само `nameday_seo.py`):
+  (1) `MEANINGS` — **40 популярни имена** с авторски текст за значението/произхода → H2 „Какво означава
+  името X?" + втори FAQ въпрос; (2) изрична бележка за **46-те плаващи имена**; (3) бързи SEO:
+  `og:image`+Twitter Card (споделяне с картинка), **BreadcrumbList** JSON-LD, `<lastmod>` в sitemap.
+  Всички 821 title-а уникални; JSON-LD валиден. Deploy `wrangler pages deploy . --project-name=taskify`
+  (★сайт=`taskify`, app=`taskify-app`; хостинг = **Cloudflare Pages**, Namecheap само домейн★).
+  Разширяване: добавяш имена в `MEANINGS` → run → copy → deploy. iOS/Android НЕ засегнати (само уеб).
 - **Widget „+" + локален контекст + „Какво ново" диалог → v1.0.51+61 (PC, 2026-07-13):**
   (1) **„+" в трите размера widget** → `WidgetActions.kt` (`PendingIntent.getActivity`, action
   `ACTION_NEW_TASK`, уникална data → `onNewIntent`); `MainActivity` пази `pendingWidgetAction` и го дава
