@@ -94,8 +94,14 @@ padding:30px 22px;text-align:center;box-shadow:0 4px 18px rgba(74,40,170,.08);tr
 """
 
 
+OG_IMAGE = "https://taskify1969.com/assets/og-image.png"
+
+
 def page(title, desc, canonical, body, jsonld=None):
-    ld = f'<script type="application/ld+json">{json.dumps(jsonld, ensure_ascii=False)}</script>' if jsonld else ""
+    # jsonld може да е един dict или списък от dict-ове (напр. FAQPage + BreadcrumbList).
+    blocks = [] if jsonld is None else (jsonld if isinstance(jsonld, list) else [jsonld])
+    ld = "".join(f'<script type="application/ld+json">{json.dumps(b, ensure_ascii=False)}</script>'
+                 for b in blocks)
     return f"""<!DOCTYPE html><html lang="bg"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(title)}</title>
@@ -103,7 +109,11 @@ def page(title, desc, canonical, body, jsonld=None):
 <link rel="canonical" href="{canonical}">
 <meta property="og:type" content="website"><meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(desc)}"><meta property="og:url" content="{canonical}">
+<meta property="og:image" content="{OG_IMAGE}"><meta property="og:locale" content="bg_BG">
 <meta property="og:site_name" content="Taskify"><meta name="robots" content="index,follow">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{esc(title)}"><meta name="twitter:description" content="{esc(desc)}">
+<meta name="twitter:image" content="{OG_IMAGE}">
 <style>{CSS}</style>{ld}</head><body>
 <header><div class="brand">Taskify</div></header><div class="wrap">{body}</div>
 <footer>Направено с любов от <a href="https://taskify1969.com">Taskify</a> —
@@ -350,7 +360,10 @@ def main():
         if n in MEANINGS:
             faq.append({"@type":"Question","name":f"Какво означава името {n}?",
                         "acceptedAnswer":{"@type":"Answer","text":MEANINGS[n]}})
-        ld = {"@context":"https://schema.org","@type":"FAQPage","mainEntity":faq}
+        crumb = {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+            {"@type":"ListItem","position":1,"name":"Именник","item":f"{BASE}/"},
+            {"@type":"ListItem","position":2,"name":n,"item":url}]}
+        ld = [{"@context":"https://schema.org","@type":"FAQPage","mainEntity":faq}, crumb]
         write(os.path.join(OUT, "ime", s, "index.html"),
               page(title, desc, url, body, ld)); pages += 1
 
@@ -365,8 +378,11 @@ def main():
 <div class="names">{''.join(f'<a href="{BASE}/ime/{slugs[x]}/">{esc(x)}</a>' for x in names)}</div>
 {CTA_BLOCK}
 <p>Taskify ти напомня за всеки имен ден и официален празник — безплатно, на български.</p>"""
+        crumb = {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+            {"@type":"ListItem","position":1,"name":"Именник","item":f"{BASE}/"},
+            {"@type":"ListItem","position":2,"name":lab,"item":url}]}
         write(os.path.join(OUT, "data", mmdd, "index.html"),
-              page(title, desc, url, body)); pages += 1
+              page(title, desc, url, body, crumb)); pages += 1
 
     # ---- HUB /imen-den/ ----
     all_names = sorted(name_dates)
@@ -404,8 +420,9 @@ else{{el.textContent='Днес няма голям имен ден по кале
     # ---- sitemap ----
     urls = [f"{BASE}/"] + [f"{BASE}/ime/{slugs[n]}/" for n in all_names] + \
            [f"{BASE}/data/{mmdd}/" for _, mmdd, _, _ in date_entries]
+    today = datetime.date.today().isoformat()
     sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    sm += "".join(f"<url><loc>{u}</loc></url>\n" for u in urls) + "</urlset>\n"
+    sm += "".join(f"<url><loc>{u}</loc><lastmod>{today}</lastmod></url>\n" for u in urls) + "</urlset>\n"
     write(os.path.join(OUT, "sitemap.xml"), sm)
 
     print(f"OUT: {OUT}")
