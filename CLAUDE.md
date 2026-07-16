@@ -282,3 +282,15 @@ single shared source of truth across machines. Therefore:
 Actively seeking realistic revenue opportunities — assist proactively across:
 - Taskify (subscriptions, ads, premium features)
 - Facebook group "УМОПОМРАЧИТЕЛНИ БАЛАДИ" (197,000+ members)
+
+<!-- BUILD-NOTES-ANDROID -->
+## Android release build — задължителни стъпки
+
+Преди ВСЕКИ release билд (aab/apk за Google Play):
+
+1. `flutter clean` — ЗАДЪЛЖИТЕЛНО. AndroidManifest.xml е променян ръчно (16.07.2026, добавен USE_FULL_SCREEN_INTENT). Без clean merge-натият manifest може да остане кеширан.
+2. targetSdk = 36 / compileSdk = 36 — изискване на Google Play (нови submissions след 31.08.2026). НЕ понижавай.
+3. USE_FULL_SCREEN_INTENT в `android/app/src/main/AndroidManifest.xml` — НЕ премахвай. Нужно е за full-screen нотификации на алармите на Android 14+/API 36; без него алармите не се задействат на цял екран.
+
+След билд: провери че merged manifest съдържа USE_FULL_SCREEN_INTENT (build/app/intermediates/merged_manifests/).
+<!-- /BUILD-NOTES-ANDROID -->
