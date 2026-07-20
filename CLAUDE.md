@@ -97,6 +97,23 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **★Училищен режим★ (българска учебна година + обратно броене до ваканция) (PC, 2026-07-20, БЕЗ app bump):**
+  Нова функция за ученици; ядрото = **обратно броене до следваща ваканция** („Още N дни до Коледната
+  ваканция 🎄"). Диференциатор: приложението знае БГ учебната година (ваканции/срокове/НВО/ДЗИ).
+  Архитектура = **1:1 копие на `renewal_offers`**: Firestore колекция `school_calendar` (документ по
+  учебна година `bg_YYYY_YYYY`) + вграден JSON fallback + 24ч кеш + `revision` ValueNotifier. ★Датите
+  НЕ са хардкоднати★ — Иво пълни един Firestore документ веднъж годишно по заповед на МОН, без нов билд;
+  при липса → **честно празно състояние, НЕ гадаем**. Нови: `models/school_calendar.dart` (чиста
+  тествана логика `computeCountdown`/`gradeMatches`), `services/school_calendar_service.dart`,
+  `widgets/school_countdown_card.dart` (реактивна карта, 11 ез.), `assets/data/school_calendar_bg.json`
+  (seed 2025/2026 `official:false`+TODO), `test/school_calendar_test.dart` (**14 теста ✅**). Краят на
+  годината е РАЗЛИЧЕН по клас (I–III/IV–VI/VII–XI/XII) → потребителят избира клас при включване. Карта
+  в Tasks под productivity банера (скрива се при изкл.); toggle+клас+„Добави предмети" (предметите=
+  обикновени категории) в BG секцията на Настройки; `firestore.rules` ново read правило за
+  `school_calendar`. Режимът е **БЕЗПЛАТЕН** (виралната кука движи инсталации). **Чист Dart → iOS=само
+  Mac билд** (Firestore вече в Podfile). analyze 0 issues. ОСТАВА за Иво: попълни реалните дати в
+  Firestore Console (`school_calendar/bg_2026_2027`, `official:true`) + `firebase deploy --only
+  firestore:rules`. Опц. пропусната: AI „домашно по математика" (server-side worker).
 - **Именник SEO: значения на имена + og:image/breadcrumb/lastmod (PC, 2026-07-15, само уеб, БЕЗ app bump):**
   Задачата „SEO страници за имена дни" — ★системата ВЕЧЕ съществуваше и е жива★: `tools/nameday_seo.py`
   (от 2026-07-11) генерира **821 статични страници** от `assets/data/bg_name_days.json` (700 по име

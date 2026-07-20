@@ -22,6 +22,7 @@ import '../../widgets/reminder_selector.dart';
 import '../../services/widget_service.dart';
 import '../../services/ad_service.dart';
 import '../../widgets/celebration_overlay.dart';
+import '../../widgets/school_countdown_card.dart';
 import '../../services/review_service.dart';
 import 'shopping_list_screen.dart';
 import 'task_type_selector.dart';
@@ -2669,6 +2670,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
               children: [
             // Productivity banner — streak + today's score
             _ProductivityBanner(taskBox: taskBox),
+
+            // „Училищен режим": обратно броене до следваща ваканция (само при
+            // включен режим; сама се скрива иначе). Реактивна.
+            const SchoolCountdownCard(),
 
             // Статистика - нов дизайн
             Padding(

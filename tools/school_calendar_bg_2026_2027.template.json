@@ -1,0 +1,35 @@
+{
+  "_INSTRUCTIONS": "Шаблон за Firestore документ school_calendar/bg_2026_2027. Попълни СAMO датите (ISO 'YYYY-MM-DD') по ОФИЦИАЛНАТА заповед на МОН за учебната 2026/2027 г. Изтрий полетата с '', които не важат. Когато датите са потвърдени по заповед → official: true. Качване: python tools/school_calendar_upload.py tools/school_calendar_bg_2026_2027.template.json  (или ръчно paste в Firebase Console). НЕ измисляй дати — ако заповедта още не е издадена, НЕ качвай документа (приложението ще покаже честно празно състояние).",
+  "docId": "bg_2026_2027",
+  "data": {
+    "year": "2026/2027",
+    "country": "bg",
+    "enabled": true,
+    "official": false,
+    "sourceNote": "Заповед № ... на МОН (попълни номер и дата)",
+    "startOfYear": "",
+    "terms": [
+      { "name": "Първи срок", "start": "", "end": "" },
+      { "name": "Втори срок", "start": "", "end": "" }
+    ],
+    "vacations": [
+      { "key": "autumn",  "name": "Есенна ваканция",      "start": "", "end": "" },
+      { "key": "winter",  "name": "Коледна ваканция",     "start": "", "end": "" },
+      { "key": "midterm", "name": "Междусрочна ваканция", "start": "", "end": "" },
+      { "key": "spring",  "name": "Пролетна ваканция",    "start": "", "end": "", "grades": "1-11" },
+      { "key": "spring",  "name": "Пролетна ваканция",    "start": "", "end": "", "grades": "12" }
+    ],
+    "endOfYear": [
+      { "grades": "1-3",  "date": "" },
+      { "grades": "4-6",  "date": "" },
+      { "grades": "7-11", "date": "" },
+      { "grades": "12",   "date": "" }
+    ],
+    "exams": [
+      { "key": "nvo7_bel", "name": "НВО 7. клас — БЕЛ",        "date": "", "grades": "7" },
+      { "key": "nvo7_mat", "name": "НВО 7. клас — Математика", "date": "", "grades": "7" },
+      { "key": "dzi_bel",  "name": "ДЗИ — БЕЛ",                "date": "", "grades": "12" },
+      { "key": "dzi_2",    "name": "ДЗИ — втори предмет",      "date": "", "grades": "12" }
+    ]
+  }
+}

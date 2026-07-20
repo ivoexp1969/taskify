@@ -36,6 +36,7 @@ import '../../services/morning_briefing_service.dart';
 import '../../services/name_days_service.dart';
 import '../../services/contact_name_index.dart';
 import '../../services/holidays_service.dart';
+import '../../services/school_calendar_service.dart';
 import '../../services/pro_service.dart';
 import '../paywall/paywall_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -67,6 +68,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _contactsNameDayEnabled = false;
   bool _holidaysEnabled = false;
   String _holidaysCountry = 'BG';
+  bool _schoolModeEnabled = false;
+  int? _schoolGrade;
   StreamSubscription<dynamic>? _authSub;
 
   @override
@@ -76,6 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadMorningBriefingSetting();
     _loadNameDaysSetting();
     _loadHolidaysSetting();
+    _loadSchoolModeSetting();
     _checkCalendarConnection();
     if (!kIsWeb && Platform.isIOS) _checkIosCalendarPermission();
     // Този екран живее в IndexedStack и се build-ва още при стартиране,
@@ -142,6 +146,641 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _nameDaysEnabled = prefs.getBool('name_days_enabled') ?? false;
       _contactsNameDayEnabled = contactsOn;
     });
+  }
+
+  Future<void> _loadSchoolModeSetting() async {
+    final enabled = await SchoolCalendarService().loadEnabled();
+    if (!mounted) return;
+    setState(() {
+      _schoolModeEnabled = enabled;
+      _schoolGrade = SchoolCalendarService().grade;
+    });
+  }
+
+  /// Локализирано „N. клас" за избора на клас (1–12).
+  String _gradeLabel(String lang, int g) {
+    const suffix = {
+      'en': 'Grade', 'bg': 'клас', 'de': 'Klasse', 'fr': 'classe',
+      'it': 'classe', 'el': 'τάξη', 'es': 'grado', 'pt': 'ano',
+      'ru': 'класс', 'tr': 'sınıf', 'ja': '年生',
+    };
+    final s = suffix[lang] ?? suffix['en']!;
+    // Английски/немски: „Grade 7"; останалите: „7. клас" / „7 sınıf".
+    if (lang == 'en' || lang == 'de') return '$s $g';
+    if (lang == 'ja') return '$g$s';
+    if (lang == 'tr') return '$g. $s';
+    return '$g. $s';
+  }
+
+  /// Диалог за избор на клас (1–12). Връща избрания клас или null.
+  Future<int?> _pickGrade(BuildContext context, String lang) async {
+    String tr(Map<String, String> m) => m[lang] ?? m['en']!;
+    const question = {
+      'en': 'Which grade are you in?', 'bg': 'В кой клас си?',
+      'de': 'In welcher Klasse bist du?', 'fr': 'Tu es en quelle classe ?',
+      'it': 'In che classe sei?', 'el': 'Σε ποια τάξη είσαι;',
+      'es': '¿En qué grado estás?', 'pt': 'Em que ano estás?',
+      'ru': 'В каком ты классе?', 'tr': 'Hangi sınıftasın?', 'ja': '何年生ですか？',
+    };
+    return showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr(question)),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: List.generate(12, (i) {
+              final g = i + 1;
+              final selected = _schoolGrade == g;
+              return ChoiceChip(
+                label: Text('$g'),
+                selected: selected,
+                onSelected: (_) => Navigator.pop(ctx, g),
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Учебни предмети, предлагани при включване на режима (id → цвят + имена +
+  /// диапазон класове `min..max`, в който предметът обикновено се учи в БГ).
+  /// Преизползват съществуващата система за категории (НЕ строим паралелна).
+  ///
+  /// Диапазоните са ОРИЕНТИРОВЪЧНИ (учебният план се мени): начални класове нямат
+  /// Физика/Химия/Биология (те са от 7. клас); История/География са от 5. клас;
+  /// природознанието е слято до 6. клас. Потребителят решава — оттук и опцията за
+  /// собствен предмет. При съмнение → по-широк диапазон, за да не крием предмет.
+  static const List<
+      ({String id, int color, int min, int max, Map<String, String> name})>
+      _allSubjects = [
+    (id: 'subj_math', color: 0xFF3498DB, min: 1, max: 12, name: {
+      'en': 'Math', 'bg': 'Математика', 'de': 'Mathe', 'fr': 'Maths',
+      'it': 'Matematica', 'el': 'Μαθηματικά', 'es': 'Matemáticas',
+      'pt': 'Matemática', 'ru': 'Математика', 'tr': 'Matematik', 'ja': '数学',
+    }),
+    (id: 'subj_bel', color: 0xFFE74C3C, min: 1, max: 12, name: {
+      'en': 'Language & Lit.', 'bg': 'БЕЛ', 'de': 'Sprache & Lit.',
+      'fr': 'Langue & Litt.', 'it': 'Lingua e Lett.', 'el': 'Γλώσσα & Λογ.',
+      'es': 'Lengua y Lit.', 'pt': 'Língua e Lit.', 'ru': 'Язык и лит.',
+      'tr': 'Dil ve Ed.', 'ja': '国語',
+    }),
+    (id: 'subj_en', color: 0xFF9B59B6, min: 1, max: 12, name: {
+      'en': 'English', 'bg': 'Английски', 'de': 'Englisch', 'fr': 'Anglais',
+      'it': 'Inglese', 'el': 'Αγγλικά', 'es': 'Inglés', 'pt': 'Inglês',
+      'ru': 'Английский', 'tr': 'İngilizce', 'ja': '英語',
+    }),
+    // Начален етап: слято природознание/родинознание (1–6 клас).
+    (id: 'subj_nature', color: 0xFF1ABC9C, min: 1, max: 6, name: {
+      'en': 'Nature study', 'bg': 'Човекът и природата',
+      'de': 'Sachkunde', 'fr': 'Découverte du monde',
+      'it': 'Scienze (base)', 'el': 'Μελέτη περιβάλλοντος',
+      'es': 'Conocimiento del medio', 'pt': 'Estudo do meio',
+      'ru': 'Окружающий мир', 'tr': 'Hayat bilgisi', 'ja': '生活科',
+    }),
+    (id: 'subj_history', color: 0xFFD35400, min: 5, max: 12, name: {
+      'en': 'History', 'bg': 'История', 'de': 'Geschichte', 'fr': 'Histoire',
+      'it': 'Storia', 'el': 'Ιστορία', 'es': 'Historia', 'pt': 'História',
+      'ru': 'История', 'tr': 'Tarih', 'ja': '歴史',
+    }),
+    (id: 'subj_geo', color: 0xFF16A085, min: 5, max: 12, name: {
+      'en': 'Geography', 'bg': 'География', 'de': 'Geografie',
+      'fr': 'Géographie', 'it': 'Geografia', 'el': 'Γεωγραφία',
+      'es': 'Geografía', 'pt': 'Geografia', 'ru': 'География',
+      'tr': 'Coğrafya', 'ja': '地理',
+    }),
+    (id: 'subj_bio', color: 0xFF27AE60, min: 7, max: 12, name: {
+      'en': 'Biology', 'bg': 'Биология', 'de': 'Biologie', 'fr': 'Biologie',
+      'it': 'Biologia', 'el': 'Βιολογία', 'es': 'Biología', 'pt': 'Biologia',
+      'ru': 'Биология', 'tr': 'Biyoloji', 'ja': '生物',
+    }),
+    (id: 'subj_chem', color: 0xFF2980B9, min: 7, max: 12, name: {
+      'en': 'Chemistry', 'bg': 'Химия', 'de': 'Chemie', 'fr': 'Chimie',
+      'it': 'Chimica', 'el': 'Χημεία', 'es': 'Química', 'pt': 'Química',
+      'ru': 'Химия', 'tr': 'Kimya', 'ja': '化学',
+    }),
+    (id: 'subj_phys', color: 0xFF8E44AD, min: 7, max: 12, name: {
+      'en': 'Physics', 'bg': 'Физика', 'de': 'Physik', 'fr': 'Physique',
+      'it': 'Fisica', 'el': 'Φυσική', 'es': 'Física', 'pt': 'Física',
+      'ru': 'Физика', 'tr': 'Fizik', 'ja': '物理',
+    }),
+    (id: 'subj_it', color: 0xFF34495E, min: 3, max: 12, name: {
+      'en': 'IT', 'bg': 'Информатика', 'de': 'Informatik',
+      'fr': 'Informatique', 'it': 'Informatica', 'el': 'Πληροφορική',
+      'es': 'Informática', 'pt': 'Informática', 'ru': 'Информатика',
+      'tr': 'Bilişim', 'ja': '情報',
+    }),
+    (id: 'subj_music', color: 0xFFEC407A, min: 1, max: 12, name: {
+      'en': 'Music', 'bg': 'Музика', 'de': 'Musik', 'fr': 'Musique',
+      'it': 'Musica', 'el': 'Μουσική', 'es': 'Música', 'pt': 'Música',
+      'ru': 'Музыка', 'tr': 'Müzik', 'ja': '音楽',
+    }),
+    (id: 'subj_art', color: 0xFFAB47BC, min: 1, max: 12, name: {
+      'en': 'Art', 'bg': 'Изобразително изкуство', 'de': 'Kunst',
+      'fr': 'Arts plastiques', 'it': 'Arte', 'el': 'Εικαστικά',
+      'es': 'Plástica', 'pt': 'Artes', 'ru': 'ИЗО', 'tr': 'Resim',
+      'ja': '美術',
+    }),
+    (id: 'subj_pe', color: 0xFFE67E22, min: 1, max: 12, name: {
+      'en': 'PE', 'bg': 'Физическо', 'de': 'Sport', 'fr': 'EPS',
+      'it': 'Ed. Fisica', 'el': 'Φυσική Αγωγή', 'es': 'Ed. Física',
+      'pt': 'Ed. Física', 'ru': 'Физкультура', 'tr': 'Beden', 'ja': '体育',
+    }),
+    (id: 'subj_tech', color: 0xFF795548, min: 1, max: 12, name: {
+      'en': 'Technology', 'bg': 'Технологии', 'de': 'Technik',
+      'fr': 'Technologie', 'it': 'Tecnologia', 'el': 'Τεχνολογία',
+      'es': 'Tecnología', 'pt': 'Tecnologia', 'ru': 'Технологии',
+      'tr': 'Teknoloji', 'ja': '技術',
+    }),
+  ];
+
+  /// Предметите, подходящи за клас [grade] (по ориентировъчния диапазон).
+  static List<({String id, int color, int min, int max, Map<String, String> name})>
+      _subjectsForGrade(int? grade) {
+    if (grade == null) return _allSubjects;
+    return _allSubjects
+        .where((s) => grade >= s.min && grade <= s.max)
+        .toList();
+  }
+
+  /// Диалог за избор на предмети (съобразени с класа) + собствен предмет →
+  /// добавя избраните като категории.
+  Future<void> _pickSubjects(BuildContext context, String lang) async {
+    String tr(Map<String, String> m) => m[lang] ?? m['en']!;
+    const title = {
+      'en': 'Add school subjects', 'bg': 'Добави училищни предмети',
+      'de': 'Schulfächer hinzufügen', 'fr': 'Ajouter des matières',
+      'it': 'Aggiungi materie', 'el': 'Πρόσθεσε μαθήματα',
+      'es': 'Añadir asignaturas', 'pt': 'Adicionar disciplinas',
+      'ru': 'Добавить предметы', 'tr': 'Ders ekle', 'ja': '教科を追加',
+    };
+    const hint = {
+      'en': 'Selected subjects become task categories.',
+      'bg': 'Избраните предмети стават категории за задачи.',
+      'de': 'Ausgewählte Fächer werden zu Aufgaben-Kategorien.',
+      'fr': 'Les matières choisies deviennent des catégories.',
+      'it': 'Le materie scelte diventano categorie.',
+      'el': 'Τα επιλεγμένα μαθήματα γίνονται κατηγορίες.',
+      'es': 'Las asignaturas elegidas se vuelven categorías.',
+      'pt': 'As disciplinas escolhidas viram categorias.',
+      'ru': 'Выбранные предметы станут категориями.',
+      'tr': 'Seçilen dersler kategoriye dönüşür.', 'ja': '選んだ教科はカテゴリになります。',
+    };
+    const addBtn = {
+      'en': 'Add', 'bg': 'Добави', 'de': 'Hinzufügen', 'fr': 'Ajouter',
+      'it': 'Aggiungi', 'el': 'Πρόσθεσε', 'es': 'Añadir', 'pt': 'Adicionar',
+      'ru': 'Добавить', 'tr': 'Ekle', 'ja': '追加',
+    };
+    const cancelBtn = {
+      'en': 'Cancel', 'bg': 'Отказ', 'de': 'Abbrechen', 'fr': 'Annuler',
+      'it': 'Annulla', 'el': 'Άκυρο', 'es': 'Cancelar', 'pt': 'Cancelar',
+      'ru': 'Отмена', 'tr': 'İptal', 'ja': 'キャンセル',
+    };
+    const limitMsg = {
+      'en': 'Category limit reached — upgrade to Pro for more.',
+      'bg': 'Достигнат лимит на категориите — Pro дава повече.',
+      'de': 'Kategorielimit erreicht — Pro für mehr.',
+      'fr': 'Limite de catégories atteinte — passe à Pro.',
+      'it': 'Limite categorie raggiunto — passa a Pro.',
+      'el': 'Όριο κατηγοριών — αναβάθμιση σε Pro.',
+      'es': 'Límite de categorías — pásate a Pro.',
+      'pt': 'Limite de categorias — passa a Pro.',
+      'ru': 'Лимит категорий — оформи Pro.',
+      'tr': 'Kategori limiti — Pro\'ya geç.', 'ja': 'カテゴリ上限です — Proで解除。',
+    };
+
+    const addOwn = {
+      'en': '+ Add your own', 'bg': '+ Добави свой', 'de': '+ Eigenes',
+      'fr': '+ Le tien', 'it': '+ Il tuo', 'el': '+ Δικό σου',
+      'es': '+ El tuyo', 'pt': '+ O teu', 'ru': '+ Свой',
+      'tr': '+ Kendi dersin', 'ja': '+ 自分の教科',
+    };
+    const ownPrompt = {
+      'en': 'New subject', 'bg': 'Нов предмет', 'de': 'Neues Fach',
+      'fr': 'Nouvelle matière', 'it': 'Nuova materia', 'el': 'Νέο μάθημα',
+      'es': 'Nueva asignatura', 'pt': 'Nova disciplina', 'ru': 'Новый предмет',
+      'tr': 'Yeni ders', 'ja': '新しい教科',
+    };
+
+    final box = Hive.box<Category>('categories');
+    final selected = <String>{};
+    final customNames = <String>[]; // собствени предмети (свободен текст)
+
+    // Палитра за собствените предмети (циклично).
+    const customColors = [
+      0xFF00897B, 0xFF5E35B1, 0xFFC0392B, 0xFF00838F, 0xFF6D4C41
+    ];
+
+    Future<String?> promptCustom() {
+      final ctrl = TextEditingController();
+      return showDialog<String>(
+        context: context,
+        builder: (c) => AlertDialog(
+          title: Text(tr(ownPrompt)),
+          content: TextField(
+            controller: ctrl,
+            autofocus: true,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: InputDecoration(hintText: tr(ownPrompt)),
+            onSubmitted: (v) => Navigator.pop(c, v.trim()),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(c),
+                child: Text(tr(cancelBtn))),
+            FilledButton(
+                onPressed: () => Navigator.pop(c, ctrl.text.trim()),
+                child: Text(tr(addBtn))),
+          ],
+        ),
+      );
+    }
+
+    final gradeSubjects = _subjectsForGrade(_schoolGrade);
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          title: Text(tr(title)),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(tr(hint),
+                      style: const TextStyle(fontSize: 12.5, color: Colors.grey)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      ...gradeSubjects.map((s) {
+                        final exists = box.containsKey(s.id);
+                        final isSel = selected.contains(s.id) || exists;
+                        return FilterChip(
+                          label: Text(tr(s.name)),
+                          selected: isSel,
+                          onSelected: exists
+                              ? null
+                              : (v) => setLocal(() {
+                                    if (v) {
+                                      selected.add(s.id);
+                                    } else {
+                                      selected.remove(s.id);
+                                    }
+                                  }),
+                          avatar: CircleAvatar(
+                              backgroundColor: Color(s.color), radius: 6),
+                        );
+                      }),
+                      // Вече добавени собствени предмети (селектирани по подр.).
+                      ...customNames.map((n) => FilterChip(
+                            label: Text(n),
+                            selected: true,
+                            onSelected: (_) =>
+                                setLocal(() => customNames.remove(n)),
+                          )),
+                      // Бутон „+ Добави свой".
+                      ActionChip(
+                        avatar: const Icon(Icons.add, size: 18),
+                        label: Text(tr(addOwn)),
+                        onPressed: () async {
+                          final name = await promptCustom();
+                          if (name != null && name.isNotEmpty) {
+                            setLocal(() => customNames.add(name));
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(tr(cancelBtn))),
+            FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(tr(addBtn))),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed != true || (selected.isEmpty && customNames.isEmpty)) return;
+
+    bool hitLimit = false;
+    // Предефинирани предмети.
+    for (final s in _allSubjects) {
+      if (!selected.contains(s.id)) continue;
+      if (box.containsKey(s.id)) continue;
+      if (!ProService().canAddCategory(box.length)) {
+        hitLimit = true;
+        break;
+      }
+      await box.put(
+        s.id,
+        Category(id: s.id, name: tr(s.name), colorValue: s.color),
+      );
+    }
+    // Собствени предмети.
+    for (var i = 0; i < customNames.length && !hitLimit; i++) {
+      if (!ProService().canAddCategory(box.length)) {
+        hitLimit = true;
+        break;
+      }
+      final id = 'subj_custom_${DateTime.now().microsecondsSinceEpoch}_$i';
+      await box.put(
+        id,
+        Category(
+          id: id,
+          name: customNames[i],
+          colorValue: customColors[i % customColors.length],
+        ),
+      );
+    }
+    if (mounted && hitLimit) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(tr(limitMsg))));
+    }
+  }
+
+  /// Секцията „Училищен режим" (в рамките на BG контекста). Връща widget-и,
+  /// които се вливат в списъка на [_buildBulgariaSection].
+  ///
+  /// Режимът е БЕЗПЛАТЕН (виралната кука „N дни до ваканция"); монетизацията е
+  /// на друго място (лимити/реклами/AI). За Pro-gate: увий toggle-а в
+  /// showPaywallIfNeeded, като при именните дни.
+  List<Widget> _buildSchoolModeCards(BuildContext context) {
+    final theme = Theme.of(context);
+    final lang = LanguageScope.of(context).locale.languageCode;
+    String tr(Map<String, String> m) => m[lang] ?? m['en']!;
+
+    const schoolTitle = {
+      'en': 'School mode', 'bg': 'Училищен режим', 'de': 'Schulmodus',
+      'fr': 'Mode école', 'it': 'Modalità scuola', 'el': 'Λειτουργία σχολείου',
+      'es': 'Modo escolar', 'pt': 'Modo escolar', 'ru': 'Школьный режим',
+      'tr': 'Okul modu', 'ja': '学校モード',
+    };
+    const schoolSubtitle = {
+      'en': 'Countdown to the next school vacation, subjects & exams',
+      'bg': 'Обратно броене до ваканция, предмети и изпити',
+      'de': 'Countdown bis zu den Ferien, Fächer & Prüfungen',
+      'fr': 'Compte à rebours des vacances, matières et examens',
+      'it': 'Conto alla rovescia per le vacanze, materie ed esami',
+      'el': 'Αντίστροφη μέτρηση για διακοπές, μαθήματα & εξετάσεις',
+      'es': 'Cuenta atrás para las vacaciones, asignaturas y exámenes',
+      'pt': 'Contagem para as férias, disciplinas e exames',
+      'ru': 'Обратный отсчёт до каникул, предметы и экзамены',
+      'tr': 'Tatile geri sayım, dersler ve sınavlar',
+      'ja': '休みまでのカウントダウン、教科・試験',
+    };
+    const gradeTitle = {
+      'en': 'Grade', 'bg': 'Клас', 'de': 'Klasse', 'fr': 'Classe',
+      'it': 'Classe', 'el': 'Τάξη', 'es': 'Grado', 'pt': 'Ano',
+      'ru': 'Класс', 'tr': 'Sınıf', 'ja': '学年',
+    };
+    const subjectsBtn = {
+      'en': 'Add school subjects', 'bg': 'Добави училищни предмети',
+      'de': 'Schulfächer hinzufügen', 'fr': 'Ajouter des matières',
+      'it': 'Aggiungi materie', 'el': 'Πρόσθεσε μαθήματα',
+      'es': 'Añadir asignaturas', 'pt': 'Adicionar disciplinas',
+      'ru': 'Добавить предметы', 'tr': 'Ders ekle', 'ja': '教科を追加',
+    };
+    const notSet = {
+      'en': 'Not set', 'bg': 'Не е избран', 'de': 'Nicht gewählt',
+      'fr': 'Non défini', 'it': 'Non impostato', 'el': 'Δεν έχει οριστεί',
+      'es': 'Sin definir', 'pt': 'Não definido', 'ru': 'Не выбран',
+      'tr': 'Seçilmedi', 'ja': '未設定',
+    };
+
+    return [
+      const SizedBox(height: 8),
+      Card(
+        child: Column(
+          children: [
+            SwitchListTile(
+              secondary: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7B2FF7).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.school_rounded,
+                    color: Color(0xFF7B2FF7)),
+              ),
+              title: Text(tr(schoolTitle)),
+              subtitle: Text(
+                tr(schoolSubtitle),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+              value: _schoolModeEnabled,
+              onChanged: (value) async {
+                if (value) {
+                  // При включване питаме клас (иначе броенето е грешно).
+                  final g = await _pickGrade(context, lang);
+                  if (g == null) return; // отказ → не включваме
+                  await SchoolCalendarService().setGrade(g);
+                  await SchoolCalendarService().setEnabled(true);
+                  await SchoolCalendarService().load();
+                  if (!mounted) return;
+                  setState(() {
+                    _schoolModeEnabled = true;
+                    _schoolGrade = g;
+                  });
+                } else {
+                  await SchoolCalendarService().setEnabled(false);
+                  if (!mounted) return;
+                  setState(() => _schoolModeEnabled = false);
+                }
+              },
+            ),
+            // Инструкция при ИЗКЛЮЧЕН режим — как да го включиш.
+            if (!_schoolModeEnabled)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.info_outline_rounded,
+                        size: 16,
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        tr(_schoolEnableHint),
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.35,
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            if (_schoolModeEnabled) ...[
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.grade_rounded),
+                title: Text(tr(gradeTitle)),
+                trailing: Text(
+                  _schoolGrade != null
+                      ? _gradeLabel(lang, _schoolGrade!)
+                      : tr(notSet),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                onTap: () async {
+                  final g = await _pickGrade(context, lang);
+                  if (g == null) return;
+                  await SchoolCalendarService().setGrade(g);
+                  if (!mounted) return;
+                  setState(() => _schoolGrade = g);
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.category_rounded),
+                title: Text(tr(subjectsBtn)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _pickSubjects(context, lang),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.help_outline_rounded),
+                title: Text(tr(_schoolHowToTitle)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => showSchoolHowTo(context, lang),
+              ),
+            ],
+          ],
+        ),
+      ),
+    ];
+  }
+
+  // Инструкция за включване (при изключен режим).
+  static const Map<String, String> _schoolEnableHint = {
+    'en': 'Turn it on and pick your grade — a countdown to the next school '
+        'vacation appears on the home screen.',
+    'bg': 'Включи и избери класа си — на началния екран се появява обратно '
+        'броене до следващата ваканция.',
+    'de': 'Aktiviere und wähle deine Klasse — auf dem Startbildschirm '
+        'erscheint ein Countdown bis zu den nächsten Ferien.',
+    'fr': 'Active-le et choisis ta classe — un compte à rebours des prochaines '
+        'vacances apparaît sur l\'accueil.',
+    'it': 'Attivalo e scegli la classe — sulla home appare un conto alla '
+        'rovescia per le prossime vacanze.',
+    'el': 'Ενεργοποίησέ το και διάλεξε τάξη — στην αρχική εμφανίζεται '
+        'αντίστροφη μέτρηση για τις επόμενες διακοπές.',
+    'es': 'Actívalo y elige tu grado — en la pantalla de inicio aparece una '
+        'cuenta atrás para las próximas vacaciones.',
+    'pt': 'Ativa e escolhe o teu ano — no ecrã inicial aparece uma contagem '
+        'para as próximas férias.',
+    'ru': 'Включи и выбери класс — на главном экране появится обратный отсчёт '
+        'до ближайших каникул.',
+    'tr': 'Aç ve sınıfını seç — ana ekranda bir sonraki tatile geri sayım '
+        'görünür.',
+    'ja': 'オンにして学年を選ぶと、ホーム画面に次の休みまでのカウントダウンが表示されます。',
+  };
+
+  static const Map<String, String> _schoolHowToTitle = {
+    'en': 'How it works', 'bg': 'Как се ползва', 'de': 'So funktioniert\'s',
+    'fr': 'Comment ça marche', 'it': 'Come funziona', 'el': 'Πώς λειτουργεί',
+    'es': 'Cómo funciona', 'pt': 'Como funciona', 'ru': 'Как это работает',
+    'tr': 'Nasıl çalışır', 'ja': '使い方',
+  };
+
+  /// Диалог „Как се ползва Училищния режим" (стъпки). Ползва се и от Настройки,
+  /// и от еднократния интро диалог на началния екран.
+  static Future<void> showSchoolHowTo(BuildContext context, String lang) {
+    String tr(Map<String, String> m) => m[lang] ?? m['en']!;
+    const steps = {
+      'en': '1. Pick your grade — the countdown is exact for it (end of year '
+          'differs by grade).\n'
+          '2. See how many days until the next vacation on the home screen.\n'
+          '3. Add your subjects — they become task categories, so you can file '
+          'homework by subject.\n'
+          '4. For grades 7 and 12, a countdown to the NEO/matriculation exams '
+          'shows up too.',
+      'bg': '1. Избери класа си — броенето е точно за него (краят на годината е '
+          'различен по клас).\n'
+          '2. Виж на началния екран колко дни остават до следващата ваканция.\n'
+          '3. Добави предметите си — стават категории за задачи, за да '
+          'разпределяш домашните по предмет.\n'
+          '4. За 7. и 12. клас се показва и броене до НВО/матурите.',
+      'de': '1. Wähle deine Klasse — der Countdown gilt genau für sie.\n'
+          '2. Sieh auf dem Startbildschirm, wie viele Tage bis zu den Ferien.\n'
+          '3. Füge deine Fächer hinzu — sie werden zu Aufgaben-Kategorien.\n'
+          '4. Für Klasse 7 und 12 erscheint auch ein Prüfungs-Countdown.',
+      'fr': '1. Choisis ta classe — le compte à rebours lui est propre.\n'
+          '2. Vois sur l\'accueil les jours avant les prochaines vacances.\n'
+          '3. Ajoute tes matières — elles deviennent des catégories.\n'
+          '4. En 7e et terminale, un compte à rebours des examens apparaît.',
+      'it': '1. Scegli la classe — il conto alla rovescia è esatto per essa.\n'
+          '2. Vedi in home i giorni alle prossime vacanze.\n'
+          '3. Aggiungi le materie — diventano categorie.\n'
+          '4. Per 7ª e 12ª appare anche il conto alla rovescia degli esami.',
+      'el': '1. Διάλεξε τάξη — η μέτρηση είναι ακριβής γι\' αυτήν.\n'
+          '2. Δες στην αρχική πόσες μέρες ως τις επόμενες διακοπές.\n'
+          '3. Πρόσθεσε μαθήματα — γίνονται κατηγορίες.\n'
+          '4. Για 7η & 12η εμφανίζεται και μέτρηση για τις εξετάσεις.',
+      'es': '1. Elige tu grado — la cuenta atrás es exacta para él.\n'
+          '2. Mira en el inicio los días para las próximas vacaciones.\n'
+          '3. Añade tus asignaturas — se vuelven categorías.\n'
+          '4. En 7.º y 12.º aparece también la cuenta atrás de los exámenes.',
+      'pt': '1. Escolhe o teu ano — a contagem é exata para ele.\n'
+          '2. Vê no início os dias para as próximas férias.\n'
+          '3. Adiciona as disciplinas — viram categorias.\n'
+          '4. No 7.º e 12.º aparece também a contagem para os exames.',
+      'ru': '1. Выбери класс — отсчёт точный именно для него.\n'
+          '2. Смотри на главном экране дни до ближайших каникул.\n'
+          '3. Добавь предметы — они станут категориями.\n'
+          '4. Для 7 и 12 класса показывается отсчёт до экзаменов.',
+      'tr': '1. Sınıfını seç — geri sayım ona göre kesin.\n'
+          '2. Ana ekranda tatile kaç gün kaldığını gör.\n'
+          '3. Derslerini ekle — kategoriye dönüşür.\n'
+          '4. 7. ve 12. sınıf için sınav geri sayımı da görünür.',
+      'ja': '1. 学年を選ぶ — カウントダウンはその学年に正確です。\n'
+          '2. ホームで次の休みまでの日数を確認。\n'
+          '3. 教科を追加 — カテゴリになります。\n'
+          '4. 7年生・12年生には試験までのカウントダウンも表示。',
+    };
+    const closeBtn = {
+      'en': 'Got it', 'bg': 'Разбрах', 'de': 'Verstanden', 'fr': 'Compris',
+      'it': 'Capito', 'el': 'Κατάλαβα', 'es': 'Entendido', 'pt': 'Percebi',
+      'ru': 'Понятно', 'tr': 'Anladım', 'ja': 'わかった',
+    };
+    return showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.school_rounded, size: 36, color: Color(0xFF7B2FF7)),
+        title: Text(tr(_schoolHowToTitle)),
+        content: Text(tr(steps), style: const TextStyle(height: 1.5)),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(tr(closeBtn)),
+          ),
+        ],
+      ),
+    );
   }
 
   /// „Стани Pro" картата — ПОСТОЯНЕН, забележим вход към paywall. Показва се
@@ -578,6 +1217,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
       ],
+      // „Училищен режим" — обратно броене до ваканция + предмети + изпити.
+      ..._buildSchoolModeCards(context),
     ];
   }
 

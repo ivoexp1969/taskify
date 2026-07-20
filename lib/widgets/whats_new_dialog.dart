@@ -15,66 +15,66 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Нови инсталации НЕ го виждат (те виждат welcome диалога).
 class WhatsNewDialog {
   /// Билдът, за който са точките по-долу (= `pubspec.yaml` build number).
-  static const int _build = 63;
+  static const int _build = 64;
 
   static const String _prefKey = 'whats_new_seen_build';
 
   /// Точките за текущата версия, по език.
   static const Map<String, List<String>> _items = {
     'bg': [
-      'Widget-ът вече показва и просрочените задачи, маркирани в червено.',
-      'Отмятай задачи направо от widget-а (iOS 17+) — без да отваряш приложението.',
-      'Прави картички за имени и рождени дни — с истинска снимка за фон.',
+      '🎒 Нов Училищен режим: обратно броене до следващата ваканция направо на началния екран.',
+      'Избери класа си и добави учебните предмети — стават категории за домашните.',
+      'За 7. и 12. клас — броене и до НВО и матурите.',
     ],
     'en': [
-      'The widget now shows overdue tasks too, marked in red.',
-      'Check off tasks right from the widget (iOS 17+) — no need to open the app.',
-      'Make greeting cards for name days and birthdays — with a real photo background.',
+      '🎒 New School mode: a countdown to the next school vacation right on your home screen.',
+      'Pick your grade and add your subjects — they become categories for homework.',
+      'For grades 7 and 12 — a countdown to the NEO and matriculation exams too.',
     ],
     'de': [
-      'Das Widget zeigt jetzt auch überfällige Aufgaben, rot markiert.',
-      'Hake Aufgaben direkt im Widget ab (iOS 17+) — ohne die App zu öffnen.',
-      'Erstelle Grußkarten für Namenstage und Geburtstage — mit echtem Foto-Hintergrund.',
+      '🎒 Neuer Schulmodus: ein Countdown bis zu den nächsten Ferien auf dem Startbildschirm.',
+      'Wähle deine Klasse und füge deine Fächer hinzu — sie werden zu Kategorien.',
+      'Für Klasse 7 und 12 — auch ein Countdown bis zu den Prüfungen.',
     ],
     'fr': [
-      'Le widget affiche aussi les tâches en retard, marquées en rouge.',
-      "Coche les tâches directement depuis le widget (iOS 17+) — sans ouvrir l'app.",
-      'Crée des cartes pour les fêtes du prénom et les anniversaires — avec une vraie photo en fond.',
+      "🎒 Nouveau Mode école : un compte à rebours des prochaines vacances sur l'accueil.",
+      'Choisis ta classe et ajoute tes matières — elles deviennent des catégories.',
+      'Pour la 7e et la terminale — aussi un compte à rebours des examens.',
     ],
     'it': [
-      'Il widget ora mostra anche le attività scadute, segnate in rosso.',
-      "Segna le attività direttamente dal widget (iOS 17+) — senza aprire l'app.",
-      'Crea cartoline per onomastici e compleanni — con una vera foto di sfondo.',
+      '🎒 Nuova Modalità scuola: un conto alla rovescia per le prossime vacanze in home.',
+      'Scegli la classe e aggiungi le materie — diventano categorie per i compiti.',
+      'Per la 7ª e la 12ª — anche un conto alla rovescia degli esami.',
     ],
     'el': [
-      'Το widget δείχνει τώρα και τις εκπρόθεσμες εργασίες, με κόκκινο.',
-      'Τσέκαρε εργασίες κατευθείαν από το widget (iOS 17+) — χωρίς να ανοίξεις την εφαρμογή.',
-      'Φτιάξε κάρτες για ονομαστικές εορτές και γενέθλια — με πραγματική φωτογραφία φόντο.',
+      '🎒 Νέα Λειτουργία σχολείου: αντίστροφη μέτρηση για τις επόμενες διακοπές στην αρχική.',
+      'Διάλεξε τάξη και πρόσθεσε μαθήματα — γίνονται κατηγορίες για τις εργασίες.',
+      'Για 7η και 12η — και μέτρηση για τις εξετάσεις.',
     ],
     'es': [
-      'El widget ahora también muestra las tareas vencidas, marcadas en rojo.',
-      'Marca tareas directamente desde el widget (iOS 17+) — sin abrir la app.',
-      'Crea tarjetas para onomásticas y cumpleaños — con una foto real de fondo.',
+      '🎒 Nuevo Modo escolar: una cuenta atrás para las próximas vacaciones en el inicio.',
+      'Elige tu grado y añade tus asignaturas — se vuelven categorías para las tareas.',
+      'Para 7.º y 12.º — también una cuenta atrás para los exámenes.',
     ],
     'pt': [
-      'O widget mostra agora também as tarefas atrasadas, marcadas a vermelho.',
-      'Marca tarefas diretamente no widget (iOS 17+) — sem abrir a app.',
-      'Cria cartões para dias do nome e aniversários — com uma foto real de fundo.',
+      '🎒 Novo Modo escolar: uma contagem para as próximas férias no ecrã inicial.',
+      'Escolhe o teu ano e adiciona as disciplinas — viram categorias para os trabalhos.',
+      'Para o 7.º e o 12.º — também uma contagem para os exames.',
     ],
     'ru': [
-      'Виджет теперь показывает и просроченные задачи, отмеченные красным.',
-      'Отмечай задачи прямо из виджета (iOS 17+) — не открывая приложение.',
-      'Создавай открытки на именины и дни рождения — с настоящим фото на фоне.',
+      '🎒 Новый Школьный режим: обратный отсчёт до ближайших каникул на главном экране.',
+      'Выбери класс и добавь предметы — они станут категориями для домашних заданий.',
+      'Для 7 и 12 класса — отсчёт и до экзаменов.',
     ],
     'tr': [
-      'Widget artık gecikmiş görevleri de kırmızıyla gösteriyor.',
-      "Görevleri doğrudan widget'tan işaretle (iOS 17+) — uygulamayı açmadan.",
-      'İsim günleri ve doğum günleri için kart yap — gerçek fotoğraf arka planıyla.',
+      '🎒 Yeni Okul modu: ana ekranda bir sonraki tatile geri sayım.',
+      'Sınıfını seç ve derslerini ekle — ödevler için kategoriye dönüşür.',
+      '7. ve 12. sınıf için — sınavlara da geri sayım.',
     ],
     'ja': [
-      'ウィジェットが期限切れのタスクも赤で表示するようになりました。',
-      'ウィジェットから直接タスクを完了（iOS 17以降）— アプリを開かずに。',
-      '聖名祝日や誕生日のカードを作成 — 本物の写真を背景に。',
+      '🎒 新しい学校モード：次の休みまでのカウントダウンをホーム画面に表示。',
+      '学年を選んで教科を追加 — 宿題用のカテゴリになります。',
+      '7年生・12年生には試験までのカウントダウンも。',
     ],
   };
 

@@ -30,6 +30,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'services/morning_briefing_service.dart';
 import 'services/name_days_service.dart';
 import 'services/holidays_service.dart';
+import 'services/school_calendar_service.dart';
 import 'services/tombstone_service.dart';
 import 'services/migration_service.dart';
 import 'services/sync_service.dart';
@@ -187,6 +188,12 @@ Future<void> main() async {
       if (enabled) HolidaysService().loadForCurrentYears();
     });
   }
+
+  // „Училищен режим" — учебен календар (Firestore remote config + вграден
+  // fallback). Зарежда данните само ако режимът е включен. Offline-first.
+  SchoolCalendarService().loadEnabled().then((enabled) {
+    if (enabled) SchoolCalendarService().load();
+  });
   
   final themeController = ThemeController(ThemeMode.system);
   await themeController.loadSavedTheme();

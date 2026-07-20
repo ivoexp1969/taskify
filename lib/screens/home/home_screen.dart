@@ -13,6 +13,7 @@ import '../../widgets/gift_cta.dart';
 import '../../widgets/whats_new_dialog.dart';
 import '../../services/pro_service.dart';
 import '../../services/holidays_service.dart';
+import '../../services/school_calendar_service.dart';
 import '../../services/sync_service.dart';
 import '../../services/widget_service.dart';
 import '../paywall/paywall_screen.dart';
@@ -50,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!kIsWeb) {
       _initAndShowWelcome();
       _maybeShowHolidaysPrompt();
+      _maybeShowSchoolIntro();
       // ФАЗА 4: cold-start routing на ден-3/ден-7 нотификация (app беше убит).
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _consumePendingConversionRoute());
@@ -209,6 +211,96 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       await HolidaysService().setEnabled(true);
       await HolidaysService().loadForCurrentYears();
     }
+  }
+
+  /// Еднократни инструкции „в началото" как да включиш Училищния режим (само
+  /// BG контекст, ако още не е включен). Без този интро новата функция остава
+  /// неоткрита. Показва се веднъж (`school_intro_shown`) и НЕ се стека с други
+  /// диалози (проверява, че home маршрутът е най-отгоре).
+  Future<void> _maybeShowSchoolIntro() async {
+    await Future.delayed(const Duration(seconds: 5));
+    if (!mounted) return;
+
+    final lang = LanguageScope.of(context).locale.languageCode;
+    final country = WidgetsBinding.instance.platformDispatcher.locale.countryCode
+        ?.toUpperCase();
+    final isBg = lang == 'bg' || country == 'BG';
+    if (!isBg) return;
+
+    if (SchoolCalendarService.enabledNotifier.value) return; // вече е включен
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('school_intro_shown') ?? false) return;
+
+    // Не се стекваме върху друг диалог — ако има отворен, ще опитаме следващата
+    // сесия (флагът се вдига чак когато реално покажем интрото).
+    if (!mounted) return;
+    final route = ModalRoute.of(context);
+    if (route != null && !route.isCurrent) return;
+
+    await prefs.setBool('school_intro_shown', true);
+    if (!mounted) return;
+
+    String tr(Map<String, String> m) => m[lang] ?? m['en']!;
+    const title = {
+      'en': 'School mode 🎒', 'bg': 'Училищен режим 🎒', 'de': 'Schulmodus 🎒',
+      'fr': 'Mode école 🎒', 'it': 'Modalità scuola 🎒',
+      'el': 'Λειτουργία σχολείου 🎒', 'es': 'Modo escolar 🎒',
+      'pt': 'Modo escolar 🎒', 'ru': 'Школьный режим 🎒', 'tr': 'Okul modu 🎒',
+      'ja': '学校モード 🎒',
+    };
+    const body = {
+      'en': 'Want a countdown to the next school vacation right on your home '
+          'screen? Turn on School mode in Settings → Bulgaria and pick your grade.',
+      'bg': 'Искаш ли обратно броене до следващата ваканция направо на началния '
+          'екран? Включи Училищен режим от Настройки → България и избери класа си.',
+      'de': 'Möchtest du einen Countdown bis zu den nächsten Ferien auf dem '
+          'Startbildschirm? Aktiviere den Schulmodus in Einstellungen → Bulgarien.',
+      'fr': 'Envie d\'un compte à rebours des prochaines vacances sur l\'accueil ? '
+          'Active le Mode école dans Réglages → Bulgarie et choisis ta classe.',
+      'it': 'Vuoi un conto alla rovescia per le prossime vacanze in home? '
+          'Attiva la Modalità scuola in Impostazioni → Bulgaria e scegli la classe.',
+      'el': 'Θέλεις αντίστροφη μέτρηση για τις επόμενες διακοπές στην αρχική; '
+          'Ενεργοποίησε τη Λειτουργία σχολείου στις Ρυθμίσεις → Βουλγαρία.',
+      'es': '¿Quieres una cuenta atrás para las próximas vacaciones en el inicio? '
+          'Activa el Modo escolar en Ajustes → Bulgaria y elige tu grado.',
+      'pt': 'Queres uma contagem para as próximas férias no ecrã inicial? '
+          'Ativa o Modo escolar em Definições → Bulgária e escolhe o teu ano.',
+      'ru': 'Хочешь обратный отсчёт до ближайших каникул прямо на главном экране? '
+          'Включи Школьный режим в Настройки → Болгария и выбери класс.',
+      'tr': 'Ana ekranda bir sonraki tatile geri sayım ister misin? '
+          'Ayarlar → Bulgaristan\'dan Okul modunu aç ve sınıfını seç.',
+      'ja': '次の休みまでのカウントダウンをホーム画面に表示しませんか？'
+          '設定 → ブルガリア で学校モードをオンにして学年を選びましょう。',
+    };
+    const later = {
+      'en': 'Later', 'bg': 'По-късно', 'de': 'Später', 'fr': 'Plus tard',
+      'it': 'Più tardi', 'el': 'Αργότερα', 'es': 'Más tarde', 'pt': 'Mais tarde',
+      'ru': 'Позже', 'tr': 'Sonra', 'ja': '後で',
+    };
+    const gotIt = {
+      'en': 'Got it', 'bg': 'Разбрах', 'de': 'Verstanden', 'fr': 'Compris',
+      'it': 'Capito', 'el': 'Κατάλαβα', 'es': 'Entendido', 'pt': 'Percebi',
+      'ru': 'Понятно', 'tr': 'Anladım', 'ja': 'わかった',
+    };
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.school_rounded, size: 40, color: Color(0xFF7B2FF7)),
+        title: Text(tr(title)),
+        content: Text(tr(body)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(tr(later)),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(tr(gotIt)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
