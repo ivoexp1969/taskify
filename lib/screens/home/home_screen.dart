@@ -6,6 +6,7 @@ import '../task/task_screen.dart';
 import '../calendar/calendar_screen.dart';
 import '../settings/settings_screen.dart';
 import '../documents/documents_screen.dart';
+import '../modes/modes_screen.dart';
 import '../../utils/localization.dart';
 import '../../widgets/banner_ad_widget.dart';
 import '../../widgets/gift_cta.dart';
@@ -16,6 +17,13 @@ import '../../services/school_calendar_service.dart';
 import '../../services/sync_service.dart';
 import '../../services/widget_service.dart';
 import '../paywall/paywall_screen.dart';
+
+/// Етикет за таб „Уча" (11 езика) — кратък за долната навигация.
+const Map<String, String> _studyLabel = {
+  'en': 'Study', 'bg': 'Уча', 'de': 'Lernen', 'fr': 'Études',
+  'it': 'Studio', 'el': 'Μελέτη', 'es': 'Estudio', 'pt': 'Estudo',
+  'ru': 'Учёба', 'tr': 'Okul', 'ja': '学習',
+};
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -38,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// освободеният слот е за таб „Уча 🎓" (Фаза 2).
   List<Widget> get _screens => [
         const TaskScreen(),
+        const ModesScreen(),
         const CalendarScreen(),
         if (_showDocuments) const DocumentsScreen(),
         const SettingsScreen(),
@@ -675,6 +684,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   icon: const Icon(Icons.checklist_rtl_outlined),
                   selectedIcon: const Icon(Icons.checklist_rtl),
                   label: t.tasks,
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.school_outlined),
+                  selectedIcon: const Icon(Icons.school_rounded),
+                  label: _studyLabel[t.lang] ?? _studyLabel['en']!,
                 ),
                 NavigationDestination(
                   icon: Stack(
