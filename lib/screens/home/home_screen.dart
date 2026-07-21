@@ -46,17 +46,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// освободеният слот е за таб „Уча 🎓" (Фаза 2).
   List<Widget> get _screens => [
         const TaskScreen(),
-        const ModesScreen(),
+        if (_showModes) const ModesScreen(),
         const CalendarScreen(),
         if (_showDocuments) const DocumentsScreen(),
         const SettingsScreen(),
       ];
+
+  /// Табът „Уча" се показва САМО когато е активиран режим (Ученик, по-нататък и
+  /// Студент). Включването става от Настройки; така табът не стои празен.
+  bool get _showModes => SchoolCalendarService.enabledNotifier.value;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _proService.addListener(_onProStatusChanged);
+    // Появяване/скриване на таб „Уча" при вкл./изкл. на режим.
+    SchoolCalendarService.enabledNotifier.addListener(_onModesChanged);
     if (!kIsWeb) {
       _initAndShowWelcome();
       _maybeShowHolidaysPrompt();
@@ -69,6 +75,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           .addPostFrameCallback((_) => _consumeWidgetAction());
       _maybeShowWhatsNew();
     }
+  }
+
+  void _onModesChanged() {
+    if (mounted) setState(() {});
   }
 
   /// „Какво ново" след ъпдейт — веднъж за всеки нов билд (не за нови инсталации).
@@ -316,6 +326,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _proService.removeListener(_onProStatusChanged);
+    SchoolCalendarService.enabledNotifier.removeListener(_onModesChanged);
     super.dispose();
   }
 
@@ -685,11 +696,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   selectedIcon: const Icon(Icons.checklist_rtl),
                   label: t.tasks,
                 ),
-                NavigationDestination(
-                  icon: const Icon(Icons.school_outlined),
-                  selectedIcon: const Icon(Icons.school_rounded),
-                  label: _studyLabel[t.lang] ?? _studyLabel['en']!,
-                ),
+                if (_showModes)
+                  NavigationDestination(
+                    icon: const Icon(Icons.school_outlined),
+                    selectedIcon: const Icon(Icons.school_rounded),
+                    label: _studyLabel[t.lang] ?? _studyLabel['en']!,
+                  ),
                 NavigationDestination(
                   icon: Stack(
                     children: [
