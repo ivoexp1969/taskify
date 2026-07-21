@@ -6,7 +6,6 @@ import '../task/task_screen.dart';
 import '../calendar/calendar_screen.dart';
 import '../settings/settings_screen.dart';
 import '../documents/documents_screen.dart';
-import '../shared/shared_groups_screen.dart';
 import '../../utils/localization.dart';
 import '../../widgets/banner_ad_widget.dart';
 import '../../widgets/gift_cta.dart';
@@ -34,10 +33,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// Разделът „Документи" се показва на ВСИЧКИ (универсална функция; Pro gated).
   bool get _showDocuments => true;
 
-  /// Екраните в долната навигация. „Документи" се вмъква преди Настройки.
+  /// Екраните в долната навигация. Таб „Споделени" е ОБЕДИНЕН в „Задачи"
+  /// (Фаза 1: споделените се достъпват от иконата в AppBar-а на Задачи) →
+  /// освободеният слот е за таб „Уча 🎓" (Фаза 2).
   List<Widget> get _screens => [
         const TaskScreen(),
-        const SharedGroupsScreen(),
         const CalendarScreen(),
         if (_showDocuments) const DocumentsScreen(),
         const SettingsScreen(),
@@ -675,11 +675,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   icon: const Icon(Icons.checklist_rtl_outlined),
                   selectedIcon: const Icon(Icons.checklist_rtl),
                   label: t.tasks,
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.groups_outlined),
-                  selectedIcon: const Icon(Icons.groups_rounded),
-                  label: t.sharedTab,
                 ),
                 NavigationDestination(
                   icon: Stack(

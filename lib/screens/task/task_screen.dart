@@ -38,6 +38,7 @@ import '../../widgets/task_card_styles.dart';
 import '../../widgets/pomodoro_timer_sheet.dart';
 import '../../widgets/ai_limit.dart';
 import '../settings/statistics_screen.dart';
+import '../shared/shared_groups_screen.dart';
 import '../../utils/natural_language_parser.dart';
 import '../../services/ai_service.dart';
 import '../../services/ai_usage_service.dart';
@@ -2674,6 +2675,16 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
         actions: _isSearching
             ? []
             : [
+                // Споделени списъци (обединени от отделния таб във Фаза 1).
+                IconButton(
+                  icon: const Icon(Icons.groups_outlined),
+                  tooltip: t.sharedTab,
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const SharedGroupsScreen(),
+                    ),
+                  ),
+                ),
                 IconButton(
                   icon: const Icon(Icons.grid_view_rounded),
                   tooltip: t.matrix,
