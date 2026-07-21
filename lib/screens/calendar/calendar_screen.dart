@@ -275,6 +275,42 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
+  // Етикет за синтетичния „Училище" чип (11 езика).
+  static const Map<String, String> _schoolLabel = {
+    'en': 'School', 'bg': 'Училище', 'de': 'Schule', 'fr': 'École',
+    'it': 'Scuola', 'el': 'Σχολείο', 'es': 'Escuela', 'pt': 'Escola',
+    'ru': 'Школа', 'tr': 'Okul', 'ja': '学校',
+  };
+
+  /// Шийт за избор на учебен предмет (зад чипа „🎒 Училище"). Връща избрания.
+  Future<Category?> _pickSchoolSubject(List<Category> subjects, AppText t) {
+    return showModalBottomSheet<Category>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+              child: Text('🎒 ${_schoolLabel[t.lang] ?? _schoolLabel['en']!}',
+                  style: Theme.of(ctx).textTheme.titleLarge),
+            ),
+            for (final s in subjects)
+              ListTile(
+                leading: CircleAvatar(
+                    radius: 9, backgroundColor: Color(s.colorValue)),
+                title: Text(s.name),
+                onTap: () => Navigator.pop(ctx, s),
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
   String _localizedCategoryName(Category? c, AppText t) {
     if (c == null) return '';
     // Календарната категория не е „default", но id-то е фиксирано → локализира се винаги.
@@ -788,7 +824,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             spacing: 8,
                             runSpacing: 8,
                             children: [
-                              ...categories.map((cat) {
+                              // Училищните предмети (subj_*) са зад чипа „🎒 Училище".
+                              ...categories
+                                  .where((c) => !c.id.startsWith('subj_'))
+                                  .map((cat) {
                                 final isSelected = cat.id == tempCategoryId;
                                 final catColor = Color(cat.colorValue);
                                 return GestureDetector(
@@ -840,6 +879,73 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   ),
                                 );
                               }),
+                              // Синтетичен чип „🎒 Училище" (ако има добавени предмети).
+                              if (categories.any((c) => c.id.startsWith('subj_')))
+                                Builder(builder: (_) {
+                                  final subjects = categories
+                                      .where((c) => c.id.startsWith('subj_'))
+                                      .toList();
+                                  final sel = subjects
+                                      .where((c) => c.id == tempCategoryId);
+                                  final selSubj = sel.isEmpty ? null : sel.first;
+                                  final schoolColor = selSubj != null
+                                      ? Color(selSubj.colorValue)
+                                      : const Color(0xFF6A3DE8);
+                                  final isSel = selSubj != null;
+                                  final label = selSubj != null
+                                      ? '🎒 ${selSubj.name}'
+                                      : '🎒 ${_schoolLabel[t.lang] ?? _schoolLabel['en']!}';
+                                  return GestureDetector(
+                                    onTap: () async {
+                                      final picked = await _pickSchoolSubject(
+                                          subjects, t);
+                                      if (picked != null) {
+                                        setSheetState(() {
+                                          tempCategoryId = picked.id;
+                                          _selectedCategoryId = picked.id;
+                                        });
+                                      }
+                                    },
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 200),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 10),
+                                      decoration: BoxDecoration(
+                                        color: isSel
+                                            ? schoolColor.withValues(alpha: 0.2)
+                                            : theme.colorScheme.outline
+                                                .withValues(alpha: 0.08),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                            color: isSel
+                                                ? schoolColor
+                                                : Colors.transparent,
+                                            width: 2),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(label,
+                                              style: TextStyle(
+                                                  fontWeight: isSel
+                                                      ? FontWeight.w600
+                                                      : FontWeight.normal,
+                                                  color: isSel
+                                                      ? schoolColor
+                                                      : theme.colorScheme
+                                                          .onSurface)),
+                                          const SizedBox(width: 4),
+                                          Icon(Icons.expand_more,
+                                              size: 18,
+                                              color: isSel
+                                                  ? schoolColor
+                                                  : theme.colorScheme.onSurface
+                                                      .withValues(alpha: 0.5)),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }),
                               GestureDetector(
                                 onTap: () => _showAddCategoryDialog(setSheetState),
                                 child: Container(
