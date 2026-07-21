@@ -472,6 +472,64 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     }
   }
 
+  static const Map<String, String> _sharedHint = {
+    'en': 'Lists with family or your team', 'bg': 'Списъци със семейството или екипа',
+    'de': 'Listen mit Familie oder Team', 'fr': 'Listes avec ta famille ou ton équipe',
+    'it': 'Liste con famiglia o team', 'el': 'Λίστες με οικογένεια ή ομάδα',
+    'es': 'Listas con familia o equipo', 'pt': 'Listas com a família ou equipa',
+    'ru': 'Списки с семьёй или командой', 'tr': 'Aile veya ekiple listeler',
+    'ja': '家族やチームとのリスト',
+  };
+
+  /// Видима „категория"-подобна карта за Споделени списъци в началото на Задачи.
+  Widget _buildSharedEntry(AppText t, ThemeData theme) {
+    const accent = Color(0xFF378ADD);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 6, 12, 2),
+      child: Material(
+        color: accent.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const SharedGroupsScreen()),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                      color: accent, shape: BoxShape.circle),
+                  child: const Icon(Icons.groups_rounded,
+                      color: Colors.white, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t.sharedTab,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 15)),
+                      Text(_sharedHint[t.lang] ?? _sharedHint['en']!,
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: theme.colorScheme.onSurfaceVariant)),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right,
+                    color: theme.colorScheme.onSurfaceVariant),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   // Етикет за синтетичния „Училище" чип (11 езика).
   static const Map<String, String> _schoolLabel = {
     'en': 'School', 'bg': 'Училище', 'de': 'Schule', 'fr': 'École',
@@ -2795,6 +2853,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
             // „Училищен режим": обратно броене до следваща ваканция (само при
             // включен режим; сама се скрива иначе). Реактивна.
             const SchoolCountdownCard(),
+
+            // Видим вход към Споделени списъци (по-забележим от иконата в AppBar).
+            _buildSharedEntry(t, theme),
 
             // Статистика - нов дизайн
             Padding(
