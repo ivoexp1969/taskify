@@ -41,13 +41,14 @@ class TaskAdapter extends TypeAdapter<Task> {
       deleted: fields[21] == null ? false : fields[21] as bool,
       deletedAt: fields[22] as DateTime?,
       appleEventId: fields[23] as String?,
+      taskKind: fields[24] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Task obj) {
     writer
-      ..writeByte(24)
+      ..writeByte(25)
       ..writeByte(0)
       ..write(obj.title)
       ..writeByte(1)
@@ -95,7 +96,9 @@ class TaskAdapter extends TypeAdapter<Task> {
       ..writeByte(22)
       ..write(obj.deletedAt)
       ..writeByte(23)
-      ..write(obj.appleEventId);
+      ..write(obj.appleEventId)
+      ..writeByte(24)
+      ..write(obj.taskKind);
   }
 
   @override

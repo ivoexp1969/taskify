@@ -35,6 +35,7 @@ class SchoolCalendarService {
 
   static const String _prefEnabled = 'school_mode_enabled';
   static const String _prefGrade = 'school_grade';
+  static const String _prefSchool = 'school_name';
   static const String _kCacheJson = 'school_calendar_cache';
   static const String _kCacheTs = 'school_calendar_cache_ts';
   static const String _kCacheKey = 'school_calendar_cache_key';
@@ -55,6 +56,7 @@ class SchoolCalendarService {
 
   SchoolYear? _year;
   int? _grade;
+  String? _school; // име на училището (опционално, за бъдещи функции)
   bool _loaded = false;
 
   /// Заредената учебна година (или null → празно състояние).
@@ -62,6 +64,9 @@ class SchoolCalendarService {
 
   /// Избраният клас (1–12) или null, ако още не е избран.
   int? get grade => _grade;
+
+  /// Училище (опционално, свободен текст) или null.
+  String? get school => _school;
 
   bool get enabled => enabledNotifier.value;
 
@@ -78,8 +83,21 @@ class SchoolCalendarService {
     final v = prefs.getBool(_prefEnabled) ?? false;
     final g = prefs.getInt(_prefGrade);
     _grade = (g != null && g >= 1 && g <= 12) ? g : null;
+    _school = prefs.getString(_prefSchool);
     enabledNotifier.value = v;
     return v;
+  }
+
+  Future<void> setSchool(String? name) async {
+    final trimmed = name?.trim();
+    _school = (trimmed == null || trimmed.isEmpty) ? null : trimmed;
+    final prefs = await SharedPreferences.getInstance();
+    if (_school == null) {
+      await prefs.remove(_prefSchool);
+    } else {
+      await prefs.setString(_prefSchool, _school!);
+    }
+    revision.value++;
   }
 
   Future<void> setEnabled(bool value) async {

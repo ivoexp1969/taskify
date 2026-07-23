@@ -126,6 +126,12 @@ class Task extends HiveObject with EquatableMixin {
   @HiveField(23)
   String? appleEventId;
 
+  /// Учебен вид на задачата (Режими Уча): null/'regular' = обикновена,
+  /// 'homework' = домашно, 'essay' = есе, 'coursework' = курсова работа.
+  /// Влияе само на UI/автоматичното разбиване; съществуващите задачи са regular.
+  @HiveField(24)
+  String? taskKind;
+
   Task({
     required this.title,
     required this.dueDate,
@@ -150,6 +156,7 @@ class Task extends HiveObject with EquatableMixin {
     this.deleted = false,
     this.deletedAt,
     this.appleEventId,
+    this.taskKind,
   }) {
     // Всяка задача винаги има стабилен id и updatedAt — дори стара задача,
     // прочетена от Hive без тези полета (адаптерът подава null). Миграцията
@@ -254,6 +261,7 @@ class Task extends HiveObject with EquatableMixin {
         deleted,
         deletedAt,
         appleEventId,
+        taskKind,
       ];
 }
 

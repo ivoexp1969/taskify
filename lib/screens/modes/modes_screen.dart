@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../services/school_calendar_service.dart';
+import '../../services/university_service.dart';
 import '../../widgets/school_countdown_card.dart';
+import '../../widgets/exam_helper_card.dart';
 import '../../utils/localization.dart';
+import 'student_onboarding_screen.dart';
+import 'weekly_schedule_screen.dart';
 
 /// Таб „Уча 🎓" — вход към режимите за учащи: **Ученик** (готов, българска учебна
 /// година + обратно броене) и **Студент** (Фаза 4 — предстои). Всяка карта показва
@@ -16,6 +20,14 @@ class ModesScreen extends StatefulWidget {
 
 class _ModesScreenState extends State<ModesScreen> {
   final _school = SchoolCalendarService();
+  final _uni = UniversityService();
+  final _schoolCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _schoolCtrl.dispose();
+    super.dispose();
+  }
 
   static String _t(Map<String, String> m, String lang) =>
       m[lang] ?? m['en']!;
@@ -39,11 +51,6 @@ class _ModesScreenState extends State<ModesScreen> {
     'en': 'Off', 'bg': 'Изключен', 'de': 'Aus', 'fr': 'Désactivé',
     'it': 'Disattivato', 'el': 'Ανενεργό', 'es': 'Desactivado',
     'pt': 'Desativado', 'ru': 'Выключен', 'tr': 'Kapalı', 'ja': 'オフ',
-  };
-  static const _soon = {
-    'en': 'Coming soon', 'bg': 'Очаквайте скоро', 'de': 'Demnächst',
-    'fr': 'Bientôt', 'it': 'Presto', 'el': 'Σύντομα', 'es': 'Muy pronto',
-    'pt': 'Em breve', 'ru': 'Скоро', 'tr': 'Yakında', 'ja': '近日公開',
   };
   static const _gradeShort = {
     'en': 'grade', 'bg': 'клас', 'de': 'Klasse', 'fr': 'classe',
@@ -74,8 +81,26 @@ class _ModesScreenState extends State<ModesScreen> {
     'it': 'Disattiva', 'el': 'Απενεργοποίηση', 'es': 'Desactivar',
     'pt': 'Desativar', 'ru': 'Выключить', 'tr': 'Kapat', 'ja': 'オフにする',
   };
+  static const _schoolLabel = {
+    'en': 'School (optional)', 'bg': 'Училище (по избор)', 'de': 'Schule (optional)',
+    'fr': 'École (facultatif)', 'it': 'Scuola (facoltativo)', 'el': 'Σχολείο (προαιρετικό)',
+    'es': 'Escuela (opcional)', 'pt': 'Escola (opcional)', 'ru': 'Школа (необязательно)',
+    'tr': 'Okul (isteğe bağlı)', 'ja': '学校（任意）',
+  };
+  static const _setUp = {
+    'en': 'Set up', 'bg': 'Настрой', 'de': 'Einrichten', 'fr': 'Configurer',
+    'it': 'Configura', 'el': 'Ρύθμιση', 'es': 'Configurar', 'pt': 'Configurar',
+    'ru': 'Настроить', 'tr': 'Kur', 'ja': '設定',
+  };
+  static const _mySchedule = {
+    'en': 'My schedule', 'bg': 'Мой разпис', 'de': 'Mein Stundenplan',
+    'fr': 'Mon emploi du temps', 'it': 'Il mio orario', 'el': 'Το πρόγραμμά μου',
+    'es': 'Mi horario', 'pt': 'O meu horário', 'ru': 'Моё расписание',
+    'tr': 'Ders programım', 'ja': '時間割',
+  };
 
   Future<void> _configurePupil(String lang) async {
+    _schoolCtrl.text = _school.school ?? '';
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -100,6 +125,7 @@ class _ModesScreenState extends State<ModesScreen> {
                       selected: _school.enabled && _school.grade == g,
                       onSelected: (_) async {
                         await _school.setGrade(g);
+                        await _school.setSchool(_schoolCtrl.text);
                         await _school.setEnabled(true);
                         if (mounted) setState(() {});
                         if (ctx.mounted) Navigator.pop(ctx);
@@ -108,6 +134,20 @@ class _ModesScreenState extends State<ModesScreen> {
                 ].map((w) => Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4), child: w)).toList(),
               ),
+              // Училище (опционално, свободен текст — за бъдещи функции).
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                child: TextField(
+                  controller: _schoolCtrl,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(
+                    labelText: _t(_schoolLabel, lang),
+                    isDense: true,
+                    border: const OutlineInputBorder(),
+                  ),
+                  onSubmitted: (v) => _school.setSchool(v),
+                ),
+              ),
               if (_school.enabled)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
@@ -115,6 +155,7 @@ class _ModesScreenState extends State<ModesScreen> {
                     icon: const Icon(Icons.power_settings_new),
                     label: Text(_t(_turnOff, lang)),
                     onPressed: () async {
+                      await _school.setSchool(_schoolCtrl.text);
                       await _school.setEnabled(false);
                       if (mounted) setState(() {});
                       if (ctx.mounted) Navigator.pop(ctx);
@@ -176,17 +217,26 @@ class _ModesScreenState extends State<ModesScreen> {
             style: const TextStyle(fontWeight: FontWeight.w600)),
         centerTitle: true,
       ),
-      body: ValueListenableBuilder<int>(
-        valueListenable: SchoolCalendarService.revision,
-        builder: (context, _, __) {
+      body: AnimatedBuilder(
+        animation: Listenable.merge([
+          SchoolCalendarService.revision,
+          SchoolCalendarService.enabledNotifier,
+          UniversityService.revision,
+          UniversityService.enabledNotifier,
+        ]),
+        builder: (context, _) {
           final pupilOn = _school.enabled && _school.grade != null;
           final pupilStatus = pupilOn
               ? '${_school.grade} ${_t(_gradeShort, lang)}'
               : _t(_off, lang);
+          final studentOn = _uni.enabled && _uni.profile != null;
+          final studentStatus = studentOn
+              ? (_uni.displayUniversityName ?? _t(_setUp, lang))
+              : _t(_off, lang);
           return ListView(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
             children: [
-              if (!pupilOn)
+              if (!pupilOn && !studentOn)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
                   child: Text(_t(_intro, lang),
@@ -202,19 +252,51 @@ class _ModesScreenState extends State<ModesScreen> {
                 enabled: pupilOn,
                 onTap: () => _configurePupil(lang),
                 extra: pupilOn
-                    ? const Padding(
-                        padding: EdgeInsets.fromLTRB(12, 0, 12, 12),
-                        child: SchoolCountdownCard(),
+                    ? const Column(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(12, 0, 12, 4),
+                            child: SchoolCountdownCard(),
+                          ),
+                          ExamHelperCard(),
+                        ],
                       )
                     : null,
               ),
               _modeCard(
                 emoji: '🎓',
                 title: _t(_student, lang),
-                status: _t(_soon, lang),
-                enabled: false,
-                comingSoon: true,
+                status: studentStatus,
+                enabled: studentOn,
+                onTap: () async {
+                  if (!_uni.enabled && _uni.profile == null) {
+                    // Първо включване → зареди ВУЗ списъка предварително.
+                    await _uni.loadUniversities();
+                  }
+                  if (!context.mounted) return;
+                  await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(
+                      builder: (_) => const StudentOnboardingScreen(),
+                    ),
+                  );
+                  if (mounted) setState(() {});
+                },
               ),
+              if (pupilOn || studentOn)
+                Card(
+                  margin: const EdgeInsets.symmetric(vertical: 6),
+                  child: ListTile(
+                    leading: const Text('📅', style: TextStyle(fontSize: 26)),
+                    title: Text(_t(_mySchedule, lang),
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const WeeklyScheduleScreen(),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           );
         },

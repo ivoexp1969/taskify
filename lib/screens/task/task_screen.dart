@@ -22,7 +22,7 @@ import '../../widgets/reminder_selector.dart';
 import '../../services/widget_service.dart';
 import '../../services/ad_service.dart';
 import '../../widgets/celebration_overlay.dart';
-import '../../widgets/school_countdown_card.dart';
+import '../../widgets/study_countdown_card.dart';
 import '../../services/review_service.dart';
 import 'shopping_list_screen.dart';
 import 'task_type_selector.dart';
@@ -34,6 +34,7 @@ import 'payment_dialog.dart';
 import 'travel_dialog.dart';
 import 'gift_dialog.dart';
 import 'document_dialog.dart';
+import 'study_task_dialog.dart';
 import '../../widgets/task_card_styles.dart';
 import '../../widgets/pomodoro_timer_sheet.dart';
 import '../../widgets/ai_limit.dart';
@@ -2850,9 +2851,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
             // Productivity banner — streak + today's score
             _ProductivityBanner(taskBox: taskBox),
 
-            // „Училищен режим": обратно броене до следваща ваканция (само при
-            // включен режим; сама се скрива иначе). Реактивна.
-            const SchoolCountdownCard(),
+            // Режими Уча: обратно броене (Ученик до ваканция/изпит, Студент до
+            // ключова дата). Само при включен режим; сама се скрива иначе.
+            // Тап → пълен списък с предстоящи събития. Реактивна.
+            const StudyCountdownCard(),
 
             // Видим вход към Споделени списъци (по-забележим от иконата в AppBar).
             _buildSharedEntry(t, theme),
@@ -3452,6 +3454,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                 if (type == 'travel') { TravelDialog.show(context).then((_) => setState(() {})); return; }
                 if (type == 'gift') { GiftDialog.show(context).then((_) => setState(() {})); return; }
                 if (type == 'document') { DocumentDialog.show(context).then((_) => setState(() {})); return; }
+                if (type == 'homework' || type == 'essay' || type == 'coursework') {
+                  StudyTaskDialog.show(context, kind: type).then((_) => setState(() {})); return;
+                }
                 _openTaskDialog();
               },
                 child: const Icon(Icons.add),

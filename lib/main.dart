@@ -31,6 +31,8 @@ import 'services/morning_briefing_service.dart';
 import 'services/name_days_service.dart';
 import 'services/holidays_service.dart';
 import 'services/school_calendar_service.dart';
+import 'services/university_service.dart';
+import 'services/weekly_schedule_service.dart';
 import 'services/tombstone_service.dart';
 import 'services/migration_service.dart';
 import 'services/sync_service.dart';
@@ -194,7 +196,17 @@ Future<void> main() async {
   SchoolCalendarService().loadEnabled().then((enabled) {
     if (enabled) SchoolCalendarService().load();
   });
-  
+
+  // „Режим Студент" — списък ВУЗ (вграден asset) + профил/ключови дати. Чист
+  // Dart, offline-first; зарежда ВУЗ списъка само ако режимът е включен.
+  UniversityService().loadEnabled().then((enabled) {
+    if (enabled) UniversityService().loadUniversities();
+  });
+
+  // Седмичен разпис (Режими Уча) — прости слотове уроци/лекции. Зарежда се, за
+  // да е достъпен на календара; чист SharedPreferences.
+  WeeklyScheduleService().load();
+
   final themeController = ThemeController(ThemeMode.system);
   await themeController.loadSavedTheme();
 

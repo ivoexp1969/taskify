@@ -1,0 +1,70 @@
+{
+  "_meta": {
+    "note": "Шаблони за автоматично разбиване на учебни задачи (Режими Уча). Всеки шаблон има стъпки с daysBefore (дни преди крайния срок при средна сложност=2). Сложност 1 скъсява отстоянията (×0.6), 3 ги удължава (×1.4). При кратък срок отстоянията се компресират пропорционално, но нито една стъпка не се пропуска. Домашно няма шаблон (без авто-подзадачи).",
+    "version": "2026-07",
+    "complexityMultipliers": { "1": 0.6, "2": 1.0, "3": 1.4 }
+  },
+  "templates": {
+    "essay": {
+      "steps": [
+        { "daysBefore": 7, "title": {
+          "en": "Pick a topic / read the requirements", "bg": "Избор на тема / прочит на изискванията",
+          "de": "Thema wählen / Anforderungen lesen", "fr": "Choisir un sujet / lire les consignes",
+          "it": "Scegli un tema / leggi i requisiti", "el": "Επιλογή θέματος / ανάγνωση απαιτήσεων",
+          "es": "Elegir tema / leer los requisitos", "pt": "Escolher tema / ler os requisitos",
+          "ru": "Выбор темы / чтение требований", "tr": "Konu seç / gereksinimleri oku", "ja": "テーマ選び／要件を読む" } },
+        { "daysBefore": 5, "title": {
+          "en": "Outline the essay", "bg": "План на есето", "de": "Essay-Gliederung",
+          "fr": "Plan de la dissertation", "it": "Scaletta del saggio", "el": "Σχεδιάγραμμα δοκιμίου",
+          "es": "Esquema del ensayo", "pt": "Plano do ensaio", "ru": "План эссе",
+          "tr": "Deneme taslağı", "ja": "エッセイの構成" } },
+        { "daysBefore": 3, "title": {
+          "en": "First draft", "bg": "Чернова", "de": "Erster Entwurf", "fr": "Premier brouillon",
+          "it": "Prima bozza", "el": "Πρώτο προσχέδιο", "es": "Primer borrador", "pt": "Primeiro rascunho",
+          "ru": "Черновик", "tr": "İlk taslak", "ja": "下書き" } },
+        { "daysBefore": 1, "title": {
+          "en": "Revise & edit", "bg": "Редакция", "de": "Überarbeiten", "fr": "Révision",
+          "it": "Revisione", "el": "Αναθεώρηση", "es": "Revisión", "pt": "Revisão",
+          "ru": "Редактирование", "tr": "Düzeltme", "ja": "推敲・修正" } },
+        { "daysBefore": 0, "title": {
+          "en": "Submit", "bg": "Предаване", "de": "Abgabe", "fr": "Rendre",
+          "it": "Consegna", "el": "Παράδοση", "es": "Entregar", "pt": "Entregar",
+          "ru": "Сдача", "tr": "Teslim", "ja": "提出" } }
+      ]
+    },
+    "coursework": {
+      "steps": [
+        { "daysBefore": 14, "title": {
+          "en": "Research the topic", "bg": "Проучване на тема", "de": "Thema recherchieren",
+          "fr": "Recherche sur le sujet", "it": "Ricerca sul tema", "el": "Έρευνα θέματος",
+          "es": "Investigar el tema", "pt": "Pesquisar o tema", "ru": "Исследование темы",
+          "tr": "Konuyu araştır", "ja": "テーマの調査" } },
+        { "daysBefore": 10, "title": {
+          "en": "Plan / structure", "bg": "План/структура", "de": "Plan / Struktur",
+          "fr": "Plan / structure", "it": "Piano / struttura", "el": "Σχέδιο / δομή",
+          "es": "Plan / estructura", "pt": "Plano / estrutura", "ru": "План / структура",
+          "tr": "Plan / yapı", "ja": "計画・構成" } },
+        { "daysBefore": 7, "title": {
+          "en": "First part", "bg": "Първа част", "de": "Erster Teil", "fr": "Première partie",
+          "it": "Prima parte", "el": "Πρώτο μέρος", "es": "Primera parte", "pt": "Primeira parte",
+          "ru": "Первая часть", "tr": "İlk bölüm", "ja": "第一部" } },
+        { "daysBefore": 5, "title": {
+          "en": "Second part", "bg": "Втора част", "de": "Zweiter Teil", "fr": "Deuxième partie",
+          "it": "Seconda parte", "el": "Δεύτερο μέρος", "es": "Segunda parte", "pt": "Segunda parte",
+          "ru": "Вторая часть", "tr": "İkinci bölüm", "ja": "第二部" } },
+        { "daysBefore": 2, "title": {
+          "en": "Formatting", "bg": "Оформление", "de": "Formatierung", "fr": "Mise en forme",
+          "it": "Formattazione", "el": "Μορφοποίηση", "es": "Formato", "pt": "Formatação",
+          "ru": "Оформление", "tr": "Biçimlendirme", "ja": "書式設定" } },
+        { "daysBefore": 1, "title": {
+          "en": "Final check", "bg": "Финална проверка", "de": "Endkontrolle", "fr": "Vérification finale",
+          "it": "Controllo finale", "el": "Τελικός έλεγχος", "es": "Revisión final", "pt": "Verificação final",
+          "ru": "Финальная проверка", "tr": "Son kontrol", "ja": "最終確認" } },
+        { "daysBefore": 0, "title": {
+          "en": "Submit", "bg": "Предаване", "de": "Abgabe", "fr": "Rendre",
+          "it": "Consegna", "el": "Παράδοση", "es": "Entregar", "pt": "Entregar",
+          "ru": "Сдача", "tr": "Teslim", "ja": "提出" } }
+      ]
+    }
+  }
+}

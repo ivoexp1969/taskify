@@ -1109,6 +1109,10 @@ class AppText {
   String get typeTravel => _t({'en': 'Travel', 'bg': 'Пътуване', 'de': 'Reise', 'fr': 'Voyage', 'it': 'Viaggio', 'el': 'Ταξίδι', 'es': 'Viaje', 'pt': 'Viagem', 'ru': 'Путешествие', 'tr': 'Seyahat', 'ja': '旅行'});
   String get typeGift => _t({'en': 'Gift', 'bg': 'Подарък', 'de': 'Geschenk', 'fr': 'Cadeau', 'it': 'Regalo', 'el': 'Δώρο', 'es': 'Regalo', 'pt': 'Presente', 'ru': 'Подарок', 'tr': 'Hediye', 'ja': 'ギフト'});
   String get typeDocument => _t({'en': 'Document', 'bg': 'Документ', 'de': 'Dokument', 'fr': 'Document', 'it': 'Documento', 'el': 'Έγγραφο', 'es': 'Documento', 'pt': 'Documento', 'ru': 'Документ', 'tr': 'Belge', 'ja': '書類'});
+  // Режими Уча — учебни типове задачи
+  String get typeHomework => _t({'en': 'Homework', 'bg': 'Домашно', 'de': 'Hausaufgabe', 'fr': 'Devoir', 'it': 'Compiti', 'el': 'Εργασία για το σπίτι', 'es': 'Deberes', 'pt': 'Trabalho de casa', 'ru': 'Домашнее задание', 'tr': 'Ödev', 'ja': '宿題'});
+  String get typeEssay => _t({'en': 'Essay', 'bg': 'Есе', 'de': 'Aufsatz', 'fr': 'Dissertation', 'it': 'Saggio', 'el': 'Δοκίμιο', 'es': 'Ensayo', 'pt': 'Ensaio', 'ru': 'Эссе', 'tr': 'Deneme', 'ja': 'エッセイ'});
+  String get typeCoursework => _t({'en': 'Coursework', 'bg': 'Курсова работа', 'de': 'Hausarbeit', 'fr': 'Travail de cours', 'it': 'Tesina', 'el': 'Εργασία εξαμήνου', 'es': 'Trabajo de curso', 'pt': 'Trabalho de curso', 'ru': 'Курсовая работа', 'tr': 'Dönem ödevi', 'ja': 'コースワーク'});
 
   // ==================== ДОКУМЕНТИ (изтичащ срок) ====================
   String get documents => _t({'en': 'Documents', 'bg': 'Документи', 'de': 'Dokumente', 'fr': 'Documents', 'it': 'Documenti', 'el': 'Έγγραφα', 'es': 'Documentos', 'pt': 'Documentos', 'ru': 'Документы', 'tr': 'Belgeler', 'ja': '書類'});

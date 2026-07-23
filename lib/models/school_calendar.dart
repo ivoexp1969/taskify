@@ -86,17 +86,25 @@ class SchoolExam {
   final String name;
   final DateTime date;
   final String? grades;
+  final String? subject; // БЕЛ | Математика | … (по избор)
+  final bool mandatory; // за 10. клас чуждият/ИТ са по избор
 
   const SchoolExam({
     required this.key,
     required this.name,
     required this.date,
     this.grades,
+    this.subject,
+    this.mandatory = true,
   });
 
   static SchoolExam? fromJson(Map<String, dynamic> j) {
+    // Изключен изпит (напр. НВО отпадне) → не се показва. „Кодът не се пипа" —
+    // Иво само маркира enabled:false във Firestore.
+    if (j['enabled'] == false) return null;
     final date = parseSchoolDate(j['date']);
     if (date == null) return null;
+    final subj = (j['subject'] as String?)?.trim();
     return SchoolExam(
       key: (j['key'] as String?)?.trim() ?? '',
       name: (j['name'] as String?)?.trim() ?? '',
@@ -104,6 +112,8 @@ class SchoolExam {
       grades: (j['grades']?.toString().trim().isEmpty ?? true)
           ? null
           : j['grades'].toString().trim(),
+      subject: (subj?.isEmpty ?? true) ? null : subj,
+      mandatory: j['mandatory'] as bool? ?? true,
     );
   }
 }

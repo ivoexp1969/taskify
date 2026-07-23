@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../utils/localization.dart';
+import '../../services/school_calendar_service.dart';
+import '../../services/university_service.dart';
 
 class _TypeItem {
   final String type;
@@ -120,10 +122,55 @@ class _Sheet extends StatelessWidget {
     ),
   ];
 
+  // Учебни типове (Режими Уча) — показват се само при включен режим.
+  static final _TypeItem _homework = _TypeItem(
+    type: 'homework',
+    icon: Icons.menu_book_outlined,
+    lightBg: const Color(0xFFEDE7FB),
+    darkBg: const Color(0xFF1a1330),
+    lightIcon: const Color(0xFF6A3DE8),
+    darkIcon: const Color(0xFFB9A3F0),
+    label: (t) => t.typeHomework,
+  );
+  static final _TypeItem _essay = _TypeItem(
+    type: 'essay',
+    icon: Icons.edit_note_outlined,
+    lightBg: const Color(0xFFE1F0FB),
+    darkBg: const Color(0xFF0d1e2b),
+    lightIcon: const Color(0xFF1F76B4),
+    darkIcon: const Color(0xFF83BBE8),
+    label: (t) => t.typeEssay,
+  );
+  static final _TypeItem _coursework = _TypeItem(
+    type: 'coursework',
+    icon: Icons.article_outlined,
+    lightBg: const Color(0xFFE1F5EE),
+    darkBg: const Color(0xFF0e2520),
+    lightIcon: const Color(0xFF0AA674),
+    darkIcon: const Color(0xFF5DCAA5),
+    label: (t) => t.typeCoursework,
+  );
+
+  /// Типовете за показване спрямо активните режими: Ученик → +Домашно/Есе;
+  /// Студент → +Домашно/Есе/Курсова.
+  List<_TypeItem> _visibleTypes() {
+    final pupilOn =
+        SchoolCalendarService().enabled && SchoolCalendarService().grade != null;
+    final studentOn = UniversityService().enabled;
+    final list = List<_TypeItem>.from(_types);
+    if (pupilOn || studentOn) {
+      list.add(_homework);
+      list.add(_essay);
+    }
+    if (studentOn) list.add(_coursework);
+    return list;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final t = AppText.of(context);
+    final types = _visibleTypes();
     final isDark = theme.brightness == Brightness.dark;
     final bgColor = isDark ? const Color(0xFF13131f) : theme.colorScheme.surface;
 
@@ -168,9 +215,9 @@ class _Sheet extends StatelessWidget {
               mainAxisSpacing: 8,
               childAspectRatio: 0.75,
             ),
-            itemCount: _types.length,
+            itemCount: types.length,
             itemBuilder: (ctx, i) {
-              final item = _types[i];
+              final item = types[i];
               final bg = isDark ? item.darkBg : item.lightBg;
               final iconColor = isDark ? item.darkIcon : item.lightIcon;
               return GestureDetector(

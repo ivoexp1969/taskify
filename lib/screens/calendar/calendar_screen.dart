@@ -27,6 +27,8 @@ import '../../widgets/celebration_overlay.dart';
 import '../../widgets/task_card_styles.dart';
 import '../../widgets/pomodoro_timer_sheet.dart';
 import '../../widgets/gift_cta.dart';
+import '../../models/weekly_schedule.dart';
+import '../../services/weekly_schedule_service.dart';
 
 enum CalendarView { day, week, month }
 
@@ -1799,6 +1801,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     children: [
                       if (_holidaysEnabled) _buildHolidayBanner(context),
                       if (_nameDaysEnabled) _buildNameDayBanner(context),
+                      _buildScheduleStrip(context),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
                         child: Align(
@@ -2003,6 +2006,49 @@ class _CalendarScreenState extends State<CalendarScreen> {
   /// Read-only банер за официалния празник на избрания ден.
   /// localName идва от Nager.Date (вече на местния език). Връща празно,
   /// ако денят не е официален празник.
+  /// Лента с уроците/лекциите за избрания ден (Режими Уча — седмичен разпис).
+  /// Показва се само ако има слотове за деня; иначе нищо.
+  Widget _buildScheduleStrip(BuildContext context) {
+    return AnimatedBuilder(
+      animation: WeeklyScheduleService.revision,
+      builder: (context, _) {
+        final slots = WeeklyScheduleService().forDay(_selectedDay.weekday);
+        if (slots.isEmpty) return const SizedBox.shrink();
+        final theme = Theme.of(context);
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+          child: Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final s in slots)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer
+                        .withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border(
+                      left: BorderSide(
+                          color: theme.colorScheme.primary, width: 3),
+                    ),
+                  ),
+                  child: Text(
+                    '${s.fromLabel} ${s.subject.isNotEmpty ? s.subject : (s.kind == SlotKind.lecture ? '🎓' : '🎒')}',
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.onPrimaryContainer),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildHolidayBanner(BuildContext context) {
     final name = HolidaysService().forDate(_selectedDay);
     if (name == null) return const SizedBox.shrink();
