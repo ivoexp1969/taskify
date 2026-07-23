@@ -33,9 +33,9 @@ class _ModesScreenState extends State<ModesScreen> {
       m[lang] ?? m['en']!;
 
   static const _title = {
-    'en': 'Study', 'bg': 'Уча', 'de': 'Lernen', 'fr': 'Études',
-    'it': 'Studio', 'el': 'Μελέτη', 'es': 'Estudio', 'pt': 'Estudo',
-    'ru': 'Учёба', 'tr': 'Okul', 'ja': '学習',
+    'en': 'Learning', 'bg': 'Обучение', 'de': 'Bildung', 'fr': 'Éducation',
+    'it': 'Istruzione', 'el': 'Εκπαίδευση', 'es': 'Educación', 'pt': 'Educação',
+    'ru': 'Обучение', 'tr': 'Eğitim', 'ja': '学び',
   };
   static const _pupil = {
     'en': 'Pupil', 'bg': 'Ученик', 'de': 'Schüler', 'fr': 'Élève',
@@ -57,18 +57,18 @@ class _ModesScreenState extends State<ModesScreen> {
     'it': 'classe', 'el': 'τάξη', 'es': 'grado', 'pt': 'ano',
     'ru': 'класс', 'tr': 'sınıf', 'ja': '年生',
   };
-  static const _intro = {
-    'en': 'Turn on a mode to get features made just for you.',
-    'bg': 'Активирай режим, за да получиш функции специално за теб.',
-    'de': 'Aktiviere einen Modus für Funktionen speziell für dich.',
-    'fr': 'Active un mode pour des fonctions rien que pour toi.',
-    'it': 'Attiva una modalità per funzioni pensate per te.',
-    'el': 'Ενεργοποίησε μια λειτουργία για δυνατότητες ειδικά για σένα.',
-    'es': 'Activa un modo para tener funciones hechas para ti.',
-    'pt': 'Ativa um modo para funções feitas para ti.',
-    'ru': 'Включи режим, чтобы получить функции специально для тебя.',
-    'tr': 'Sana özel özellikler için bir mod aç.',
-    'ja': 'モードをオンにすると、あなた専用の機能が使えます。',
+  static const _pickInSettings = {
+    'en': 'Choose Pupil or Student in Settings → School mode.',
+    'bg': 'Избери Ученик или Студент от Настройки → Училищен режим.',
+    'de': 'Wähle Schüler oder Student in Einstellungen → Schulmodus.',
+    'fr': 'Choisis Élève ou Étudiant dans Réglages → Mode école.',
+    'it': 'Scegli Alunno o Studente in Impostazioni → Modalità scuola.',
+    'el': 'Διάλεξε Μαθητή ή Φοιτητή στις Ρυθμίσεις → Λειτουργία σχολείου.',
+    'es': 'Elige Alumno o Estudiante en Ajustes → Modo escolar.',
+    'pt': 'Escolhe Aluno ou Estudante em Definições → Modo escolar.',
+    'ru': 'Выбери Ученика или Студента в Настройках → Школьный режим.',
+    'tr': 'Ayarlar → Okul modunda Öğrenci veya Üniversite seç.',
+    'ja': '設定 → 学校モードで生徒か大学生を選択。',
   };
   static const _pickGrade = {
     'en': 'Pick your grade', 'bg': 'Избери класа си', 'de': 'Wähle deine Klasse',
@@ -93,7 +93,7 @@ class _ModesScreenState extends State<ModesScreen> {
     'ru': 'Настроить', 'tr': 'Kur', 'ja': '設定',
   };
   static const _mySchedule = {
-    'en': 'My schedule', 'bg': 'Мой разпис', 'de': 'Mein Stundenplan',
+    'en': 'My schedule', 'bg': 'Моето разписание', 'de': 'Mein Stundenplan',
     'fr': 'Mon emploi du temps', 'it': 'Il mio orario', 'el': 'Το πρόγραμμά μου',
     'es': 'Mi horario', 'pt': 'O meu horário', 'ru': 'Моё расписание',
     'tr': 'Ders programım', 'ja': '時間割',
@@ -127,6 +127,8 @@ class _ModesScreenState extends State<ModesScreen> {
                         await _school.setGrade(g);
                         await _school.setSchool(_schoolCtrl.text);
                         await _school.setEnabled(true);
+                        // Режимите са взаимно изключващи се (ученик ИЛИ студент).
+                        await _uni.setEnabled(false);
                         if (mounted) setState(() {});
                         if (ctx.mounted) Navigator.pop(ctx);
                       },
@@ -213,7 +215,7 @@ class _ModesScreenState extends State<ModesScreen> {
     final lang = LanguageScope.of(context).locale.languageCode;
     return Scaffold(
       appBar: AppBar(
-        title: Text('🎓 ${_t(_title, lang)}',
+        title: Text('📚 ${_t(_title, lang)}',
             style: const TextStyle(fontWeight: FontWeight.w600)),
         centerTitle: true,
       ),
@@ -236,52 +238,49 @@ class _ModesScreenState extends State<ModesScreen> {
           return ListView(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
             children: [
+              // Показва се САМО активният режим (изборът Ученик/Студент е от
+              // Настройки → Училищен режим).
               if (!pupilOn && !studentOn)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
-                  child: Text(_t(_intro, lang),
+                  child: Text(_t(_pickInSettings, lang),
                       style: TextStyle(
                           color: Theme.of(context)
                               .colorScheme
                               .onSurfaceVariant)),
                 ),
-              _modeCard(
-                emoji: '🎒',
-                title: _t(_pupil, lang),
-                status: pupilStatus,
-                enabled: pupilOn,
-                onTap: () => _configurePupil(lang),
-                extra: pupilOn
-                    ? const Column(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(12, 0, 12, 4),
-                            child: SchoolCountdownCard(),
-                          ),
-                          ExamHelperCard(),
-                        ],
-                      )
-                    : null,
-              ),
-              _modeCard(
-                emoji: '🎓',
-                title: _t(_student, lang),
-                status: studentStatus,
-                enabled: studentOn,
-                onTap: () async {
-                  if (!_uni.enabled && _uni.profile == null) {
-                    // Първо включване → зареди ВУЗ списъка предварително.
-                    await _uni.loadUniversities();
-                  }
-                  if (!context.mounted) return;
-                  await Navigator.of(context).push<bool>(
-                    MaterialPageRoute(
-                      builder: (_) => const StudentOnboardingScreen(),
-                    ),
-                  );
-                  if (mounted) setState(() {});
-                },
-              ),
+              if (pupilOn)
+                _modeCard(
+                  emoji: '🎒',
+                  title: _t(_pupil, lang),
+                  status: pupilStatus,
+                  enabled: true,
+                  onTap: () => _configurePupil(lang),
+                  extra: const Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(12, 0, 12, 4),
+                        child: SchoolCountdownCard(),
+                      ),
+                      ExamHelperCard(),
+                    ],
+                  ),
+                ),
+              if (studentOn)
+                _modeCard(
+                  emoji: '🎓',
+                  title: _t(_student, lang),
+                  status: studentStatus,
+                  enabled: true,
+                  onTap: () async {
+                    await Navigator.of(context).push<bool>(
+                      MaterialPageRoute(
+                        builder: (_) => const StudentOnboardingScreen(),
+                      ),
+                    );
+                    if (mounted) setState(() {});
+                  },
+                ),
               if (pupilOn || studentOn)
                 Card(
                   margin: const EdgeInsets.symmetric(vertical: 6),

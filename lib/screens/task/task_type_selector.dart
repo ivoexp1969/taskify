@@ -213,7 +213,7 @@ class _Sheet extends StatelessWidget {
               crossAxisCount: 4,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
-              childAspectRatio: 0.75,
+              childAspectRatio: 0.66, // по-високи клетки за 2-редови етикети
             ),
             itemCount: types.length,
             itemBuilder: (ctx, i) {
@@ -235,9 +235,9 @@ class _Sheet extends StatelessWidget {
                       ),
                       child: Icon(item.icon, color: iconColor, size: 22),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     SizedBox(
-                      height: 28,
+                      height: 32,
                       child: Text(
                         item.label(t),
                         style: TextStyle(

@@ -147,12 +147,29 @@ class UniversityProfile {
   }
 }
 
-/// Тип на студентска ключова дата (за обратното броене — Ф2).
-enum StudentDateKind { semesterStart, semesterEnd, sessionStart, exam, other }
+/// Тип на ключова дата (за обратното броене). Общи за Ученик и Студент:
+/// `schoolYearStart`/`termStart`/`vacation` са предимно ученически, а
+/// `semester*`/`sessionStart` — студентски; `exam`/`other` важат за двамата.
+enum StudentDateKind {
+  schoolYearStart,
+  termStart,
+  vacation,
+  semesterStart,
+  semesterEnd,
+  sessionStart,
+  exam,
+  other,
+}
 
 extension StudentDateKindKey on StudentDateKind {
   String get key {
     switch (this) {
+      case StudentDateKind.schoolYearStart:
+        return 'school_year_start';
+      case StudentDateKind.termStart:
+        return 'term_start';
+      case StudentDateKind.vacation:
+        return 'vacation';
       case StudentDateKind.semesterStart:
         return 'semester_start';
       case StudentDateKind.semesterEnd:
@@ -168,6 +185,12 @@ extension StudentDateKindKey on StudentDateKind {
 
   static StudentDateKind fromKey(String? k) {
     switch ((k ?? '').trim()) {
+      case 'school_year_start':
+        return StudentDateKind.schoolYearStart;
+      case 'term_start':
+        return StudentDateKind.termStart;
+      case 'vacation':
+        return StudentDateKind.vacation;
       case 'semester_start':
         return StudentDateKind.semesterStart;
       case 'semester_end':

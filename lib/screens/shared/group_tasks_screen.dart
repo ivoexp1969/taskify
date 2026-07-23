@@ -520,6 +520,11 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                   final completer = gt.completedBy != null
                       ? _group.memberFor(gt.completedBy!).displayName
                       : null;
+                  // Само авторът може да завършва/редактира/трие задачата.
+                  // (Стари задачи без автор → достъпни за всички, за съвместимост.)
+                  final isAuthor = gt.createdBy == null || gt.createdBy == uid;
+                  void notAuthor() => ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(t.onlyAuthorCanManage)));
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -541,13 +546,17 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                             _expanded.add(gt.id);
                           }
                         }),
-                        onToggleComplete: () => _service.toggleComplete(
-                            _group.id, gt.id, !gt.isCompleted),
+                        onToggleComplete: () => isAuthor
+                            ? _service.toggleComplete(
+                                _group.id, gt.id, !gt.isCompleted)
+                            : notAuthor(),
                         onBreakdown: () => _breakdown(gt),
                         onToggleSubtask: (index) => _toggleSubtask(gt, index),
-                        onEdit: () => _addOrEditTask(existing: gt),
-                        onDelete: () =>
-                            _service.deleteTask(_group.id, gt.id),
+                        onEdit: () =>
+                            isAuthor ? _addOrEditTask(existing: gt) : notAuthor(),
+                        onDelete: () => isAuthor
+                            ? _service.deleteTask(_group.id, gt.id)
+                            : notAuthor(),
                       ),
                       if (gt.isCompleted && completer != null)
                         Padding(

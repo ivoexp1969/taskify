@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/university.dart';
 import '../../services/university_service.dart';
+import '../../services/school_calendar_service.dart';
 import '../../utils/localization.dart';
 
 /// Онбординг на „Режим Студент": ВУЗ → факултет → специалност → курс → форма.
@@ -27,8 +28,9 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
   University? _uni;
   final _uniNameCtrl = TextEditingController(); // за „Друг университет"
   final _facultyCtrl = TextEditingController();
-  String _program = '';
+  String _program = ''; // избрана от списъка специалност
   final _programCtrl = TextEditingController(); // за ръчна специалност
+  bool _manualProgram = false; // true = въвежда ръчно („Друга")
   int _year = 1;
   StudyForm _form = StudyForm.regular;
   bool _loading = true;
@@ -48,8 +50,14 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
         _uni = _service.universityById(p.uniId);
         _uniNameCtrl.text = p.uniName ?? '';
         _facultyCtrl.text = p.faculty;
-        _program = p.program;
-        _programCtrl.text = p.program;
+        // Специалността е „ръчна", ако ВУЗ-ът няма списък или тя не е в списъка.
+        final inList = _uni?.programs.contains(p.program) ?? false;
+        if (inList) {
+          _program = p.program;
+        } else {
+          _manualProgram = p.program.isNotEmpty;
+          _programCtrl.text = p.program;
+        }
         _year = p.year;
         _form = p.form;
       }
@@ -221,11 +229,12 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
     if (picked != null) {
       setState(() {
         _uni = picked;
-        // При смяна на ВУЗ нулираме специалността, ако не е в новия списък.
-        if (_program.isNotEmpty && !picked.programs.contains(_program)) {
+        // При смяна на ВУЗ нулираме избора на специалност (различни списъци).
+        if (!picked.programs.contains(_program)) {
           _program = '';
-          _programCtrl.text = '';
         }
+        // Ако новият ВУЗ няма списък → режим „ръчно" (само текстово поле).
+        _manualProgram = picked.programs.isEmpty && _programCtrl.text.isNotEmpty;
       });
     }
   }
@@ -243,9 +252,11 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
     if (picked == null) return;
     setState(() {
       if (picked == other) {
+        // „Друга" → скрий списъка, покажи ръчното поле.
+        _manualProgram = true;
         _program = '';
-        _programCtrl.text = '';
       } else {
+        _manualProgram = false;
         _program = picked;
         _programCtrl.text = picked;
       }
@@ -254,8 +265,8 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
 
   Future<void> _save(String lang) async {
     final uni = _uni!;
-    final program =
-        _programCtrl.text.trim().isNotEmpty ? _programCtrl.text.trim() : _program;
+    final manual = uni.programs.isEmpty || _manualProgram;
+    final program = manual ? _programCtrl.text.trim() : _program;
     final profile = UniversityProfile(
       uniId: uni.id,
       uniName: uni.isOther ? _uniNameCtrl.text.trim() : null,
@@ -266,6 +277,8 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
     );
     await _service.setProfile(profile);
     await _service.setEnabled(true);
+    // Режимите са взаимно изключващи се (ученик ИЛИ студент).
+    await SchoolCalendarService().setEnabled(false);
     if (mounted) Navigator.pop(context, true);
   }
 
@@ -334,6 +347,7 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
                 // ── Специалност ──
                 Text(_t(_programLabel, lang), style: theme.textTheme.labelLarge),
                 const SizedBox(height: 4),
+                // ВУЗ с примерни специалности → dropdown (вкл. „Друга — ръчно").
                 if (hasPrograms)
                   OutlinedButton(
                     onPressed: () => _pickProgram(lang),
@@ -343,24 +357,29 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
                           horizontal: 14, vertical: 14),
                     ),
                     child: Text(
-                      _program.isNotEmpty ? _program : _t(_pickHint, lang),
+                      _manualProgram
+                          ? _t(_programOther, lang)
+                          : (_program.isNotEmpty
+                              ? _program
+                              : _t(_pickHint, lang)),
                       style: TextStyle(
-                          color: _program.isEmpty
+                          color: (!_manualProgram && _program.isEmpty)
                               ? theme.colorScheme.onSurfaceVariant
                               : theme.colorScheme.onSurface),
                     ),
                   ),
-                if (hasPrograms) const SizedBox(height: 8),
-                // Ръчно поле — винаги достъпно (и когато няма списък, и за „Друга").
-                TextField(
-                  controller: _programCtrl,
-                  textCapitalization: TextCapitalization.sentences,
-                  onChanged: (v) => _program = v,
-                  decoration: InputDecoration(
-                    labelText: _t(_programLabel, lang),
-                    border: const OutlineInputBorder(),
+                // Ръчно поле — само ако няма списък ИЛИ е избрано „Друга".
+                if (!hasPrograms || _manualProgram) ...[
+                  if (hasPrograms) const SizedBox(height: 8),
+                  TextField(
+                    controller: _programCtrl,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: InputDecoration(
+                      labelText: _t(_programLabel, lang),
+                      border: const OutlineInputBorder(),
+                    ),
                   ),
-                ),
+                ],
                 const SizedBox(height: 20),
 
                 // ── Курс ──

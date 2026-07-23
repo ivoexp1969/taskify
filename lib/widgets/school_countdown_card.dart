@@ -13,7 +13,11 @@ import '../utils/localization.dart';
 ///
 /// Чист Dart → еднакво на Android и iOS.
 class SchoolCountdownCard extends StatelessWidget {
-  const SchoolCountdownCard({super.key});
+  /// Дали да показва вътрешния ред „следващ изпит". Изключва се, когато картата
+  /// е част от ротатор, който показва изпитите като отделни събития.
+  final bool showExamLine;
+
+  const SchoolCountdownCard({super.key, this.showExamLine = true});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +31,7 @@ class SchoolCountdownCard extends StatelessWidget {
           builder: (context, _, __) {
             final lang = LanguageScope.of(context).locale.languageCode;
             final cd = svc.countdown();
-            final exams = svc.upcomingExams();
+            final exams = showExamLine ? svc.upcomingExams() : const <SchoolExam>[];
             return _buildCard(context, lang, cd, exams);
           },
         );

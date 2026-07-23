@@ -37,6 +37,8 @@ import '../../services/name_days_service.dart';
 import '../../services/contact_name_index.dart';
 import '../../services/holidays_service.dart';
 import '../../services/school_calendar_service.dart';
+import '../../services/university_service.dart';
+import '../modes/student_onboarding_screen.dart';
 import '../../services/pro_service.dart';
 import '../paywall/paywall_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -543,11 +545,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'tr': 'Tatile geri sayım, dersler ve sınavlar',
       'ja': '休みまでのカウントダウン、教科・試験',
     };
-    const gradeTitle = {
-      'en': 'Grade', 'bg': 'Клас', 'de': 'Klasse', 'fr': 'Classe',
-      'it': 'Classe', 'el': 'Τάξη', 'es': 'Grado', 'pt': 'Ano',
-      'ru': 'Класс', 'tr': 'Sınıf', 'ja': '学年',
-    };
     const subjectsBtn = {
       'en': 'Add school subjects', 'bg': 'Добави училищни предмети',
       'de': 'Schulfächer hinzufügen', 'fr': 'Ajouter des matières',
@@ -555,27 +552,81 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'es': 'Añadir asignaturas', 'pt': 'Adicionar disciplinas',
       'ru': 'Добавить предметы', 'tr': 'Ders ekle', 'ja': '教科を追加',
     };
-    const notSet = {
-      'en': 'Not set', 'bg': 'Не е избран', 'de': 'Nicht gewählt',
-      'fr': 'Non défini', 'it': 'Non impostato', 'el': 'Δεν έχει οριστεί',
-      'es': 'Sin definir', 'pt': 'Não definido', 'ru': 'Не выбран',
-      'tr': 'Seçilmedi', 'ja': '未設定',
+    const pupilRole = {
+      'en': 'Pupil', 'bg': 'Ученик', 'de': 'Schüler', 'fr': 'Élève',
+      'it': 'Alunno', 'el': 'Μαθητής', 'es': 'Alumno', 'pt': 'Aluno',
+      'ru': 'Ученик', 'tr': 'Öğrenci', 'ja': '生徒',
     };
+    const studentRole = {
+      'en': 'Student', 'bg': 'Студент', 'de': 'Student', 'fr': 'Étudiant',
+      'it': 'Studente', 'el': 'Φοιτητής', 'es': 'Estudiante', 'pt': 'Estudante',
+      'ru': 'Студент', 'tr': 'Üniversite', 'ja': '大学生',
+    };
+    const chooseRole = {
+      'en': 'Choose your role', 'bg': 'Избери роля', 'de': 'Wähle deine Rolle',
+      'fr': 'Choisis ton rôle', 'it': 'Scegli il ruolo', 'el': 'Διάλεξε ρόλο',
+      'es': 'Elige tu rol', 'pt': 'Escolhe o teu papel', 'ru': 'Выбери роль',
+      'tr': 'Rolünü seç', 'ja': '役割を選択',
+    };
+    const switchToStudent = {
+      'en': 'Switch to Student', 'bg': 'Смени на Студент', 'de': 'Zu Student wechseln',
+      'fr': 'Passer à Étudiant', 'it': 'Passa a Studente', 'el': 'Άλλαξε σε Φοιτητή',
+      'es': 'Cambiar a Estudiante', 'pt': 'Mudar para Estudante',
+      'ru': 'Переключить на Студента', 'tr': 'Üniversiteye geç', 'ja': '大学生に切替',
+    };
+    const switchToPupil = {
+      'en': 'Switch to Pupil', 'bg': 'Смени на Ученик', 'de': 'Zu Schüler wechseln',
+      'fr': 'Passer à Élève', 'it': 'Passa a Alunno', 'el': 'Άλλαξε σε Μαθητή',
+      'es': 'Cambiar a Alumno', 'pt': 'Mudar para Aluno',
+      'ru': 'Переключить на Ученика', 'tr': 'Öğrenciye geç', 'ja': '生徒に切替',
+    };
+    const turnOffLabel = {
+      'en': 'Turn off', 'bg': 'Изключи', 'de': 'Ausschalten', 'fr': 'Désactiver',
+      'it': 'Disattiva', 'el': 'Απενεργοποίηση', 'es': 'Desactivar',
+      'pt': 'Desativar', 'ru': 'Выключить', 'tr': 'Kapat', 'ja': 'オフにする',
+    };
+
+    final studentOn = UniversityService().enabled;
+    final studentName = UniversityService().displayUniversityName;
+
+    // Включване на Ученик (пита клас; изключва Студент).
+    Future<void> enablePupil() async {
+      final g = await _pickGrade(context, lang);
+      if (g == null) return;
+      await SchoolCalendarService().setGrade(g);
+      await SchoolCalendarService().setEnabled(true);
+      await SchoolCalendarService().load();
+      await UniversityService().setEnabled(false);
+      if (!mounted) return;
+      setState(() {
+        _schoolModeEnabled = true;
+        _schoolGrade = g;
+      });
+    }
+
+    // Включване/редакция на Студент (онбордингът изключва Ученик при запис).
+    Future<void> enableStudent() async {
+      await UniversityService().loadUniversities();
+      if (!mounted) return;
+      await Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => const StudentOnboardingScreen()));
+      if (!mounted) return;
+      setState(() => _schoolModeEnabled = SchoolCalendarService().enabled);
+    }
 
     return [
       const SizedBox(height: 8),
       Card(
         child: Column(
           children: [
-            SwitchListTile(
-              secondary: Container(
+            ListTile(
+              leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: const Color(0xFF7B2FF7).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.school_rounded,
-                    color: Color(0xFF7B2FF7)),
+                child: const Icon(Icons.school_rounded, color: Color(0xFF7B2FF7)),
               ),
               title: Text(tr(schoolTitle)),
               subtitle: Text(
@@ -585,66 +636,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
-              value: _schoolModeEnabled,
-              onChanged: (value) async {
-                if (value) {
-                  // При включване питаме клас (иначе броенето е грешно).
-                  final g = await _pickGrade(context, lang);
-                  if (g == null) return; // отказ → не включваме
-                  await SchoolCalendarService().setGrade(g);
-                  await SchoolCalendarService().setEnabled(true);
-                  await SchoolCalendarService().load();
-                  if (!mounted) return;
-                  setState(() {
-                    _schoolModeEnabled = true;
-                    _schoolGrade = g;
-                  });
-                } else {
-                  await SchoolCalendarService().setEnabled(false);
-                  if (!mounted) return;
-                  setState(() => _schoolModeEnabled = false);
-                }
-              },
             ),
-            // Инструкция при ИЗКЛЮЧЕН режим — как да го включиш.
-            if (!_schoolModeEnabled)
+
+            // ── Изключено: избор на роля ──
+            if (!_schoolModeEnabled && !studentOn) ...[
+              const Divider(height: 1),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(tr(chooseRole),
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.6))),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.info_outline_rounded,
-                        size: 16,
-                        color:
-                            theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        icon: const Text('🎒'),
+                        label: Text(tr(pupilRole)),
+                        onPressed: enablePupil,
+                      ),
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(
-                        tr(_schoolEnableHint),
-                        style: TextStyle(
-                          fontSize: 12,
-                          height: 1.35,
-                          color: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.6),
-                        ),
+                      child: OutlinedButton.icon(
+                        icon: const Text('🎓'),
+                        label: Text(tr(studentRole)),
+                        onPressed: enableStudent,
                       ),
                     ),
                   ],
                 ),
               ),
+            ],
+
+            // ── Ученик активен ──
             if (_schoolModeEnabled) ...[
               const Divider(height: 1),
               ListTile(
-                leading: const Icon(Icons.grade_rounded),
-                title: Text(tr(gradeTitle)),
+                leading: const Text('🎒', style: TextStyle(fontSize: 22)),
+                title: Text(tr(pupilRole)),
                 trailing: Text(
-                  _schoolGrade != null
-                      ? _gradeLabel(lang, _schoolGrade!)
-                      : tr(notSet),
+                  _schoolGrade != null ? _gradeLabel(lang, _schoolGrade!) : '',
                   style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.primary,
-                  ),
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.primary),
                 ),
                 onTap: () async {
                   final g = await _pickGrade(context, lang);
@@ -668,6 +710,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => showSchoolHowTo(context, lang),
               ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.swap_horiz_rounded),
+                title: Text(tr(switchToStudent)),
+                onTap: enableStudent,
+              ),
+              ListTile(
+                leading: Icon(Icons.power_settings_new,
+                    color: theme.colorScheme.error),
+                title: Text(tr(turnOffLabel)),
+                onTap: () async {
+                  await SchoolCalendarService().setEnabled(false);
+                  if (!mounted) return;
+                  setState(() => _schoolModeEnabled = false);
+                },
+              ),
+            ],
+
+            // ── Студент активен ──
+            if (studentOn) ...[
+              const Divider(height: 1),
+              ListTile(
+                leading: const Text('🎓', style: TextStyle(fontSize: 22)),
+                title: Text(tr(studentRole)),
+                subtitle: studentName != null
+                    ? Text(studentName,
+                        maxLines: 1, overflow: TextOverflow.ellipsis)
+                    : null,
+                trailing: const Icon(Icons.chevron_right),
+                onTap: enableStudent, // редакция на профила
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.swap_horiz_rounded),
+                title: Text(tr(switchToPupil)),
+                onTap: enablePupil,
+              ),
+              ListTile(
+                leading: Icon(Icons.power_settings_new,
+                    color: theme.colorScheme.error),
+                title: Text(tr(turnOffLabel)),
+                onTap: () async {
+                  await UniversityService().setEnabled(false);
+                  if (!mounted) return;
+                  setState(() {});
+                },
+              ),
             ],
           ],
         ),
@@ -675,36 +764,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ];
   }
 
-  // Инструкция за включване (при изключен режим).
-  static const Map<String, String> _schoolEnableHint = {
-    'en': 'Turn it on and pick your grade — a countdown to the next school '
-        'vacation appears on the home screen.',
-    'bg': 'Включи и избери класа си — на началния екран се появява обратно '
-        'броене до следващата ваканция.',
-    'de': 'Aktiviere und wähle deine Klasse — auf dem Startbildschirm '
-        'erscheint ein Countdown bis zu den nächsten Ferien.',
-    'fr': 'Active-le et choisis ta classe — un compte à rebours des prochaines '
-        'vacances apparaît sur l\'accueil.',
-    'it': 'Attivalo e scegli la classe — sulla home appare un conto alla '
-        'rovescia per le prossime vacanze.',
-    'el': 'Ενεργοποίησέ το και διάλεξε τάξη — στην αρχική εμφανίζεται '
-        'αντίστροφη μέτρηση για τις επόμενες διακοπές.',
-    'es': 'Actívalo y elige tu grado — en la pantalla de inicio aparece una '
-        'cuenta atrás para las próximas vacaciones.',
-    'pt': 'Ativa e escolhe o teu ano — no ecrã inicial aparece uma contagem '
-        'para as próximas férias.',
-    'ru': 'Включи и выбери класс — на главном экране появится обратный отсчёт '
-        'до ближайших каникул.',
-    'tr': 'Aç ve sınıfını seç — ana ekranda bir sonraki tatile geri sayım '
-        'görünür.',
-    'ja': 'オンにして学年を選ぶと、ホーム画面に次の休みまでのカウントダウンが表示されます。',
-  };
-
   static const Map<String, String> _schoolHowToTitle = {
-    'en': 'How it works', 'bg': 'Как се ползва', 'de': 'So funktioniert\'s',
-    'fr': 'Comment ça marche', 'it': 'Come funziona', 'el': 'Πώς λειτουργεί',
-    'es': 'Cómo funciona', 'pt': 'Como funciona', 'ru': 'Как это работает',
-    'tr': 'Nasıl çalışır', 'ja': '使い方',
+    'en': 'How the mode works', 'bg': 'Как работи режимът',
+    'de': 'So funktioniert der Modus', 'fr': 'Comment marche le mode',
+    'it': 'Come funziona la modalità', 'el': 'Πώς λειτουργεί η λειτουργία',
+    'es': 'Cómo funciona el modo', 'pt': 'Como funciona o modo',
+    'ru': 'Как работает режим', 'tr': 'Mod nasıl çalışır', 'ja': 'モードの使い方',
   };
 
   /// Диалог „Как се ползва Училищния режим" (стъпки). Ползва се и от Настройки,
@@ -712,55 +777,103 @@ class _SettingsScreenState extends State<SettingsScreen> {
   static Future<void> showSchoolHowTo(BuildContext context, String lang) {
     String tr(Map<String, String> m) => m[lang] ?? m['en']!;
     const steps = {
-      'en': '1. Pick your grade — the countdown is exact for it (end of year '
-          'differs by grade).\n'
-          '2. See how many days until the next vacation on the home screen.\n'
-          '3. Add your subjects — they become task categories, so you can file '
-          'homework by subject.\n'
-          '4. For grades 7 and 12, a countdown to the NEO/matriculation exams '
-          'shows up too.',
-      'bg': '1. Избери класа си — броенето е точно за него (краят на годината е '
-          'различен по клас).\n'
-          '2. Виж на началния екран колко дни остават до следващата ваканция.\n'
-          '3. Добави предметите си — стават категории за задачи, за да '
-          'разпределяш домашните по предмет.\n'
-          '4. За 7. и 12. клас се показва и броене до НВО/матурите.',
-      'de': '1. Wähle deine Klasse — der Countdown gilt genau für sie.\n'
-          '2. Sieh auf dem Startbildschirm, wie viele Tage bis zu den Ferien.\n'
-          '3. Füge deine Fächer hinzu — sie werden zu Aufgaben-Kategorien.\n'
-          '4. Für Klasse 7 und 12 erscheint auch ein Prüfungs-Countdown.',
-      'fr': '1. Choisis ta classe — le compte à rebours lui est propre.\n'
-          '2. Vois sur l\'accueil les jours avant les prochaines vacances.\n'
+      'en': '1. Pick your role in Settings → School mode: Pupil (grade) or '
+          'Student (university).\n'
+          '2. The home screen shows a countdown — to the next vacation (pupil) '
+          'or to a key date you added (student).\n'
+          '3. Add your subjects — they become task categories.\n'
+          '4. Tap "+" → Homework/Essay/Coursework: for essays & coursework the '
+          'subtasks are created automatically up to the deadline.\n'
+          '5. "My schedule" — enter your lessons; they also show on the calendar.\n'
+          '6. For grades 4, 7, 10 and 12 a NEO/matriculation helper appears.',
+      'bg': '1. Избери роля от Настройки → Училищен режим: Ученик (клас) или '
+          'Студент (ВУЗ).\n'
+          '2. На началния екран виждаш обратно броене — до ваканция (ученик) '
+          'или до въведена от теб ключова дата (студент).\n'
+          '3. Добави предметите си — стават категории за задачи.\n'
+          '4. „+" → Домашно/Есе/Курсова: за есе и курсова подзадачите се '
+          'създават автоматично до крайния срок.\n'
+          '5. „Моето разписание" — въведи часовете си; виждат се и на календара.\n'
+          '6. За 4., 7., 10. и 12. клас се показва помощник за НВО/ДЗИ.',
+      'de': '1. Wähle deine Rolle in Einstellungen → Schulmodus: Schüler '
+          '(Klasse) oder Student (Hochschule).\n'
+          '2. Der Startbildschirm zeigt einen Countdown — bis zu den Ferien '
+          '(Schüler) oder bis zu einem Termin (Student).\n'
+          '3. Füge deine Fächer hinzu — sie werden zu Kategorien.\n'
+          '4. "+" → Hausaufgabe/Aufsatz/Hausarbeit: Teilaufgaben entstehen '
+          'automatisch bis zur Frist.\n'
+          '5. "Mein Stundenplan" — trage Stunden ein; auch im Kalender.\n'
+          '6. Für Klasse 4, 7, 10 und 12 erscheint ein Prüfungs-Helfer.',
+      'fr': '1. Choisis ton rôle dans Réglages → Mode école : Élève (classe) '
+          'ou Étudiant (université).\n'
+          '2. L\'accueil affiche un compte à rebours — vacances (élève) ou une '
+          'date clé ajoutée (étudiant).\n'
           '3. Ajoute tes matières — elles deviennent des catégories.\n'
-          '4. En 7e et terminale, un compte à rebours des examens apparaît.',
-      'it': '1. Scegli la classe — il conto alla rovescia è esatto per essa.\n'
-          '2. Vedi in home i giorni alle prossime vacanze.\n'
+          '4. "+" → Devoir/Dissertation/Travail : les sous-tâches sont créées '
+          'automatiquement jusqu\'à l\'échéance.\n'
+          '5. "Mon emploi du temps" — saisis tes cours ; aussi au calendrier.\n'
+          '6. En 4e, 7e, 10e et terminale, un assistant examens apparaît.',
+      'it': '1. Scegli il ruolo in Impostazioni → Modalità scuola: Alunno '
+          '(classe) o Studente (università).\n'
+          '2. La home mostra un conto alla rovescia — vacanze (alunno) o una '
+          'data chiave aggiunta (studente).\n'
           '3. Aggiungi le materie — diventano categorie.\n'
-          '4. Per 7ª e 12ª appare anche il conto alla rovescia degli esami.',
-      'el': '1. Διάλεξε τάξη — η μέτρηση είναι ακριβής γι\' αυτήν.\n'
-          '2. Δες στην αρχική πόσες μέρες ως τις επόμενες διακοπές.\n'
+          '4. "+" → Compiti/Saggio/Tesina: le sottoattività si creano '
+          'automaticamente fino alla scadenza.\n'
+          '5. "Il mio orario" — inserisci le lezioni; anche nel calendario.\n'
+          '6. Per 4ª, 7ª, 10ª e 12ª appare un assistente esami.',
+      'el': '1. Διάλεξε ρόλο στις Ρυθμίσεις → Λειτουργία σχολείου: Μαθητής '
+          '(τάξη) ή Φοιτητής (πανεπιστήμιο).\n'
+          '2. Η αρχική δείχνει μέτρηση — ως τις διακοπές (μαθητής) ή ως μια '
+          'ημερομηνία (φοιτητής).\n'
           '3. Πρόσθεσε μαθήματα — γίνονται κατηγορίες.\n'
-          '4. Για 7η & 12η εμφανίζεται και μέτρηση για τις εξετάσεις.',
-      'es': '1. Elige tu grado — la cuenta atrás es exacta para él.\n'
-          '2. Mira en el inicio los días para las próximas vacaciones.\n'
+          '4. "+" → Εργασία/Δοκίμιο/Εργασία εξαμήνου: οι υποεργασίες '
+          'δημιουργούνται αυτόματα ως την προθεσμία.\n'
+          '5. "Το πρόγραμμά μου" — βάλε τα μαθήματα· φαίνονται και στο ημερολόγιο.\n'
+          '6. Για 4η, 7η, 10η & 12η εμφανίζεται βοηθός εξετάσεων.',
+      'es': '1. Elige tu rol en Ajustes → Modo escolar: Alumno (grado) o '
+          'Estudiante (universidad).\n'
+          '2. El inicio muestra una cuenta atrás — a las vacaciones (alumno) o '
+          'a una fecha clave (estudiante).\n'
           '3. Añade tus asignaturas — se vuelven categorías.\n'
-          '4. En 7.º y 12.º aparece también la cuenta atrás de los exámenes.',
-      'pt': '1. Escolhe o teu ano — a contagem é exata para ele.\n'
-          '2. Vê no início os dias para as próximas férias.\n'
+          '4. "+" → Deberes/Ensayo/Trabajo: las subtareas se crean '
+          'automáticamente hasta la fecha límite.\n'
+          '5. "Mi horario" — añade tus clases; también en el calendario.\n'
+          '6. En 4.º, 7.º, 10.º y 12.º aparece un asistente de exámenes.',
+      'pt': '1. Escolhe o teu papel em Definições → Modo escolar: Aluno (ano) '
+          'ou Estudante (universidade).\n'
+          '2. O início mostra uma contagem — para as férias (aluno) ou para uma '
+          'data-chave (estudante).\n'
           '3. Adiciona as disciplinas — viram categorias.\n'
-          '4. No 7.º e 12.º aparece também a contagem para os exames.',
-      'ru': '1. Выбери класс — отсчёт точный именно для него.\n'
-          '2. Смотри на главном экране дни до ближайших каникул.\n'
+          '4. "+" → Trabalho de casa/Ensaio/Trabalho: as subtarefas são criadas '
+          'automaticamente até ao prazo.\n'
+          '5. "O meu horário" — adiciona as aulas; também no calendário.\n'
+          '6. No 4.º, 7.º, 10.º e 12.º aparece um assistente de exames.',
+      'ru': '1. Выбери роль в Настройках → Школьный режим: Ученик (класс) или '
+          'Студент (вуз).\n'
+          '2. На главном экране — обратный отсчёт: до каникул (ученик) или до '
+          'добавленной даты (студент).\n'
           '3. Добавь предметы — они станут категориями.\n'
-          '4. Для 7 и 12 класса показывается отсчёт до экзаменов.',
-      'tr': '1. Sınıfını seç — geri sayım ona göre kesin.\n'
-          '2. Ana ekranda tatile kaç gün kaldığını gör.\n'
+          '4. "+" → Домашнее/Эссе/Курсовая: подзадачи создаются автоматически '
+          'до срока.\n'
+          '5. "Моё расписание" — внеси занятия; видны и в календаре.\n'
+          '6. Для 4, 7, 10 и 12 класса появляется помощник по экзаменам.',
+      'tr': '1. Ayarlar → Okul modunda rolünü seç: Öğrenci (sınıf) veya '
+          'Üniversite (üniversite).\n'
+          '2. Ana ekranda geri sayım — tatile (öğrenci) veya eklediğin bir '
+          'tarihe (üniversite).\n'
           '3. Derslerini ekle — kategoriye dönüşür.\n'
-          '4. 7. ve 12. sınıf için sınav geri sayımı da görünür.',
-      'ja': '1. 学年を選ぶ — カウントダウンはその学年に正確です。\n'
-          '2. ホームで次の休みまでの日数を確認。\n'
+          '4. "+" → Ödev/Deneme/Dönem ödevi: alt görevler son tarihe kadar '
+          'otomatik oluşturulur.\n'
+          '5. "Ders programım" — derslerini gir; takvimde de görünür.\n'
+          '6. 4, 7, 10 ve 12. sınıf için sınav yardımcısı görünür.',
+      'ja': '1. 設定 → 学校モードで役割を選択：生徒（学年）か大学生（大学）。\n'
+          '2. ホームにカウントダウン — 休み（生徒）や追加した日付（大学生）まで。\n'
           '3. 教科を追加 — カテゴリになります。\n'
-          '4. 7年生・12年生には試験までのカウントダウンも表示。',
+          '4. 「+」→ 宿題/エッセイ/コースワーク：エッセイとコースワークは締切まで'
+          'サブタスクが自動作成。\n'
+          '5. 「時間割」— 授業を入力；カレンダーにも表示。\n'
+          '6. 4・7・10・12年生には試験ヘルパーが表示。',
     };
     const closeBtn = {
       'en': 'Got it', 'bg': 'Разбрах', 'de': 'Verstanden', 'fr': 'Compris',
@@ -770,9 +883,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        icon: const Icon(Icons.school_rounded, size: 36, color: Color(0xFF7B2FF7)),
+        icon: const Icon(Icons.menu_book_rounded, size: 36, color: Color(0xFF7B2FF7)),
         title: Text(tr(_schoolHowToTitle)),
-        content: Text(tr(steps), style: const TextStyle(height: 1.5)),
+        content: SingleChildScrollView(
+          child: Text(tr(steps), style: const TextStyle(height: 1.5)),
+        ),
         actions: [
           FilledButton(
             onPressed: () => Navigator.pop(ctx),
@@ -1321,12 +1436,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           );
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        return _settingsGroup(
+          title: t.appearance,
+          icon: Icons.palette_rounded,
+          color: Colors.deepPurple,
           children: [
-            Text(t.appearance, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
             Card(
+              elevation: 0,
+              margin: EdgeInsets.zero,
               child: Column(
                 children: [
                   styleTile(
@@ -2650,13 +2767,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     };
 
     return [
-      const SizedBox(height: 24),
-      Text(
-        tr(sectionTitle),
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-      ),
-      const SizedBox(height: 8),
+      _settingsGroup(
+        title: tr(sectionTitle),
+        icon: Icons.info_outline_rounded,
+        color: Colors.blueGrey,
+        children: [
       Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
         child: Column(
           children: [
             // Версия + билд — четат се ДИНАМИЧНО от package_info_plus.
@@ -2739,6 +2857,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ),
+      ),
+        ],
       ),
     ];
   }
@@ -2873,6 +2993,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  /// Падаща (сгъваема) група в Настройки — намалява претрупването. Логиката на
+  /// всяка секция остава непокътната; тук само я обгръщаме визуално.
+  Widget _settingsGroup({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required List<Widget> children,
+    bool initiallyExpanded = false,
+  }) {
+    final theme = Theme.of(context);
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Theme(
+        // Скрий стандартните разделители на ExpansionTile за по-чист вид.
+        data: theme.copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: color, size: 22),
+          ),
+          title: Text(title,
+              style: TextStyle(
+                fontSize: 15.5,
+                fontWeight: FontWeight.w700,
+                color: color,
+                letterSpacing: 0.2,
+              )),
+          initiallyExpanded: initiallyExpanded,
+          shape: const Border(),
+          collapsedShape: const Border(),
+          childrenPadding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+          children: children,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppText.of(context);
@@ -2935,291 +3096,182 @@ class _SettingsScreenState extends State<SettingsScreen> {
           if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS)
             _buildWidgetGuideTile(context, langCode),
 
-          // Статистики секция
-          Text(
-            t.activity,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.purple.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+          // ── Задачи (падаща група): Статистики, Категории, AI ──
+          _settingsGroup(
+            title: t.tasks,
+            icon: Icons.task_alt_rounded,
+            color: Colors.teal,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.bar_chart_rounded, color: Colors.purple),
+                title: Text(t.statistics),
+                subtitle: Text(
+                  t.viewProgress,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
                 ),
-                child: const Icon(
-                  Icons.bar_chart_rounded,
-                  color: Colors.purple,
-                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const StatisticsScreen()),
+                  );
+                },
               ),
-              title: Text(t.statistics),
-              subtitle: Text(
-                t.viewProgress,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.category_rounded, color: Colors.teal),
+                title: Text(t.manageCategories),
+                subtitle: Text(
+                  t.editAddDeleteCategories,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
                 ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _showCategoryManagementDialog,
               ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const StatisticsScreen()),
-                );
-              },
-            ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.auto_awesome, color: Colors.purple),
+                title: Text(t.aiSettings),
+                subtitle: Text(
+                  t.aiSettingsSubtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const AiSettingsScreen()),
+                  );
+                },
+              ),
+            ],
           ),
 
           const SizedBox(height: 16),
 
-          // Категории секция
-          Text(
-            t.categories,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.teal.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.category_rounded,
-                  color: Colors.teal,
-                ),
-              ),
-              title: Text(t.manageCategories),
-              subtitle: Text(
-                t.editAddDeleteCategories,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _showCategoryManagementDialog,
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // AI секция
-          Text(
-            t.aiSettings,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.purple.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.auto_awesome,
-                  color: Colors.purple,
-                ),
-              ),
-              title: Text(t.aiSettings),
-              subtitle: Text(
-                t.aiSettingsSubtitle,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AiSettingsScreen()),
-                );
-              },
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Акаунт секция
-          Text(
-            t.account,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: user != null
-                ? Column(
-                    children: [
-                      ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: theme.colorScheme.primary,
-                          child: Text(
-                            (_authService.displayName.isNotEmpty
-                                    ? _authService.displayName
-                                    : (user.email ?? '?'))
-                                .substring(0, 1)
-                                .toUpperCase(),
-                            style: TextStyle(
-                              color: theme.colorScheme.onPrimary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        title: Text(user.email ?? ''),
-                        subtitle: Text(
-                          t.signedIn,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: theme.colorScheme.onSurface
-                                .withValues(alpha: 0.6),
-                          ),
-                        ),
-                        trailing: TextButton(
-                          onPressed: _logout,
-                          child: Text(
-                            t.logout,
-                            style: const TextStyle(color: Colors.redAccent),
-                          ),
-                        ),
-                      ),
-                      const Divider(height: 1),
-                      ListTile(
-                        leading: Icon(Icons.badge_outlined,
-                            color: theme.colorScheme.primary),
-                        title: Text(_authService.displayName.isNotEmpty
-                            ? _authService.displayName
-                            : t.addName),
-                        subtitle: Text(
-                          t.displayNameDesc,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: theme.colorScheme.onSurface
-                                .withValues(alpha: 0.6),
-                          ),
-                        ),
-                        trailing: const Icon(Icons.edit_outlined, size: 18),
-                        onTap: _editDisplayName,
-                      ),
-                    ],
-                  )
-                : ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.person_outline,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    title: Text(t.login),
-                    subtitle: Text(
-                      t.signInToSync,
+          // ── Акаунт (падаща група): профил + облачна синхронизация ──
+          _settingsGroup(
+            title: t.account,
+            icon: Icons.person_rounded,
+            color: theme.colorScheme.primary,
+            children: [
+              if (user != null) ...[
+                ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: theme.colorScheme.primary,
+                    child: Text(
+                      (_authService.displayName.isNotEmpty
+                              ? _authService.displayName
+                              : (user.email ?? '?'))
+                          .substring(0, 1)
+                          .toUpperCase(),
                       style: TextStyle(
-                        fontSize: 12,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: theme.colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: _openLogin,
                   ),
+                  title: Text(user.email ?? ''),
+                  subtitle: Text(
+                    t.signedIn,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  trailing: TextButton(
+                    onPressed: _logout,
+                    child: Text(
+                      t.logout,
+                      style: const TextStyle(color: Colors.redAccent),
+                    ),
+                  ),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.badge_outlined,
+                      color: theme.colorScheme.primary),
+                  title: Text(_authService.displayName.isNotEmpty
+                      ? _authService.displayName
+                      : t.addName),
+                  subtitle: Text(
+                    t.displayNameDesc,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  trailing: const Icon(Icons.edit_outlined, size: 18),
+                  onTap: _editDisplayName,
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: _isSyncing
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.cloud_sync_outlined, color: Colors.blue),
+                  title: Text(t.syncNow),
+                  subtitle: Text(
+                    t.autoSyncDesc,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _isSyncing ? null : _syncNow,
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.restart_alt, color: Colors.red),
+                  title: Text(t.resetSync),
+                  subtitle: Text(t.resetSyncDesc,
+                      style: const TextStyle(fontSize: 12)),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _isSyncing ? null : _resetSync,
+                ),
+              ] else
+                ListTile(
+                  leading: Icon(Icons.person_outline,
+                      color: theme.colorScheme.primary),
+                  title: Text(t.login),
+                  subtitle: Text(
+                    t.signInToSync,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _openLogin,
+                ),
+            ],
           ),
-
-          // Синхронизация (само ако е логнат)
-          if (user != null) ...[
-            const SizedBox(height: 16),
-            Text(
-              t.cloudSync,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Card(
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: _isSyncing
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.cloud_sync_outlined,
-                              color: Colors.blue),
-                    ),
-                    title: Text(t.syncNow),
-                    subtitle: Text(
-                      // Сливането е автоматично и невидимо; този бутон само форсира.
-                      t.autoSyncDesc,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color:
-                            theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: _isSyncing ? null : _syncNow,
-                  ),
-                  const Divider(height: 0),
-                  ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.restart_alt, color: Colors.red),
-                    ),
-                    title: Text(t.resetSync),
-                    subtitle: Text(t.resetSyncDesc,
-                        style: const TextStyle(fontSize: 12)),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: _isSyncing ? null : _resetSync,
-                  ),
-                ],
-              ),
-            ),
-          ],
 
           const SizedBox(height: 16),
           // Календарна синхронизация — ЕДИН избор. Източниците са взаимно
           // изключващи се: ако потребителят има външна GCal↔Apple връзка, двата
           // активни наведнъж биха показвали всяко събитие двойно. Apple е
           // export-only (без импорт) — виж IosCalendarService.
-          Text(
-            t.calendarSource,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: Column(
+          _settingsGroup(
+            title: t.calendarSource,
+            icon: Icons.calendar_month_rounded,
+            color: Colors.blue,
+            children: [
+              Card(
+                elevation: 0,
+                margin: EdgeInsets.zero,
+                child: Column(
               children: [
                 RadioListTile<String>(
                   value: 'none',
@@ -3384,17 +3436,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
             ),
           ),
-          // Тема
-          Text(
-            t.theme,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Card(
-            child: Column(
+          // Тема
+          _settingsGroup(
+            title: t.theme,
+            icon: Icons.brightness_6_rounded,
+            color: Colors.indigo,
+            children: [
+              Card(
+                elevation: 0,
+                margin: EdgeInsets.zero,
+                child: Column(
               children: [
                 RadioListTile<int>(
                   value: 0,
@@ -3441,22 +3494,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
             ),
           ),
-
-          
+            ],
+          ),
 
           const SizedBox(height: 16),
 
-
-          // Morning Briefing
-          Text(
-            t.morningBriefing,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
+          // ── Известия и данни (падаща група): Morning Briefing + Backup ──
+          _settingsGroup(
+            title: t.morningBriefing,
+            icon: Icons.notifications_active_rounded,
+            color: Colors.orange,
+            children: [
           Card(
+            elevation: 0,
+            margin: EdgeInsets.zero,
             child: SwitchListTile(
               secondary: Container(
                 padding: const EdgeInsets.all(8),
@@ -3484,9 +3535,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           // Time Picker (only show if briefing enabled)
-          if (_isMorningBriefingEnabled) ...[
-            const SizedBox(height: 8),
+          if (_isMorningBriefingEnabled)
             Card(
+              elevation: 0,
+              margin: EdgeInsets.zero,
               child: ListTile(
                 leading: Container(
                   padding: const EdgeInsets.all(8),
@@ -3502,10 +3554,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onTap: _selectBriefingTime,
               ),
             ),
-          ],
+            ],
+          ),
 
-          // Официални празници — достъпно за всички държави (не само BG).
           const SizedBox(height: 16),
+          // Официални празници — достъпно за всички държави (не само BG).
           _buildHolidaysTile(
               context, LanguageScope.of(context).locale.languageCode),
 
@@ -3513,16 +3566,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ..._buildBulgariaSection(context),
 
           const SizedBox(height: 16),
-          // Backup / Restore
-          Text(
-            t.localData,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
+          // ── Данни (падаща група): Backup / Restore ──
+          _settingsGroup(
+            title: t.localData,
+            icon: Icons.storage_rounded,
+            color: Colors.green,
+            children: [
           Card(
+            elevation: 0,
+            margin: EdgeInsets.zero,
             child: Column(
               children: [
                 ListTile(
@@ -3574,6 +3626,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ],
             ),
+          ),
+            ],
           ),
 
           const SizedBox(height: 16),

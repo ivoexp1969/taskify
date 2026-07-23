@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -2014,36 +2015,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
       builder: (context, _) {
         final slots = WeeklyScheduleService().forDay(_selectedDay.weekday);
         if (slots.isEmpty) return const SizedBox.shrink();
-        final theme = Theme.of(context);
         return Padding(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-          child: Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              for (final s in slots)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer
-                        .withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border(
-                      left: BorderSide(
-                          color: theme.colorScheme.primary, width: 3),
-                    ),
-                  ),
-                  child: Text(
-                    '${s.fromLabel} ${s.subject.isNotEmpty ? s.subject : (s.kind == SlotKind.lecture ? '🎓' : '🎒')}',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: theme.colorScheme.onPrimaryContainer),
-                  ),
+          // Един час → статичен чип; повече → редуват се циклично, за да не
+          // затрупват реда.
+          child: slots.length == 1
+              ? scheduleSlotChip(context, slots.first)
+              : _ScheduleRotator(
+                  key: ValueKey('sched_${_selectedDay.weekday}'),
+                  slots: slots,
                 ),
-            ],
-          ),
         );
       },
     );
@@ -2492,6 +2473,95 @@ class _CalendarScreenState extends State<CalendarScreen> {
           );
 
     await Share.share(text, sharePositionOrigin: origin);
+  }
+}
+
+/// Един чип за слот от седмичното разписание (ползван и статично, и в ротатора).
+Widget scheduleSlotChip(BuildContext context, ScheduleSlot s) {
+  final theme = Theme.of(context);
+  final label =
+      '${s.fromLabel} ${s.subject.isNotEmpty ? s.subject : (s.kind == SlotKind.lecture ? '🎓' : '🎒')}';
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    decoration: BoxDecoration(
+      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.6),
+      borderRadius: BorderRadius.circular(10),
+      border: Border(
+        left: BorderSide(color: theme.colorScheme.primary, width: 3),
+      ),
+    ),
+    child: Text(
+      label,
+      style: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        color: theme.colorScheme.onPrimaryContainer,
+      ),
+    ),
+  );
+}
+
+/// Показва часовете за деня с редуване (по един на всеки няколко секунди), когато
+/// са повече от един — за да не затрупват реда. Показва и брояч „i/n".
+class _ScheduleRotator extends StatefulWidget {
+  final List<ScheduleSlot> slots;
+  const _ScheduleRotator({required this.slots, super.key});
+
+  @override
+  State<_ScheduleRotator> createState() => _ScheduleRotatorState();
+}
+
+class _ScheduleRotatorState extends State<_ScheduleRotator> {
+  int _i = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (!mounted || widget.slots.length < 2) return;
+      setState(() => _i = (_i + 1) % widget.slots.length);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final idx = _i % widget.slots.length;
+    final s = widget.slots[idx];
+    return Row(
+      children: [
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 350),
+              transitionBuilder: (child, anim) =>
+                  FadeTransition(opacity: anim, child: child),
+              child: Container(
+                key: ValueKey(s.id),
+                child: scheduleSlotChip(context, s),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '${idx + 1}/${widget.slots.length}',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
   }
 }
 

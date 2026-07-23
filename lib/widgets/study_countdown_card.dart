@@ -40,18 +40,19 @@ class StudyCountdownCard extends StatelessWidget {
 
         // Датите на най-близките събития за подредба, ако и двата са активни.
         final pupilTarget = pupilOn ? school.countdown().targetDate : null;
-        final studentUpcoming = studentOn ? uni.upcomingKeyDates() : const [];
-        final studentNext =
-            studentUpcoming.isEmpty ? null : studentUpcoming.first.date;
+        // Ръчните ключови дати са общи за двата режима.
+        final manualUpcoming = uni.upcomingKeyDates();
+        final manualNext =
+            manualUpcoming.isEmpty ? null : manualUpcoming.first.date;
 
-        final showStudent = _pickStudent(
+        final showManual = _pickManual(
           pupilOn: pupilOn,
           studentOn: studentOn,
           pupilTarget: pupilTarget,
-          studentNext: studentNext,
+          manualNext: manualNext,
         );
 
-        final Widget card = showStudent
+        final Widget card = showManual
             ? _StudentCard(lang: lang)
             : const SchoolCountdownCard();
 
@@ -65,20 +66,21 @@ class StudyCountdownCard extends StatelessWidget {
     );
   }
 
-  /// Решава дали да покаже студентската карта (иначе ученическата).
-  static bool _pickStudent({
+  /// Решава дали да покаже картата с ръчните ключови дати (иначе ученическата
+  /// от Firestore). Ученик ползва Firestore; но при липса на данни там пада на
+  /// ръчните дати (напр. „Начало на учебната година"), които той сам е въвел.
+  static bool _pickManual({
     required bool pupilOn,
     required bool studentOn,
     required DateTime? pupilTarget,
-    required DateTime? studentNext,
+    required DateTime? manualNext,
   }) {
-    if (studentOn && !pupilOn) return true;
-    if (pupilOn && !studentOn) return false;
-    // И двата активни → по-близкото събитие печели. Ако липсва дата от едната
-    // страна, показваме другата.
-    if (pupilTarget == null) return true;
-    if (studentNext == null) return false;
-    return !studentNext.isAfter(pupilTarget);
+    if (studentOn && !pupilOn) return true; // студент → винаги ръчни дати
+    if (!pupilOn) return false;
+    // Ученик активен:
+    if (pupilTarget == null) return manualNext != null; // няма Firestore → ръчни
+    if (manualNext == null) return false;
+    return !manualNext.isAfter(pupilTarget); // по-близкото събитие печели
   }
 }
 

@@ -28,10 +28,15 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
   static String _t(Map<String, String> m, String lang) => m[lang] ?? m['en']!;
 
   static const _title = {
-    'en': 'My schedule', 'bg': 'Мой разпис', 'de': 'Mein Stundenplan',
+    'en': 'My schedule', 'bg': 'Моето разписание', 'de': 'Mein Stundenplan',
     'fr': 'Mon emploi du temps', 'it': 'Il mio orario', 'el': 'Το πρόγραμμά μου',
     'es': 'Mi horario', 'pt': 'O meu horário', 'ru': 'Моё расписание',
     'tr': 'Ders programım', 'ja': '時間割',
+  };
+  static const _deleteTip = {
+    'en': 'Delete', 'bg': 'Изтрий', 'de': 'Löschen', 'fr': 'Supprimer',
+    'it': 'Elimina', 'el': 'Διαγραφή', 'es': 'Eliminar', 'pt': 'Eliminar',
+    'ru': 'Удалить', 'tr': 'Sil', 'ja': '削除',
   };
   static const _empty = {
     'en': 'No lessons yet. Tap + to add one.',
@@ -146,6 +151,15 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                 '${s.fromLabel}–${s.toLabel}',
                 if (s.location != null) '📍 ${s.location}',
               ].join('  ')),
+              trailing: IconButton(
+                icon: Icon(Icons.delete_outline,
+                    color: theme.colorScheme.error),
+                tooltip: _t(_deleteTip, lang),
+                onPressed: () async {
+                  await _svc.remove(s.id);
+                  if (mounted) setState(() {});
+                },
+              ),
               onTap: () => _addOrEdit(lang, existing: s),
             ),
           ),

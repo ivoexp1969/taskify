@@ -9,6 +9,24 @@ import '../../utils/localization.dart';
 /// Локализирани етикети за видовете студентски ключови дати (ползвани от
 /// списъка, диалога за добавяне и картата за обратно броене).
 const Map<StudentDateKind, Map<String, String>> kStudentDateKindLabels = {
+  StudentDateKind.schoolYearStart: {
+    'en': 'Start of school year', 'bg': 'Начало на учебната година',
+    'de': 'Schuljahresbeginn', 'fr': "Début de l'année scolaire",
+    'it': "Inizio dell'anno scolastico", 'el': 'Έναρξη σχολικής χρονιάς',
+    'es': 'Inicio del año escolar', 'pt': 'Início do ano letivo',
+    'ru': 'Начало учебного года', 'tr': 'Öğretim yılı başı', 'ja': '学年開始',
+  },
+  StudentDateKind.termStart: {
+    'en': 'Start of term', 'bg': 'Начало на срок', 'de': 'Beginn des Halbjahres',
+    'fr': 'Début du trimestre', 'it': 'Inizio del trimestre', 'el': 'Έναρξη τριμήνου',
+    'es': 'Inicio del trimestre', 'pt': 'Início do período', 'ru': 'Начало четверти',
+    'tr': 'Dönem başı', 'ja': '学期開始',
+  },
+  StudentDateKind.vacation: {
+    'en': 'Vacation', 'bg': 'Ваканция', 'de': 'Ferien', 'fr': 'Vacances',
+    'it': 'Vacanze', 'el': 'Διακοπές', 'es': 'Vacaciones', 'pt': 'Férias',
+    'ru': 'Каникулы', 'tr': 'Tatil', 'ja': '休み',
+  },
   StudentDateKind.semesterStart: {
     'en': 'Semester start', 'bg': 'Начало на семестър', 'de': 'Semesterbeginn',
     'fr': 'Début de semestre', 'it': 'Inizio semestre', 'el': 'Έναρξη εξαμήνου',
@@ -130,16 +148,14 @@ class _StudyEventsScreenState extends State<StudyEventsScreen> {
       }
     }
 
-    // ── Студент ──
-    if (_uni.enabled) {
-      for (final d in _uni.upcomingKeyDates(today)) {
-        out.add(_Event(
-          date: d.date,
-          title: d.title.isNotEmpty ? d.title : _kindLabel(d.kind),
-          emoji: _kindEmoji(d.kind),
-          studentDateId: d.id,
-        ));
-      }
+    // ── Ръчни ключови дати (общи за Ученик и Студент) ──
+    for (final d in _uni.upcomingKeyDates(today)) {
+      out.add(_Event(
+        date: d.date,
+        title: d.title.isNotEmpty ? d.title : _kindLabel(d.kind),
+        emoji: _kindEmoji(d.kind),
+        studentDateId: d.id,
+      ));
     }
 
     out.sort((a, b) => a.date.compareTo(b.date));
@@ -160,6 +176,12 @@ class _StudyEventsScreenState extends State<StudyEventsScreen> {
 
   String _kindEmoji(StudentDateKind k) {
     switch (k) {
+      case StudentDateKind.schoolYearStart:
+        return '🎒';
+      case StudentDateKind.termStart:
+        return '📅';
+      case StudentDateKind.vacation:
+        return '🏖️';
       case StudentDateKind.semesterStart:
         return '📅';
       case StudentDateKind.semesterEnd:
@@ -209,7 +231,7 @@ class _StudyEventsScreenState extends State<StudyEventsScreen> {
         final months = _months[lang] ?? _months['en']!;
         return Scaffold(
           appBar: AppBar(title: Text(_t(_title, lang))),
-          floatingActionButton: _uni.enabled
+          floatingActionButton: (_school.enabled || _uni.enabled)
               ? FloatingActionButton.extended(
                   onPressed: () => _addKeyDate(lang),
                   icon: const Icon(Icons.add),

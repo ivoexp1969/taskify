@@ -14,15 +14,17 @@ import '../../widgets/whats_new_dialog.dart';
 import '../../services/pro_service.dart';
 import '../../services/holidays_service.dart';
 import '../../services/school_calendar_service.dart';
+import '../../services/university_service.dart';
 import '../../services/sync_service.dart';
 import '../../services/widget_service.dart';
 import '../paywall/paywall_screen.dart';
 
-/// Етикет за таб „Уча" (11 езика) — кратък за долната навигация.
+/// Етикет за таб „Обучение" (11 езика) — обединява Ученик + Студент; неутрален,
+/// защото и двамата учат. Кратък за долната навигация.
 const Map<String, String> _studyLabel = {
-  'en': 'Study', 'bg': 'Уча', 'de': 'Lernen', 'fr': 'Études',
-  'it': 'Studio', 'el': 'Μελέτη', 'es': 'Estudio', 'pt': 'Estudo',
-  'ru': 'Учёба', 'tr': 'Okul', 'ja': '学習',
+  'en': 'Learning', 'bg': 'Обучение', 'de': 'Bildung', 'fr': 'Éducation',
+  'it': 'Istruzione', 'el': 'Εκπαίδευση', 'es': 'Educación', 'pt': 'Educação',
+  'ru': 'Обучение', 'tr': 'Eğitim', 'ja': '学び',
 };
 
 class HomeScreen extends StatefulWidget {
@@ -52,17 +54,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         const SettingsScreen(),
       ];
 
-  /// Табът „Уча" се показва САМО когато е активиран режим (Ученик, по-нататък и
-  /// Студент). Включването става от Настройки; така табът не стои празен.
-  bool get _showModes => SchoolCalendarService.enabledNotifier.value;
+  /// Табът се показва САМО когато е активиран режим — Ученик ИЛИ Студент. Така
+  /// студент-само потребител също вижда таба (иначе трябваше да включи училищния,
+  /// за да го достигне → и двата светваха).
+  bool get _showModes =>
+      SchoolCalendarService.enabledNotifier.value ||
+      UniversityService.enabledNotifier.value;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _proService.addListener(_onProStatusChanged);
-    // Появяване/скриване на таб „Уча" при вкл./изкл. на режим.
+    // Появяване/скриване на таба при вкл./изкл. на който и да е режим.
     SchoolCalendarService.enabledNotifier.addListener(_onModesChanged);
+    UniversityService.enabledNotifier.addListener(_onModesChanged);
     if (!kIsWeb) {
       _initAndShowWelcome();
       _maybeShowHolidaysPrompt();
@@ -327,6 +333,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _proService.removeListener(_onProStatusChanged);
     SchoolCalendarService.enabledNotifier.removeListener(_onModesChanged);
+    UniversityService.enabledNotifier.removeListener(_onModesChanged);
     super.dispose();
   }
 
@@ -698,8 +705,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
                 if (_showModes)
                   NavigationDestination(
-                    icon: const Icon(Icons.school_outlined),
-                    selectedIcon: const Icon(Icons.school_rounded),
+                    icon: const Icon(Icons.menu_book_outlined),
+                    selectedIcon: const Icon(Icons.menu_book_rounded),
                     label: _studyLabel[t.lang] ?? _studyLabel['en']!,
                   ),
                 NavigationDestination(
