@@ -6,6 +6,16 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-26 · Mac — App Store 3.1.2 fix (EULA линк в метаданни) + ресубмит 1.0.54
+Apple отхвърли **1.0.54 (64)** — Guideline 3.1.2: липсва функционален Terms of Use (EULA) линк в
+метаданните за subscriptions. Taskify е на **стандартния Apple EULA** → фикс = линк в App Description.
+- **Paywall** (`paywall_screen.dart`, commit `abaa179`): линкове Apple stdeula + стар github privacy →
+  `https://taskify1969.com/terms` и `/privacy` (проверени на живо). Само линковете.
+- **ASC метаданни:** добавени `Terms of Use (EULA): …/terms` + `Privacy Policy: …/privacy` в описанието
+  (ASC API PATCH). **Ресубмит:** cancel на старата `UNRESOLVED_ISSUES` submission → нова submission +
+  item + submitted:true → **WAITING_FOR_REVIEW** (същия build 64, без нов бинар).
+- **TODO:** App Information → Privacy Policy URL още е стар github (не блокира; смени на taskify1969.com за консистентност).
+
 ## 2026-07-23 · Mac — Режими Обучение (Ученик/Студент) V1 + UX итерации; iOS билд на Toto
 **Комити:** `2c06a31` (V1) → `a01eb1f` (UX). Firestore rules ДЕПЛОЙНАТИ (`taskify-1969`).
 - **V1 (6 фази):** онбординг Ученик(клас+училище)/Студент(ВУЗ от `universities_bg.json`, факултет=free-text);
