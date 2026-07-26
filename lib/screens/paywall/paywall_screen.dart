@@ -482,7 +482,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                           children: [
                             TextButton(
                               onPressed: () async {
-                                final uri = Uri.parse('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/');
+                                final uri = Uri.parse('https://taskify1969.com/terms');
                                 if (await canLaunchUrl(uri)) {
                                   await launchUrl(uri, mode: LaunchMode.externalApplication);
                                 }
@@ -492,7 +492,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             const Text(' • '),
                             TextButton(
                               onPressed: () async {
-                                final uri = Uri.parse('https://ivoexp1969.github.io/taskify/privacy-policy.html');
+                                final uri = Uri.parse('https://taskify1969.com/privacy');
                                 if (await canLaunchUrl(uri)) {
                                   await launchUrl(uri, mode: LaunchMode.externalApplication);
                                 }
