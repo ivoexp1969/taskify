@@ -6,6 +6,27 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-07-27 · PC — Довършване Обучение TODO-та (валидация + учебна програма по срокове + ротатор) → v1.0.55+65
+Затворих трите отворени TODO от Mac (07-23). Всичко чист cross-platform Dart → iOS = само Mac билд.
+- **Фаза 1 — валидация на разписанието:** `ScheduleSlot.hasValidRange` (край строго след начало) +
+  `overlaps(other)` (същ ден И срок; долепени край==начало НЕ са припокриване). Service
+  `firstConflict(candidate)`. Диалогът за слот (`weekly_schedule_screen.dart`) валидира при Запази →
+  inline червена грешка (11 ез. `badRange` / `overlapMsg` с предмет+час на конфликта); не затваря.
+- **Фаза 2 — „Учебна програма" по срокове/семестри:** ново поле `ScheduleSlot.term` (1/2, стари слотове→1,
+  БЕЗ Hive bump — SharedPreferences JSON). Service: `_currentTerm` + `setCurrentTerm` (persist
+  `weekly_schedule_term`), `forDay(term:)`, `isEmptyForTerm`, `newSlot(term:)`. Екран: `SegmentedButton`
+  срок/семестър (Ученик→I/II срок; Студент→зимен/летен, чрез `UniversityService().enabled`), филтрира по
+  текущ срок, празно състояние per срок. Вход = карта „📅 Учебна програма" в таб Обучение (`modes_screen`).
+- **Фаза 3 — ротатор на картата за броене (Студент):** `_StudentCard` → StatefulWidget; редува
+  `upcomingKeyDates().take(4)` с `Timer.periodic(5s)` (само при >1; спира при ≤1 и в dispose),
+  `AnimatedSwitcher` 400ms fade + вертикални точки (активната по-ярка). Празно състояние непроменено.
+- **Тестове:** `test/weekly_schedule_test.dart` **11 ✅** (range, overlaps вкл. различен срок, term round-trip
+  + обратна съвместимост). `flutter analyze` (7 файла) = **0 issues**.
+- **Bump 1.0.54+64 → 1.0.55+65** + „Какво ново" (`whats_new_dialog.dart` `_build=65`, 3 точки × 11 ез.) +
+  `release_notes/1.0.55.md`. AAB билднат (flutter clean задължителен — ръчен manifest).
+- **ОСТАВА за Иво:** ръчно/скрипт качване на AAB 1.0.55+65 в Play Console; Firestore НВО/ДЗИ дати
+  `official:true`. iOS 1.0.55 = само Mac билд.
+
 ## 2026-07-26 · Mac — App Store 3.1.2 fix (EULA линк в метаданни) + ресубмит 1.0.54
 Apple отхвърли **1.0.54 (64)** — Guideline 3.1.2: липсва функционален Terms of Use (EULA) линк в
 метаданните за subscriptions. Taskify е на **стандартния Apple EULA** → фикс = линк в App Description.

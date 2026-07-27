@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../models/weekly_schedule.dart';
 import '../../services/weekly_schedule_service.dart';
+import '../../services/university_service.dart';
 import '../../utils/localization.dart';
 
-/// Екран „Мой разпис" — прости слотове уроци/лекции по дни от седмицата.
-/// Не е пълно разписание; ръчно въведени слотове, които се виждат и на календара.
+/// Екран „Учебна програма" — прости слотове уроци/лекции по дни от седмицата,
+/// организирани по **срок (ученик) / семестър (студент)**. Слотовете се виждат
+/// и на календара (за текущо избрания срок).
 class WeeklyScheduleScreen extends StatefulWidget {
   const WeeklyScheduleScreen({super.key});
 
@@ -28,10 +30,34 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
   static String _t(Map<String, String> m, String lang) => m[lang] ?? m['en']!;
 
   static const _title = {
-    'en': 'My schedule', 'bg': 'Моето разписание', 'de': 'Mein Stundenplan',
-    'fr': 'Mon emploi du temps', 'it': 'Il mio orario', 'el': 'Το πρόγραμμά μου',
-    'es': 'Mi horario', 'pt': 'O meu horário', 'ru': 'Моё расписание',
-    'tr': 'Ders programım', 'ja': '時間割',
+    'en': 'Curriculum', 'bg': 'Учебна програма', 'de': 'Lehrplan',
+    'fr': 'Programme', 'it': 'Programma', 'el': 'Πρόγραμμα σπουδών',
+    'es': 'Programa', 'pt': 'Programa', 'ru': 'Учебная программа',
+    'tr': 'Ders programı', 'ja': '時間割',
+  };
+  // Ученик — учебни срокове.
+  static const _term1Pupil = {
+    'en': 'Term 1', 'bg': 'I срок', 'de': '1. Halbjahr', 'fr': '1er trimestre',
+    'it': '1° periodo', 'el': '1ο τρίμηνο', 'es': '1er trimestre',
+    'pt': '1º período', 'ru': '1-й срок', 'tr': '1. dönem', 'ja': '前期',
+  };
+  static const _term2Pupil = {
+    'en': 'Term 2', 'bg': 'II срок', 'de': '2. Halbjahr', 'fr': '2e trimestre',
+    'it': '2° periodo', 'el': '2ο τρίμηνο', 'es': '2º trimestre',
+    'pt': '2º período', 'ru': '2-й срок', 'tr': '2. dönem', 'ja': '後期',
+  };
+  // Студент — семестри.
+  static const _term1Student = {
+    'en': 'Winter sem.', 'bg': 'Зимен семестър', 'de': 'Wintersemester',
+    'fr': 'Semestre d\'hiver', 'it': 'Sem. invernale', 'el': 'Χειμ. εξάμηνο',
+    'es': 'Sem. de invierno', 'pt': 'Sem. de inverno', 'ru': 'Зимний семестр',
+    'tr': 'Güz dönemi', 'ja': '冬学期',
+  };
+  static const _term2Student = {
+    'en': 'Summer sem.', 'bg': 'Летен семестър', 'de': 'Sommersemester',
+    'fr': 'Semestre d\'été', 'it': 'Sem. estivo', 'el': 'Θεριν. εξάμηνο',
+    'es': 'Sem. de verano', 'pt': 'Sem. de verão', 'ru': 'Летний семестр',
+    'tr': 'Bahar dönemi', 'ja': '夏学期',
   };
   static const _deleteTip = {
     'en': 'Delete', 'bg': 'Изтрий', 'de': 'Löschen', 'fr': 'Supprimer',
@@ -97,28 +123,56 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
           : AnimatedBuilder(
               animation: WeeklyScheduleService.revision,
               builder: (context, _) {
-                if (_svc.isEmpty) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(32),
-                      child: Text(_t(_empty, lang),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant)),
-                    ),
-                  );
-                }
-                return ListView(
-                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 96),
+                return Column(
                   children: [
-                    for (int day = 1; day <= 7; day++)
-                      _daySection(context, lang, day),
+                    _termSelector(context, lang),
+                    Expanded(
+                      child: _svc.isEmptyForTerm()
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(32),
+                                child: Text(_t(_empty, lang),
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant)),
+                              ),
+                            )
+                          : ListView(
+                              padding: const EdgeInsets.fromLTRB(8, 8, 8, 96),
+                              children: [
+                                for (int day = 1; day <= 7; day++)
+                                  _daySection(context, lang, day),
+                              ],
+                            ),
+                    ),
                   ],
                 );
               },
             ),
+    );
+  }
+
+  /// Превключвател срок/семестър. Ученик → I/II срок; Студент → зимен/летен.
+  Widget _termSelector(BuildContext context, String lang) {
+    final isStudent = UniversityService().enabled;
+    final l1 = _t(isStudent ? _term1Student : _term1Pupil, lang);
+    final l2 = _t(isStudent ? _term2Student : _term2Pupil, lang);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
+      child: SegmentedButton<int>(
+        segments: [
+          ButtonSegment(value: 1, label: Text(l1, textAlign: TextAlign.center)),
+          ButtonSegment(value: 2, label: Text(l2, textAlign: TextAlign.center)),
+        ],
+        selected: {_svc.currentTerm},
+        showSelectedIcon: false,
+        onSelectionChanged: (sel) async {
+          await _svc.setCurrentTerm(sel.first);
+          if (mounted) setState(() {});
+        },
+      ),
     );
   }
 
@@ -238,7 +292,42 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
     'el': 'Αποθήκευση', 'es': 'Guardar', 'pt': 'Guardar', 'ru': 'Сохранить', 'tr': 'Kaydet',
     'ja': '保存',
   };
+  const badRange = {
+    'en': 'End time must be after start time.',
+    'bg': 'Крайният час трябва да е след началния.',
+    'de': 'Die Endzeit muss nach der Startzeit liegen.',
+    'fr': 'L\'heure de fin doit être après le début.',
+    'it': 'L\'ora di fine deve essere dopo l\'inizio.',
+    'el': 'Η ώρα λήξης πρέπει να είναι μετά την έναρξη.',
+    'es': 'La hora de fin debe ser posterior al inicio.',
+    'pt': 'A hora de fim deve ser após o início.',
+    'ru': 'Время окончания должно быть позже начала.',
+    'tr': 'Bitiş saati başlangıçtan sonra olmalı.',
+    'ja': '終了時刻は開始時刻より後にしてください。',
+  };
+  // {0} = предмет/тип, {1} = от–до на конфликтния слот
+  const overlapMsg = {
+    'en': 'Overlaps with {0} ({1}).',
+    'bg': 'Припокрива се с {0} ({1}).',
+    'de': 'Überschneidet sich mit {0} ({1}).',
+    'fr': 'Chevauche {0} ({1}).',
+    'it': 'Si sovrappone a {0} ({1}).',
+    'el': 'Επικαλύπτεται με {0} ({1}).',
+    'es': 'Se solapa con {0} ({1}).',
+    'pt': 'Sobrepõe-se a {0} ({1}).',
+    'ru': 'Пересекается с {0} ({1}).',
+    'tr': '{0} ({1}) ile çakışıyor.',
+    'ja': '{0}（{1}）と重複しています。',
+  };
+  const busyFallback = {
+    'en': 'another slot', 'bg': 'друг час', 'de': 'einem anderen Termin',
+    'fr': 'un autre créneau', 'it': 'un altro slot', 'el': 'άλλη ώρα',
+    'es': 'otro horario', 'pt': 'outro horário', 'ru': 'другим слотом',
+    'tr': 'başka bir ders', 'ja': '別の予定',
+  };
   const dayNames = _WeeklyScheduleScreenState._dayNames;
+
+  String? errorText;
 
   String hhmm(TimeOfDay tod) =>
       '${tod.hour.toString().padLeft(2, '0')}:${tod.minute.toString().padLeft(2, '0')}';
@@ -331,6 +420,23 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
                     border: const OutlineInputBorder(),
                   ),
                 ),
+                if (errorText != null) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.error_outline,
+                          size: 18, color: Theme.of(ctx).colorScheme.error),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(errorText!,
+                            style: TextStyle(
+                                color: Theme.of(ctx).colorScheme.error,
+                                fontSize: 13)),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -368,6 +474,22 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
                             ? null
                             : locationCtrl.text.trim(),
                       );
+                // Валидация: краят след началото + без припокриване в деня.
+                if (!slot.hasValidRange) {
+                  setD(() => errorText = t(badRange));
+                  return;
+                }
+                final conflict = svc.firstConflict(slot);
+                if (conflict != null) {
+                  final label = conflict.subject.trim().isNotEmpty
+                      ? conflict.subject.trim()
+                      : t(busyFallback);
+                  final range = '${conflict.fromLabel}–${conflict.toLabel}';
+                  setD(() => errorText = t(overlapMsg)
+                      .replaceFirst('{0}', label)
+                      .replaceFirst('{1}', range));
+                  return;
+                }
                 Navigator.pop(ctx, ScheduleSlotResult(slot: slot));
               },
               child: Text(t(save)),

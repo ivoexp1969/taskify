@@ -50,7 +50,18 @@ flutter build appbundle --release
 без този диалог новите функции остават неоткрити.
 
 ## Current Version
-**v1.0.52+62 (July 2026) — ЖИВА в Google Play Production (100%). ★КРАШ FIX★: `AndroidManifest.xml`
+**v1.0.55+65 (July 2026) — Довършени 3-те отворени TODO по режим „Обучение": (1) валидация на
+разписанието (без припокриващи се часове — `ScheduleSlot.overlaps`/`hasValidRange`, service
+`firstConflict`, inline грешка в диалога, 11 ез.); (2) „Учебна програма" **по срокове (Ученик)/
+семестри (Студент)** — ново поле `ScheduleSlot.term` (SharedPreferences JSON, БЕЗ Hive bump),
+`SegmentedButton` в `weekly_schedule_screen`, вход = карта в таб Обучение; (3) ротатор на картата за
+броене (Студент) — `_StudentCard` StatefulWidget, редува 4 най-близки дати (Timer 5s + AnimatedSwitcher
++ точки). Тестове **11 ✅**, analyze **0**. „Какво ново" `_build=65` + `release_notes/1.0.55.md`.
+AAB билднат. ★Чист Dart → iOS=само Mac билд.★ ОСТАВА: качване в Play Console + Firestore НВО/ДЗИ дати.**
+ПРЕДИШНО:
+**v1.0.54+64 (July 2026) — Режими Обучение V1 (Ученик/Студент) + категория „🎒 Училище" (Mac,
+качено production 100%, заменя 1.0.52). ПРЕДИШНО:
+v1.0.52+62 — ЖИВА в Google Play Production (100%). ★КРАШ FIX★: `AndroidManifest.xml`
 декларираше компоненти на `android_alarm_manager_plus` (AlarmService/AlarmBroadcastReceiver/
 RebootBroadcastReceiver), а плъгинът НЕ е зависимост → липсващи класове → `ClassNotFoundException` при
 `BOOT_COMPLETED` (5 потребители, билдове 54/55/57). Махнати. Крашовете се четат с нов
@@ -97,6 +108,19 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **★Обучение — 3-те TODO довършени → v1.0.55+65 (PC, 2026-07-27):** затворих отворените TODO от Mac (07-23).
+  **(1) Валидация разписание:** `ScheduleSlot.hasValidRange` (край>начало) + `overlaps` (същ ден И срок;
+  долепени НЕ припокриват), service `firstConflict`; диалогът за слот (`weekly_schedule_screen.dart`)
+  валидира при Запази → inline червена грешка с предмет+час на конфликта (11 ез. `badRange`/`overlapMsg`).
+  **(2) „Учебна програма" по срокове/семестри:** ново поле `ScheduleSlot.term` (1/2; стари слотове→1; БЕЗ
+  Hive bump, чисто SharedPreferences JSON); service `_currentTerm`+`setCurrentTerm`(persist)+`forDay(term:)`+
+  `isEmptyForTerm`; екран = `SegmentedButton` (Ученик→I/II срок, Студент→зимен/летен през
+  `UniversityService().enabled`), филтрира по текущ срок; вход = карта „📅 Учебна програма" в таб Обучение
+  (`modes_screen`). **(3) Ротатор карта за броене (Студент):** `_StudentCard`→StatefulWidget, редува
+  `upcomingKeyDates().take(4)` (`Timer.periodic(5s)` само при >1; AnimatedSwitcher 400ms + точки; спира в
+  dispose). Тестове **11 ✅** (`test/weekly_schedule_test.dart`), analyze **0**. Bump 1.0.54+64→1.0.55+65,
+  „Какво ново" `_build=65` (3 точки×11 ез.), `release_notes/1.0.55.md`. AAB билднат (flutter clean). **Чист
+  cross-platform Dart — iOS=само Mac билд.** ОСТАВА за Иво: качване AAB в Play Console + Firestore НВО/ДЗИ дати.
 - **⏳ TODO за Mac (Иво, 2026-07-20):** категория **„Училище"**, която при избор отваря избраните
   предмети на ученика (вместо плосък списък от `subj_*` категории). Пълна спецификация в **DEVLOG.md**
   (най-горе, „TODO / HANDOFF → Mac"). Чист Dart → важи и за двете платформи.

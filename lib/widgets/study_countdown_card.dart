@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../models/school_calendar.dart';
@@ -84,10 +86,48 @@ class StudyCountdownCard extends StatelessWidget {
   }
 }
 
-/// Карта за студент — броене до най-близката ключова дата (или подкана да добави).
-class _StudentCard extends StatelessWidget {
+/// Карта за студент — броене до най-близките ключови дати.
+///
+/// Ако има повече от една предстояща дата, картата ги **редува** (плавно
+/// затихване на всеки няколко секунди), за да са видими най-близките събития,
+/// не само първото. Тап (родителят) → пълен списък.
+class _StudentCard extends StatefulWidget {
   final String lang;
   const _StudentCard({required this.lang});
+
+  @override
+  State<_StudentCard> createState() => _StudentCardState();
+}
+
+class _StudentCardState extends State<_StudentCard> {
+  /// Колко от най-близките събития да се редуват.
+  static const int _maxRotate = 4;
+
+  /// През колко време сменя показаното събитие.
+  static const Duration _interval = Duration(seconds: 5);
+
+  Timer? _timer;
+  int _index = 0;
+
+  String get lang => widget.lang;
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _ensureTimer(int count) {
+    if (count > 1) {
+      _timer ??= Timer.periodic(_interval, (_) {
+        if (!mounted) return;
+        setState(() => _index = (_index + 1) % count);
+      });
+    } else {
+      _timer?.cancel();
+      _timer = null;
+    }
+  }
 
   static String _t(Map<String, String> m, String lang) => m[lang] ?? m['en']!;
 
@@ -172,8 +212,12 @@ class _StudentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final uni = UniversityService();
-    final upcoming = uni.upcomingKeyDates();
-    final next = upcoming.isEmpty ? null : upcoming.first;
+    final all = uni.upcomingKeyDates();
+    // Редуваме само най-близките няколко събития.
+    final rotate = all.take(_maxRotate).toList();
+    _ensureTimer(rotate.length);
+    if (_index >= rotate.length) _index = 0;
+    final next = rotate.isEmpty ? null : rotate[_index];
 
     // Празно състояние — честна подкана (не гадаем дати).
     if (next == null) {
@@ -241,16 +285,39 @@ class _StudentCard extends StatelessWidget {
             const Text('🎓', style: TextStyle(fontSize: 30)),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                headline,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  height: 1.15,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                child: Text(
+                  headline,
+                  key: ValueKey(next.id),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    height: 1.15,
+                  ),
                 ),
               ),
             ),
+            if (rotate.length > 1) ...[
+              const SizedBox(width: 8),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (int i = 0; i < rotate.length; i++)
+                    Container(
+                      width: 6,
+                      height: 6,
+                      margin: const EdgeInsets.symmetric(vertical: 2),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white
+                            .withValues(alpha: i == _index ? 0.95 : 0.35),
+                      ),
+                    ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

@@ -16,17 +16,33 @@ class WeeklyScheduleService {
   factory WeeklyScheduleService() => _instance;
 
   static const String _pref = 'weekly_schedule';
+  static const String _prefTerm = 'weekly_schedule_term';
 
-  /// Бумва се при всяка промяна на разписа.
+  /// Бумва се при всяка промяна на разписа (вкл. смяна на текущия срок).
   static final ValueNotifier<int> revision = ValueNotifier<int>(0);
 
   List<ScheduleSlot> _slots = const [];
   bool _loaded = false;
 
+  /// Текущо избран срок/семестър (1 или 2). Разписанието се въвежда и показва
+  /// отделно за всеки срок; календарът показва слотовете на текущия срок.
+  int _currentTerm = 1;
+  int get currentTerm => _currentTerm;
+
+  Future<void> setCurrentTerm(int term) async {
+    final t = term == 2 ? 2 : 1;
+    if (t == _currentTerm) return;
+    _currentTerm = t;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_prefTerm, t);
+    revision.value++;
+  }
+
   Future<void> load() async {
     if (_loaded) return;
     final prefs = await SharedPreferences.getInstance();
     _parse(prefs.getString(_pref));
+    _currentTerm = (prefs.getInt(_prefTerm) == 2) ? 2 : 1;
     _loaded = true;
     // Опресни евентуалните слушатели (напр. лентата на календара), заредени
     // преди края на асинхронния load.
@@ -58,13 +74,32 @@ class WeeklyScheduleService {
   List<ScheduleSlot> get all => List.unmodifiable(_slots);
 
   /// Слотовете за конкретен ден (1=пон … 7=нед), сортирани по начален час.
-  List<ScheduleSlot> forDay(int day) {
-    final list = _slots.where((s) => s.day == day).toList();
+  /// По подразбиране връща само текущия срок; подай [term] за конкретен срок.
+  List<ScheduleSlot> forDay(int day, {int? term}) {
+    final t = term ?? _currentTerm;
+    final list = _slots.where((s) => s.day == day && s.term == t).toList();
     list.sort((a, b) => a.fromMinutes.compareTo(b.fromMinutes));
     return list;
   }
 
+  /// Празно ли е разписанието за срок (по подразбиране — текущия).
+  bool isEmptyForTerm([int? term]) {
+    final t = term ?? _currentTerm;
+    return !_slots.any((s) => s.term == t);
+  }
+
   bool get isEmpty => _slots.isEmpty;
+
+  /// Връща първия съществуващ слот, който се припокрива по време с [candidate]
+  /// в същия ден (пропуска самия него по id), или `null` ако няма конфликт.
+  /// Използва се за да НЕ допускаме два часа/събития в едно и също време.
+  ScheduleSlot? firstConflict(ScheduleSlot candidate) {
+    for (final s in _slots) {
+      if (s.id == candidate.id) continue;
+      if (candidate.overlaps(s)) return s;
+    }
+    return null;
+  }
 
   Future<void> upsert(ScheduleSlot slot) async {
     final idx = _slots.indexWhere((s) => s.id == slot.id);
@@ -86,6 +121,7 @@ class WeeklyScheduleService {
     required String subject,
     required SlotKind kind,
     String? location,
+    int? term,
   }) {
     return ScheduleSlot(
       id: Uuid.v4(),
@@ -95,6 +131,7 @@ class WeeklyScheduleService {
       subject: subject,
       kind: kind,
       location: location,
+      term: term ?? _currentTerm,
     );
   }
 

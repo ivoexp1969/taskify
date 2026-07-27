@@ -15,66 +15,66 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Нови инсталации НЕ го виждат (те виждат welcome диалога).
 class WhatsNewDialog {
   /// Билдът, за който са точките по-долу (= `pubspec.yaml` build number).
-  static const int _build = 64;
+  static const int _build = 65;
 
   static const String _prefKey = 'whats_new_seen_build';
 
   /// Точките за текущата версия, по език.
   static const Map<String, List<String>> _items = {
     'bg': [
-      '🎒 Нов Училищен режим: обратно броене до следващата ваканция направо на началния екран.',
-      'Избери класа си и добави учебните предмети — стават категории за домашните.',
-      'За 7. и 12. клас — броене и до НВО и матурите.',
+      '🎓 Ново „Обучение": режими Ученик и Студент — избери своя и следи важните дати.',
+      '📅 Учебна програма по срокове/семестри; предупреждава при припокриващи се часове.',
+      '⏳ Обратно броене до ваканции, изпити и ключови дати — на началния екран.',
     ],
     'en': [
-      '🎒 New School mode: a countdown to the next school vacation right on your home screen.',
-      'Pick your grade and add your subjects — they become categories for homework.',
-      'For grades 7 and 12 — a countdown to the NEO and matriculation exams too.',
+      '🎓 New “Learning”: Pupil and Student modes — pick yours and track key dates.',
+      '📅 Curriculum by term/semester; warns you about overlapping classes.',
+      '⏳ Countdown to holidays, exams and key dates — right on your home screen.',
     ],
     'de': [
-      '🎒 Neuer Schulmodus: ein Countdown bis zu den nächsten Ferien auf dem Startbildschirm.',
-      'Wähle deine Klasse und füge deine Fächer hinzu — sie werden zu Kategorien.',
-      'Für Klasse 7 und 12 — auch ein Countdown bis zu den Prüfungen.',
+      '🎓 Neu „Bildung“: Modi Schüler und Student — wähle deinen und behalte Termine im Blick.',
+      '📅 Lehrplan nach Halbjahr/Semester; warnt bei sich überschneidenden Stunden.',
+      '⏳ Countdown bis Ferien, Prüfungen und wichtigen Terminen — auf dem Startbildschirm.',
     ],
     'fr': [
-      "🎒 Nouveau Mode école : un compte à rebours des prochaines vacances sur l'accueil.",
-      'Choisis ta classe et ajoute tes matières — elles deviennent des catégories.',
-      'Pour la 7e et la terminale — aussi un compte à rebours des examens.',
+      '🎓 Nouveau « Éducation » : modes Élève et Étudiant — choisis le tien et suis tes dates.',
+      '📅 Programme par trimestre/semestre ; alerte en cas de cours qui se chevauchent.',
+      '⏳ Compte à rebours des vacances, examens et dates clés — sur l’accueil.',
     ],
     'it': [
-      '🎒 Nuova Modalità scuola: un conto alla rovescia per le prossime vacanze in home.',
-      'Scegli la classe e aggiungi le materie — diventano categorie per i compiti.',
-      'Per la 7ª e la 12ª — anche un conto alla rovescia degli esami.',
+      '🎓 Nuovo “Istruzione”: modalità Alunno e Studente — scegli la tua e segui le date.',
+      '📅 Programma per periodo/semestre; avvisa in caso di lezioni sovrapposte.',
+      '⏳ Conto alla rovescia per vacanze, esami e date chiave — nella home.',
     ],
     'el': [
-      '🎒 Νέα Λειτουργία σχολείου: αντίστροφη μέτρηση για τις επόμενες διακοπές στην αρχική.',
-      'Διάλεξε τάξη και πρόσθεσε μαθήματα — γίνονται κατηγορίες για τις εργασίες.',
-      'Για 7η και 12η — και μέτρηση για τις εξετάσεις.',
+      '🎓 Νέο «Εκπαίδευση»: λειτουργίες Μαθητή και Φοιτητή — διάλεξε τη δική σου.',
+      '📅 Πρόγραμμα ανά τρίμηνο/εξάμηνο· προειδοποιεί για μαθήματα που επικαλύπτονται.',
+      '⏳ Αντίστροφη μέτρηση για διακοπές, εξετάσεις και βασικές ημερομηνίες — στην αρχική.',
     ],
     'es': [
-      '🎒 Nuevo Modo escolar: una cuenta atrás para las próximas vacaciones en el inicio.',
-      'Elige tu grado y añade tus asignaturas — se vuelven categorías para las tareas.',
-      'Para 7.º y 12.º — también una cuenta atrás para los exámenes.',
+      '🎓 Nuevo “Educación”: modos Alumno y Estudiante — elige el tuyo y sigue las fechas.',
+      '📅 Programa por trimestre/semestre; avisa de clases que se solapan.',
+      '⏳ Cuenta atrás para vacaciones, exámenes y fechas clave — en el inicio.',
     ],
     'pt': [
-      '🎒 Novo Modo escolar: uma contagem para as próximas férias no ecrã inicial.',
-      'Escolhe o teu ano e adiciona as disciplinas — viram categorias para os trabalhos.',
-      'Para o 7.º e o 12.º — também uma contagem para os exames.',
+      '🎓 Novo “Educação”: modos Aluno e Estudante — escolhe o teu e segue as datas.',
+      '📅 Programa por período/semestre; avisa sobre aulas sobrepostas.',
+      '⏳ Contagem para férias, exames e datas-chave — no ecrã inicial.',
     ],
     'ru': [
-      '🎒 Новый Школьный режим: обратный отсчёт до ближайших каникул на главном экране.',
-      'Выбери класс и добавь предметы — они станут категориями для домашних заданий.',
-      'Для 7 и 12 класса — отсчёт и до экзаменов.',
+      '🎓 Новый «Обучение»: режимы Ученик и Студент — выбери свой и следи за датами.',
+      '📅 Учебная программа по срокам/семестрам; предупреждает о накладках занятий.',
+      '⏳ Обратный отсчёт до каникул, экзаменов и ключевых дат — на главном экране.',
     ],
     'tr': [
-      '🎒 Yeni Okul modu: ana ekranda bir sonraki tatile geri sayım.',
-      'Sınıfını seç ve derslerini ekle — ödevler için kategoriye dönüşür.',
-      '7. ve 12. sınıf için — sınavlara da geri sayım.',
+      '🎓 Yeni “Eğitim”: Öğrenci ve Üniversite modları — kendininkini seç, tarihleri takip et.',
+      '📅 Döneme/yarıyıla göre ders programı; çakışan dersler için uyarır.',
+      '⏳ Tatiller, sınavlar ve önemli tarihlere geri sayım — ana ekranda.',
     ],
     'ja': [
-      '🎒 新しい学校モード：次の休みまでのカウントダウンをホーム画面に表示。',
-      '学年を選んで教科を追加 — 宿題用のカテゴリになります。',
-      '7年生・12年生には試験までのカウントダウンも。',
+      '🎓 新しい「学び」：生徒モードと大学生モード — 自分に合った方を選んで重要な日を管理。',
+      '📅 学期ごとの時間割。授業が重なると警告します。',
+      '⏳ 休み・試験・重要な日までのカウントダウンをホーム画面に。',
     ],
   };
 
