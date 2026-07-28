@@ -79,27 +79,33 @@ class WidgetService {
   ///
   /// Уважава Pro статуса и toggle-ите: ако не е Pro или функциите са изключени,
   /// ключът се трие → widget-ът не показва реда.
-  static Future<void> _syncContextToPrefs(SharedPreferences prefs) async {
-    try {
-      final ctx = <String, String>{};
+  /// Изчислява локалния контекст (готови локализирани редове), уважавайки Pro +
+  /// toggle-ите. Общ за Android (пише в prefs) и iOS (изпраща към App Group).
+  static Future<Map<String, String>> _computeWidgetContext(
+      SharedPreferences prefs) async {
+    final ctx = <String, String>{};
+    if (ProService().isPro) {
+      final lang = prefs.getString('app_language') ?? 'en';
 
-      if (ProService().isPro) {
-        final lang = prefs.getString('app_language') ?? 'en';
+      final doc = _docExpiryLine(lang);
+      if (doc != null) ctx['docExpiry'] = doc;
 
-        final doc = _docExpiryLine(lang);
-        if (doc != null) ctx['docExpiry'] = doc;
-
-        if (prefs.getBool('name_days_enabled') ?? false) {
-          final nameDay = await _nameDayLine(lang);
-          if (nameDay != null) ctx['nameDay'] = nameDay;
-        }
-
-        if (prefs.getBool('holidays_enabled') ?? false) {
-          final holiday = await _holidayLine(lang);
-          if (holiday != null) ctx['holiday'] = holiday;
-        }
+      if (prefs.getBool('name_days_enabled') ?? false) {
+        final nameDay = await _nameDayLine(lang);
+        if (nameDay != null) ctx['nameDay'] = nameDay;
       }
 
+      if (prefs.getBool('holidays_enabled') ?? false) {
+        final holiday = await _holidayLine(lang);
+        if (holiday != null) ctx['holiday'] = holiday;
+      }
+    }
+    return ctx;
+  }
+
+  static Future<void> _syncContextToPrefs(SharedPreferences prefs) async {
+    try {
+      final ctx = await _computeWidgetContext(prefs);
       if (ctx.isEmpty) {
         await prefs.remove('widget_context');
       } else {
@@ -268,9 +274,12 @@ class WidgetService {
         'dueDate': t.dueDate.toIso8601String(),
         if (t.template != null) 'template': t.template,
       }).toList();
+      // Като Android: изпращаме и локалния контекст (документ/имен ден/празник).
+      final ctx = await _computeWidgetContext(prefs);
       await _channel.invokeMethod('syncToAppGroup', {
         'tasks': jsonEncode(tasksJson),
         'language': lang,
+        'context': jsonEncode(ctx),
       });
     } catch (e) {
       debugPrint('iOS widget sync error: $e');

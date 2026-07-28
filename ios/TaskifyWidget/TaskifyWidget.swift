@@ -96,6 +96,8 @@ struct TaskEntry: TimelineEntry {
     let date: Date
     let tasks: [TaskItem]
     let language: String
+    /// Локален контекст (готов ред): документ/имен ден/празник — като Android.
+    let context: String?
 }
 
 let kWidgetBg = Color(red: 0.216, green: 0.188, blue: 0.639)
@@ -114,7 +116,7 @@ struct TaskifyProvider: TimelineProvider {
     let appGroup = "group.com.ivoexp.taskify"
 
     func placeholder(in context: Context) -> TaskEntry {
-        TaskEntry(date: Date(), tasks: [], language: "en")
+        TaskEntry(date: Date(), tasks: [], language: "en", context: nil)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (TaskEntry) -> Void) {
@@ -159,7 +161,16 @@ struct TaskifyProvider: TimelineProvider {
             return d < tomorrow
         }.prefix(3)
 
-        return TaskEntry(date: Date(), tasks: Array(todayTasks), language: lang)
+        // Локален контекст — приоритет като Android: документ > имен ден > празник.
+        var ctxLine: String? = nil
+        if let cj = defaults?.string(forKey: "flutter.widget_context"),
+           let cdata = cj.data(using: .utf8),
+           let map = (try? JSONSerialization.jsonObject(with: cdata)) as? [String: String] {
+            ctxLine = map["docExpiry"] ?? map["nameDay"] ?? map["holiday"]
+        }
+
+        return TaskEntry(date: Date(), tasks: Array(todayTasks),
+                         language: lang, context: ctxLine)
     }
 }
 
@@ -405,15 +416,28 @@ struct TaskifyWidgetEntryView: View {
 
             if entry.tasks.isEmpty {
                 Spacer()
-                Text(emptyMsg)
-                    // Handwritten Caveat, like Android: as large as possible but
-                    // auto-shrinks to the text length so it fits with no ellipsis.
-                    .font(.custom("Caveat-Regular", size: family == .systemSmall ? 24 : 32))
-                    .foregroundColor(.white.opacity(0.92))
-                    .multilineTextAlignment(.center)
-                    .lineLimit(3)
-                    .minimumScaleFactor(0.4)
-                    .frame(maxWidth: .infinity)
+                if let ctx = entry.context {
+                    // При празен списък контекстът заменя закачливата фраза
+                    // (като Android) — четим шрифт, не ръкописният.
+                    Text(ctx)
+                        .font(.system(size: family == .systemSmall ? 13 : 15,
+                                      weight: .semibold))
+                        .foregroundColor(.white.opacity(0.95))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(4)
+                        .minimumScaleFactor(0.5)
+                        .frame(maxWidth: .infinity)
+                } else {
+                    Text(emptyMsg)
+                        // Handwritten Caveat, like Android: as large as possible but
+                        // auto-shrinks to the text length so it fits with no ellipsis.
+                        .font(.custom("Caveat-Regular", size: family == .systemSmall ? 24 : 32))
+                        .foregroundColor(.white.opacity(0.92))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(3)
+                        .minimumScaleFactor(0.4)
+                        .frame(maxWidth: .infinity)
+                }
                 Spacer()
             } else {
                 VStack(spacing: 3) {
@@ -421,7 +445,17 @@ struct TaskifyWidgetEntryView: View {
                         TaskRowView(task: task, lang: entry.language)
                     }
                 }
-                Spacer()
+                Spacer(minLength: 2)
+                // Локален контекст под задачите (само medium — има място).
+                if let ctx = entry.context, family != .systemSmall {
+                    Text(ctx)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.white.opacity(0.85))
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, 2)
+                }
             }
         }
         .padding(10)

@@ -26,6 +26,14 @@ import WidgetKit
         if let lang = args["language"] as? String {
           defaults?.set(lang, forKey: "flutter.app_language")
         }
+        // Локален контекст (документ/имен ден/празник) — като Android.
+        if let ctx = args["context"] as? String {
+          if ctx.isEmpty || ctx == "{}" {
+            defaults?.removeObject(forKey: "flutter.widget_context")
+          } else {
+            defaults?.set(ctx, forKey: "flutter.widget_context")
+          }
+        }
         if #available(iOS 14.0, *) {
           WidgetCenter.shared.reloadAllTimelines()
         }
