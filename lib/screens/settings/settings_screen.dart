@@ -3300,116 +3300,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 16),
 
-          // ── Акаунт (падаща група): профил + облачна синхронизация ──
-          _settingsGroup(
-            title: t.account,
-            icon: Icons.person_rounded,
-            color: theme.colorScheme.primary,
-            children: [
-              if (user != null) ...[
-                ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: theme.colorScheme.primary,
-                    child: Text(
-                      (_authService.displayName.isNotEmpty
-                              ? _authService.displayName
-                              : (user.email ?? '?'))
-                          .substring(0, 1)
-                          .toUpperCase(),
-                      style: TextStyle(
-                        color: theme.colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  title: Text(user.email ?? ''),
-                  subtitle: Text(
-                    t.signedIn,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  trailing: TextButton(
-                    onPressed: _logout,
-                    child: Text(
-                      t.logout,
-                      style: const TextStyle(color: Colors.redAccent),
-                    ),
-                  ),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: Icon(Icons.badge_outlined,
-                      color: theme.colorScheme.primary),
-                  title: Text(_authService.displayName.isNotEmpty
-                      ? _authService.displayName
-                      : t.addName),
-                  subtitle: Text(
-                    t.displayNameDesc,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  trailing: const Icon(Icons.edit_outlined, size: 18),
-                  onTap: _editDisplayName,
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: _isSyncing
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.cloud_sync_outlined, color: Colors.blue),
-                  title: Text(t.syncNow),
-                  subtitle: Text(
-                    t.autoSyncDesc,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: _isSyncing ? null : _syncNow,
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.restart_alt, color: Colors.red),
-                  title: Text(t.resetSync),
-                  subtitle: Text(t.resetSyncDesc,
-                      style: const TextStyle(fontSize: 12)),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: _isSyncing ? null : _resetSync,
-                ),
-              ] else
-                ListTile(
-                  leading: Icon(Icons.person_outline,
-                      color: theme.colorScheme.primary),
-                  title: Text(t.login),
-                  subtitle: Text(
-                    t.signInToSync,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: _openLogin,
-                ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
+          // (Акаунтът се управлява от карта „Профил" горе → ProfileScreen.)
           // Календарна синхронизация — ЕДИН избор. Източниците са взаимно
           // изключващи се: ако потребителят има външна GCal↔Apple връзка, двата
           // активни наведнъж биха показвали всяко събитие двойно. Apple е
           // export-only (без импорт) — виж IosCalendarService.
           _settingsGroup(
-            title: t.calendarSource,
-            icon: Icons.calendar_month_rounded,
+            title: t.cloudSync,
+            icon: Icons.sync_rounded,
             color: Colors.blue,
             children: [
               Card(
@@ -3580,6 +3478,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
             ),
           ),
+              // Синхронизирай / Нулирай — преместени тук от Акаунт (Пакет 2).
+              if (user != null) ...[
+                const SizedBox(height: 8),
+                Card(
+                  elevation: 0,
+                  margin: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: _isSyncing
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(strokeWidth: 2))
+                            : const Icon(Icons.cloud_sync_outlined,
+                                color: Colors.blue),
+                        title: Text(t.syncNow),
+                        subtitle: Text(t.autoSyncDesc,
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: theme.colorScheme.onSurface
+                                    .withValues(alpha: 0.6))),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: _isSyncing ? null : _syncNow,
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: const Icon(Icons.restart_alt, color: Colors.red),
+                        title: Text(t.resetSync),
+                        subtitle: Text(t.resetSyncDesc,
+                            style: const TextStyle(fontSize: 12)),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: _isSyncing ? null : _resetSync,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 16),
