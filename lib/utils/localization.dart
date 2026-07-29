@@ -303,6 +303,7 @@ class AppText {
 
   // ==================== ЕЗИК И ТЕМА ====================
   String get language => _t({'en': 'Language', 'bg': 'Език', 'de': 'Sprache', 'fr': 'Langue', 'it': 'Lingua', 'el': 'Γλώσσα', 'es': 'Idioma', 'pt': 'Idioma', 'ru': 'Язык', 'tr': 'Dil', 'ja': '言語'});
+  String get langAndRegion => _t({'en': 'Language & region', 'bg': 'Език и регион', 'de': 'Sprache & Region', 'fr': 'Langue et région', 'it': 'Lingua e regione', 'el': 'Γλώσσα & περιοχή', 'es': 'Idioma y región', 'pt': 'Idioma e região', 'ru': 'Язык и регион', 'tr': 'Dil ve bölge', 'ja': '言語と地域'});
   String get bulgarian => _t({'en': 'Bulgarian', 'bg': 'Български', 'de': 'Bulgarisch', 'fr': 'Bulgare', 'it': 'Bulgaro', 'el': 'Βουλγαρικά', 'es': 'Búlgaro', 'pt': 'Búlgaro', 'ru': 'Болгарский', 'tr': 'Bulgarca', 'ja': 'ブルガリア語'});
   String get english => _t({'en': 'English', 'bg': 'Английски', 'de': 'Englisch', 'fr': 'Anglais', 'it': 'Inglese', 'el': 'Αγγλικά', 'es': 'Inglés', 'pt': 'Inglês', 'ru': 'Английский', 'tr': 'İngilizce', 'ja': '英語'});
   String get theme => _t({'en': 'Theme', 'bg': 'Тема', 'de': 'Design', 'fr': 'Thème', 'it': 'Tema', 'el': 'Θέμα', 'es': 'Tema', 'pt': 'Tema', 'ru': 'Тема', 'tr': 'Tema', 'ja': 'テーマ'});

@@ -26,7 +26,6 @@ import '../auth/login_screen.dart';
 import 'statistics_screen.dart';
 import 'ai_settings_screen.dart';
 import 'how_to_use_screen.dart';
-import 'delete_account_flow.dart';
 import '../profile/profile_screen.dart';
 import '../../services/task_view_preference.dart';
 import '../home/home_screen.dart';
@@ -1181,14 +1180,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     String tr(Map<String, String> m) => m[lang] ?? m['en']!;
     final isPro = ProService().isPro;
 
+    // Пакет 2: връща само тайловете Именни дни / Контакти (без header + без
+    // Училищен режим) — вливат се в група „Език и регион".
     return [
-      const SizedBox(height: 24),
-      Text(
-        tr(sectionTitle),
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-      ),
-      const SizedBox(height: 8),
       Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
         child: SwitchListTile(
           secondary: Container(
             padding: const EdgeInsets.all(8),
@@ -1333,8 +1330,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
       ],
-      // „Училищен режим" — обратно броене до ваканция + предмети + изпити.
-      ..._buildSchoolModeCards(context),
     ];
   }
 
@@ -1565,6 +1560,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
 
     return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
       child: Column(
         children: [
           SwitchListTile(
@@ -3207,37 +3204,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildProfileCard(context),
           const SizedBox(height: 16),
 
-          // Език - НАЙ-ОТГОРЕ
-          Text(
-            t.language,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.indigo.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  SupportedLocales.flags[currentLocale.languageCode] ?? '🌐',
-                  style: const TextStyle(fontSize: 20),
+          // ═══ Група 1 — 🇧🇬 Език и регион ═══
+          _settingsGroup(
+            title: t.langAndRegion,
+            icon: Icons.language_rounded,
+            color: Colors.indigo,
+            children: [
+              Card(
+                elevation: 0,
+                margin: EdgeInsets.zero,
+                child: ListTile(
+                  leading: Text(
+                    SupportedLocales.flags[currentLocale.languageCode] ?? '🌐',
+                    style: const TextStyle(fontSize: 22),
+                  ),
+                  title: Text(t.language),
+                  subtitle: Text(
+                      SupportedLocales.names[currentLocale.languageCode] ??
+                          'English'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _showLanguageDialog(
+                      context, languageController, currentLocale),
                 ),
               ),
-              title: Text(SupportedLocales.names[currentLocale.languageCode] ?? 'English'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => _showLanguageDialog(context, languageController, currentLocale),
-            ),
+              _buildHolidaysTile(context, currentLocale.languageCode),
+              ..._buildBulgariaSection(context),
+            ],
           ),
 
           const SizedBox(height: 16),
 
-          // ═══ Група — 🎨 Външен вид (Стил карти + Тема + Добави widget) ═══
+          // ═══ Група 2 — 🎨 Външен вид (Стил карти + Тема + Добави widget) ═══
           _buildAppearanceSection(context, t),
 
           // ── Задачи (падаща група): Статистики, Категории, AI ──
@@ -3579,14 +3576,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
 
           const SizedBox(height: 16),
-          // Официални празници — достъпно за всички държави (не само BG).
-          _buildHolidaysTile(
-              context, LanguageScope.of(context).locale.languageCode),
-
-          // Раздел „България" (именни дни) — само при BG език/локация.
-          ..._buildBulgariaSection(context),
-
-          const SizedBox(height: 16),
+          // (Празници + Именни дни/Контакти са в група „Език и регион" — Пакет 2.)
           // ── Данни (падаща група): Backup / Restore ──
           _settingsGroup(
             title: t.localData,
@@ -3664,38 +3654,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          // Delete Account (само ако е логнат)
-          if (user != null) ...[
-            const SizedBox(height: 16),
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Text(
-                t.account.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.delete_forever, color: Colors.red),
-                title: Text(
-                  t.deleteAccount,
-                  style: const TextStyle(
-                      color: Colors.red, fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  t.deleteAccountSubtitle,
-                  style: const TextStyle(fontSize: 12),
-                ),
-                onTap: () => DeleteAccountFlow.start(context),
-              ),
-            ),
-            const SizedBox(height: 32),
-          ],
+          // (Изтрий акаунт е в Профил → Опасна зона — Пакет 2.)
+          const SizedBox(height: 16),
 
           // „За приложението" — най-долу.
           ..._buildAboutSection(context),
