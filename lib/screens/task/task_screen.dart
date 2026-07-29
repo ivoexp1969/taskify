@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/google_calendar_service.dart';
 import '../../services/ios_calendar_service.dart';
+import '../../services/sync_service.dart';
 import '../../services/calendar_import_service.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -213,7 +214,8 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
       'meeting', 'workout', 'payment', 'travel', 'gift',
     };
     SharedPreferences.getInstance().then((prefs) async {
-      if (prefs.getBool('dedupe_cat_display_v1') ?? false) return;
+      // v2: трие дубликата И от облака (иначе sync го връща).
+      if (prefs.getBool('dedupe_cat_display_v2') ?? false) return;
       final keptByName = <String, String>{}; // показано име (lower) → запазено id
       final toDelete = <String>[];
       for (final c in categoryBox.values) {
@@ -240,8 +242,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
       }
       for (final id in toDelete) {
         await categoryBox.delete(id);
+        await SyncService().deleteCloudCategory(id); // и от облака
       }
-      await prefs.setBool('dedupe_cat_display_v1', true);
+      await prefs.setBool('dedupe_cat_display_v2', true);
       if (mounted && toDelete.isNotEmpty) setState(() {});
     });
   }

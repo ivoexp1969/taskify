@@ -478,6 +478,16 @@ class SyncService {
     }
   }
 
+  /// Трие категория ОТ ОБЛАКА (за де-дублиране). Без това дубликатът се сваля
+  /// наново при следваща синхронизация и „възкръсва".
+  Future<void> deleteCloudCategory(String id) async {
+    final ref = _categoriesRef;
+    if (ref == null) return;
+    try {
+      await ref.doc(id).delete();
+    } catch (_) {}
+  }
+
   // ======================= FIRESTORE МАПИНГ =======================
 
   /// Сигнатура по съдържание — за съпоставяне на дубли с различни id (вкл.
