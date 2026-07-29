@@ -43,6 +43,28 @@ class StudyTaskDialog {
     }
   }
 
+  /// Локализирано име на категория — default категориите се превеждат по id
+  /// (иначе се виждаха суровите английски имена = „паразитни" категории).
+  static String _catName(Category c, AppText t) {
+    if (c.id == 'cal_events') return t.catCalendarEvents;
+    if (c.id == 'documents') return t.catDocuments;
+    if (c.isDefault) {
+      return {
+            'work': t.work,
+            'personal': t.personal,
+            'shopping': t.shopping,
+            'birthday': t.catBirthdays,
+            'meeting': t.catMeeting,
+            'workout': t.catWorkout,
+            'payment': t.catPayment,
+            'travel': t.catTravel,
+            'gift': t.catGift,
+          }[c.id] ??
+          c.name;
+    }
+    return c.name;
+  }
+
   static Future<bool?> show(BuildContext context, {required String kind}) async {
     await TaskTemplateService().load();
     if (!context.mounted) return null;
@@ -168,7 +190,7 @@ class StudyTaskDialog {
                           children: [
                             for (final c in categories)
                               ChoiceChip(
-                                label: Text(c.name),
+                                label: Text(_catName(c, t)),
                                 selected: categoryId == c.id,
                                 onSelected: (_) =>
                                     setState(() => categoryId = c.id),
