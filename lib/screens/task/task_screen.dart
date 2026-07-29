@@ -312,6 +312,18 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                     },
                   );
                 }),
+                // Споделени списъци — вход от „Категория" (Пакет 3).
+                ActionChip(
+                  avatar: const Icon(Icons.groups_rounded, size: 18),
+                  label: Text(t.sharedTab),
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (_) => const SharedGroupsScreen()),
+                    );
+                  },
+                ),
               ],
             ),
           ],
@@ -2856,8 +2868,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
             // Тап → пълен списък с предстоящи събития. Реактивна.
             const StudyCountdownCard(),
 
-            // Видим вход към Споделени списъци (по-забележим от иконата в AppBar).
-            _buildSharedEntry(t, theme),
+            // (Входът към Споделени списъци е в „Категория" избора — Пакет 3.)
 
             // Статистика - нов дизайн
             Padding(
