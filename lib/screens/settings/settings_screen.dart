@@ -1437,6 +1437,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           );
         }
 
+        final themeController = ThemeScope.of(context);
+        final currentMode = themeController.mode;
+        final langCode = LanguageScope.of(context).locale.languageCode;
         return _settingsGroup(
           title: t.appearance,
           icon: Icons.palette_rounded,
@@ -1479,7 +1482,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
+            // Тема (light/dark/amoled) — преместена в „Външен вид" (Пакет 2).
+            Card(
+              elevation: 0,
+              margin: EdgeInsets.zero,
+              child: Column(
+                children: [
+                  RadioListTile<int>(
+                    value: 0,
+                    groupValue: themeController.isAmoled ? 3 : (currentMode == ThemeMode.system ? 0 : (currentMode == ThemeMode.light ? 1 : 2)),
+                    title: Text(t.systemTheme),
+                    onChanged: (value) => themeController.setMode(ThemeMode.system),
+                  ),
+                  const Divider(height: 0),
+                  RadioListTile<int>(
+                    value: 1,
+                    groupValue: themeController.isAmoled ? 3 : (currentMode == ThemeMode.system ? 0 : (currentMode == ThemeMode.light ? 1 : 2)),
+                    title: Text(t.lightTheme),
+                    onChanged: (value) => themeController.setMode(ThemeMode.light),
+                  ),
+                  const Divider(height: 0),
+                  RadioListTile<int>(
+                    value: 2,
+                    groupValue: themeController.isAmoled ? 3 : (currentMode == ThemeMode.system ? 0 : (currentMode == ThemeMode.light ? 1 : 2)),
+                    title: Text(t.darkTheme),
+                    onChanged: (value) => themeController.setMode(ThemeMode.dark),
+                  ),
+                  const Divider(height: 0),
+                  RadioListTile<int>(
+                    value: 3,
+                    groupValue: themeController.isAmoled ? 3 : (currentMode == ThemeMode.system ? 0 : (currentMode == ThemeMode.light ? 1 : 2)),
+                    title: Text(t.amoledTheme),
+                    subtitle: Text('OLED',
+                        style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.5))),
+                    onChanged: (value) => themeController.setAmoled(true),
+                  ),
+                ],
+              ),
+            ),
+            // „Добави widget" (iOS) — преместено в „Външен вид" (Пакет 2).
+            if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS)
+              _buildWidgetGuideTile(context, langCode),
           ],
         );
       },
@@ -3141,11 +3185,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final t = AppText.of(context);
     final theme = Theme.of(context);
     final languageController = LanguageScope.of(context);
-    final themeController = ThemeScope.of(context);
-    final langCode = languageController.locale.languageCode;
 
     final currentLocale = languageController.locale;
-    final currentMode = themeController.mode;
     // Анонимните сесии (създадени само за affiliate-attribution лог) НЕ са
     // „акаунт" → показваме им секцията за вход, не панел за профил.
     final rawUser = _authService.currentUser;
@@ -3196,15 +3237,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 16),
 
+          // ═══ Група — 🎨 Външен вид (Стил карти + Тема + Добави widget) ═══
           _buildAppearanceSection(context, t),
-
-          // Упътване „Как да добавя widget" — само iOS (Android има pin от системата).
-          if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS)
-            _buildWidgetGuideTile(context, langCode),
 
           // ── Задачи (падаща група): Статистики, Категории, AI ──
           _settingsGroup(
-            title: t.tasks,
+            title: t.tasksAndAi,
             icon: Icons.task_alt_rounded,
             color: Colors.teal,
             children: [
@@ -3544,65 +3582,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
             ],
           ),
-          // Тема
-          _settingsGroup(
-            title: t.theme,
-            icon: Icons.brightness_6_rounded,
-            color: Colors.indigo,
-            children: [
-              Card(
-                elevation: 0,
-                margin: EdgeInsets.zero,
-                child: Column(
-              children: [
-                RadioListTile<int>(
-                  value: 0,
-                  groupValue: themeController.isAmoled ? 3 : (currentMode == ThemeMode.system ? 0 : (currentMode == ThemeMode.light ? 1 : 2)),
-                  title: Text(t.systemTheme),
-                  onChanged: (value) {
-                    themeController.setMode(ThemeMode.system);
-                  },
-                ),
-                const Divider(height: 0),
-                RadioListTile<int>(
-                  value: 1,
-                  groupValue: themeController.isAmoled ? 3 : (currentMode == ThemeMode.system ? 0 : (currentMode == ThemeMode.light ? 1 : 2)),
-                  title: Text(t.lightTheme),
-                  onChanged: (value) {
-                    themeController.setMode(ThemeMode.light);
-                  },
-                ),
-                const Divider(height: 0),
-                RadioListTile<int>(
-                  value: 2,
-                  groupValue: themeController.isAmoled ? 3 : (currentMode == ThemeMode.system ? 0 : (currentMode == ThemeMode.light ? 1 : 2)),
-                  title: Text(t.darkTheme),
-                  onChanged: (value) {
-                    themeController.setMode(ThemeMode.dark);
-                  },
-                ),
-                const Divider(height: 0),
-                RadioListTile<int>(
-                  value: 3,
-                  groupValue: themeController.isAmoled ? 3 : (currentMode == ThemeMode.system ? 0 : (currentMode == ThemeMode.light ? 1 : 2)),
-                  title: Text(t.amoledTheme),
-                  subtitle: Text(
-                    'OLED',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  onChanged: (value) {
-                    themeController.setAmoled(true);
-                  },
-                ),
-              ],
-            ),
-          ),
-            ],
-          ),
-
           const SizedBox(height: 16),
 
           // ── Известия и данни (падаща група): Morning Briefing + Backup ──

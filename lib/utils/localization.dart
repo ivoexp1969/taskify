@@ -170,6 +170,7 @@ class AppText {
 
   // ==================== ОСНОВНИ ЕКРАНИ ====================
   String get tasks => _t({'en': 'Tasks', 'bg': 'Задачи', 'de': 'Aufgaben', 'fr': 'Tâches', 'it': 'Attività', 'el': 'Εργασίες', 'es': 'Tareas', 'pt': 'Tarefas', 'ru': 'Задачи', 'tr': 'Görevler', 'ja': 'タスク'});
+  String get tasksAndAi => _t({'en': 'Tasks & AI', 'bg': 'Задачи и AI', 'de': 'Aufgaben & KI', 'fr': 'Tâches et IA', 'it': 'Attività e IA', 'el': 'Εργασίες & AI', 'es': 'Tareas e IA', 'pt': 'Tarefas e IA', 'ru': 'Задачи и AI', 'tr': 'Görevler ve AI', 'ja': 'タスクとAI'});
   String get calendar => _t({'en': 'Calendar', 'bg': 'Календар', 'de': 'Kalender', 'fr': 'Calendrier', 'it': 'Calendario', 'el': 'Ημερολόγιο', 'es': 'Calendario', 'pt': 'Calendário', 'ru': 'Календарь', 'tr': 'Takvim', 'ja': 'カレンダー'});
   String get settings => _t({'en': 'Settings', 'bg': 'Настройки', 'de': 'Einstellungen', 'fr': 'Paramètres', 'it': 'Impostazioni', 'el': 'Ρυθμίσεις', 'es': 'Ajustes', 'pt': 'Configurações', 'ru': 'Настройки', 'tr': 'Ayarlar', 'ja': '設定'});
 
