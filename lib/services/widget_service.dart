@@ -7,6 +7,7 @@ import '../models/task.dart';
 import 'holidays_service.dart';
 import 'name_days_service.dart';
 import 'pro_service.dart';
+import 'auth_service.dart';
 
 class WidgetService {
   static const _channel = MethodChannel('com.ivoexp.taskify/widget');
@@ -276,10 +277,13 @@ class WidgetService {
       }).toList();
       // Като Android: изпращаме и локалния контекст (документ/имен ден/празник).
       final ctx = await _computeWidgetContext(prefs);
+      // Име на потребителя → widget-ът показва по-лично приветствие.
+      final userName = AuthService().displayName.trim();
       await _channel.invokeMethod('syncToAppGroup', {
         'tasks': jsonEncode(tasksJson),
         'language': lang,
         'context': jsonEncode(ctx),
+        'userName': userName,
       });
     } catch (e) {
       debugPrint('iOS widget sync error: $e');

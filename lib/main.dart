@@ -88,6 +88,7 @@ Future<void> main() async {
   await MigrationService.migrateTaskSyncFields();
   await MigrationService.migrateAppleEventIds();
   await MigrationService.migrateDocumentsToTasks();
+  await MigrationService.dedupeCategories();
   await MigrationService.purgeOldTombstones();
 
   // Widget инициализация - само за mobile

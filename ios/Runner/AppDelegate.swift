@@ -34,6 +34,14 @@ import WidgetKit
             defaults?.set(ctx, forKey: "flutter.widget_context")
           }
         }
+        // Име на потребителя → по-лично приветствие в widget-а.
+        if let userName = args["userName"] as? String {
+          if userName.isEmpty {
+            defaults?.removeObject(forKey: "flutter.widget_user_name")
+          } else {
+            defaults?.set(userName, forKey: "flutter.widget_user_name")
+          }
+        }
         if #available(iOS 14.0, *) {
           WidgetCenter.shared.reloadAllTimelines()
         }

@@ -13,7 +13,41 @@ class MigrationService {
   static const _syncFieldsKey = 'sync_fields_migrated_v1';
   static const _appleEventIdsKey = 'apple_event_ids_migrated_v1';
   static const _documentsToTasksKey = 'documents_to_tasks_migrated_v1';
+  static const _dedupeCategoriesKey = 'dedupe_categories_v1';
   static const _iosEventPrefix = 'ios_cal_event_';
+
+  /// Обединява категории с ЕДНАКВО име (напр. два пъти „Събития") в една:
+  /// задачите се прехвърлят към първата, дубликатите се трият. Еднократно.
+  /// Системните категории имат уникални имена → не се засягат погрешно.
+  static Future<void> dedupeCategories() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_dedupeCategoriesKey) ?? false) return;
+
+    final categoryBox = Hive.box<Category>('categories');
+    final taskBox = Hive.box<Task>('tasks');
+    final keptByName = <String, String>{}; // нормализирано име → запазено id
+    final toDelete = <String>[];
+
+    for (final c in categoryBox.values) {
+      final key = c.name.trim().toLowerCase();
+      if (key.isEmpty) continue;
+      final keptId = keptByName[key];
+      if (keptId == null) {
+        keptByName[key] = c.id;
+      } else if (keptId != c.id) {
+        // Дубликат → прехвърли задачите към запазената и маркирай за триене.
+        for (final t in taskBox.values.where((t) => t.categoryId == c.id)) {
+          t.categoryId = keptId;
+          await t.save();
+        }
+        toDelete.add(c.id);
+      }
+    }
+    for (final id in toDelete) {
+      await categoryBox.delete(id);
+    }
+    await prefs.setBool(_dedupeCategoriesKey, true);
+  }
 
   /// Гарантира, че всяка съществуваща задача има стабилен `id` и `updatedAt`,
   /// записани ТРАЙНО в Hive. Конструкторът на Task вече присвоява id/updatedAt

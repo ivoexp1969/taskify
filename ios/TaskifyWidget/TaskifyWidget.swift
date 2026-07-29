@@ -98,6 +98,8 @@ struct TaskEntry: TimelineEntry {
     let language: String
     /// Локален контекст (готов ред): документ/имен ден/празник — като Android.
     let context: String?
+    /// Име на потребителя (ако е въведено) → по-лично приветствие в заглавието.
+    let userName: String?
 }
 
 let kWidgetBg = Color(red: 0.216, green: 0.188, blue: 0.639)
@@ -116,7 +118,7 @@ struct TaskifyProvider: TimelineProvider {
     let appGroup = "group.com.ivoexp.taskify"
 
     func placeholder(in context: Context) -> TaskEntry {
-        TaskEntry(date: Date(), tasks: [], language: "en", context: nil)
+        TaskEntry(date: Date(), tasks: [], language: "en", context: nil, userName: nil)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (TaskEntry) -> Void) {
@@ -169,8 +171,11 @@ struct TaskifyProvider: TimelineProvider {
             ctxLine = map["docExpiry"] ?? map["nameDay"] ?? map["holiday"]
         }
 
+        let name = defaults?.string(forKey: "flutter.widget_user_name")
+        let userName = (name?.isEmpty ?? true) ? nil : name
+
         return TaskEntry(date: Date(), tasks: Array(todayTasks),
-                         language: lang, context: ctxLine)
+                         language: lang, context: ctxLine, userName: userName)
     }
 }
 
@@ -245,7 +250,7 @@ struct TaskRowView: View {
                     .foregroundColor(dotColor(task.priority))
             }
             Text(task.displayTitle(lang: lang))
-                .font(.system(size: 14, weight: task.isOverdue ? .semibold : .regular))
+                .font(.system(size: 14, weight: task.isOverdue ? .semibold : .regular, design: .rounded))
                 .foregroundColor(task.isOverdue ? kOverdueColor : .white)
                 .lineLimit(1)
             Spacer()
@@ -396,6 +401,24 @@ struct TaskifyWidgetEntryView: View {
         }
     }
 
+    /// Заглавие на widget-а: лично приветствие, ако има въведено име; иначе „Taskify".
+    var headerTitle: String {
+        guard let n = entry.userName, !n.isEmpty else { return "Taskify" }
+        switch entry.language {
+        case "bg": return "Здравей, \(n)"
+        case "de": return "Hallo, \(n)"
+        case "ru": return "Привет, \(n)"
+        case "fr": return "Salut, \(n)"
+        case "it": return "Ciao, \(n)"
+        case "es": return "Hola, \(n)"
+        case "pt": return "Olá, \(n)"
+        case "el": return "Γεια, \(n)"
+        case "tr": return "Merhaba, \(n)"
+        case "ja": return "\(n)さん"
+        default:   return "Hi, \(n)"
+        }
+    }
+
     var body: some View {
         widgetContent
             .modifier(WidgetBackgroundModifier())
@@ -407,9 +430,11 @@ struct TaskifyWidgetEntryView: View {
                 Image(systemName: "checkmark.square.fill")
                     .foregroundColor(Color(red: 0.20, green: 0.72, blue: 0.47))
                     .font(.system(size: 15))
-                Text("Taskify")
-                    .font(.system(size: 13, weight: .bold))
+                Text(headerTitle)
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                 Spacer()
             }
             .padding(.bottom, 6)
@@ -421,7 +446,7 @@ struct TaskifyWidgetEntryView: View {
                     // (като Android) — четим шрифт, не ръкописният.
                     Text(ctx)
                         .font(.system(size: family == .systemSmall ? 13 : 15,
-                                      weight: .semibold))
+                                      weight: .semibold, design: .rounded))
                         .foregroundColor(.white.opacity(0.95))
                         .multilineTextAlignment(.center)
                         .lineLimit(4)
@@ -449,7 +474,7 @@ struct TaskifyWidgetEntryView: View {
                 // Локален контекст под задачите (само medium — има място).
                 if let ctx = entry.context, family != .systemSmall {
                     Text(ctx)
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
                         .foregroundColor(.white.opacity(0.85))
                         .lineLimit(1)
                         .truncationMode(.tail)
