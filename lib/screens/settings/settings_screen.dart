@@ -71,6 +71,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _holidaysEnabled = false;
   String _holidaysCountry = 'BG';
   bool _schoolModeEnabled = false;
+  String? _profilePhotoPath; // локална снимка на профила (Пакет 2)
   int? _schoolGrade;
   StreamSubscription<dynamic>? _authSub;
 
@@ -82,6 +83,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadNameDaysSetting();
     _loadHolidaysSetting();
     _loadSchoolModeSetting();
+    _loadProfilePhoto();
     _checkCalendarConnection();
     if (!kIsWeb && Platform.isIOS) _checkIosCalendarPermission();
     // Този екран живее в IndexedStack и се build-ва още при стартиране,
@@ -3076,6 +3078,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _loadProfilePhoto() async {
+    final prefs = await SharedPreferences.getInstance();
+    final p = prefs.getString('profile_photo_path');
+    final path = (p != null && File(p).existsSync()) ? p : null;
+    if (mounted && path != _profilePhotoPath) {
+      setState(() => _profilePhotoPath = path);
+    }
+  }
+
   /// Компактна карта „Профил" горе в Настройки (Пакет 2). Два реда (аватар +
   /// име/имейл) БЕЗ CTA; трети ред само при активен режим. Тап → [ProfileScreen].
   Widget _buildProfileCard(BuildContext context) {
@@ -3120,9 +3131,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const ProfileScreen()),
-        ),
+        onTap: () async {
+          await Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const ProfileScreen()),
+          );
+          await _loadProfilePhoto(); // снимката/името може да са сменени
+          if (mounted) setState(() {});
+        },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
@@ -3130,11 +3145,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               CircleAvatar(
                 radius: 22,
                 backgroundColor: theme.colorScheme.primary,
-                child: Text(initial,
-                    style: TextStyle(
-                        color: theme.colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18)),
+                backgroundImage: _profilePhotoPath != null
+                    ? FileImage(File(_profilePhotoPath!))
+                    : null,
+                child: _profilePhotoPath == null
+                    ? Text(initial,
+                        style: TextStyle(
+                            color: theme.colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18))
+                    : null,
               ),
               const SizedBox(width: 14),
               Expanded(

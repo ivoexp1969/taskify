@@ -1,4 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../services/auth_service.dart';
 import '../../services/group_service.dart';
@@ -27,6 +32,97 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _auth = AuthService();
   final _school = SchoolCalendarService();
   final _uni = UniversityService();
+  String? _photoPath; // локална снимка на профила (по избор)
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPhoto();
+  }
+
+  Future<void> _loadPhoto() async {
+    final prefs = await SharedPreferences.getInstance();
+    final p = prefs.getString('profile_photo_path');
+    if (p != null && File(p).existsSync()) {
+      if (mounted) setState(() => _photoPath = p);
+    }
+  }
+
+  Future<void> _pickPhoto() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+    final src = result?.files.single.path;
+    if (src == null) return;
+    final dir = await getApplicationDocumentsDirectory();
+    final ext = src.contains('.') ? src.split('.').last : 'jpg';
+    final dest =
+        '${dir.path}/profile_photo_${DateTime.now().millisecondsSinceEpoch}.$ext';
+    await File(src).copy(dest);
+    final prefs = await SharedPreferences.getInstance();
+    final old = prefs.getString('profile_photo_path');
+    if (old != null && old != dest) {
+      try {
+        File(old).deleteSync();
+      } catch (_) {}
+    }
+    await prefs.setString('profile_photo_path', dest);
+    if (mounted) setState(() => _photoPath = dest);
+  }
+
+  Future<void> _removePhoto() async {
+    final prefs = await SharedPreferences.getInstance();
+    final old = prefs.getString('profile_photo_path');
+    if (old != null) {
+      try {
+        File(old).deleteSync();
+      } catch (_) {}
+    }
+    await prefs.remove('profile_photo_path');
+    if (mounted) setState(() => _photoPath = null);
+  }
+
+  void _photoOptions(String lang) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: Text(_t(_choosePhoto, lang)),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickPhoto();
+              },
+            ),
+            if (_photoPath != null)
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: Colors.red),
+                title: Text(_t(_removePhotoLabel, lang)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _removePhoto();
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static const _choosePhoto = {
+    'en': 'Choose photo', 'bg': 'Избери снимка', 'de': 'Foto wählen',
+    'fr': 'Choisir une photo', 'it': 'Scegli foto', 'el': 'Επίλεξε φωτογραφία',
+    'es': 'Elegir foto', 'pt': 'Escolher foto', 'ru': 'Выбрать фото',
+    'tr': 'Fotoğraf seç', 'ja': '写真を選ぶ',
+  };
+  static const _removePhotoLabel = {
+    'en': 'Remove photo', 'bg': 'Премахни снимката', 'de': 'Foto entfernen',
+    'fr': 'Supprimer la photo', 'it': 'Rimuovi foto', 'el': 'Αφαίρεση φωτογραφίας',
+    'es': 'Quitar foto', 'pt': 'Remover foto', 'ru': 'Удалить фото',
+    'tr': 'Fotoğrafı kaldır', 'ja': '写真を削除',
+  };
 
   static String _t(Map<String, String> m, String lang) => m[lang] ?? m['en']!;
 
@@ -281,16 +377,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
         (name.isNotEmpty ? name : (email.isNotEmpty ? email : '?'))
             .substring(0, 1)
             .toUpperCase();
+    final lang = LanguageScope.of(context).locale.languageCode;
     return Card(
       child: Column(
         children: [
           ListTile(
-            leading: CircleAvatar(
-              backgroundColor: theme.colorScheme.primary,
-              child: Text(initial,
-                  style: TextStyle(
-                      color: theme.colorScheme.onPrimary,
-                      fontWeight: FontWeight.bold)),
+            leading: GestureDetector(
+              onTap: () => _photoOptions(lang),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  CircleAvatar(
+                    radius: 22,
+                    backgroundColor: theme.colorScheme.primary,
+                    backgroundImage:
+                        _photoPath != null ? FileImage(File(_photoPath!)) : null,
+                    child: _photoPath == null
+                        ? Text(initial,
+                            style: TextStyle(
+                                color: theme.colorScheme.onPrimary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18))
+                        : null,
+                  ),
+                  Positioned(
+                    bottom: -2,
+                    right: -2,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.photo_camera_rounded,
+                          size: 13, color: theme.colorScheme.primary),
+                    ),
+                  ),
+                ],
+              ),
             ),
             title: Text(name.isNotEmpty ? name : t.addName),
             subtitle: email.isNotEmpty ? Text(email) : null,
