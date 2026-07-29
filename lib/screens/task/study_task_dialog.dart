@@ -71,8 +71,10 @@ class StudyTaskDialog {
 
     final taskBox = Hive.box<Task>('tasks');
     final categoryBox = Hive.box<Category>('categories');
+    // Системните категории „Документи" и „Събития" (календар) не са учебни
+    // предмети → изключваме ги (иначе „Събития" се дублираше).
     final categories = categoryBox.values
-        .where((c) => c.id != 'documents')
+        .where((c) => c.id != 'documents' && c.id != 'cal_events')
         .toList();
 
     final titleCtrl = TextEditingController();
