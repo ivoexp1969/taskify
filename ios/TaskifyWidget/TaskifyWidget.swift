@@ -431,8 +431,8 @@ struct TaskifyWidgetEntryView: View {
                     .foregroundColor(Color(red: 0.20, green: 0.72, blue: 0.47))
                     .font(.system(size: 15))
                 Text(headerTitle)
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundColor(.white.opacity(0.95))
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
                 Spacer()
@@ -446,7 +446,7 @@ struct TaskifyWidgetEntryView: View {
                     // (като Android) — четим шрифт, не ръкописният.
                     Text(ctx)
                         .font(.system(size: family == .systemSmall ? 13 : 15,
-                                      weight: .semibold, design: .rounded))
+                                      weight: .medium, design: .rounded))
                         .foregroundColor(.white.opacity(0.95))
                         .multilineTextAlignment(.center)
                         .lineLimit(4)

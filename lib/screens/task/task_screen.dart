@@ -195,6 +195,55 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
       _needsDefaults = false;
       _selectedCategoryId = categoryBox.values.first.id;
     }
+    _maybeDedupeCategories();
+  }
+
+  static bool _dedupeChecked = false;
+
+  /// Еднократно де-дублиране на категории по ПОКАЗАНОТО (локализирано) име —
+  /// напр. системната „Документи" (raw „Documents") и потребителска „Документи"
+  /// изглеждат еднакво, но имат различни сурови имена, затова се сравняват по
+  /// показаното име. Задачите се прехвърлят към канонична/първа; дублите се трият.
+  void _maybeDedupeCategories() {
+    if (_dedupeChecked) return;
+    _dedupeChecked = true;
+    final t = AppText.of(context);
+    const canonical = {
+      'documents', 'cal_events', 'work', 'personal', 'shopping', 'birthday',
+      'meeting', 'workout', 'payment', 'travel', 'gift',
+    };
+    SharedPreferences.getInstance().then((prefs) async {
+      if (prefs.getBool('dedupe_cat_display_v1') ?? false) return;
+      final keptByName = <String, String>{}; // показано име (lower) → запазено id
+      final toDelete = <String>[];
+      for (final c in categoryBox.values) {
+        final key = _localizedCategoryName(c, t).trim().toLowerCase();
+        if (key.isEmpty) continue;
+        final keptId = keptByName[key];
+        if (keptId == null) {
+          keptByName[key] = c.id;
+          continue;
+        }
+        if (keptId == c.id) continue;
+        // Реши коя да запазим: предпочитаме каноничната (системна/default).
+        String keep = keptId, drop = c.id;
+        if (!canonical.contains(keptId) && canonical.contains(c.id)) {
+          keep = c.id;
+          drop = keptId;
+          keptByName[key] = keep;
+        }
+        for (final task in taskBox.values.where((x) => x.categoryId == drop)) {
+          task.categoryId = keep;
+          await task.save();
+        }
+        toDelete.add(drop);
+      }
+      for (final id in toDelete) {
+        await categoryBox.delete(id);
+      }
+      await prefs.setBool('dedupe_cat_display_v1', true);
+      if (mounted && toDelete.isNotEmpty) setState(() {});
+    });
   }
 
   @override
