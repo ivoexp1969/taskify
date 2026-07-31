@@ -64,18 +64,24 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
     'it': 'Elimina', 'el': 'Διαγραφή', 'es': 'Eliminar', 'pt': 'Eliminar',
     'ru': 'Удалить', 'tr': 'Sil', 'ja': '削除',
   };
-  static const _empty = {
-    'en': 'No lessons yet. Tap + to add one.',
-    'bg': 'Още няма часове. Натисни +, за да добавиш.',
-    'de': 'Noch keine Stunden. Tippe auf +.',
-    'fr': 'Aucun cours. Appuie sur +.',
-    'it': 'Nessuna lezione. Tocca +.',
-    'el': 'Κανένα μάθημα. Πάτησε +.',
-    'es': 'Sin clases. Pulsa +.',
-    'pt': 'Sem aulas. Toca em +.',
-    'ru': 'Пока нет занятий. Нажми +.',
-    'tr': 'Henüz ders yok. + ile ekle.',
-    'ja': '授業がありません。＋で追加。',
+  static const _addLesson = {
+    'en': 'Add class', 'bg': 'Добави час', 'de': 'Stunde hinzufügen',
+    'fr': 'Ajouter un cours', 'it': 'Aggiungi lezione', 'el': 'Προσθήκη μαθήματος',
+    'es': 'Añadir clase', 'pt': 'Adicionar aula', 'ru': 'Добавить занятие',
+    'tr': 'Ders ekle', 'ja': '授業を追加',
+  };
+  static const _noLessonsDay = {
+    'en': 'No classes — tap to add.',
+    'bg': 'Няма часове — натисни, за да добавиш.',
+    'de': 'Keine Stunden – zum Hinzufügen tippen.',
+    'fr': 'Aucun cours — appuie pour ajouter.',
+    'it': 'Nessuna lezione — tocca per aggiungere.',
+    'el': 'Κανένα μάθημα — πάτησε για προσθήκη.',
+    'es': 'Sin clases: toca para añadir.',
+    'pt': 'Sem aulas — toca para adicionar.',
+    'ru': 'Нет занятий — нажми, чтобы добавить.',
+    'tr': 'Ders yok — eklemek için dokun.',
+    'ja': '授業なし — タップで追加。',
   };
 
   static const _dayNames = {
@@ -97,9 +103,16 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
     return list[(day - 1).clamp(0, 6)];
   }
 
-  Future<void> _addOrEdit(String lang, {ScheduleSlot? existing, int? day}) async {
+  Future<void> _addOrEdit(String lang,
+      {ScheduleSlot? existing,
+      int? day,
+      int? initialFromMinutes,
+      int? initialToMinutes}) async {
     final result = await showScheduleSlotDialog(context, lang,
-        existing: existing, initialDay: day);
+        existing: existing,
+        initialDay: day,
+        initialFromMinutes: initialFromMinutes,
+        initialToMinutes: initialToMinutes);
     if (result == null) return;
     if (result.delete && existing != null) {
       await _svc.remove(existing.id);
@@ -109,15 +122,33 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
     if (mounted) setState(() {});
   }
 
+  /// Добавя нов час за конкретен ден. Началото по подразбиране е **15 минути след
+  /// края на последния час** в деня (за текущия срок; редактируемо), а
+  /// продължителността копира последния час (или 45 мин). При празен ден —
+  /// стандартно 08:00–08:45.
+  Future<void> _addForDay(String lang, int day) async {
+    final slots = _svc.forDay(day);
+    int? fromMin;
+    int? toMin;
+    if (slots.isNotEmpty) {
+      final last = slots.reduce((a, b) => a.toMinutes >= b.toMinutes ? a : b);
+      final dur = last.toMinutes - last.fromMinutes;
+      final d = (dur >= 5 && dur <= 240) ? dur : 45;
+      final f = last.toMinutes + 15;
+      if (f < 24 * 60 - 1) {
+        fromMin = f;
+        toMin = (f + d) > (24 * 60 - 1) ? (24 * 60 - 1) : (f + d);
+      }
+    }
+    await _addOrEdit(lang,
+        day: day, initialFromMinutes: fromMin, initialToMinutes: toMin);
+  }
+
   @override
   Widget build(BuildContext context) {
     final lang = LanguageScope.of(context).locale.languageCode;
     return Scaffold(
       appBar: AppBar(title: Text(_t(_title, lang))),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _addOrEdit(lang),
-        child: const Icon(Icons.add),
-      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : AnimatedBuilder(
@@ -127,25 +158,14 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                   children: [
                     _termSelector(context, lang),
                     Expanded(
-                      child: _svc.isEmptyForTerm()
-                          ? Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(32),
-                                child: Text(_t(_empty, lang),
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant)),
-                              ),
-                            )
-                          : ListView(
-                              padding: const EdgeInsets.fromLTRB(8, 8, 8, 96),
-                              children: [
-                                for (int day = 1; day <= 7; day++)
-                                  _daySection(context, lang, day),
-                              ],
-                            ),
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(8, 8, 8, 96),
+                        children: [
+                          // Работната седмица: понеделник (1) – петък (5).
+                          for (int day = 1; day <= 5; day++)
+                            _daySection(context, lang, day),
+                        ],
+                      ),
                     ),
                   ],
                 );
@@ -178,45 +198,70 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
 
   Widget _daySection(BuildContext context, String lang, int day) {
     final slots = _svc.forDay(day);
-    if (slots.isEmpty) return const SizedBox.shrink();
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Заглавие на деня + бутон „+" за добавяне на час в този ден.
         Padding(
-          padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
-          child: Text(_dayName(lang, day),
-              style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
-                  color: theme.colorScheme.primary)),
-        ),
-        for (final s in slots)
-          Card(
-            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            child: ListTile(
-              leading: Icon(
-                  s.kind == SlotKind.lecture
-                      ? Icons.school_outlined
-                      : Icons.menu_book_outlined,
-                  color: theme.colorScheme.primary),
-              title: Text(s.subject.isNotEmpty ? s.subject : '—'),
-              subtitle: Text([
-                '${s.fromLabel}–${s.toLabel}',
-                if (s.location != null) '📍 ${s.location}',
-              ].join('  ')),
-              trailing: IconButton(
-                icon: Icon(Icons.delete_outline,
-                    color: theme.colorScheme.error),
-                tooltip: _t(_deleteTip, lang),
-                onPressed: () async {
-                  await _svc.remove(s.id);
-                  if (mounted) setState(() {});
-                },
+          padding: const EdgeInsets.fromLTRB(12, 14, 4, 2),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(_dayName(lang, day),
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: theme.colorScheme.primary)),
               ),
-              onTap: () => _addOrEdit(lang, existing: s),
-            ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                visualDensity: VisualDensity.compact,
+                tooltip: _t(_addLesson, lang),
+                onPressed: () => _addForDay(lang, day),
+              ),
+            ],
           ),
+        ),
+        if (slots.isEmpty)
+          InkWell(
+            onTap: () => _addForDay(lang, day),
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+              child: Text(_t(_noLessonsDay, lang),
+                  style: TextStyle(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontSize: 13)),
+            ),
+          )
+        else
+          for (final s in slots)
+            Card(
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              child: ListTile(
+                leading: Icon(
+                    s.kind == SlotKind.lecture
+                        ? Icons.school_outlined
+                        : Icons.menu_book_outlined,
+                    color: theme.colorScheme.primary),
+                title: Text(s.subject.isNotEmpty ? s.subject : '—'),
+                subtitle: Text([
+                  '${s.fromLabel}–${s.toLabel}',
+                  if (s.location != null) '📍 ${s.location}',
+                ].join('  ')),
+                trailing: IconButton(
+                  icon: Icon(Icons.delete_outline,
+                      color: theme.colorScheme.error),
+                  tooltip: _t(_deleteTip, lang),
+                  onPressed: () async {
+                    await _svc.remove(s.id);
+                    if (mounted) setState(() {});
+                  },
+                ),
+                onTap: () => _addOrEdit(lang, existing: s),
+              ),
+            ),
       ],
     );
   }
@@ -235,19 +280,28 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
   String lang, {
   ScheduleSlot? existing,
   int? initialDay,
+  int? initialFromMinutes,
+  int? initialToMinutes,
 }) {
   String t(Map<String, String> m) => m[lang] ?? m['en']!;
   final svc = WeeklyScheduleService();
 
-  int day = existing?.day ?? initialDay ?? DateTime.now().weekday;
+  // Ако е добавяне през уикенда (без подаден ден) → по подразбиране понеделник.
+  final todayWd = DateTime.now().weekday;
+  int day = existing?.day ?? initialDay ?? (todayWd > 5 ? 1 : todayWd);
   final subjectCtrl = TextEditingController(text: existing?.subject ?? '');
   final locationCtrl = TextEditingController(text: existing?.location ?? '');
   TimeOfDay from = existing != null
       ? TimeOfDay(hour: existing.fromMinutes ~/ 60, minute: existing.fromMinutes % 60)
-      : const TimeOfDay(hour: 8, minute: 0);
+      : (initialFromMinutes != null
+          ? TimeOfDay(
+              hour: initialFromMinutes ~/ 60, minute: initialFromMinutes % 60)
+          : const TimeOfDay(hour: 8, minute: 0));
   TimeOfDay to = existing != null
       ? TimeOfDay(hour: existing.toMinutes ~/ 60, minute: existing.toMinutes % 60)
-      : const TimeOfDay(hour: 8, minute: 45);
+      : (initialToMinutes != null
+          ? TimeOfDay(hour: initialToMinutes ~/ 60, minute: initialToMinutes % 60)
+          : const TimeOfDay(hour: 8, minute: 45));
   SlotKind kind = existing?.kind ?? SlotKind.lesson;
 
   const subjectLabel = {
@@ -350,7 +404,7 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
                   spacing: 6,
                   runSpacing: 6,
                   children: [
-                    for (int d = 1; d <= 7; d++)
+                    for (int d = 1; d <= 5; d++)
                       ChoiceChip(
                         label: Text(days[d - 1]),
                         selected: day == d,
