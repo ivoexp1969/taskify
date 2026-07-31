@@ -50,20 +50,15 @@ flutter build appbundle --release
 без този диалог новите функции остават неоткрити.
 
 ## Current Version
-**v1.0.56+66 (2026-07-31) — Пакет 1: плътен таб Обучение (Mac). iOS 1.0.56(66) е `WAITING_FOR_REVIEW`
-в App Store (подадена 07-31). Реорганизиран `ModesScreen`: компактна Профил карта, готовата countdown
-карта, ново „Днес" разписание (`widgets/today_schedule_card.dart` — маркира текущ/следващ час), днешни
-учебни задачи (`widgets/study_today_tasks_card.dart`), предстоящи изпити (Ученик `ExamHelperCard` +
-Студент ключови дати). Уеднаквен термин → **„Моето разписание"** навсякъде. `analyze` 0, 11 ез.**
-### ⚠️ ANDROID TODO (PC) — за да настигне iOS 1.0.56:
-1. `git pull --rebase origin main` — взима Пакет 1 + вече bump-натата версия. **НЕ bump-вай пак**
-   (`pubspec.yaml` вече е `1.0.56+66`; `whats_new_dialog._build` вече е `66` с точки за 11 ез.).
-   Пакет 1 е **чист cross-platform Dart** → важи 1:1 за Android без промени.
-2. `flutter clean` — **ЗАДЪЛЖИТЕЛНО** (ръчен AndroidManifest, USE_FULL_SCREEN_INTENT; иначе кеширан merge).
-3. `flutter pub get` → `flutter build appbundle --release` (JDK 17, targetSdk/compileSdk 36).
-4. Провери merged manifest съдържа USE_FULL_SCREEN_INTENT (`build/app/intermediates/merged_manifests/`).
-5. Качи AAB → **Play Console Production** (`tools/play_upload.py` service account, или ръчно), после
-   `tools/play_promote.py` за rollout. Заменя живата 1.0.54(64)/1.0.52. `release_notes/1.0.56.md` е готов.
+**v1.0.56+66 (2026-07-31) — Пакет 1: плътен таб Обучение. ★Android ЖИВА в Google Play Production 100%★
+(качено 07-31 от PC чрез `tools/play_upload.py`, versionCode 66, заменя 1.0.54(64); release notes EN+BG
+съкратени <500 знака — Play лимит). iOS 1.0.56(66) е `WAITING_FOR_REVIEW` в App Store (подадена 07-31,
+Mac). Реорганизиран `ModesScreen`: компактна Профил карта, готовата countdown карта, ново „Днес"
+разписание (`widgets/today_schedule_card.dart` — маркира текущ/следващ час), днешни учебни задачи
+(`widgets/study_today_tasks_card.dart`), предстоящи изпити (Ученик `ExamHelperCard` + Студент ключови
+дати). Уеднаквен термин → **„Моето разписание"** навсякъде. **PC добави:** бутон „+" на всеки ден в
+`weekly_schedule_screen` + работна седмица Пн–Пт + умни начални часове (нов час = 15 мин след последния).
+`analyze` 0 грешки, тестове 11 ✅. Инсталирано+тествано на Note 9 (SM-N960F), стартира без краш.**
 ПРЕДИШНО:
 **v1.0.55+65 (July 2026) — Довършени 3-те отворени TODO по режим „Обучение": (1) валидация на
 разписанието (без припокриващи се часове — `ScheduleSlot.overlaps`/`hasValidRange`, service
@@ -123,6 +118,16 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **★Android настигна iOS → v1.0.56+66 ЖИВА в Play Production 100% (PC, 2026-07-31):** `git pull --rebase`
+  взе Пакет 1 (Mac) + bump-натата версия. **PC добавка (комит преди pull):** в `weekly_schedule_screen.dart`
+  бутон „+" на всеки ден (`_addForDay`), работна седмица **Пн–Пт** (дни 1–5), умни начални часове (нов час =
+  15 мин след края на последния, копира продължителността; празен ден→08:00–08:45; уикенд→понеделник);
+  празен ден вече е тапваем ред „Няма часове — натисни". Rebase чист (Mac бе пипал само `_title`). `analyze`
+  0 грешки, тестове **11 ✅**. `flutter clean`→AAB (61MB, merged manifest пази USE_FULL_SCREEN_INTENT)+APK
+  (73.4MB). APK инсталиран+пуснат на Note 9 (SM-N960F) без краш. AAB качен **Production 100%** през
+  `tools/play_upload.py --status completed` (versionCode 66, заменя 1.0.54). ★КАПАН: Play лимит release
+  notes = **500 знака** (`release_notes/1.0.56.md` бе 598 → commit 403); съкратени EN(346)+BG(488) в
+  scratchpad. Иво поиска и Facebook пост (готов в чата). НЕ bump-нато повторно.
 - **★Пакет 1 — плътен таб Обучение (Mac, 2026-07-31, инсталиран на Toto, НЕ bump-нат):** реорганизация на
   `ModesScreen` в плътен екран. Фаза 0 → **преизползваме съществуващите модели** (Ученик Firestore
   `SchoolYear`; Студент ръчни `StudentKeyDate`), БЕЗ нови модели. 4 нови/пренаредени секции: **Ф7**
