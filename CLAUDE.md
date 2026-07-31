@@ -50,6 +50,21 @@ flutter build appbundle --release
 без този диалог новите функции остават неоткрити.
 
 ## Current Version
+**v1.0.56+66 (2026-07-31) — Пакет 1: плътен таб Обучение (Mac). iOS 1.0.56(66) е `WAITING_FOR_REVIEW`
+в App Store (подадена 07-31). Реорганизиран `ModesScreen`: компактна Профил карта, готовата countdown
+карта, ново „Днес" разписание (`widgets/today_schedule_card.dart` — маркира текущ/следващ час), днешни
+учебни задачи (`widgets/study_today_tasks_card.dart`), предстоящи изпити (Ученик `ExamHelperCard` +
+Студент ключови дати). Уеднаквен термин → **„Моето разписание"** навсякъде. `analyze` 0, 11 ез.**
+### ⚠️ ANDROID TODO (PC) — за да настигне iOS 1.0.56:
+1. `git pull --rebase origin main` — взима Пакет 1 + вече bump-натата версия. **НЕ bump-вай пак**
+   (`pubspec.yaml` вече е `1.0.56+66`; `whats_new_dialog._build` вече е `66` с точки за 11 ез.).
+   Пакет 1 е **чист cross-platform Dart** → важи 1:1 за Android без промени.
+2. `flutter clean` — **ЗАДЪЛЖИТЕЛНО** (ръчен AndroidManifest, USE_FULL_SCREEN_INTENT; иначе кеширан merge).
+3. `flutter pub get` → `flutter build appbundle --release` (JDK 17, targetSdk/compileSdk 36).
+4. Провери merged manifest съдържа USE_FULL_SCREEN_INTENT (`build/app/intermediates/merged_manifests/`).
+5. Качи AAB → **Play Console Production** (`tools/play_upload.py` service account, или ръчно), после
+   `tools/play_promote.py` за rollout. Заменя живата 1.0.54(64)/1.0.52. `release_notes/1.0.56.md` е готов.
+ПРЕДИШНО:
 **v1.0.55+65 (July 2026) — Довършени 3-те отворени TODO по режим „Обучение": (1) валидация на
 разписанието (без припокриващи се часове — `ScheduleSlot.overlaps`/`hasValidRange`, service
 `firstConflict`, inline грешка в диалога, 11 ез.); (2) „Учебна програма" **по срокове (Ученик)/

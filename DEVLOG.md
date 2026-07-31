@@ -28,8 +28,13 @@ discovery → **Иво реши: преизползваме съществува
 - **Уеднаквен термин:** екранът/бутонът бяха „Учебна програма", новата карта — „разписание", помощният
   текст — „Моето разписание" (3 имена за 1 нещо). Всичко → **„Моето разписание"** (`_title` в
   `weekly_schedule_screen`, `_mySchedule` в `modes_screen`), 11 ез.
-- **iOS билд + инсталиран на Toto** (release, team YP2QH7PM93). Чист Dart → важи и за Android (PC билд).
-  ОСТАВА: bump версия + „Какво ново" + качване, когато Иво реши.
+- **iOS билд + инсталиран на Toto** (release, team YP2QH7PM93), после **подаден в App Store →
+  v1.0.56(66) WAITING_FOR_REVIEW** (bump 1.0.55+65→1.0.56+66, „Какво ново" `_build=66`,
+  `release_notes/1.0.56.md`, `altool` upload + `/tmp/asc56.py` submit). 1.0.55 е прескочена на iOS
+  (1.0.54 беше последна жива). **Чист Dart → важи и за Android.**
+- **⚠️ ANDROID TODO (PC) за да настигне iOS 1.0.56:** `git pull` (взима Пакет 1 + вече bump-натата
+  версия — **НЕ bump-вай пак**) → `flutter clean` (задължит.) → `flutter build appbundle --release`
+  → качи AAB в Play Console (`tools/play_upload.py`) → `play_promote.py`. Детайли в CLAUDE.md → Current Version.
 
 ## 2026-07-27 · PC — Довършване Обучение TODO-та (валидация + учебна програма по срокове + ротатор) → v1.0.55+65
 Затворих трите отворени TODO от Mac (07-23). Всичко чист cross-platform Dart → iOS = само Mac билд.
