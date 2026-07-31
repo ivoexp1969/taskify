@@ -15,66 +15,66 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Нови инсталации НЕ го виждат (те виждат welcome диалога).
 class WhatsNewDialog {
   /// Билдът, за който са точките по-долу (= `pubspec.yaml` build number).
-  static const int _build = 65;
+  static const int _build = 66;
 
   static const String _prefKey = 'whats_new_seen_build';
 
   /// Точките за текущата версия, по език.
   static const Map<String, List<String>> _items = {
     'bg': [
-      '🎓 Ново „Обучение": режими Ученик и Студент — избери своя и следи важните дати.',
-      '📅 Учебна програма по срокове/семестри; предупреждава при припокриващи се часове.',
-      '⏳ Обратно броене до ваканции, изпити и ключови дати — на началния екран.',
+      '📚 Обновен таб „Обучение": профил, обратно броене, днешно разписание, задачи и изпити — на едно място.',
+      '📅 „Днес" в разписанието маркира текущия и следващия ти час.',
+      '📝 Днешните учебни задачи (домашни, есета, курсови) са под ръка.',
     ],
     'en': [
-      '🎓 New “Learning”: Pupil and Student modes — pick yours and track key dates.',
-      '📅 Curriculum by term/semester; warns you about overlapping classes.',
-      '⏳ Countdown to holidays, exams and key dates — right on your home screen.',
+      '📚 Refreshed “Learning” tab: profile, countdown, today’s schedule, tasks and exams — all in one place.',
+      '📅 “Today” highlights your current and next class.',
+      '📝 Today’s study tasks (homework, essays, coursework) at a glance.',
     ],
     'de': [
-      '🎓 Neu „Bildung“: Modi Schüler und Student — wähle deinen und behalte Termine im Blick.',
-      '📅 Lehrplan nach Halbjahr/Semester; warnt bei sich überschneidenden Stunden.',
-      '⏳ Countdown bis Ferien, Prüfungen und wichtigen Terminen — auf dem Startbildschirm.',
+      '📚 Überarbeiteter „Bildung“-Tab: Profil, Countdown, heutiger Stundenplan, Aufgaben und Prüfungen — an einem Ort.',
+      '📅 „Heute“ hebt deine aktuelle und nächste Stunde hervor.',
+      '📝 Heutige Lernaufgaben (Hausaufgaben, Aufsätze, Hausarbeiten) auf einen Blick.',
     ],
     'fr': [
-      '🎓 Nouveau « Éducation » : modes Élève et Étudiant — choisis le tien et suis tes dates.',
-      '📅 Programme par trimestre/semestre ; alerte en cas de cours qui se chevauchent.',
-      '⏳ Compte à rebours des vacances, examens et dates clés — sur l’accueil.',
+      '📚 Onglet « Éducation » repensé : profil, compte à rebours, emploi du temps du jour, tâches et examens — au même endroit.',
+      '📅 « Aujourd’hui » met en avant ton cours actuel et le suivant.',
+      '📝 Les tâches d’étude du jour (devoirs, dissertations, travaux) en un coup d’œil.',
     ],
     'it': [
-      '🎓 Nuovo “Istruzione”: modalità Alunno e Studente — scegli la tua e segui le date.',
-      '📅 Programma per periodo/semestre; avvisa in caso di lezioni sovrapposte.',
-      '⏳ Conto alla rovescia per vacanze, esami e date chiave — nella home.',
+      '📚 Scheda “Istruzione” rinnovata: profilo, conto alla rovescia, orario di oggi, compiti ed esami — tutto insieme.',
+      '📅 “Oggi” evidenzia la lezione attuale e la prossima.',
+      '📝 I compiti di studio di oggi (compiti, saggi, tesine) a portata di mano.',
     ],
     'el': [
-      '🎓 Νέο «Εκπαίδευση»: λειτουργίες Μαθητή και Φοιτητή — διάλεξε τη δική σου.',
-      '📅 Πρόγραμμα ανά τρίμηνο/εξάμηνο· προειδοποιεί για μαθήματα που επικαλύπτονται.',
-      '⏳ Αντίστροφη μέτρηση για διακοπές, εξετάσεις και βασικές ημερομηνίες — στην αρχική.',
+      '📚 Ανανεωμένη καρτέλα «Εκπαίδευση»: προφίλ, αντίστροφη μέτρηση, σημερινό πρόγραμμα, εργασίες και εξετάσεις — μαζί.',
+      '📅 Το «Σήμερα» τονίζει το τρέχον και το επόμενο μάθημά σου.',
+      '📝 Οι σημερινές εργασίες (ασκήσεις, δοκίμια, εργασίες) με μια ματιά.',
     ],
     'es': [
-      '🎓 Nuevo “Educación”: modos Alumno y Estudiante — elige el tuyo y sigue las fechas.',
-      '📅 Programa por trimestre/semestre; avisa de clases que se solapan.',
-      '⏳ Cuenta atrás para vacaciones, exámenes y fechas clave — en el inicio.',
+      '📚 Pestaña “Educación” renovada: perfil, cuenta atrás, horario de hoy, tareas y exámenes — todo junto.',
+      '📅 “Hoy” resalta tu clase actual y la siguiente.',
+      '📝 Las tareas de estudio de hoy (deberes, ensayos, trabajos) a mano.',
     ],
     'pt': [
-      '🎓 Novo “Educação”: modos Aluno e Estudante — escolhe o teu e segue as datas.',
-      '📅 Programa por período/semestre; avisa sobre aulas sobrepostas.',
-      '⏳ Contagem para férias, exames e datas-chave — no ecrã inicial.',
+      '📚 Separador “Educação” renovado: perfil, contagem decrescente, horário de hoje, tarefas e exames — num só lugar.',
+      '📅 “Hoje” destaca a tua aula atual e a seguinte.',
+      '📝 As tarefas de estudo de hoje (trabalhos de casa, ensaios, trabalhos) à mão.',
     ],
     'ru': [
-      '🎓 Новый «Обучение»: режимы Ученик и Студент — выбери свой и следи за датами.',
-      '📅 Учебная программа по срокам/семестрам; предупреждает о накладках занятий.',
-      '⏳ Обратный отсчёт до каникул, экзаменов и ключевых дат — на главном экране.',
+      '📚 Обновлённая вкладка «Обучение»: профиль, обратный отсчёт, расписание на сегодня, задачи и экзамены — в одном месте.',
+      '📅 «Сегодня» выделяет текущее и следующее занятие.',
+      '📝 Сегодняшние учебные задачи (домашние, эссе, курсовые) под рукой.',
     ],
     'tr': [
-      '🎓 Yeni “Eğitim”: Öğrenci ve Üniversite modları — kendininkini seç, tarihleri takip et.',
-      '📅 Döneme/yarıyıla göre ders programı; çakışan dersler için uyarır.',
-      '⏳ Tatiller, sınavlar ve önemli tarihlere geri sayım — ana ekranda.',
+      '📚 Yenilenen “Eğitim” sekmesi: profil, geri sayım, bugünkü program, görevler ve sınavlar — tek yerde.',
+      '📅 “Bugün” mevcut ve sıradaki dersini vurgular.',
+      '📝 Bugünkü çalışma görevleri (ödev, deneme, dönem ödevi) elinin altında.',
     ],
     'ja': [
-      '🎓 新しい「学び」：生徒モードと大学生モード — 自分に合った方を選んで重要な日を管理。',
-      '📅 学期ごとの時間割。授業が重なると警告します。',
-      '⏳ 休み・試験・重要な日までのカウントダウンをホーム画面に。',
+      '📚 「学び」タブを刷新：プロフィール、カウントダウン、今日の時間割、タスク、試験を一か所に。',
+      '📅 「今日」が現在と次の授業を強調表示します。',
+      '📝 今日の学習タスク（宿題・エッセイ・レポート）をすぐに確認。',
     ],
   };
 
