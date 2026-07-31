@@ -48,7 +48,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// освободеният слот е за таб „Уча 🎓" (Фаза 2).
   List<Widget> get _screens => [
         const TaskScreen(),
-        if (_showModes) const ModesScreen(),
+        if (_showModes)
+          ModesScreen(onOpenTasks: () => setState(() => _currentIndex = 0)),
         const CalendarScreen(),
         if (_showDocuments) const DocumentsScreen(),
         const SettingsScreen(),

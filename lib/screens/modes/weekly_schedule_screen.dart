@@ -30,10 +30,10 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
   static String _t(Map<String, String> m, String lang) => m[lang] ?? m['en']!;
 
   static const _title = {
-    'en': 'Curriculum', 'bg': 'Учебна програма', 'de': 'Lehrplan',
-    'fr': 'Programme', 'it': 'Programma', 'el': 'Πρόγραμμα σπουδών',
-    'es': 'Programa', 'pt': 'Programa', 'ru': 'Учебная программа',
-    'tr': 'Ders programı', 'ja': '時間割',
+    'en': 'My schedule', 'bg': 'Моето разписание', 'de': 'Mein Stundenplan',
+    'fr': 'Mon emploi du temps', 'it': 'Il mio orario', 'el': 'Το πρόγραμμά μου',
+    'es': 'Mi horario', 'pt': 'O meu horário', 'ru': 'Моё расписание',
+    'tr': 'Ders programım', 'ja': '時間割',
   };
   // Ученик — учебни срокове.
   static const _term1Pupil = {

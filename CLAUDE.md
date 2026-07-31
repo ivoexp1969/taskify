@@ -108,6 +108,19 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **★Пакет 1 — плътен таб Обучение (Mac, 2026-07-31, инсталиран на Toto, НЕ bump-нат):** реорганизация на
+  `ModesScreen` в плътен екран. Фаза 0 → **преизползваме съществуващите модели** (Ученик Firestore
+  `SchoolYear`; Студент ръчни `StudentKeyDate`), БЕЗ нови модели. 4 нови/пренаредени секции: **Ф7**
+  компактна Профил карта (`_compactProfile`; тап→grade sheet/`StudentOnboardingScreen`); **Ф2** готовата
+  `StudyCountdownCard`; **Ф3** ново `widgets/today_schedule_card.dart` (`TodayScheduleCard` — часовете за
+  деня, маркира „сега"/„следваща (след X мин)"/минали; празно→„☕"/ваканция→„🌴"/изцяло празно→подкана);
+  **Ф5** ново `widgets/study_today_tasks_card.dart` (`StudyTodayTasksCard` — до 4 задачи
+  `taskKind∈homework/essay/coursework` срок днес+3дни; бутон→таб Задачи през нов `ModesScreen.onOpenTasks`);
+  **Ф6** Ученик `ExamHelperCard` + Студент „🎯 Предстоящи изпити" (`_studentExams`, дати `kind==exam`).
+  Махнат мъртъв код (`_off`/`_setUp`/`_modeCard`). **Уеднаквен термин** „Учебна програма"/„разписание"/
+  „Моето разписание" → **„Моето разписание"** навсякъде (11 ез.). `analyze` **0**. НЕ направено (по избор
+  на Иво): филтър „само Обучение" за Ф5; махане на countdown от таб Задачи. **Чист Dart → важи и за Android.**
+  ОСТАВА: bump версия + „Какво ново" + качване.
 - **★Обучение — 3-те TODO довършени → v1.0.55+65 (PC, 2026-07-27):** затворих отворените TODO от Mac (07-23).
   **(1) Валидация разписание:** `ScheduleSlot.hasValidRange` (край>начало) + `overlaps` (същ ден И срок;
   долепени НЕ припокриват), service `firstConflict`; диалогът за слот (`weekly_schedule_screen.dart`)
