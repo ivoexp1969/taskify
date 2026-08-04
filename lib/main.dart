@@ -59,11 +59,6 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Firebase Analytics — минимална телеметрия (retention + onboarding funnel).
-  // Логва app_first_open / day_2_active веднага; никакви лични данни. Тиха при
-  // грешка. На web е no-op. Викаме преди runApp, за да е готов observer-ът.
-  await AnalyticsService().initialize();
-
   // Споделените групи разчитат на вградения Firestore offline кеш (без Hive
   // дублиране). На web го оставяме по подразбиране (избягва multi-tab проблеми).
   if (!kIsWeb) {
@@ -88,6 +83,12 @@ Future<void> main() async {
   await Hive.openBox<Category>('categories');
   // Кутия с tombstones (изтрити задачи) — за merge синхронизацията.
   await Hive.openBox<int>(TombstoneService.boxName);
+
+  // Firebase Analytics — минимална телеметрия (retention + onboarding funnel).
+  // Логва app_first_open / day_2_active веднага; никакви лични данни. Тиха при
+  // грешка. На web е no-op. ЗАДЪЛЖИТЕЛНО след Hive.initFlutter — вътрешно отваря
+  // Hive кутия `analytics_flags`. Пак е преди runApp → observer-ът е готов навреме.
+  await AnalyticsService().initialize();
 
   // Безопасна миграция: стабилизира id/updatedAt на старите задачи и чисти
   // стари tombstones. НЕ изтрива и не губи нищо.
