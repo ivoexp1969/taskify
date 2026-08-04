@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import '../../models/task.dart';
+import '../../services/analytics_service.dart';
 import '../../models/category.dart';
 import '../../utils/localization.dart';
 import '../../services/notification_service.dart';
@@ -182,6 +183,7 @@ class PaymentDialog {
                                 priority: selectedPriority, template: 'payment', recurrence: recurrence, notes: notesStr,
                                 reminders: reminders.isEmpty ? null : reminders);
                               await taskBox.add(task);
+                              AnalyticsService().logTaskCreated(task);
                               await NotificationService().scheduleForTask(task);
                             }
                             await WidgetService.updateWidget();

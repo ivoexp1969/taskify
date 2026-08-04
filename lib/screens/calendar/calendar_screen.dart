@@ -16,6 +16,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../models/task.dart';
+import '../../services/analytics_service.dart';
 import '../../models/category.dart';
 import '../../utils/localization.dart';
 import '../../utils/category_colors.dart';
@@ -1319,6 +1320,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               notes: tempNotes.trim().isEmpty ? null : tempNotes.trim(),
                             );
                             await taskBox.add(newTask);
+                            AnalyticsService().logTaskCreated(newTask);
                             // Google Calendar sync (само ако Apple не е активен).
                             if (GoogleCalendarService().isConnected && !IosCalendarService.exportEnabled) {
                               final eventId = await GoogleCalendarService().addTaskToCalendar(newTask);
@@ -1876,6 +1878,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           task.isCompleted = !task.isCompleted;
                           task.completedAt = task.isCompleted ? DateTime.now() : null;
                           await task.save();
+                          if (!wasCompleted && task.isCompleted) {
+                            AnalyticsService().logTaskCompleted();
+                          }
                           if (!wasCompleted && task.isCompleted && task.recurrence != null) {
                             final nextDate = _nextDueDate(task.dueDate, task.recurrence!);
                             final newTask = Task(
@@ -1887,6 +1892,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               reminders: task.reminders,
                             );
                             await taskBox.add(newTask);
+                            AnalyticsService().logTaskCreated(newTask);
                             // Google Calendar sync (само ако Apple не е активен).
                             if (GoogleCalendarService().isConnected && !IosCalendarService.exportEnabled) {
                               final eventId = await GoogleCalendarService().addTaskToCalendar(newTask);

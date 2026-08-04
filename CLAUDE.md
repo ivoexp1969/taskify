@@ -118,6 +118,18 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **Firebase Analytics Фаза 1 (retention + onboarding funnel) (PC, 2026-08-04, БЕЗ app bump):** минимална
+  телеметрия за 2 бизнес въпроса — retention D1/D7/D30 + onboarding funnel до първа задача/режим. Нов
+  `firebase_analytics: ^11.3.0` + нов слой `services/analytics_service.dart` (singleton като `ProService`,
+  тиха при грешка, no-op на web, Hive кутия `analytics_flags` за „first" маркерите). Закачени 10 events +
+  2 user props + `FirebaseAnalyticsObserver`: `app_first_open`/`day_2_active` (main.dart преди runApp),
+  `onboarding_started`/`_completed`, хелпер `logTaskCreated` на **11-те реални точки** за създаване (→
+  `task_created`+`first_task_created`, само `task_type` НЕ съдържание; ★ИЗКЛЮЧЕН bulk JSON restore в
+  settings★), `task_completed` (task/calendar/group), `first_mode_activated`/`mode_changed`+`active_mode`
+  вътре в `setEnabled` на school+university service, `app_locale` в `LanguageController`. Нула лични данни,
+  IDFA/Google signals default off, iOS без нов ATT prompt (ATT вече заради AdMob). `analyze` **0 грешки**,
+  release APK ✅ (73.7MB). Чист Dart + config файлове налични → iOS=само Mac билд. ОСТАВА за Иво (Фаза 4):
+  Privacy секция (готови BG/EN текстове) + DebugView проверка в Firebase Console.
 - **★Android настигна iOS → v1.0.56+66 ЖИВА в Play Production 100% (PC, 2026-07-31):** `git pull --rebase`
   взе Пакет 1 (Mac) + bump-натата версия. **PC добавка (комит преди pull):** в `weekly_schedule_screen.dart`
   бутон „+" на всеки ден (`_addForDay`), работна седмица **Пн–Пт** (дни 1–5), умни начални часове (нов час =

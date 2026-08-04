@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/localization.dart';
+import '../../services/analytics_service.dart';
 import '../home/home_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -14,6 +15,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _currentPage = 0;
   static const int _totalPages = 6;
+
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService().logOnboardingStarted();
+  }
 
   @override
   void dispose() {
@@ -33,6 +40,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _finish() async {
+    AnalyticsService().logOnboardingCompleted(_currentPage + 1);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_v1_done', true);
     // Пълният onboarding вече включва AI страницата — маркираме AI intro-то

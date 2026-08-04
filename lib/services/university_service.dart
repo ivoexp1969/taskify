@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/university.dart';
 import '../utils/uuid.dart';
+import 'analytics_service.dart';
 
 /// „Режим Студент" — списък с български ВУЗ (вграден asset) + профил на студента
 /// + ръчно въведени ключови дати за обратното броене (Ф2).
@@ -136,9 +137,15 @@ class UniversityService {
 
   Future<void> setEnabled(bool value) async {
     final prefs = await SharedPreferences.getInstance();
+    final was = prefs.getBool(_prefEnabled) ?? false;
     await prefs.setBool(_prefEnabled, value);
     enabledNotifier.value = value;
     revision.value++;
+    if (value && !was) {
+      AnalyticsService().logModeActivated('student');
+    } else if (!value && was) {
+      AnalyticsService().logModeDeactivated('student');
+    }
   }
 
   Future<void> setProfile(UniversityProfile profile) async {

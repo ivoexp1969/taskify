@@ -9,6 +9,7 @@ import '../../models/task.dart';
 import '../../services/auth_service.dart';
 import '../../services/group_service.dart';
 import '../../services/pro_service.dart';
+import '../../services/analytics_service.dart';
 import '../../services/ai_service.dart';
 import '../../services/ai_usage_service.dart';
 import '../../utils/localization.dart';
@@ -546,10 +547,17 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                             _expanded.add(gt.id);
                           }
                         }),
-                        onToggleComplete: () => isAuthor
-                            ? _service.toggleComplete(
-                                _group.id, gt.id, !gt.isCompleted)
-                            : notAuthor(),
+                        onToggleComplete: () {
+                          if (!isAuthor) {
+                            notAuthor();
+                            return;
+                          }
+                          final willComplete = !gt.isCompleted;
+                          _service.toggleComplete(_group.id, gt.id, willComplete);
+                          if (willComplete) {
+                            AnalyticsService().logTaskCompleted();
+                          }
+                        },
                         onBreakdown: () => _breakdown(gt),
                         onToggleSubtask: (index) => _toggleSubtask(gt, index),
                         onEdit: () =>

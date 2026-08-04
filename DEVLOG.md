@@ -6,6 +6,30 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-08-04 · PC — Firebase Analytics (retention + onboarding funnel) Фаза 1
+Минимална, целенасочена телеметрия за 2 бизнес въпроса: **retention D1/D7/D30** + **onboarding funnel до
+първа задача/режим**. Нов `firebase_analytics: ^11.3.0` (линията за Core 3.x). Нов слой
+`services/analytics_service.dart` — singleton (като `ProService`), тиха при грешка, no-op на web, Hive
+кутия `analytics_flags` за еднократните „first" маркери.
+- **Retention:** `app_first_open` (веднъж/инсталация) + `day_2_active` (връщане на различен ден) — в
+  `main.dart initialize()` преди `runApp`.
+- **Observer:** `FirebaseAnalyticsObserver` в `MaterialApp.navigatorObservers` (автоматичен `screen_view`).
+- **Onboarding:** `onboarding_started` (initState) + `onboarding_completed` (steps) в `onboarding_screen`.
+- **Задачи:** хелпер `logTaskCreated(task)` на **11-те реални точки** (task_screen, 8 диалога,
+  shopping_list, calendar recurring, exam_helper) → `task_created` + еднократно `first_task_created`
+  (само `task_type`, НЕ съдържание). ★Умишлено ИЗКЛЮЧЕН `settings_screen` bulk JSON restore★ (иначе
+  инфлира метриката + фалшив `first_task_created` при възстановяване). `task_completed` в
+  task_screen + calendar + group_tasks.
+- **Режими:** `logModeActivated`/`logModeDeactivated` ВЪТРЕ в `SchoolCalendarService.setEnabled`
+  (pupil) + `UniversityService.setEnabled` (student) → `first_mode_activated`/`mode_changed` + user prop
+  `active_mode`. User prop `app_locale` в `LanguageController`.
+- **Privacy:** нула лични данни; IDFA/Google signals НЕ се пипат (default off). iOS = **няма нов ATT
+  prompt** (`NSUserTrackingUsageDescription` вече е там заради AdMob).
+Верификация: `git pull --rebase` (remote чист), `flutter analyze` **0 грешки**, **release APK билднат ✅
+(73.7MB)**. Чист cross-platform Dart + config файловете (`google-services.json`/`GoogleService-Info.plist`)
+вече са налични → iOS = само Mac билд/pod install. **ОСТАВА за Иво (Фаза 4):** Privacy секция в
+политиката (готови BG/EN текстове) + проверка на потока в Firebase Console (DebugView).
+
 ## 2026-07-31 · Mac — Пакет 1: плътен таб Обучение + уеднаквен термин „Моето разписание"
 Реорганизация на таб Обучение (`ModesScreen`) от 2 големи карти в плътен екран със секции. Фаза 0
 discovery → **Иво реши: преизползваме съществуващите модели** (за Ученик Firestore `SchoolYear`; за

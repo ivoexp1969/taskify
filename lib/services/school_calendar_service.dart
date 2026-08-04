@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/school_calendar.dart';
+import 'analytics_service.dart';
 
 /// „Училищен режим" — данни за българската учебна година (ваканции, срокове,
 /// НВО/ДЗИ), с обратно броене до следваща ваканция.
@@ -102,9 +103,15 @@ class SchoolCalendarService {
 
   Future<void> setEnabled(bool value) async {
     final prefs = await SharedPreferences.getInstance();
+    final was = prefs.getBool(_prefEnabled) ?? false;
     await prefs.setBool(_prefEnabled, value);
     enabledNotifier.value = value;
     revision.value++;
+    if (value && !was) {
+      AnalyticsService().logModeActivated('pupil');
+    } else if (!value && was) {
+      AnalyticsService().logModeDeactivated('pupil');
+    }
   }
 
   Future<void> setGrade(int grade) async {

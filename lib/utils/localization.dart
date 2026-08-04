@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/analytics_service.dart';
 
 /// Поддържани езици
 class SupportedLocales {
@@ -70,6 +71,7 @@ class LanguageController extends ChangeNotifier {
     _locale = locale;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('app_language', locale.languageCode);
+    AnalyticsService().setAppLocale(locale.languageCode);
     notifyListeners();
   }
 
@@ -82,6 +84,7 @@ class LanguageController extends ChangeNotifier {
       _locale = SupportedLocales.getBestMatch(systemLocale);
       await prefs.setString('app_language', _locale.languageCode);
     }
+    AnalyticsService().setAppLocale(_locale.languageCode);
     notifyListeners();
   }
 }

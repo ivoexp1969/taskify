@@ -36,6 +36,7 @@ import 'services/weekly_schedule_service.dart';
 import 'services/tombstone_service.dart';
 import 'services/migration_service.dart';
 import 'services/sync_service.dart';
+import 'services/analytics_service.dart';
 
 Future<void> _checkMorningBriefingOnLaunch() async {
   final prefs = await SharedPreferences.getInstance();
@@ -57,6 +58,11 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Firebase Analytics — минимална телеметрия (retention + onboarding funnel).
+  // Логва app_first_open / day_2_active веднага; никакви лични данни. Тиха при
+  // грешка. На web е no-op. Викаме преди runApp, за да е готов observer-ът.
+  await AnalyticsService().initialize();
 
   // Споделените групи разчитат на вградения Firestore offline кеш (без Hive
   // дублиране). На web го оставяме по подразбиране (избягва multi-tab проблеми).
@@ -259,6 +265,10 @@ class MyApp extends StatelessWidget {
           builder: (context, _) {
             return MaterialApp(
                 navigatorKey: MyApp.navigatorKey,
+                navigatorObservers: [
+                  if (AnalyticsService().observer != null)
+                    AnalyticsService().observer!,
+                ],
                 debugShowCheckedModeBanner: false,
               title: 'Taskify',
               locale: languageController.locale,

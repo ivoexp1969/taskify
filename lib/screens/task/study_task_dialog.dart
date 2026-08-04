@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 import '../../models/task.dart';
+import '../../services/analytics_service.dart';
 import '../../models/category.dart';
 import '../../models/task_templates.dart';
 import '../../utils/localization.dart';
@@ -352,6 +353,7 @@ class StudyTaskDialog {
       subtasks: subtasks,
     );
     await taskBox.add(task);
+    AnalyticsService().logTaskCreated(task);
     await NotificationService().scheduleForTask(task);
     await WidgetService.updateWidget();
     if (ctx.mounted) Navigator.pop(ctx, true);

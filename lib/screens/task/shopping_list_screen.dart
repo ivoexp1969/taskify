@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import '../../models/task.dart';
+import '../../services/analytics_service.dart';
 import '../../utils/localization.dart';
 import '../../services/notification_service.dart';
 import '../../widgets/reminder_selector.dart';
@@ -28,6 +29,7 @@ class ShoppingListScreen extends StatefulWidget {
       template: 'shopping',
     );
     await taskBox.add(task);
+    AnalyticsService().logTaskCreated(task);
     if (context.mounted) {
       await Navigator.push(
         context,

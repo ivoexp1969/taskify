@@ -14,6 +14,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../models/task.dart';
+import '../../services/analytics_service.dart';
 import '../../models/category.dart';
 import '../../utils/localization.dart';
 import '../../utils/category_colors.dart';
@@ -293,6 +294,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
       notes: '',
     );
     await taskBox.add(task);
+    AnalyticsService().logTaskCreated(task);
 
     if (mounted) {
       final t = AppText.of(context);
@@ -2256,6 +2258,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                             );
                             newTask.setSubtasks(tempSubtasks);
                             await taskBox.add(newTask);
+                            AnalyticsService().logTaskCreated(newTask);
                             AdService().onUserAction();
                             // Google Calendar sync (само ако Apple не е активен —
                             // източниците са взаимно изключващи се).
@@ -3163,6 +3166,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                               task.completedAt = task.isCompleted ? DateTime.now() : null;
                               await task.save();
                               if (task.isCompleted) AdService().onUserAction();
+                              if (!wasCompleted && task.isCompleted) {
+                                AnalyticsService().logTaskCompleted();
+                              }
                               if (task.isCompleted && mounted) {
                                 ConversionService.instance.onTaskCompleted(context);
                               }
@@ -3184,6 +3190,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                   }).toList(),
                                 );
                                 await taskBox.add(newTask);
+                                AnalyticsService().logTaskCreated(newTask);
                             // Google Calendar sync (само ако Apple не е активен —
                             // източниците са взаимно изключващи се).
                             if (GoogleCalendarService().isConnected && !IosCalendarService.exportEnabled) {
@@ -3355,6 +3362,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                   });
                                   await task.save();
                                   if (!wasCompleted && task.isCompleted) AdService().onUserAction();
+                                  if (!wasCompleted && task.isCompleted) {
+                                    AnalyticsService().logTaskCompleted();
+                                  }
                                   if (!wasCompleted && task.isCompleted && mounted) {
                                     ConversionService.instance.onTaskCompleted(context);
                                   }
@@ -3376,6 +3386,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                       }).toList(),
                                     );
                                     await taskBox.add(newTask);
+                                    AnalyticsService().logTaskCreated(newTask);
                             // Google Calendar sync (само ако Apple не е активен —
                             // източниците са взаимно изключващи се).
                             if (GoogleCalendarService().isConnected && !IosCalendarService.exportEnabled) {

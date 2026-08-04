@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 
 import '../models/school_calendar.dart';
 import '../models/task.dart';
+import '../services/analytics_service.dart';
 import '../models/category.dart';
 import '../services/school_calendar_service.dart';
 import '../utils/localization.dart';
@@ -216,6 +217,7 @@ class ExamHelperCard extends StatelessWidget {
       subtasks: subtasks.isEmpty ? null : subtasks,
     );
     await taskBox.add(task);
+    AnalyticsService().logTaskCreated(task);
     await NotificationService().scheduleForTask(task);
     await WidgetService.updateWidget();
     if (context.mounted) {

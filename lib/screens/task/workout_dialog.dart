@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import '../../models/task.dart';
+import '../../services/analytics_service.dart';
 import '../../models/category.dart';
 import '../../utils/localization.dart';
 import '../../services/notification_service.dart';
@@ -179,6 +180,7 @@ class WorkoutDialog {
                                 recurrence: selectedRecurrence == 'none' ? null : selectedRecurrence,
                                 reminders: reminders.isEmpty ? null : reminders);
                               await taskBox.add(task);
+                              AnalyticsService().logTaskCreated(task);
                               await NotificationService().scheduleForTask(task);
                             }
                             await WidgetService.updateWidget();
