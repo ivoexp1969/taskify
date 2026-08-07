@@ -136,8 +136,13 @@ Keep this current — it is the shared cross-machine context (see Cross-Machine 
   (versionCode 67, заменя 1.0.56(66)). ★КАПАН: Play release notes лимит **500 знака** (`release_notes/
   1.0.57.md` бе 887 → съкратени EN(373)+BG(374) в scratchpad). Иво поиска и Facebook пост (готов в чата).★
   НАМЕРЕНО: живият сайт `taskify1969.com` е ОТДЕЛЕН, по-нов от repo `index.html` (repo-то е стар) — вече
-  има двата store badge-а + og-тагове; App Store ID = **6768345070**. ОСТАВА (уеб): og:image
-  `https://taskify1969.com/assets/og-image.png` връща HTML (липсва) → затова НЯМА Facebook превю.
+  има двата store badge-а + og-тагове; App Store ID = **6768345070**. ★FB превю FIX★: `og:image` липсваше
+  (връщаше HTML) → генерирах 1200×630 PNG (Pillow: бранд градиент + иконата `play_store_512.png` + BG
+  таглайн) в source-а на живия сайт **`C:\Users\Admin\Desktop\taskify-site-deploy\`** (ИЗВЪН git,
+  Cloudflare Pages) → `wrangler pages deploy . --project-name=taskify`; на живо вече `image/png` 101978B.
+  (Иво: пусни през FB Sharing Debugger „Scrape Again" за опресняване на кеша.) ★УЕБ APP обновен★:
+  `flutter build web --release` → `wrangler pages deploy build/web --project-name=taskify-app`
+  (`app.taskify1969.com`, нов `main.dart.js` 6.4MB). ★проект `taskify`=лендинг сайт, `taskify-app`=уеб APP★.
 - **★Споделените задачи в основния списък → v1.0.57(67) App Store ревю (Mac, 2026-08-07):** ново
   `widgets/shared_tasks_section.dart` (`SharedTasksSection`) — обособена секция „Споделени" НАЙ-ОТГОРЕ в
   `task_screen` (ListView index 0). Днешните+просрочените (и завършени днес) групови задачи от ВСИЧКИ групи,
