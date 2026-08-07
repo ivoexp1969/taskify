@@ -30,6 +30,26 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 вече са налични → iOS = само Mac билд/pod install. **ОСТАВА за Иво (Фаза 4):** Privacy секция в
 политиката (готови BG/EN текстове) + проверка на потока в Firebase Console (DebugView).
 
+## 2026-08-07 · Mac — Споделените задачи в основния списък → v1.0.57(67) в App Store ревю
+Ново `widgets/shared_tasks_section.dart` (`SharedTasksSection`): обособена секция **„Споделени" НАЙ-ОТГОРЕ**
+в `task_screen` (вмъкната като index 0 в ListView.builder → скролва с личния списък, без overflow).
+Показва днешните + просрочените (и завършени ДНЕС) групови задачи от **ВСИЧКИ групи наведнъж**, всяка с
+етикет на групата. **Real-time:** ръчен combineLatest — `GroupService.watchMyGroups()` → per група
+`watchTasks(id)`; управлявам subscription-ите в map (add за нови, cancel за напуснали, `dispose` чисти
+всички) → без изтичане/дубликати. Рендира със същите карти (`TaskCardView`, класик/билет). Завършване =
+`toggleComplete` (author-gated, `t.onlyAuthorCanManage`); отваряне/редакция → `GroupTasksScreen` (не личния
+редактор); подзадачи toggle-ват във Firestore. Завършените показват „завършена от X" (`t.completedByName`).
+★Моделите остават РАЗДЕЛЕНИ★ — лични `Task`(Hive) НЕ се пипат; секцията е чисто визуална със свой източник
+(`GroupTask`/Firestore). Скрива се, ако няма групи/задачи (нула шум за без-групи). Gating = наличие на групи
+(free член на група легитимно вижда своите; не-Pro без групи не вижда нищо — по спецификацията). Локализация
+= готови ключове (`t.sharedTab`/`t.completedByName`). `analyze` 0, **web + iOS build ✅**, инсталиран на Toto.
+**App Store:** 1.0.56(66) се одобри и стана READY_FOR_SALE докато работехме → не може път Б → **нова версия
+1.0.57(67)** (bump 1.0.56→1.0.57 задължителен, защото маркетинг версията трябва да е > живата). `altool`
+upload → `/tmp/asc57.py`: build VALID → create 1.0.57 → attach → **обновени whatsNew + App Store описание
+(EN+BG, добавени Споделени + Обучение; старото описание беше от 1.0.43 ера)** → submit → **WAITING_FOR_REVIEW**.
+- **⚠️ ANDROID TODO (PC):** `git pull` (взима всичко + версия 1.0.57+67 — **НЕ bump-вай**) → `flutter clean`
+  → build AAB → качи. Детайли в CLAUDE.md → Current Version.
+
 ## 2026-07-31 · Mac — Пакет 1: плътен таб Обучение + уеднаквен термин „Моето разписание"
 Реорганизация на таб Обучение (`ModesScreen`) от 2 големи карти в плътен екран със секции. Фаза 0
 discovery → **Иво реши: преизползваме съществуващите модели** (за Ученик Firestore `SchoolYear`; за

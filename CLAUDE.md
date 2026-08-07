@@ -50,15 +50,30 @@ flutter build appbundle --release
 без този диалог новите функции остават неоткрити.
 
 ## Current Version
+**v1.0.57+67 (2026-08-07) — Споделените (групови) задачи в основния списък (Mac). iOS 1.0.57(67) е
+`WAITING_FOR_REVIEW` (обновено и App Store **описание** EN+BG). Android 1.0.56+66 остава ЖИВА в Play
+Production. Ново `widgets/shared_tasks_section.dart` (`SharedTasksSection`): обособена секция „Споделени"
+НАЙ-ОТГОРЕ в `task_screen` (ListView index 0), показва днешните+просрочените (и завършени днес) групови
+задачи от ВСИЧКИ групи наведнъж, всяка с етикет на групата; real-time (комбинира
+`GroupService.watchMyGroups`→`watchTasks` per група, ръчен combineLatest с коректен dispose). Завършване=
+`toggleComplete` (author-gated), отваряне→`GroupTasksScreen`. ★Моделите РАЗДЕЛЕНИ★ (лични Task/Hive vs
+GroupTask/Firestore). Скрива се, ако няма групи/задачи. `analyze` 0, web+iOS build ✅.**
+ПРЕДИШНО:
 **v1.0.56+66 (2026-07-31) — Пакет 1: плътен таб Обучение. ★Android ЖИВА в Google Play Production 100%★
-(качено 07-31 от PC чрез `tools/play_upload.py`, versionCode 66, заменя 1.0.54(64); release notes EN+BG
-съкратени <500 знака — Play лимит). iOS 1.0.56(66) е `WAITING_FOR_REVIEW` в App Store (подадена 07-31,
-Mac). Реорганизиран `ModesScreen`: компактна Профил карта, готовата countdown карта, ново „Днес"
-разписание (`widgets/today_schedule_card.dart` — маркира текущ/следващ час), днешни учебни задачи
-(`widgets/study_today_tasks_card.dart`), предстоящи изпити (Ученик `ExamHelperCard` + Студент ключови
-дати). Уеднаквен термин → **„Моето разписание"** навсякъде. **PC добави:** бутон „+" на всеки ден в
-`weekly_schedule_screen` + работна седмица Пн–Пт + умни начални часове (нов час = 15 мин след последния).
-`analyze` 0 грешки, тестове 11 ✅. Инсталирано+тествано на Note 9 (SM-N960F), стартира без краш.**
+(качено 07-31 от PC чрез `tools/play_upload.py`, versionCode 66, заменя 1.0.54(64)). iOS 1.0.56(66) мина
+ревю → READY_FOR_SALE. Реорганизиран `ModesScreen`: компактна Профил карта, countdown карта, „Днес"
+разписание, днешни учебни задачи, предстоящи изпити. Уеднаквен термин → „Моето разписание". **PC добави:**
+бутон „+" на всеки ден в `weekly_schedule_screen` + работна седмица Пн–Пт + умни начални часове. `analyze`
+0, тестове 11 ✅. Note 9 без краш.**
+### ⚠️ ANDROID TODO (PC) — за да настигне iOS 1.0.57 (Пакет 1 + Споделени в списъка):
+1. `git pull --rebase origin main` — взима Пакет 1 + Споделени секция + вече bump-натата версия.
+   **НЕ bump-вай пак** (`pubspec.yaml` вече е `1.0.57+67`; `whats_new_dialog._build`=`67`, 4 точки×11 ез.).
+   Всичко е **чист cross-platform Dart** → важи 1:1 за Android без промени.
+2. `flutter clean` — **ЗАДЪЛЖИТЕЛНО** (ръчен AndroidManifest, USE_FULL_SCREEN_INTENT; иначе кеширан merge).
+3. `flutter pub get` → `flutter build appbundle --release` (JDK 17, targetSdk/compileSdk 36).
+4. Провери merged manifest съдържа USE_FULL_SCREEN_INTENT (`build/app/intermediates/merged_manifests/`).
+5. Качи AAB → **Play Console Production** (`tools/play_upload.py`), после `tools/play_promote.py`.
+   Заменя живата 1.0.54(64). `release_notes/1.0.57.md` е готов. (Забележка: iOS 1.0.56 вече е READY_FOR_SALE.)
 ПРЕДИШНО:
 **v1.0.55+65 (July 2026) — Довършени 3-те отворени TODO по режим „Обучение": (1) валидация на
 разписанието (без припокриващи се часове — `ScheduleSlot.overlaps`/`hasValidRange`, service
@@ -118,6 +133,13 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **★Споделените задачи в основния списък → v1.0.57(67) App Store ревю (Mac, 2026-08-07):** ново
+  `widgets/shared_tasks_section.dart` (`SharedTasksSection`) — обособена секция „Споделени" НАЙ-ОТГОРЕ в
+  `task_screen` (ListView index 0). Днешните+просрочените (и завършени днес) групови задачи от ВСИЧКИ групи,
+  всяка с етикет; real-time (ръчен combineLatest `watchMyGroups`→`watchTasks`, чист dispose). Завършване
+  `toggleComplete` (author-gated), отваряне→`GroupTasksScreen`. Модели РАЗДЕЛЕНИ (Task/Hive vs GroupTask/
+  Firestore). Скрива се без групи. `analyze` 0, web+iOS ✅, Toto. App Store: 1.0.56 се одобри → нова версия
+  **1.0.57(67)** + обновено **описание** (EN+BG, добави Споделени+Обучение) → WAITING_FOR_REVIEW. Android TODO в PC.
 - **Firebase Analytics Фаза 1 (retention + onboarding funnel) (PC, 2026-08-04, БЕЗ app bump):** минимална
   телеметрия за 2 бизнес въпроса — retention D1/D7/D30 + onboarding funnel до първа задача/режим. Нов
   `firebase_analytics: ^11.3.0` + нов слой `services/analytics_service.dart` (singleton като `ProService`,

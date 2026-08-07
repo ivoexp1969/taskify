@@ -25,6 +25,7 @@ import '../../services/widget_service.dart';
 import '../../services/ad_service.dart';
 import '../../widgets/celebration_overlay.dart';
 import '../../widgets/study_countdown_card.dart';
+import '../../widgets/shared_tasks_section.dart';
 import '../../services/review_service.dart';
 import 'shopping_list_screen.dart';
 import 'task_type_selector.dart';
@@ -3009,25 +3010,30 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
 
             // Списък със задачи (групиран по дата)
             Expanded(
-              child: tasks.isEmpty
-                  ? const Center(
-                      child: Text(
-                        '—',
-                        style: TextStyle(
-                          fontSize: 28,
-                          color: Colors.black26,
-                        ),
-                      ),
-                    )
-                  : ListView.builder(
+              child: ListView.builder(
                       padding: const EdgeInsets.only(
                         left: 8,
                         right: 8,
                         bottom: 8,
                       ),
-                      itemCount: items.length,
+                      // +1 за обособената секция „Споделени" НАЙ-ОТГОРЕ (собствен
+                      // Firestore източник; скрива се сама, ако няма групови задачи).
+                      itemCount: items.isEmpty ? 2 : items.length + 1,
                       itemBuilder: (_, index) {
-                        final item = items[index];
+                        if (index == 0) return const SharedTasksSection();
+                        if (items.isEmpty) {
+                          return const Padding(
+                            padding: EdgeInsets.only(top: 60),
+                            child: Center(
+                              child: Text(
+                                '—',
+                                style: TextStyle(
+                                    fontSize: 28, color: Colors.black26),
+                              ),
+                            ),
+                          );
+                        }
+                        final item = items[index - 1];
 
                         if (item is DateTime) {
                           final label = _formatDate(item);
