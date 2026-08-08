@@ -22,7 +22,6 @@ import '../../utils/gsi_button.dart';
 import '../../services/auth_service.dart';
 import '../../services/group_service.dart';
 import '../../services/sync_service.dart';
-import '../auth/login_screen.dart';
 import 'statistics_screen.dart';
 import 'ai_settings_screen.dart';
 import 'how_to_use_screen.dart';
@@ -2549,15 +2548,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         );
       }
-    }
-  }
-
-  Future<void> _openLogin() async {
-    final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-    );
-    if (result == true && mounted) {
-      setState(() {});
     }
   }
 

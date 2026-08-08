@@ -11,6 +11,7 @@ import '../../services/school_calendar_service.dart';
 import '../../services/university_service.dart';
 import '../../models/university.dart';
 import '../../utils/localization.dart';
+import '../auth/login_screen.dart';
 import '../modes/student_onboarding_screen.dart';
 import '../settings/delete_account_flow.dart';
 
@@ -300,6 +301,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) setState(() {});
   }
 
+  /// Отваря екрана за вход/регистрация с имейл и парола. При успешен вход той
+  /// прави `pop(true)` → опресняваме състоянието (акаунтът вече е реален).
+  Future<void> _openLogin() async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
+    if (result == true && mounted) setState(() {});
+  }
+
   Future<void> _logout(AppText t) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -430,6 +440,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
               title: Text(t.logout,
                   style: const TextStyle(color: Colors.redAccent)),
               onTap: () => _logout(t),
+            ),
+          ] else ...[
+            // Анонимна сесия → път до вход/регистрация с имейл и парола
+            // (за облачна синхронизация между устройства).
+            const Divider(height: 1),
+            ListTile(
+              leading: Icon(Icons.login, color: theme.colorScheme.primary),
+              title: Text(t.login,
+                  style: TextStyle(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w600)),
+              subtitle: Text(t.loginToSync,
+                  style: const TextStyle(fontSize: 12)),
+              onTap: _openLogin,
             ),
           ],
         ],

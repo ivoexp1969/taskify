@@ -15,77 +15,66 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Нови инсталации НЕ го виждат (те виждат welcome диалога).
 class WhatsNewDialog {
   /// Билдът, за който са точките по-долу (= `pubspec.yaml` build number).
-  static const int _build = 67;
+  static const int _build = 68;
 
   static const String _prefKey = 'whats_new_seen_build';
 
   /// Точките за текущата версия, по език.
   static const Map<String, List<String>> _items = {
     'bg': [
-      '📚 Обновен таб „Обучение": профил, обратно броене, днешно разписание, задачи и изпити — на едно място.',
-      '📅 „Днес" в разписанието маркира текущия и следващия ти час.',
-      '📝 Днешните учебни задачи (домашни, есета, курсови) са под ръка.',
-      '👥 Споделените групови задачи вече се виждат направо в списъка — секция „Споделени" с етикет на групата.',
+      '✅ Отметнеш ли всички подзадачи, задачата се завършва автоматично — и при личните, и при споделените.',
+      '👥 Завършените споделени задачи вече изчезват от секцията „Споделени".',
+      '🔑 Върнат вход с имейл и парола в Профил + вече не забива при бавна връзка.',
     ],
     'en': [
-      '📚 Refreshed “Learning” tab: profile, countdown, today’s schedule, tasks and exams — all in one place.',
-      '📅 “Today” highlights your current and next class.',
-      '📝 Today’s study tasks (homework, essays, coursework) at a glance.',
-      '👥 Shared group tasks now appear right in your list — a “Shared” section labeled by group.',
+      '✅ Check off all subtasks and the task auto-completes — for personal and shared tasks alike.',
+      '👥 Completed shared tasks now leave the “Shared” section.',
+      '🔑 Email & password sign-in is back in Profile — and no longer freezes on a slow connection.',
     ],
     'de': [
-      '📚 Überarbeiteter „Bildung“-Tab: Profil, Countdown, heutiger Stundenplan, Aufgaben und Prüfungen — an einem Ort.',
-      '📅 „Heute“ hebt deine aktuelle und nächste Stunde hervor.',
-      '📝 Heutige Lernaufgaben (Hausaufgaben, Aufsätze, Hausarbeiten) auf einen Blick.',
-      '👥 Geteilte Gruppenaufgaben erscheinen jetzt direkt in deiner Liste — Bereich „Geteilt“ mit Gruppenlabel.',
+      '✅ Alle Unteraufgaben abgehakt → die Aufgabe wird automatisch erledigt — bei eigenen und geteilten.',
+      '👥 Erledigte geteilte Aufgaben verlassen jetzt den Bereich „Geteilt“.',
+      '🔑 Anmeldung mit E-Mail und Passwort ist zurück im Profil — und friert bei langsamer Verbindung nicht mehr ein.',
     ],
     'fr': [
-      '📚 Onglet « Éducation » repensé : profil, compte à rebours, emploi du temps du jour, tâches et examens — au même endroit.',
-      '📅 « Aujourd’hui » met en avant ton cours actuel et le suivant.',
-      '📝 Les tâches d’étude du jour (devoirs, dissertations, travaux) en un coup d’œil.',
-      '👥 Les tâches de groupe partagées apparaissent dans ta liste — une section « Partagé » avec le nom du groupe.',
+      '✅ Coche toutes les sous-tâches et la tâche se termine automatiquement — pour les tâches perso et partagées.',
+      '👥 Les tâches partagées terminées quittent désormais la section « Partagé ».',
+      '🔑 La connexion par e-mail et mot de passe est de retour dans le Profil — et ne se fige plus sur une connexion lente.',
     ],
     'it': [
-      '📚 Scheda “Istruzione” rinnovata: profilo, conto alla rovescia, orario di oggi, compiti ed esami — tutto insieme.',
-      '📅 “Oggi” evidenzia la lezione attuale e la prossima.',
-      '📝 I compiti di studio di oggi (compiti, saggi, tesine) a portata di mano.',
-      '👥 Le attività di gruppo condivise ora sono nella tua lista — sezione “Condivisi” con l’etichetta del gruppo.',
+      '✅ Spunta tutte le attività secondarie e l’attività si completa da sola — sia personali che condivise.',
+      '👥 Le attività condivise completate ora lasciano la sezione “Condivisi”.',
+      '🔑 L’accesso con email e password è tornato nel Profilo — e non si blocca più con una connessione lenta.',
     ],
     'el': [
-      '📚 Ανανεωμένη καρτέλα «Εκπαίδευση»: προφίλ, αντίστροφη μέτρηση, σημερινό πρόγραμμα, εργασίες και εξετάσεις — μαζί.',
-      '📅 Το «Σήμερα» τονίζει το τρέχον και το επόμενο μάθημά σου.',
-      '📝 Οι σημερινές εργασίες (ασκήσεις, δοκίμια, εργασίες) με μια ματιά.',
-      '👥 Οι κοινές εργασίες ομάδας εμφανίζονται τώρα στη λίστα σου — ενότητα «Κοινά» με ετικέτα ομάδας.',
+      '✅ Τσέκαρε όλες τις υποεργασίες και η εργασία ολοκληρώνεται αυτόματα — σε προσωπικές και κοινές.',
+      '👥 Οι ολοκληρωμένες κοινές εργασίες φεύγουν πλέον από την ενότητα «Κοινά».',
+      '🔑 Η σύνδεση με email και κωδικό επέστρεψε στο Προφίλ — και δεν κολλάει πια σε αργή σύνδεση.',
     ],
     'es': [
-      '📚 Pestaña “Educación” renovada: perfil, cuenta atrás, horario de hoy, tareas y exámenes — todo junto.',
-      '📅 “Hoy” resalta tu clase actual y la siguiente.',
-      '📝 Las tareas de estudio de hoy (deberes, ensayos, trabajos) a mano.',
-      '👥 Las tareas de grupo compartidas ahora aparecen en tu lista — sección “Compartido” con la etiqueta del grupo.',
+      '✅ Marca todas las subtareas y la tarea se completa sola — tanto en personales como compartidas.',
+      '👥 Las tareas compartidas completadas ahora salen de la sección “Compartido”.',
+      '🔑 El inicio de sesión con correo y contraseña vuelve al Perfil — y ya no se congela con conexión lenta.',
     ],
     'pt': [
-      '📚 Separador “Educação” renovado: perfil, contagem decrescente, horário de hoje, tarefas e exames — num só lugar.',
-      '📅 “Hoje” destaca a tua aula atual e a seguinte.',
-      '📝 As tarefas de estudo de hoje (trabalhos de casa, ensaios, trabalhos) à mão.',
-      '👥 As tarefas de grupo partilhadas aparecem agora na tua lista — secção “Partilhado” com o nome do grupo.',
+      '✅ Marca todas as subtarefas e a tarefa conclui-se sozinha — nas pessoais e nas partilhadas.',
+      '👥 As tarefas partilhadas concluídas saem agora da secção “Partilhado”.',
+      '🔑 O início de sessão com email e palavra-passe voltou ao Perfil — e já não bloqueia com ligação lenta.',
     ],
     'ru': [
-      '📚 Обновлённая вкладка «Обучение»: профиль, обратный отсчёт, расписание на сегодня, задачи и экзамены — в одном месте.',
-      '📅 «Сегодня» выделяет текущее и следующее занятие.',
-      '📝 Сегодняшние учебные задачи (домашние, эссе, курсовые) под рукой.',
-      '👥 Общие задачи групп теперь видны прямо в списке — раздел «Общие» с меткой группы.',
+      '✅ Отметьте все подзадачи — и задача завершится автоматически, как в личных, так и в общих.',
+      '👥 Завершённые общие задачи теперь исчезают из раздела «Общие».',
+      '🔑 Вход по email и паролю вернулся в Профиль — и больше не зависает при медленном соединении.',
     ],
     'tr': [
-      '📚 Yenilenen “Eğitim” sekmesi: profil, geri sayım, bugünkü program, görevler ve sınavlar — tek yerde.',
-      '📅 “Bugün” mevcut ve sıradaki dersini vurgular.',
-      '📝 Bugünkü çalışma görevleri (ödev, deneme, dönem ödevi) elinin altında.',
-      '👥 Paylaşılan grup görevleri artık listende — grup etiketli “Paylaşılan” bölümü.',
+      '✅ Tüm alt görevleri işaretle, görev otomatik tamamlansın — kişisel ve paylaşılan görevlerde.',
+      '👥 Tamamlanan paylaşılan görevler artık “Paylaşılan” bölümünden ayrılıyor.',
+      '🔑 E-posta ve şifre ile giriş Profil’e geri döndü — ve yavaş bağlantıda artık donmuyor.',
     ],
     'ja': [
-      '📚 「学び」タブを刷新：プロフィール、カウントダウン、今日の時間割、タスク、試験を一か所に。',
-      '📅 「今日」が現在と次の授業を強調表示します。',
-      '📝 今日の学習タスク（宿題・エッセイ・レポート）をすぐに確認。',
-      '👥 共有グループのタスクがリストに直接表示 — グループ名付きの「共有」セクション。',
+      '✅ すべてのサブタスクにチェックを入れると、タスクが自動的に完了します（個人・共有どちらも）。',
+      '👥 完了した共有タスクが「共有」セクションから消えるようになりました。',
+      '🔑 メールとパスワードでのサインインがプロフィールに復活 — 低速回線でも固まらなくなりました。',
     ],
   };
 

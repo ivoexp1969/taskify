@@ -1,7 +1,7 @@
 name: task_manager
 description: A simple local task manager app.
 publish_to: 'none'
-version: 1.0.57+67
+version: 1.0.58+68
 environment:
   sdk: ">=3.4.0 <4.0.0"
   flutter: ">=3.22.0"
@@ -30,7 +30,7 @@ dependencies:
   cloud_firestore: ^5.6.0
   fl_chart: 0.68.0
   google_mobile_ads: ^5.2.0
-  purchases_flutter: ^8.1.0
+  purchases_flutter: ^10.8.0
   confetti: ^0.8.0
   lottie: ^3.2.0
   glass_kit: ^4.0.2

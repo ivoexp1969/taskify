@@ -280,6 +280,15 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
     );
     try {
       await _service.updateTask(_group.id, gt.id, updated);
+      // Всички подзадачи готови → задачата се завършва автоматично (и обратно).
+      // Отделен write през toggleComplete, за да се запази КОЙ я е завършил.
+      final total = subs.length;
+      final done =
+          subs.where((s) => SubtaskCodec.parse(s)['done'] == true).length;
+      final allDone = total > 0 && done == total;
+      if (allDone != gt.isCompleted) {
+        await _service.toggleComplete(_group.id, gt.id, allDone);
+      }
     } on GroupException catch (e) {
       await _showError(e);
     } catch (_) {

@@ -3480,6 +3480,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                   list[index]['done'] =
                                       !(list[index]['done'] == true);
                                   task.setSubtasks(list);
+                                  // Всички подзадачи готови → задачата се
+                                  // завършва автоматично (и обратно).
+                                  task.syncCompletionWithSubtasks();
+                                  task.touch();
                                   await task.save();
                                   await WidgetService.updateWidget();
                                   if (mounted) setState(() {});

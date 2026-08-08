@@ -50,6 +50,30 @@ flutter build appbundle --release
 без този диалог новите функции остават неоткрити.
 
 ## Current Version
+**v1.0.58+68 (2026-08-08) — Авто-завършване по подзадачи + login freeze fix + Google Play съответствие.
+★Android ЖИВА в Google Play Production 100%★ (качено 08-08 от PC чрез `tools/play_upload.py --status
+completed`, versionCode 68, заменя 1.0.57(67)). iOS 1.0.58(68) ОСТАВА за Mac (чист cross-platform Dart).
+(1) ★Авто-завършване★: нов `Task.syncCompletionWithSubtasks()` — отметнеш ли ВСИЧКИ подзадачи, задачата
+се завършва автоматично (и обратно). Приложено на ЛИЧНИ (`task_screen`, `calendar_screen`,
+`shopping_list_screen` рефакториран към helper-а) И СПОДЕЛЕНИ (`group_tasks_screen` +
+`shared_tasks_section` — втори write през `toggleComplete`, за да се запази КОЙ я е завършил). (2)
+★Споделени★: `shared_tasks_section._inWindow` вече връща false за завършена → завършените споделени
+задачи ИЗЧЕЗВАТ веднага от секция „Споделени". (3) ★Login freeze FIX★: `signInWithEmailAndPassword`
+можеше да ВИСИ безкрайно на reCAPTCHA/Play Integrity (logcat: „empty reCAPTCHA token") → спинър вечно.
+Добавен 20-сек таймаут на login/register (`auth_service.dart`, нов `dart:async`, error ключове
+`timeout`/`network-request-failed` 11 ез.) + на облачния merge (`login_screen.dart`). (4) ★Върнат вход
+имейл/парола в Профил★ (`profile_screen.dart` `_openLogin`→`LoginScreen`; беше изчезнал при реорга;
+изтрит мъртвият `_openLogin`+импорт от `settings_screen`). (5) ★Google Play съответствие (deadline
+01.11.2026)★: `purchases_flutter` 8.11.0→**10.8.0** (Google Play Billing Library **8.3.0**); единствена
+Dart промяна = покупките връщат `PurchaseResult` вместо `CustomerInfo` (fix в `pro_service.dart` + stub).
+`premium_lifetime` потвърден **Non-consumable** в RevenueCat → lifetime купувачите защитени. targetSdk
+36 вече в сила от май 2026. **PC (08-08):** `flutter clean`→AAB (59.8MB, manifest пази
+USE_FULL_SCREEN_INTENT)+APK (73.5MB); APK на Note 9 (SM-N960F) без краш, потребителят тества входа OK.
+`analyze` **0 грешки**. ★Play notes лимит 500 → BG(403)+EN(340).★ ⚠️ОСТАВА за Иво: тест на РЕАЛНА
+покупка (sideload не сервира продукти — само internal testing/жив билд) + reCAPTCHA/Play Integrity в
+Firebase Console ако входът виси и в продукция (upload SHA-256:
+80:99:E3:F8:BE:00:85:95:BD:B7:29:EB:10:FE:DB:58:E1:63:0C:86:BD:1B:B4:6C:CE:C3:8F:C9:B9:78:B1:35).**
+ПРЕДИШНО:
 **v1.0.57+67 (2026-08-07) — Споделените (групови) задачи в основния списък. ★Android ЖИВА в Google Play
 Production 100%★ (качено 08-07 от PC чрез `tools/play_upload.py --status completed`, versionCode 67,
 заменя 1.0.56(66)). iOS 1.0.57(67) е `WAITING_FOR_REVIEW`. Ново `widgets/shared_tasks_section.dart`
@@ -127,6 +151,26 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **★v1.0.58+68 — авто-завършване по подзадачи + login freeze fix + Play съответствие → ЖИВА в Play
+  Production 100% (PC, 2026-08-08):** 3 заявки от Иво + 2 Play предупреждения. **(1) Авто-завършване:**
+  нов `Task.syncCompletionWithSubtasks()` (ако ИМА подзадачи и всички done→completed; иначе размаркира) —
+  на `task_screen`+`calendar_screen`+`shopping_list_screen` (рефакториран към helper-а). За СПОДЕЛЕНИ
+  (`group_tasks_screen`+`shared_tasks_section`): след `updateTask` пресмятам allDone и правя втори write
+  `toggleComplete` (пази completedBy). **(2) Споделени завършени изчезват:** `_inWindow` връща false за
+  `isCompleted`. **(3) Login freeze FIX:** logcat разкри „empty reCAPTCHA token" → `signInWithEmailAndPassword`
+  виси безкрайно (reCAPTCHA/Play Integrity), спинър вечно. 20-сек `.timeout()` на login/register
+  (`auth_service`, нов `dart:async` + error ключове `timeout`/`network-request-failed`) + merge
+  (`login_screen`). **(4) Върнат вход имейл/парола в Профил** (`profile_screen._openLogin`→`LoginScreen`;
+  беше изчезнал при реорга; изтрит мъртъв `_openLogin`+импорт от `settings_screen`). **(5) Play съответствие
+  (deadline 01.11.2026):** `purchases_flutter` 8.11.0→**10.8.0** (Billing Library 8.3.0); единствена Dart
+  промяна = покупките връщат `PurchaseResult` (fix `pro_service`+`purchases_stub`). `premium_lifetime`
+  потвърден **Non-consumable** в RevenueCat. targetSdk 36 вече от май 2026. `analyze` 0, APK на Note 9 без
+  краш, потребителят тества входа OK. Bump 1.0.57+67→1.0.58+68, whats_new `_build`=68 (3 точки×11 ез.),
+  `release_notes/1.0.58.md`. AAB (59.8MB) качен **Production 100%** (`play_upload.py --status completed`,
+  vc68). ★Play notes 500 → BG(403)+EN(340).★ **Чист cross-platform Dart → iOS=само Mac билд** (`purchases_flutter`
+  10.x в Podfile ще се дръпне при `pod install`). ⚠️ОСТАВА за Иво: РЕАЛНА покупка на internal testing/жив
+  билд (sideload не сервира) + reCAPTCHA/Play Integrity в Firebase ако входът виси и в продукция (upload
+  SHA-256 `80:99:E3:F8:BE:00:85:95:BD:B7:29:EB:10:FE:DB:58:E1:63:0C:86:BD:1B:B4:6C:CE:C3:8F:C9:B9:78:B1:35`).
 - **★Android настигна iOS → v1.0.57+67 ЖИВА в Play Production 100% (PC, 2026-08-07):** изпълних Android
   TODO-то от Mac. `git pull --rebase` взе Пакет 1 „Споделени" секция (`shared_tasks_section.dart`) + вече
   bump-натата версия (1.0.57+67, whats_new `_build`=67) — НЕ bump-нах повторно. Всичко чист cross-platform

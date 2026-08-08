@@ -1930,6 +1930,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           if (index < 0 || index >= list.length) return;
                           list[index]['done'] = !(list[index]['done'] == true);
                           task.setSubtasks(list);
+                          // Всички подзадачи готови → авто-завършване (и обратно).
+                          task.syncCompletionWithSubtasks();
+                          task.touch();
                           await task.save();
                           await WidgetService.updateWidget();
                           if (mounted) setState(() {});

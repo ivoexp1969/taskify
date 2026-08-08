@@ -235,6 +235,28 @@ class Task extends HiveObject with EquatableMixin {
 
   int get totalSubtasksCount => subtasks?.length ?? 0;
 
+  /// Синхронизира завършеността на задачата с подзадачите ѝ: ако ИМА подзадачи
+  /// и ВСИЧКИ са отметнати → задачата става завършена; ако не всички са
+  /// отметнати, а задачата е била завършена → размаркира се. Върни `true`, ако
+  /// състоянието е променено (за да реши викащият дали да пусне странични
+  /// ефекти, напр. обновяване на widget-а). Викай СЛЕД [setSubtasks].
+  bool syncCompletionWithSubtasks() {
+    final total = totalSubtasksCount;
+    if (total == 0) return false; // без подзадачи → не пипаме ръчния статус
+    final allDone = completedSubtasksCount == total;
+    if (allDone && !isCompleted) {
+      isCompleted = true;
+      completedAt = DateTime.now();
+      return true;
+    }
+    if (!allDone && isCompleted) {
+      isCompleted = false;
+      completedAt = null;
+      return true;
+    }
+    return false;
+  }
+
   @override
   List<Object?> get props => [
         key,

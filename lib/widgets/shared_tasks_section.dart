@@ -91,18 +91,15 @@ class _SharedTasksSectionState extends State<SharedTasksSection> {
     if (mounted) setState(() {});
   }
 
-  // ── Обхват: днешни + просрочени незавършени (+ завършени ДНЕС) ──────────────
+  // ── Обхват: днешни + просрочени НЕЗАВЪРШЕНИ ────────────────────────────────
+  // Завършените се махат веднага от секцията (тя показва само това, което още
+  // предстои) — потребителят не иска завършените да остават на екрана.
   bool _inWindow(GroupTask gt) {
+    if (gt.isCompleted) return false;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    if (!gt.isCompleted) {
-      final due = DateTime(gt.dueDate.year, gt.dueDate.month, gt.dueDate.day);
-      return !due.isAfter(today); // днес или просрочена
-    }
-    // Завършена → показвай само ако е завършена днес (за „завършена от X").
-    final ca = gt.completedAt;
-    if (ca == null) return false;
-    return DateTime(ca.year, ca.month, ca.day) == today;
+    final due = DateTime(gt.dueDate.year, gt.dueDate.month, gt.dueDate.day);
+    return !due.isAfter(today); // днес или просрочена
   }
 
   // ── Категория/цвят (компактни версии от group_tasks_screen) ────────────────
@@ -215,6 +212,15 @@ class _SharedTasksSectionState extends State<SharedTasksSection> {
     );
     try {
       await _service.updateTask(g.id, gt.id, updated);
+      // Всички подзадачи готови → задачата се завършва автоматично (и обратно).
+      // Отделен write през toggleComplete, за да се запази КОЙ я е завършил.
+      final total = subs.length;
+      final done =
+          subs.where((s) => SubtaskCodec.parse(s)['done'] == true).length;
+      final allDone = total > 0 && done == total;
+      if (allDone != gt.isCompleted) {
+        await _service.toggleComplete(g.id, gt.id, allDone);
+      }
     } catch (_) {/* snapshot-ите ще коригират UI */}
   }
 

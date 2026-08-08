@@ -132,7 +132,11 @@ class _LoginScreenState extends State<LoginScreen> {
     final lang = _lang;
     try {
       setState(() => _isLoading = true);
-      final result = await SyncService().mergeWithCloud();
+      // Таймаут: merge-ът не бива да задържи екрана след успешен вход. При
+      // изтичане просто продължаваме (данните ще се слеят при следващ синхрон).
+      final result = await SyncService()
+          .mergeWithCloud()
+          .timeout(const Duration(seconds: 20));
       if (!mounted) return;
       setState(() => _isLoading = false);
       if (result.success &&

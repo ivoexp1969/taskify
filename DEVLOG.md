@@ -6,6 +6,41 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-08-08 · PC — v1.0.58+68: авто-завършване по подзадачи + login freeze fix + Play съответствие
+**ЖИВА в Google Play Production 100%** (vc68, заменя 67). iOS остава за Mac (чист cross-platform Dart).
+
+3 заявки от потребителя + 2 Google Play предупреждения:
+- **Авто-завършване по подзадачи** (лични + споделени): нов `Task.syncCompletionWithSubtasks()` — ако има
+  подзадачи и всички са отметнати → задачата става completed (и обратно размаркира). Приложен на
+  `task_screen`/`calendar_screen`/`shopping_list_screen` (последният рефакториран към helper-а). За
+  споделени (`group_tasks_screen` + `widgets/shared_tasks_section`): след `updateTask` смятам allDone и
+  правя втори write `GroupService.toggleComplete` (пази completedBy).
+- **Завършените споделени изчезват от секция „Споделени":** `shared_tasks_section._inWindow` връща false
+  за `isCompleted`.
+- **Login freeze FIX:** logcat показа `FirebaseAuth: Logging in ... with empty reCAPTCHA token` →
+  `signInWithEmailAndPassword` виси безкрайно (reCAPTCHA/Play Integrity), спинърът се върти вечно.
+  Добавен 20-сек `.timeout()` на login/register (`auth_service.dart`, нов import `dart:async`, нови error
+  ключове `timeout`/`network-request-failed` 11 ез.) + на облачния merge (`login_screen._autoLoadFromCloud`).
+- **Върнат вход имейл/парола в Профил:** `profile_screen` нов `_openLogin`→`LoginScreen` за анонимни
+  (беше изчезнал при реорга Настройки→Профил). Изтрит мъртвият `_openLogin`+`login_screen` импорт от
+  `settings_screen`.
+- **Google Play Billing Library 8 (deadline 01.11.2026):** `purchases_flutter` 8.11.0→**10.8.0** (носи
+  Billing Library 8.3.0, minSdk 23<26 ✅). Единствената Dart промяна: покупките връщат `PurchaseResult`
+  вместо `CustomerInfo` → fix в `pro_service.dart` (purchasePackage/purchase) + `purchases_stub.dart`
+  (нов `PurchaseResult` stub + типове). `premium_lifetime` потвърден **Non-consumable** в RevenueCat →
+  lifetime купувачите защитени (Billing 8 иначе консумира грешно маркираните и не могат да се възстановят).
+- **targetSdk 36 (Android 16):** вече в сила от май 2026 (потвърдено `dumpsys`: `targetSdk=36`).
+
+`analyze` **0 грешки**. `flutter clean`→AAB (59.8MB, merged manifest пази USE_FULL_SCREEN_INTENT)+APK
+(73.5MB). APK на Note 9 (SM-N960F) без краш, потребителят тества входа OK. Bump→1.0.58+68, whats_new
+`_build`=68, `release_notes/1.0.58.md`. ★Play notes лимит 500 → BG(403)+EN(340) в scratchpad.★
+⚠️ **ОСТАВА за Иво:** (1) тест на **реална покупка** на internal testing/жив билд (sideload НЕ сервира
+продукти — logcat `PRODUCT_NOT_FOUND`); (2) ако входът виси и на живия Play билд → Firebase Console →
+Authentication reCAPTCHA/email-enumeration + Play Integrity (upload SHA-256
+`80:99:E3:F8:BE:00:85:95:BD:B7:29:EB:10:FE:DB:58:E1:63:0C:86:BD:1B:B4:6C:CE:C3:8F:C9:B9:78:B1:35`).
+**Mac (iOS 1.0.58): `git pull` → `flutter pub get` → `pod install` (дърпа purchases_flutter 10.x) → Xcode
+archive.** НЯМА нови assets/permissions; `PurchaseResult` промяната важи 1:1 за iOS.
+
 ## 2026-08-04 · PC — Firebase Analytics (retention + onboarding funnel) Фаза 1
 Минимална, целенасочена телеметрия за 2 бизнес въпроса: **retention D1/D7/D30** + **onboarding funnel до
 първа задача/режим**. Нов `firebase_analytics: ^11.3.0` (линията за Core 3.x). Нов слой

@@ -615,8 +615,10 @@ class ProService extends ChangeNotifier {
     if (kIsWeb) return false;
     
     try {
-      final customerInfo = await Purchases.purchasePackage(package);
-      _updateProStatus(customerInfo);
+      // purchases_flutter 9+ (Billing Library 8): покупките връщат PurchaseResult
+      // (CustomerInfo + StoreTransaction), не голо CustomerInfo.
+      final result = await Purchases.purchasePackage(package);
+      _updateProStatus(result.customerInfo);
       return _isPro;
     } catch (e) {
       debugPrint('ProService purchasePackage error: $e');
@@ -628,8 +630,9 @@ class ProService extends ChangeNotifier {
     if (kIsWeb) return false;
     
     try {
-      final customerInfo = await Purchases.purchaseStoreProduct(product);
-      _updateProStatus(customerInfo);
+      // purchases_flutter 9+ връща PurchaseResult вместо CustomerInfo.
+      final result = await Purchases.purchaseStoreProduct(product);
+      _updateProStatus(result.customerInfo);
       return _isPro;
     } catch (e) {
       debugPrint('ProService purchase error: $e');

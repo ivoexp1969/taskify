@@ -13,6 +13,14 @@ class CustomerInfo {
   final EntitlementInfos entitlements = EntitlementInfos();
 }
 
+/// Stub за PurchaseResult (purchases_flutter 9+ покупките връщат него —
+/// CustomerInfo + StoreTransaction — вместо голо CustomerInfo).
+class PurchaseResult {
+  final CustomerInfo customerInfo;
+  PurchaseResult({CustomerInfo? customerInfo})
+      : customerInfo = customerInfo ?? CustomerInfo();
+}
+
 /// Stub за EntitlementInfos
 class EntitlementInfos {
   final Map<String, EntitlementInfo> all = {};
@@ -145,12 +153,12 @@ class Purchases {
     return Offerings();
   }
   
-  static Future<CustomerInfo> purchaseStoreProduct(StoreProduct product) async {
-    return CustomerInfo();
+  static Future<PurchaseResult> purchaseStoreProduct(StoreProduct product) async {
+    return PurchaseResult();
   }
-  
-  static Future<CustomerInfo> purchasePackage(Package package) async {
-    return CustomerInfo();
+
+  static Future<PurchaseResult> purchasePackage(Package package) async {
+    return PurchaseResult();
   }
   
   static Future<CustomerInfo> restorePurchases() async {

@@ -89,22 +89,12 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   Future<void> _toggleItem(int index) async {
     final newDone = !(_items[index]['done'] as bool);
     _items[index]['done'] = newDone;
-    await _save();
+    await _save(); // записва подзадачите (setSubtasks + save)
 
-    bool needTaskSave = false;
-    if (_items.isNotEmpty && _items.every((i) => i['done'] == true)) {
-      if (!widget.task.isCompleted) {
-        widget.task.isCompleted = true;
-        widget.task.completedAt = DateTime.now();
-        needTaskSave = true;
-      }
-    } else if (widget.task.isCompleted) {
-      widget.task.isCompleted = false;
-      widget.task.completedAt = null;
-      needTaskSave = true;
+    // Всички артикули отметнати → задачата се завършва автоматично (и обратно).
+    if (widget.task.syncCompletionWithSubtasks()) {
+      await widget.task.save();
     }
-
-    if (needTaskSave) await widget.task.save();
     if (mounted) setState(() {});
   }
 

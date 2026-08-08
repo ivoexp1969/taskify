@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -131,15 +133,16 @@ class AuthService {
       // Задаваме езика преди регистрация
       _setEmailLanguage(languageCode);
       
-      final credential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      
+      final credential = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password)
+          .timeout(const Duration(seconds: 20));
+
       // Изпращаме верификационен имейл
       await credential.user?.sendEmailVerification();
-      
+
       return (success: true, error: null);
+    } on TimeoutException {
+      return (success: false, error: _getErrorMessage('timeout', languageCode ?? 'en'));
     } on FirebaseAuthException catch (e) {
       return (success: false, error: _getErrorMessage(e.code, languageCode ?? 'en'));
     } catch (e) {
@@ -155,10 +158,13 @@ class AuthService {
   }) async {
     final lang = languageCode ?? 'en';
     try {
-      final credential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      // ★Таймаут★: firebase_auth понякога ВИСИ безкрайно (reCAPTCHA/Play
+      // Integrity с празен токен при нерегистриран SHA, или мрежов проблем) →
+      // без таймаут спинърът се върти вечно и екранът „забива". 20s е достатъчно
+      // за нормален вход; иначе хвърля TimeoutException → приятелско съобщение.
+      final credential = await _auth
+          .signInWithEmailAndPassword(email: email, password: password)
+          .timeout(const Duration(seconds: 20));
 
       // Проверяваме дали имейлът е верифициран
       if (credential.user != null && !credential.user!.emailVerified) {
@@ -169,6 +175,8 @@ class AuthService {
       await _saveCredentials(email, password);
 
       return (success: true, error: null, needsVerification: false);
+    } on TimeoutException {
+      return (success: false, error: _getErrorMessage('timeout', lang), needsVerification: false);
     } on FirebaseAuthException catch (e) {
       return (success: false, error: _getErrorMessage(e.code, lang), needsVerification: false);
     } catch (e) {
@@ -332,6 +340,34 @@ class AuthService {
       'pt': 'Muitas tentativas. Por favor, tente mais tarde',
       'ru': 'Слишком много попыток. Попробуйте позже',
       'tr': 'Çok fazla deneme. Lütfen daha sonra tekrar deneyin', 'ja': '試行回数が多すぎます。後でもう一度お試しください',
+    },
+    // Firebase Auth понякога виси (напр. reCAPTCHA/Play Integrity с празен
+    // токен при неригистриран SHA или мрежов проблем) → таймаутът връща това.
+    'timeout': {
+      'en': 'Sign-in is taking too long. Check your connection and try again.',
+      'bg': 'Входът се бави твърде дълго. Провери връзката и опитай пак.',
+      'de': 'Die Anmeldung dauert zu lange. Prüfe deine Verbindung und versuche es erneut.',
+      'fr': 'La connexion prend trop de temps. Vérifiez votre connexion et réessayez.',
+      'it': "L'accesso richiede troppo tempo. Controlla la connessione e riprova.",
+      'el': 'Η σύνδεση αργεί πολύ. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.',
+      'es': 'El inicio de sesión tarda demasiado. Revisa tu conexión e inténtalo de nuevo.',
+      'pt': 'O login está a demorar muito. Verifica a ligação e tenta novamente.',
+      'ru': 'Вход занимает слишком много времени. Проверьте соединение и повторите.',
+      'tr': 'Giriş çok uzun sürüyor. Bağlantını kontrol edip tekrar dene.',
+      'ja': 'ログインに時間がかかっています。接続を確認してもう一度お試しください。',
+    },
+    'network-request-failed': {
+      'en': 'Network error. Check your connection and try again.',
+      'bg': 'Мрежова грешка. Провери връзката и опитай пак.',
+      'de': 'Netzwerkfehler. Prüfe deine Verbindung und versuche es erneut.',
+      'fr': 'Erreur réseau. Vérifiez votre connexion et réessayez.',
+      'it': 'Errore di rete. Controlla la connessione e riprova.',
+      'el': 'Σφάλμα δικτύου. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.',
+      'es': 'Error de red. Revisa tu conexión e inténtalo de nuevo.',
+      'pt': 'Erro de rede. Verifica a ligação e tenta novamente.',
+      'ru': 'Ошибка сети. Проверьте соединение и повторите.',
+      'tr': 'Ağ hatası. Bağlantını kontrol edip tekrar dene.',
+      'ja': 'ネットワークエラー。接続を確認してもう一度お試しください。',
     },
     'user-disabled': {
       'en': 'This account has been disabled',
