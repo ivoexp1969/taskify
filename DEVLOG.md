@@ -6,6 +6,19 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-08-08 · Mac — iOS 1.0.58(68) подадена в App Store (+ pod конфликт фикс)
+Билднах и качих iOS 1.0.58(68) от PC-работата (авто-завършване + login fix + Billing 8). **★КАПАН:**
+`flutter build ipa` гръмна на `pod install` — Flutter каза само „PurchasesHybridCommon requires higher iOS
+deployment", но реалната CocoaPods грешка (ръчен `cd ios && pod install`) беше **конфликт
+PurchasesHybridCommon 14.3.0 vs 18.29.0**. Причина: `ios/Podfile.lock` (git-нат) остана закован на старата
+purchases 8.11.0 — PC bump-на `purchases_flutter` 8.11→10.8 само в pubspec (Android), но **не билдва iOS →
+Podfile.lock не се обнови**. Фикс: `cd ios && pod update purchases_flutter PurchasesHybridCommon RevenueCat`
+→ резолвна 10.8.0/18.29.0/RevenueCat 5.83.0 → билдът мина (IPA 44.2MB). MinimumOSVersion остана 13.0 (новите
+подове искат само 13.0). altool upload build 68 (UPLOAD SUCCEEDED) → `/tmp/asc58.py`: build VALID → create
+версия 1.0.58 → attach → whatsNew EN+BG (описанието непроменено от 1.0.57) → submit → **WAITING_FOR_REVIEW**
+(ver 3eef4871…). **Commit-нат `ios/Podfile.lock`** (иначе следващ iOS билд пак гърми). **ПОУКА за занапред:**
+при purchases/native bump от PC → на Mac ЗАДЪЛЖИТЕЛНО `pod update <засегнатите>` преди билд + commit Podfile.lock.
+
 ## 2026-08-08 · PC — v1.0.58+68: авто-завършване по подзадачи + login freeze fix + Play съответствие
 **ЖИВА в Google Play Production 100%** (vc68, заменя 67). iOS остава за Mac (чист cross-platform Dart).
 

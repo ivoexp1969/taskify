@@ -51,7 +51,12 @@ flutter build appbundle --release
 
 ## Current Version
 **v1.0.58+68 (2026-08-08) — Авто-завършване по подзадачи + login freeze fix + Google Play съответствие.
-★Android ЖИВА в Google Play Production 100%★ (качено 08-08 от PC чрез `tools/play_upload.py --status
+★Android ЖИВА в Play Production★; ★iOS 1.0.58(68) подадена → WAITING_FOR_REVIEW (Mac, 08-08)★. КАПАН при
+iOS билда: `pod install` гръмна (PurchasesHybridCommon 14.3.0 vs 18.29.0 конфликт) — Podfile.lock беше закован
+на старата purchases 8.11.0 (PC bump-на само Android/pubspec, не билдва iOS). Фикс: `cd ios && pod update
+purchases_flutter PurchasesHybridCommon RevenueCat` + commit Podfile.lock. Виж [[ios-build-appstore]].
+(оригинален PC запис по-долу.)
+**v1.0.58+68 (2026-08-08) — ★Android ЖИВА в Google Play Production 100%★ (качено 08-08 от PC чрез `tools/play_upload.py --status
 completed`, versionCode 68, заменя 1.0.57(67)). iOS 1.0.58(68) ОСТАВА за Mac (чист cross-platform Dart).
 (1) ★Авто-завършване★: нов `Task.syncCompletionWithSubtasks()` — отметнеш ли ВСИЧКИ подзадачи, задачата
 се завършва автоматично (и обратно). Приложено на ЛИЧНИ (`task_screen`, `calendar_screen`,
