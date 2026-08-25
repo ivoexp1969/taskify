@@ -10,8 +10,6 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/task.dart';
 import '../../models/category.dart';
@@ -24,8 +22,6 @@ import '../../services/group_service.dart';
 import '../../services/sync_service.dart';
 import 'statistics_screen.dart';
 import 'ai_settings_screen.dart';
-import 'how_to_use_screen.dart';
-import '../profile/profile_screen.dart';
 import '../../services/task_view_preference.dart';
 import '../home/home_screen.dart';
 import '../../services/google_calendar_service.dart';
@@ -34,12 +30,17 @@ import '../../services/ios_calendar_service.dart';
 import '../../services/morning_briefing_service.dart';
 import '../../services/name_days_service.dart';
 import '../../services/contact_name_index.dart';
-import '../../services/holidays_service.dart';
 import '../../services/school_calendar_service.dart';
 import '../../services/university_service.dart';
 import '../modes/student_onboarding_screen.dart';
 import '../../services/pro_service.dart';
 import '../paywall/paywall_screen.dart';
+import 'sections/settings_group.dart';
+import 'sections/go_pro_card.dart';
+import 'sections/profile_card.dart';
+import 'sections/appearance_section.dart';
+import 'sections/about_section.dart';
+import 'sections/holidays_tile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -67,8 +68,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   int _briefingMinute = 0;
   bool _nameDaysEnabled = false;
   bool _contactsNameDayEnabled = false;
-  bool _holidaysEnabled = false;
-  String _holidaysCountry = 'BG';
   bool _schoolModeEnabled = false;
   String? _profilePhotoPath; // локална снимка на профила (Пакет 2)
   int? _schoolGrade;
@@ -80,7 +79,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadBriefingTime();
     _loadMorningBriefingSetting();
     _loadNameDaysSetting();
-    _loadHolidaysSetting();
     _loadSchoolModeSetting();
     _loadProfilePhoto();
     _checkCalendarConnection();
@@ -130,15 +128,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _calendarService.connectionNotifier.removeListener(_onCalendarConnChanged);
     _calendarService.webAuthPending.removeListener(_onCalendarConnChanged);
     super.dispose();
-  }
-
-  Future<void> _loadHolidaysSetting() async {
-    final enabled = await HolidaysService().loadEnabled();
-    if (!mounted) return;
-    setState(() {
-      _holidaysEnabled = enabled;
-      _holidaysCountry = HolidaysService().country;
-    });
   }
 
   Future<void> _loadNameDaysSetting() async {
@@ -899,138 +888,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  /// „Стани Pro" картата — ПОСТОЯНЕН, забележим вход към paywall. Показва се
-  /// само на mobile и само когато потребителят НЕ е Pro. Pro потребител не я вижда.
-  Widget _buildGoProCard(BuildContext context) {
-    final lang = LanguageScope.of(context).locale.languageCode;
-    String tr(Map<String, String> m) => m[lang] ?? m['en']!;
-
-    const title = {
-      'en': 'Get Taskify Pro', 'bg': 'Стани Pro', 'de': 'Taskify Pro holen',
-      'fr': 'Passer à Pro', 'it': 'Passa a Pro', 'el': 'Απόκτησε το Pro',
-      'es': 'Hazte Pro', 'pt': 'Seja Pro', 'ru': 'Стать Pro',
-      'tr': 'Pro\'ya geç', 'ja': 'Taskify Pro にアップグレード',
-    };
-    const subtitle = {
-      'en': 'Calendar, AI, cloud sync, no ads and more',
-      'bg': 'Календар, AI, облак, без реклами и още',
-      'de': 'Kalender, KI, Cloud-Sync, keine Werbung und mehr',
-      'fr': 'Calendrier, IA, sync cloud, sans pubs et plus',
-      'it': 'Calendario, IA, sync cloud, niente pubblicità e altro',
-      'el': 'Ημερολόγιο, AI, συγχρονισμός cloud, χωρίς διαφημίσεις και άλλα',
-      'es': 'Calendario, IA, sync en la nube, sin anuncios y más',
-      'pt': 'Calendário, IA, sync na nuvem, sem anúncios e mais',
-      'ru': 'Календарь, ИИ, облако, без рекламы и другое',
-      'tr': 'Takvim, AI, bulut senkronizasyonu, reklamsız ve daha fazlası',
-      'ja': 'カレンダー、AI、クラウド同期、広告なしなど',
-    };
-    const getButton = {
-      'en': 'Get Pro', 'bg': 'Вземи Pro', 'de': 'Pro holen',
-      'fr': 'Obtenir Pro', 'it': 'Ottieni Pro', 'el': 'Απόκτηση Pro',
-      'es': 'Obtener Pro', 'pt': 'Obter Pro', 'ru': 'Получить Pro',
-      'tr': 'Pro al', 'ja': 'Pro を入手',
-    };
-    const restoreButton = {
-      'en': 'Restore purchases', 'bg': 'Възстанови покупки',
-      'de': 'Käufe wiederherstellen', 'fr': 'Restaurer les achats',
-      'it': 'Ripristina acquisti', 'el': 'Επαναφορά αγορών',
-      'es': 'Restaurar compras', 'pt': 'Restaurar compras',
-      'ru': 'Восстановить покупки', 'tr': 'Satın alımları geri yükle',
-      'ja': '購入を復元',
-    };
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFFFFB300), Color(0xFFFF8F00)],
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.workspace_premium,
-                        color: Colors.white, size: 32),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            tr(title),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            tr(subtitle),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: const Color(0xFFE65100),
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (_) => const PaywallScreen()),
-                          );
-                        },
-                        child: Text(
-                          tr(getButton),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: _restorePurchases,
-                      child: Text(tr(restoreButton)),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   /// Възстановяване на покупки (RevenueCat). Задължително за iOS (Apple) +
   /// помага на платци, сменили устройство.
   Future<void> _restorePurchases() async {
@@ -1337,306 +1194,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // Държави за официални празници (флаг + неутрално английско име).
   // Само поддържани от Nager.Date. Auto-detect от locale е по подразбиране.
   // Бел.: Индия (IN) не се поддържа от Nager, затова липсва (макар да имаме hi).
-  static const List<(String, String)> _holidayCountries = [
-    ('AT', '🇦🇹 Austria'),
-    ('BG', '🇧🇬 Bulgaria'),
-    ('CN', '🇨🇳 China'),
-    ('CZ', '🇨🇿 Czechia'),
-    ('FR', '🇫🇷 France'),
-    ('DE', '🇩🇪 Germany'),
-    ('GR', '🇬🇷 Greece'),
-    ('HU', '🇭🇺 Hungary'),
-    ('ID', '🇮🇩 Indonesia'),
-    ('IT', '🇮🇹 Italy'),
-    ('JP', '🇯🇵 Japan'),
-    ('MK', '🇲🇰 North Macedonia'),
-    ('NL', '🇳🇱 Netherlands'),
-    ('PL', '🇵🇱 Poland'),
-    ('PT', '🇵🇹 Portugal'),
-    ('RO', '🇷🇴 Romania'),
-    ('RU', '🇷🇺 Russia'),
-    ('RS', '🇷🇸 Serbia'),
-    ('KR', '🇰🇷 South Korea'),
-    ('ES', '🇪🇸 Spain'),
-    ('CH', '🇨🇭 Switzerland'),
-    ('TR', '🇹🇷 Turkey'),
-    ('UA', '🇺🇦 Ukraine'),
-    ('GB', '🇬🇧 United Kingdom'),
-    ('US', '🇺🇸 United States'),
-  ];
-
-  /// Секция „Външен вид" — избор на стил на task картите (Класически / Билети).
-  /// Реактивна: смяната важи веднага в целия app. „Билети" е Pro тема.
-  Widget _buildAppearanceSection(BuildContext context, AppText t) {
-    final theme = Theme.of(context);
-    return AnimatedBuilder(
-      animation: Listenable.merge([TaskViewPreference(), ProService()]),
-      builder: (context, _) {
-        final pref = TaskViewPreference();
-        final isPro = ProService().isPro;
-
-        Widget styleTile({
-          required IconData icon,
-          required Color color,
-          required String title,
-          required String subtitle,
-          required bool selected,
-          required bool locked,
-          required VoidCallback onTap,
-        }) {
-          return InkWell(
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(icon, color: color),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w600))),
-                            if (locked) ...[
-                              const SizedBox(width: 6),
-                              Icon(Icons.lock, size: 14, color: theme.colorScheme.primary),
-                            ],
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        Text(subtitle, style: TextStyle(
-                          fontSize: 12,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                        )),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                    color: selected
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        final themeController = ThemeScope.of(context);
-        final currentMode = themeController.mode;
-        final langCode = LanguageScope.of(context).locale.languageCode;
-        return _settingsGroup(
-          title: t.appearance,
-          icon: Icons.palette_rounded,
-          color: Colors.deepPurple,
-          children: [
-            Card(
-              elevation: 0,
-              margin: EdgeInsets.zero,
-              child: Column(
-                children: [
-                  styleTile(
-                    icon: Icons.view_agenda_rounded,
-                    color: Colors.blueGrey,
-                    title: t.cardStyleClassic,
-                    subtitle: t.cardStyleClassicDesc,
-                    selected: pref.cardStyle == CardStyle.classic,
-                    locked: false,
-                    onTap: () => pref.setCardStyle(CardStyle.classic),
-                  ),
-                  const Divider(height: 0),
-                  styleTile(
-                    icon: Icons.confirmation_number_outlined,
-                    color: Colors.deepPurple,
-                    title: t.cardStyleTicket,
-                    subtitle: t.cardStyleTicketDesc,
-                    selected: pref.cardStyle == CardStyle.ticket,
-                    locked: !isPro,
-                    onTap: () async {
-                      if (!isPro) {
-                        final upgraded = await showPaywallIfNeeded(
-                          context,
-                          isFeatureAvailable: false,
-                          featureName: t.cardStyleTicket,
-                        );
-                        if (!upgraded) return;
-                      }
-                      await pref.setCardStyle(CardStyle.ticket);
-                    },
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Тема (light/dark/amoled) — преместена в „Външен вид" (Пакет 2).
-            Card(
-              elevation: 0,
-              margin: EdgeInsets.zero,
-              child: Column(
-                children: [
-                  RadioListTile<int>(
-                    value: 0,
-                    groupValue: themeController.isAmoled ? 3 : (currentMode == ThemeMode.system ? 0 : (currentMode == ThemeMode.light ? 1 : 2)),
-                    title: Text(t.systemTheme),
-                    onChanged: (value) => themeController.setMode(ThemeMode.system),
-                  ),
-                  const Divider(height: 0),
-                  RadioListTile<int>(
-                    value: 1,
-                    groupValue: themeController.isAmoled ? 3 : (currentMode == ThemeMode.system ? 0 : (currentMode == ThemeMode.light ? 1 : 2)),
-                    title: Text(t.lightTheme),
-                    onChanged: (value) => themeController.setMode(ThemeMode.light),
-                  ),
-                  const Divider(height: 0),
-                  RadioListTile<int>(
-                    value: 2,
-                    groupValue: themeController.isAmoled ? 3 : (currentMode == ThemeMode.system ? 0 : (currentMode == ThemeMode.light ? 1 : 2)),
-                    title: Text(t.darkTheme),
-                    onChanged: (value) => themeController.setMode(ThemeMode.dark),
-                  ),
-                  const Divider(height: 0),
-                  RadioListTile<int>(
-                    value: 3,
-                    groupValue: themeController.isAmoled ? 3 : (currentMode == ThemeMode.system ? 0 : (currentMode == ThemeMode.light ? 1 : 2)),
-                    title: Text(t.amoledTheme),
-                    subtitle: Text('OLED',
-                        style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.5))),
-                    onChanged: (value) => themeController.setAmoled(true),
-                  ),
-                ],
-              ),
-            ),
-            // „Добави widget" (iOS) — преместено в „Външен вид" (Пакет 2).
-            if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS)
-              _buildWidgetGuideTile(context, langCode),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildHolidaysTile(BuildContext context, String lang) {
-    final theme = Theme.of(context);
-    const title = {
-      'en': 'Public holidays', 'bg': 'Официални празници',
-      'de': 'Gesetzliche Feiertage', 'fr': 'Jours fériés',
-      'it': 'Festività ufficiali', 'el': 'Επίσημες αργίες',
-      'es': 'Días festivos', 'pt': 'Feriados oficiais',
-      'ru': 'Официальные праздники', 'tr': 'Resmi tatiller', 'ja': '祝日',
-    };
-    const subtitle = {
-      'en': 'Holidays for your country in the calendar',
-      'bg': 'Празниците на твоята държава в календара',
-      'de': 'Feiertage deines Landes im Kalender',
-      'fr': 'Les jours fériés de ton pays dans le calendrier',
-      'it': 'Le festività del tuo paese nel calendario',
-      'el': 'Οι αργίες της χώρας σου στο ημερολόγιο',
-      'es': 'Los festivos de tu país en el calendario',
-      'pt': 'Os feriados do teu país no calendário',
-      'ru': 'Праздники твоей страны в календаре',
-      'tr': 'Ülkenin tatilleri takvimde', 'ja': 'カレンダーにお住まいの国の祝日を表示',
-    };
-    const countryLabel = {
-      'en': 'Country', 'bg': 'Държава', 'de': 'Land', 'fr': 'Pays',
-      'it': 'Paese', 'el': 'Χώρα', 'es': 'País', 'pt': 'País',
-      'ru': 'Страна', 'tr': 'Ülke', 'ja': '国',
-    };
-    String tr(Map<String, String> m) => m[lang] ?? m['en']!;
-
-    // Ако текущата държава не е в списъка, добавяме я временно най-отгоре.
-    final items = List<(String, String)>.from(_holidayCountries);
-    if (!items.any((c) => c.$1 == _holidaysCountry)) {
-      items.insert(0, (_holidaysCountry, _holidaysCountry));
-    }
-
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      child: Column(
-        children: [
-          SwitchListTile(
-            secondary: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(HolidaysService.colorValue)
-                    .withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.flag_rounded,
-                  color: Color(HolidaysService.colorValue)),
-            ),
-            title: Text(tr(title)),
-            subtitle: Text(
-              tr(subtitle),
-              style: TextStyle(
-                fontSize: 12,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-            ),
-            value: _holidaysEnabled,
-            onChanged: (value) async {
-              setState(() => _holidaysEnabled = value);
-              await HolidaysService().setEnabled(value);
-              if (value) await HolidaysService().loadForCurrentYears();
-            },
-          ),
-          if (_holidaysEnabled) ...[
-            const Divider(height: 0),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
-              child: Row(
-                children: [
-                  Text(
-                    tr(countryLabel),
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: DropdownButton<String>(
-                      value: _holidaysCountry,
-                      isExpanded: true,
-                      alignment: Alignment.centerRight,
-                      underline: const SizedBox.shrink(),
-                      items: items
-                          .map((c) => DropdownMenuItem(
-                                value: c.$1,
-                                child: Text(c.$2,
-                                    textAlign: TextAlign.right,
-                                    overflow: TextOverflow.ellipsis),
-                              ))
-                          .toList(),
-                      onChanged: (code) async {
-                        if (code == null) return;
-                        setState(() => _holidaysCountry = code);
-                        await HolidaysService().setCountry(code);
-                        await HolidaysService().loadForCurrentYears();
-                        // loadForCurrentYears bump-ва revision → календарът се обновява.
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
   Future<void> _loadMorningBriefingSetting() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -2735,339 +2292,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Future<void> _openUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
-
-  /// Секция „За приложението" (най-долу в Настройки): динамична версия/билд
-  /// (package_info_plus), подекран „Как се ползва" и полезни линкове
-  /// (Поверителност, Условия, лиценз на именните дни — CC BY-SA).
-  List<Widget> _buildAboutSection(BuildContext context) {
-    final theme = Theme.of(context);
-    final lang = LanguageScope.of(context).locale.languageCode;
-    String tr(Map<String, String> m) => m[lang] ?? m['en']!;
-
-    const sectionTitle = {
-      'en': 'About', 'bg': 'За приложението', 'de': 'Über die App',
-      'fr': 'À propos', 'it': 'Informazioni', 'el': 'Σχετικά',
-      'es': 'Acerca de', 'pt': 'Sobre', 'ru': 'О приложении',
-      'tr': 'Hakkında', 'ja': 'アプリについて',
-    };
-    const versionWord = {
-      'en': 'Version', 'bg': 'Версия', 'de': 'Version', 'fr': 'Version',
-      'it': 'Versione', 'el': 'Έκδοση', 'es': 'Versión', 'pt': 'Versão',
-      'ru': 'Версия', 'tr': 'Sürüm', 'ja': 'バージョン',
-    };
-    const howToTitle = {
-      'en': 'How to use', 'bg': 'Как се ползва', 'de': 'Anleitung',
-      'fr': 'Comment ça marche', 'it': 'Come si usa', 'el': 'Πώς λειτουργεί',
-      'es': 'Cómo se usa', 'pt': 'Como usar', 'ru': 'Как пользоваться',
-      'tr': 'Nasıl kullanılır', 'ja': '使い方',
-    };
-    const howToSubtitle = {
-      'en': 'Quick guide', 'bg': 'Кратко ръководство', 'de': 'Kurzanleitung',
-      'fr': 'Guide rapide', 'it': 'Guida rapida', 'el': 'Σύντομος οδηγός',
-      'es': 'Guía rápida', 'pt': 'Guia rápido', 'ru': 'Краткое руководство',
-      'tr': 'Hızlı kılavuz', 'ja': 'クイックガイド',
-    };
-    const privacyLabel = {
-      'en': 'Privacy Policy', 'bg': 'Политика за поверителност',
-      'de': 'Datenschutz', 'fr': 'Confidentialité', 'it': 'Privacy',
-      'el': 'Απόρρητο', 'es': 'Privacidad', 'pt': 'Privacidade',
-      'ru': 'Конфиденциальность', 'tr': 'Gizlilik', 'ja': 'プライバシー',
-    };
-    const termsLabel = {
-      'en': 'Terms of Use', 'bg': 'Условия за ползване',
-      'de': 'Nutzungsbedingungen', 'fr': "Conditions d'utilisation",
-      'it': "Termini d'uso", 'el': 'Όροι χρήσης', 'es': 'Términos de uso',
-      'pt': 'Termos de uso', 'ru': 'Условия использования',
-      'tr': 'Kullanım koşulları', 'ja': '利用規約',
-    };
-    const nameDaysLicense = {
-      'en': 'Name days: data from Wikipedia (CC BY-SA 4.0)',
-      'bg': 'Именни дни: данни от Уикипедия (CC BY-SA 4.0)',
-      'de': 'Namenstage: Daten aus Wikipedia (CC BY-SA 4.0)',
-      'fr': 'Fêtes des prénoms : données de Wikipédia (CC BY-SA 4.0)',
-      'it': 'Onomastici: dati da Wikipedia (CC BY-SA 4.0)',
-      'el': 'Ονομαστικές εορτές: δεδομένα από τη Wikipedia (CC BY-SA 4.0)',
-      'es': 'Onomásticas: datos de Wikipedia (CC BY-SA 4.0)',
-      'pt': 'Dias do nome: dados da Wikipédia (CC BY-SA 4.0)',
-      'ru': 'Именины: данные из Википедии (CC BY-SA 4.0)',
-      'tr': 'İsim günleri: Wikipedia verileri (CC BY-SA 4.0)',
-      'ja': '聖名祝日: Wikipediaのデータ (CC BY-SA 4.0)',
-    };
-
-    return [
-      _settingsGroup(
-        title: tr(sectionTitle),
-        icon: Icons.info_outline_rounded,
-        color: Colors.blueGrey,
-        children: [
-      Card(
-        elevation: 0,
-        margin: EdgeInsets.zero,
-        child: Column(
-          children: [
-            // Версия + билд — четат се ДИНАМИЧНО от package_info_plus.
-            FutureBuilder<PackageInfo>(
-              future: PackageInfo.fromPlatform(),
-              builder: (context, snap) {
-                final info = snap.data;
-                final subtitle = info == null
-                    ? '…'
-                    : '${tr(versionWord)} ${info.version} (build ${info.buildNumber})';
-                return ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(Icons.info_outline,
-                        color: theme.colorScheme.primary),
-                  ),
-                  title: const Text('Taskify'),
-                  subtitle: Text(subtitle),
-                );
-              },
-            ),
-            const Divider(height: 1),
-            // „Как се ползва" → подекран.
-            ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(Icons.help_outline, color: theme.colorScheme.primary),
-              ),
-              title: Text(tr(howToTitle)),
-              subtitle: Text(
-                tr(howToSubtitle),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const HowToUseScreen()),
-              ),
-            ),
-            const Divider(height: 1),
-            ListTile(
-              leading: const Icon(Icons.privacy_tip_outlined),
-              title: Text(tr(privacyLabel)),
-              trailing: const Icon(Icons.open_in_new, size: 18),
-              onTap: () => _openUrl('https://taskify1969.com/privacy'),
-            ),
-            const Divider(height: 1),
-            ListTile(
-              leading: const Icon(Icons.description_outlined),
-              title: Text(tr(termsLabel)),
-              trailing: const Icon(Icons.open_in_new, size: 18),
-              onTap: () => _openUrl('https://taskify1969.com/terms'),
-            ),
-          ],
-        ),
-      ),
-      const SizedBox(height: 8),
-      // Лиценз на именните дни (CC BY-SA изисква атрибуция).
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: InkWell(
-          onTap: () =>
-              _openUrl('https://bg.wikipedia.org/wiki/Имен_ден'),
-          child: Text(
-            tr(nameDaysLicense),
-            style: TextStyle(
-              fontSize: 11,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-              decoration: TextDecoration.underline,
-            ),
-          ),
-        ),
-      ),
-        ],
-      ),
-    ];
-  }
-
-  // ── Упътване „Как да добавя widget" (iOS) ─────────────────────────────
-  static const Map<String, Map<String, String>> _widgetGuide = {
-    'title': {
-      'en': 'Add the widget', 'bg': 'Добави widget', 'de': 'Widget hinzufügen',
-      'fr': 'Ajouter le widget', 'it': 'Aggiungi il widget', 'el': 'Πρόσθεσε το widget',
-      'es': 'Añadir el widget', 'pt': 'Adicionar o widget', 'ru': 'Добавить виджет',
-      'tr': 'Widget ekle', 'ja': 'ウィジェットを追加',
-    },
-    'subtitle': {
-      'en': "See today's tasks on your Home Screen",
-      'bg': 'Виж днешните си задачи на началния екран',
-      'de': 'Zeige heutige Aufgaben auf dem Home-Bildschirm',
-      'fr': "Vois tes tâches du jour sur l'écran d'accueil",
-      'it': 'Vedi le attività di oggi nella schermata Home',
-      'el': 'Δες τις σημερινές εργασίες στην αρχική οθόνη',
-      'es': 'Ve las tareas de hoy en la pantalla de inicio',
-      'pt': 'Vê as tarefas de hoje no ecrã inicial',
-      'ru': 'Смотри задачи на сегодня на главном экране',
-      'tr': 'Bugünkü görevleri ana ekranda gör',
-      'ja': 'ホーム画面で今日のタスクを表示',
-    },
-    's1': {
-      'en': 'Touch and hold an empty spot on the Home Screen.',
-      'bg': 'Задръж пръст върху празно място на началния екран.',
-      'de': 'Halte eine leere Stelle auf dem Home-Bildschirm gedrückt.',
-      'fr': "Appuie longuement sur une zone vide de l'écran d'accueil.",
-      'it': 'Tieni premuto uno spazio vuoto nella schermata Home.',
-      'el': 'Κράτα πατημένο ένα κενό σημείο στην αρχική οθόνη.',
-      'es': 'Mantén pulsado un espacio vacío en la pantalla de inicio.',
-      'pt': 'Toca e mantém num espaço vazio do ecrã inicial.',
-      'ru': 'Нажми и удерживай пустое место на главном экране.',
-      'tr': 'Ana ekranda boş bir yere basılı tut.',
-      'ja': 'ホーム画面の空いている場所を長押しします。',
-    },
-    's2': {
-      'en': 'Tap the + button in the top corner.',
-      'bg': 'Натисни бутона + в горния ъгъл.',
-      'de': 'Tippe auf + in der oberen Ecke.',
-      'fr': 'Touche le bouton + dans le coin supérieur.',
-      'it': 'Tocca il pulsante + in alto.',
-      'el': 'Πάτησε το + στην επάνω γωνία.',
-      'es': 'Toca el botón + en la esquina superior.',
-      'pt': 'Toca no botão + no canto superior.',
-      'ru': 'Нажми кнопку + в верхнем углу.',
-      'tr': 'Üst köşedeki + düğmesine dokun.',
-      'ja': '上隅の + ボタンをタップします。',
-    },
-    's3': {
-      'en': 'Search for “Taskify”.', 'bg': 'Потърси „Taskify".',
-      'de': 'Suche nach „Taskify".', 'fr': 'Cherche « Taskify ».',
-      'it': 'Cerca “Taskify”.', 'el': 'Αναζήτησε «Taskify».',
-      'es': 'Busca «Taskify».', 'pt': 'Procura “Taskify”.',
-      'ru': 'Найди «Taskify».', 'tr': '“Taskify” ara.', 'ja': '「Taskify」を検索します。',
-    },
-    's4': {
-      'en': 'Pick a size and tap “Add Widget”.',
-      'bg': 'Избери размер и натисни „Добави widget".',
-      'de': 'Wähle eine Größe und tippe auf „Widget hinzufügen".',
-      'fr': 'Choisis une taille et touche « Ajouter le widget ».',
-      'it': 'Scegli una dimensione e tocca “Aggiungi widget”.',
-      'el': 'Διάλεξε μέγεθος και πάτησε «Προσθήκη widget».',
-      'es': 'Elige un tamaño y toca «Añadir widget».',
-      'pt': 'Escolhe um tamanho e toca “Adicionar widget”.',
-      'ru': 'Выбери размер и нажми «Добавить виджет».',
-      'tr': 'Bir boyut seç ve “Widget Ekle”ye dokun.',
-      'ja': 'サイズを選んで「ウィジェットを追加」をタップします。',
-    },
-    'ok': {
-      'en': 'Got it', 'bg': 'Разбрах', 'de': 'Verstanden', 'fr': 'Compris',
-      'it': 'Ho capito', 'el': 'Κατάλαβα', 'es': 'Entendido', 'pt': 'Percebi',
-      'ru': 'Понятно', 'tr': 'Anladım', 'ja': 'わかりました',
-    },
-  };
-
-  String _wg(String k, String lang) =>
-      _widgetGuide[k]?[lang] ?? _widgetGuide[k]?['en'] ?? '';
-
-  Widget _buildWidgetGuideTile(BuildContext context, String lang) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Card(
-        child: ListTile(
-          leading: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF6A3DE8).withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.widgets_outlined, color: Color(0xFF6A3DE8)),
-          ),
-          title: Text(_wg('title', lang)),
-          subtitle: Text(_wg('subtitle', lang)),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => showDialog<void>(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: Text(_wg('title', lang)),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (final s in ['s1', 's2', 's3', 's4'])
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('${['s1', 's2', 's3', 's4'].indexOf(s) + 1}.  ',
-                                style: const TextStyle(fontWeight: FontWeight.bold)),
-                            Expanded(child: Text(_wg(s, lang))),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text(_wg('ok', lang)),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Падаща (сгъваема) група в Настройки — намалява претрупването. Логиката на
-  /// всяка секция остава непокътната; тук само я обгръщаме визуално.
-  Widget _settingsGroup({
-    required String title,
-    required IconData icon,
-    required Color color,
-    required List<Widget> children,
-    bool initiallyExpanded = false,
-  }) {
-    final theme = Theme.of(context);
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: Theme(
-        // Скрий стандартните разделители на ExpansionTile за по-чист вид.
-        data: theme.copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          leading: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: color, size: 22),
-          ),
-          title: Text(title,
-              style: TextStyle(
-                fontSize: 15.5,
-                fontWeight: FontWeight.w700,
-                color: color,
-                letterSpacing: 0.2,
-              )),
-          initiallyExpanded: initiallyExpanded,
-          shape: const Border(),
-          collapsedShape: const Border(),
-          childrenPadding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-          children: children,
-        ),
-      ),
-    );
-  }
-
   Future<void> _loadProfilePhoto() async {
     final prefs = await SharedPreferences.getInstance();
     final p = prefs.getString('profile_photo_path');
@@ -3075,116 +2299,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (mounted && path != _profilePhotoPath) {
       setState(() => _profilePhotoPath = path);
     }
-  }
-
-  /// Компактна карта „Профил" горе в Настройки (Пакет 2). Два реда (аватар +
-  /// име/имейл) БЕЗ CTA; трети ред само при активен режим. Тап → [ProfileScreen].
-  Widget _buildProfileCard(BuildContext context) {
-    final theme = Theme.of(context);
-    final lang = LanguageScope.of(context).locale.languageCode;
-    String tr(Map<String, String> m) => m[lang] ?? m['en']!;
-    final rawUser = _authService.currentUser;
-    final user = (rawUser != null && !rawUser.isAnonymous) ? rawUser : null;
-    final name = _authService.displayName;
-    final email = user?.email ?? '';
-    final title = name.isNotEmpty
-        ? name
-        : (email.isNotEmpty ? email : tr(const {
-            'en': 'Profile', 'bg': 'Профил', 'de': 'Profil', 'fr': 'Profil',
-            'it': 'Profilo', 'el': 'Προφίλ', 'es': 'Perfil', 'pt': 'Perfil',
-            'ru': 'Профиль', 'tr': 'Profil', 'ja': 'プロフィール',
-          }));
-    final initial = (title.isNotEmpty ? title : '?').substring(0, 1).toUpperCase();
-
-    // Ред за режим (само ако е активен).
-    String? modeLine;
-    final school = SchoolCalendarService();
-    final uni = UniversityService();
-    if (school.enabled && school.grade != null) {
-      modeLine = '🎒 ${tr(const {
-        'en': 'Pupil', 'bg': 'Ученик', 'de': 'Schüler', 'fr': 'Élève',
-        'it': 'Alunno', 'el': 'Μαθητής', 'es': 'Alumno', 'pt': 'Aluno',
-        'ru': 'Ученик', 'tr': 'Öğrenci', 'ja': '生徒',
-      })} · ${school.grade} ${tr(const {
-        'en': 'grade', 'bg': 'клас', 'de': 'Klasse', 'fr': 'classe',
-        'it': 'classe', 'el': 'τάξη', 'es': 'grado', 'pt': 'ano',
-        'ru': 'класс', 'tr': 'sınıf', 'ja': '年生',
-      })}';
-    } else if (uni.enabled && uni.profile != null) {
-      modeLine = '🎓 ${tr(const {
-        'en': 'Student', 'bg': 'Студент', 'de': 'Student', 'fr': 'Étudiant',
-        'it': 'Studente', 'el': 'Φοιτητής', 'es': 'Estudiante', 'pt': 'Estudante',
-        'ru': 'Студент', 'tr': 'Üniversite', 'ja': '大学生',
-      })}${uni.displayUniversityName != null ? ' · ${uni.displayUniversityName}' : ''}';
-    }
-
-    return Card(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () async {
-          await Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const ProfileScreen()),
-          );
-          await _loadProfilePhoto(); // снимката/името може да са сменени
-          if (mounted) setState(() {});
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: theme.colorScheme.primary,
-                backgroundImage: _profilePhotoPath != null
-                    ? FileImage(File(_profilePhotoPath!))
-                    : null,
-                child: _profilePhotoPath == null
-                    ? Text(initial,
-                        style: TextStyle(
-                            color: theme.colorScheme.onPrimary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18))
-                    : null,
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(title,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
-                    if (email.isNotEmpty && name.isNotEmpty)
-                      Text(email,
-                          style: TextStyle(
-                              fontSize: 12.5,
-                              color: theme.colorScheme.onSurfaceVariant),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis),
-                    if (modeLine != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Text(modeLine,
-                            style: TextStyle(
-                                fontSize: 12.5,
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.w500),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis),
-                      ),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right,
-                  color: theme.colorScheme.onSurfaceVariant),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -3208,14 +2322,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
         children: [
           // „Стани Pro" — постоянен вход към paywall, само за не-Pro на mobile.
-          if (!kIsWeb && !ProService().isPro) _buildGoProCard(context),
+          if (!kIsWeb && !ProService().isPro)
+            GoProCard(onRestore: _restorePurchases),
 
           // ── КАРТА „ПРОФИЛ" (най-горе) → ProfileScreen ──
-          _buildProfileCard(context),
+          ProfileCard(
+            profilePhotoPath: _profilePhotoPath,
+            onReturn: () async {
+              await _loadProfilePhoto(); // снимката/името може да са сменени
+              if (mounted) setState(() {});
+            },
+          ),
           const SizedBox(height: 16),
 
           // ═══ Група 1 — 🇧🇬 Език и регион ═══
-          _settingsGroup(
+          SettingsGroup(
             title: t.langAndRegion,
             icon: Icons.language_rounded,
             color: Colors.indigo,
@@ -3237,7 +2358,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       context, languageController, currentLocale),
                 ),
               ),
-              _buildHolidaysTile(context, currentLocale.languageCode),
+              HolidaysTile(lang: currentLocale.languageCode),
               ..._buildBulgariaSection(context),
             ],
           ),
@@ -3245,10 +2366,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 16),
 
           // ═══ Група 2 — 🎨 Външен вид (Стил карти + Тема + Добави widget) ═══
-          _buildAppearanceSection(context, t),
+          const AppearanceSection(),
 
           // ── Задачи (падаща група): Статистики, Категории, AI ──
-          _settingsGroup(
+          SettingsGroup(
             title: t.tasksAndAi,
             icon: Icons.task_alt_rounded,
             color: Colors.teal,
@@ -3312,7 +2433,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // изключващи се: ако потребителят има външна GCal↔Apple връзка, двата
           // активни наведнъж биха показвали всяко събитие двойно. Apple е
           // export-only (без импорт) — виж IosCalendarService.
-          _settingsGroup(
+          SettingsGroup(
             title: t.cloudSync,
             icon: Icons.sync_rounded,
             color: Colors.blue,
@@ -3528,7 +2649,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 16),
 
           // ── Известия и данни (падаща група): Morning Briefing + Backup ──
-          _settingsGroup(
+          SettingsGroup(
             title: t.morningBriefing,
             icon: Icons.notifications_active_rounded,
             color: Colors.orange,
@@ -3588,7 +2709,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 16),
           // (Празници + Именни дни/Контакти са в група „Език и регион" — Пакет 2.)
           // ── Данни (падаща група): Backup / Restore ──
-          _settingsGroup(
+          SettingsGroup(
             title: t.localData,
             icon: Icons.storage_rounded,
             color: Colors.green,
@@ -3668,7 +2789,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 16),
 
           // „За приложението" — най-долу.
-          ..._buildAboutSection(context),
+          const AboutSection(),
           const SizedBox(height: 24),
         ],
       ),
