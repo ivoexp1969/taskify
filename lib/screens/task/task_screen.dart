@@ -46,6 +46,7 @@ import 'sections/productivity_banner.dart';
 import 'dialogs/date_picker_dialog.dart';
 import 'sections/task_editor_widgets.dart';
 import 'sections/task_list_tile.dart';
+import 'sections/task_format.dart';
 
 enum TaskFilter { all, active, completed, overdue, upcoming, archived }
 enum TaskSort { date, priority, name, category }
@@ -217,7 +218,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
       final keptByName = <String, String>{}; // показано име (lower) → запазено id
       final toDelete = <String>[];
       for (final c in categoryBox.values) {
-        final key = _localizedCategoryName(c, t).trim().toLowerCase();
+        final key = localizedCategoryName(c, t).trim().toLowerCase();
         if (key.isEmpty) continue;
         final keptId = keptByName[key];
         if (keptId == null) {
@@ -348,7 +349,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                   },
                 ),
                 ...categoryBox.values.map((c) {
-                  final name = _localizedCategoryName(c, t);
+                  final name = localizedCategoryName(c, t);
                   final isSelected = _categoryFilterId == c.id;
                   final catColor = Color(c.colorValue);
                   return FilterChip(
@@ -388,20 +389,6 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     if (mounted) setState(() {});
   }
 
-  String _formatDate(DateTime d) {
-    final day = d.day.toString().padLeft(2, '0');
-    final month = d.month.toString().padLeft(2, '0');
-    final year = d.year.toString();
-    return '$day.$month.$year';
-  }
-
-  String _formatTime(TimeOfDay? t) {
-    if (t == null) return '--:--';
-    final h = t.hour.toString().padLeft(2, '0');
-    final m = t.minute.toString().padLeft(2, '0');
-    return '$h:$m';
-  }
-
   String _smartDateStr(BuildContext ctx, DateTime d) {
     final lang = Localizations.localeOf(ctx).languageCode;
     final now = DateTime.now();
@@ -409,7 +396,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     final taskDay = DateTime(d.year, d.month, d.day);
     final diff = taskDay.difference(today).inDays;
     final timeStr = (d.hour != 0 || d.minute != 0)
-        ? ' · ${_formatTime(TimeOfDay.fromDateTime(d))}'
+        ? ' · ${formatTime(TimeOfDay.fromDateTime(d))}'
         : '';
     if (diff == 0) {
       const m = {'en': 'Today', 'bg': 'Днес', 'de': 'Heute', 'fr': 'Auj.', 'it': 'Oggi', 'el': 'Σήμερα', 'es': 'Hoy', 'pt': 'Hoje', 'ru': 'Сегодня', 'tr': 'Bugün', 'ja': '今日'};
@@ -568,12 +555,6 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
   }
 
   // Етикет за синтетичния „Училище" чип (11 езика).
-  static const Map<String, String> _schoolLabel = {
-    'en': 'School', 'bg': 'Училище', 'de': 'Schule', 'fr': 'École',
-    'it': 'Scuola', 'el': 'Σχολείο', 'es': 'Escuela', 'pt': 'Escola',
-    'ru': 'Школа', 'tr': 'Okul', 'ja': '学校',
-  };
-
   /// Шийт за избор на учебен предмет (зад чипа „🎒 Училище"). Връща избрания.
   Future<Category?> _pickSchoolSubject(List<Category> subjects, AppText t) {
     return showModalBottomSheet<Category>(
@@ -586,7 +567,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-              child: Text('🎒 ${_schoolLabel[t.lang] ?? _schoolLabel['en']!}',
+              child: Text('🎒 ${schoolLabel[t.lang] ?? schoolLabel['en']!}',
                   style: Theme.of(ctx).textTheme.titleLarge),
             ),
             for (final s in subjects)
@@ -601,28 +582,6 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
         ),
       ),
     );
-  }
-
-  String _localizedCategoryName(Category? c, AppText t) {
-    if (c == null) return '';
-    // Календарната категория не е „default", но id-то е фиксирано → локализира се винаги.
-    if (c.id == 'cal_events') return t.catCalendarEvents;
-    if (c.id == 'documents') return t.catDocuments;
-    if (c.isDefault) {
-      return {
-            'work': t.work,
-            'personal': t.personal,
-            'shopping': t.shopping,
-            'birthday': t.catBirthdays,
-            'meeting': t.catMeeting,
-            'workout': t.catWorkout,
-            'payment': t.catPayment,
-            'travel': t.catTravel,
-            'gift': t.catGift,
-          }[c.id] ??
-          c.name;
-    }
-    return c.name;
   }
 
   /// Проверява дали задачата е просрочена.
@@ -1345,7 +1304,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          _localizedCategoryName(cat, t),
+                                          localizedCategoryName(cat, t),
                                           style: TextStyle(
                                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                                             color: isSelected
@@ -1375,7 +1334,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                   final isSel = selSubj != null;
                                   final label = selSubj != null
                                       ? '🎒 ${selSubj.name}'
-                                      : '🎒 ${_schoolLabel[t.lang] ?? _schoolLabel['en']!}';
+                                      : '🎒 ${schoolLabel[t.lang] ?? schoolLabel['en']!}';
                                   return GestureDetector(
                                     onTap: () async {
                                       final picked = await _pickSchoolSubject(
@@ -1547,7 +1506,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                         const SizedBox(width: 10),
                                         Flexible(
                                           child: Text(
-                                            _formatDate(tempDueDate),
+                                            formatDate(tempDueDate),
                                             style: const TextStyle(
                                               fontSize: 15,
                                               fontWeight: FontWeight.w500,
@@ -1601,7 +1560,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                         Flexible(
                                           child: Text(
                                             tempTime != null 
-                                                ? _formatTime(tempTime)
+                                                ? formatTime(tempTime)
                                                 : (t.time),
                                             style: TextStyle(
                                               fontSize: 15,
@@ -2371,7 +2330,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                           Icon(Icons.filter_list_rounded, size: 13, color: theme.colorScheme.primary),
                           const SizedBox(width: 5),
                           Text(
-                            _localizedCategoryName(categoryBox.get(_categoryFilterId), t),
+                            localizedCategoryName(categoryBox.get(_categoryFilterId), t),
                             style: TextStyle(color: theme.colorScheme.primary, fontSize: 12, fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(width: 5),
@@ -2414,7 +2373,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                         final item = items[index - 1];
 
                         if (item is DateTime) {
-                          final label = _formatDate(item);
+                          final label = formatDate(item);
                           return Padding(
                             padding:
                                 const EdgeInsets.fromLTRB(6, 10, 6, 4),
@@ -2432,7 +2391,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                         final task = item as Task;
                         final cat = categoriesMap[task.categoryId];
                         final categoryName =
-                            _localizedCategoryName(cat, t);
+                            localizedCategoryName(cat, t);
                         final categoryColor = cat != null 
                             ? Color(cat.colorValue)
                             : Colors.grey;
