@@ -51,6 +51,7 @@ import '../../services/pro_service.dart';
 import 'sections/productivity_banner.dart';
 import 'dialogs/ai_breakdown_sheet.dart';
 import 'dialogs/date_picker_dialog.dart';
+import 'sections/task_editor_widgets.dart';
 
 enum TaskFilter { all, active, completed, overdue, upcoming, archived }
 enum TaskSort { date, priority, name, category }
@@ -851,19 +852,6 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     );
   }
 
-  static Color? _templateAccentColor(String? template) {
-    switch (template) {
-      case 'shopping': return const Color(0xFF00E5A0);
-      case 'birthday': return const Color(0xFFFF6FA8);
-      case 'meeting':  return const Color(0xFF4DB8FF);
-      case 'workout':  return const Color(0xFFFFB347);
-      case 'payment':  return const Color(0xFF8AE000);
-      case 'travel':   return const Color(0xFFA78BFF);
-      case 'gift':     return const Color(0xFFFF7043);
-      default: return null;
-    }
-  }
-
   Future<void> _openTaskDialog({Task? existing, Future<void> Function(Task draft)? onSave}) async {
     // Зареждаме AI настройките при всяко отваряне, за да са актуални
     final aiParsingEnabled = await AiUsageService.instance.isParsingEnabled();
@@ -1340,7 +1328,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                           const SizedBox(height: 16),
 
                           // Секция: Категория
-                          _buildSectionLabel(t.category, Icons.folder_outlined, theme),
+                          taskSectionLabel(t.category, Icons.folder_outlined, theme),
                           const SizedBox(height: 12),
                           Wrap(
                             spacing: 8,
@@ -1512,11 +1500,11 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                           const SizedBox(height: 24),
 
                           // Секция: Приоритет
-                          _buildSectionLabel(t.priority, Icons.flag_outlined, theme),
+                          taskSectionLabel(t.priority, Icons.flag_outlined, theme),
                           const SizedBox(height: 12),
                           Row(
                             children: [
-                              _buildPriorityButton(
+                              taskPriorityButton(
                                 label: t.low,
                                 value: 0,
                                 selected: tempPriority == 0,
@@ -1527,7 +1515,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                 }),
                               ),
                               const SizedBox(width: 10),
-                              _buildPriorityButton(
+                              taskPriorityButton(
                                 label: t.medium,
                                 value: 1,
                                 selected: tempPriority == 1,
@@ -1538,7 +1526,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                                 }),
                               ),
                               const SizedBox(width: 10),
-                              _buildPriorityButton(
+                              taskPriorityButton(
                                 label: t.high,
                                 value: 2,
                                 selected: tempPriority == 2,
@@ -1553,7 +1541,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                           const SizedBox(height: 24),
 
                           // Секция: Дата и час
-                          _buildSectionLabel(t.dateAndTime, Icons.calendar_today_outlined, theme),
+                          taskSectionLabel(t.dateAndTime, Icons.calendar_today_outlined, theme),
                           const SizedBox(height: 12),
                           Row(
                             children: [
@@ -1668,9 +1656,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                           const SizedBox(height: 24),
 
                           // Секция: Повторение
-                          _buildSectionLabel(t.repeat, Icons.repeat_rounded, theme),
+                          taskSectionLabel(t.repeat, Icons.repeat_rounded, theme),
                           const SizedBox(height: 12),
-                          _buildDropdownTile(
+                          taskDropdownTile(
                             value: tempRecurrence,
                             items: {
                               'none': t.noRepeat,
@@ -1688,7 +1676,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                           const SizedBox(height: 24),
 
                           // Секция: Напомняне
-                          _buildSectionLabel(
+                          taskSectionLabel(
                             t.reminders,
                             Icons.notifications_outlined,
                             theme,
@@ -1705,7 +1693,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                           const SizedBox(height: 24),
 
                           // Секция: Подзадачи
-                          _buildSectionLabel(
+                          taskSectionLabel(
                             t.subtasks,
                             Icons.checklist_rounded,
                             theme,
@@ -2159,179 +2147,6 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
     });
   }
 
-  Widget _buildSectionLabel(String label, IconData icon, ThemeData theme) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          size: 18,
-          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-            letterSpacing: 0.5,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPriorityButton({
-    required String label,
-    required int value,
-    required bool selected,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(
-            color: selected ? color.withValues(alpha: 0.15) : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: selected ? color : Colors.grey.withValues(alpha: 0.3),
-              width: selected ? 2 : 1,
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.flag_rounded,
-                size: 18,
-                color: selected ? color : Colors.grey,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-                  color: selected ? color : Colors.grey,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDropdownTile({
-    required String value,
-    required Map<String, String> items,
-    required ThemeData theme,
-    required Function(String) onChanged,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.outline.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          isExpanded: true,
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-          ),
-          items: items.entries.map((entry) {
-            return DropdownMenuItem<String>(
-              value: entry.key,
-              child: Text(entry.value),
-            );
-          }).toList(),
-          onChanged: (val) {
-            if (val != null) onChanged(val);
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatCard({
-    required String label,
-    required int value,
-    required bool selected,
-    required VoidCallback onTap,
-    required Color color,
-    required IconData icon,
-    required ThemeData theme,
-  }) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-          decoration: BoxDecoration(
-            color: selected
-                ? color.withValues(alpha: 0.15)
-                : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: selected ? color.withValues(alpha: 0.5) : Colors.transparent,
-              width: 1.5,
-            ),
-            boxShadow: selected ? [
-              BoxShadow(
-                color: color.withValues(alpha: 0.2),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ] : null,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, size: 13, color: selected ? color : theme.colorScheme.onSurface.withValues(alpha: 0.4)),
-                  const SizedBox(width: 4),
-                  Text(
-                    value.toString(),
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: selected ? color : theme.colorScheme.onSurface,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 2),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w500,
-                    color: selected 
-                        ? color.withValues(alpha: 0.8)
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final t = AppText.of(context);
@@ -2527,7 +2342,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
               padding: const EdgeInsets.fromLTRB(12, 6, 12, 4),
               child: Row(
                 children: [
-                  _buildStatCard(
+                  taskStatCard(
                     label: t.total,
                     value: total,
                     selected: _filter == TaskFilter.all,
@@ -2537,7 +2352,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                     theme: theme,
                   ),
                   const SizedBox(width: 8),
-                  _buildStatCard(
+                  taskStatCard(
                     label: t.upcoming,
                     value: upcoming,
                     selected: _filter == TaskFilter.upcoming,
@@ -2547,7 +2362,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                     theme: theme,
                   ),
                   const SizedBox(width: 8),
-                  _buildStatCard(
+                  taskStatCard(
                     label: t.overdue,
                     value: overdue,
                     selected: _filter == TaskFilter.overdue,
@@ -2557,7 +2372,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                     theme: theme,
                   ),
                   const SizedBox(width: 8),
-                  _buildStatCard(
+                  taskStatCard(
                     label: t.completed,
                     value: completed,
                     selected: _filter == TaskFilter.completed,
@@ -2667,7 +2482,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                         // Цветът на лентата: червен ако е просрочено, иначе цвета на категорията
                         final accentColor = isOverdue
                             ? Colors.redAccent
-                            : (_templateAccentColor(task.template) 
+                            : (templateAccentColor(task.template) 
                                 ?? categoryColor);
 
                         // Staggered анимация
