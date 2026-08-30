@@ -53,10 +53,16 @@ flutter build appbundle --release
 **v1.0.59+69 (2026-09-13) — Студентско разписание v2 (група + четна/нечетна седмица + UI полир) +
 cross-device sync за разписание/студентски/ученически профил (`PrefsSyncService`) + „Какво ново" диалог
 (`_build`=69). Bump-нато и КОМИТНАТО (commits `807291f`/`1746032`/`624eb60`), но ★ОЩЕ НЕ качено в Play★
-(живо в Production остава 1.0.58+68). Всичко чист cross-platform Dart → iOS=само Mac билд. PC (09-13):
-`flutter clean` → APK инсталиран безжично на Note 9 (192.168.0.117:5555) за тест на живо (вход от web +
-2-устройствен sync на разписанието). ОСТАВА за Иво: тест на 2 реални устройства (телефон+таблет, същ
-акаунт) + решение за качване в Play (`tools/play_upload.py --status completed`). ПРЕДИШНО:
+(живо в Production остава 1.0.58+68). PC (09-13): `flutter clean` → APK инсталиран безжично на Note 9
+(192.168.0.117:5555) за тест на живо (вход от web + 2-устройствен sync на разписанието). ОСТАВА за Иво: тест
+на 2 реални устройства (телефон+таблет, същ акаунт) + решение за качване в Play (`tools/play_upload.py
+--status completed`).
+★iOS: 1.0.59(69) ВЕЧЕ подадена за App Store ревю (Mac, 08-30) = WAITING_FOR_REVIEW — iOS настигна Android.
+(Signing капан: keychain `habits-ci` от app „Навици" беше в codesign search list-а със счупени копия на
+Taskify сертификатите → `Command CodeSign failed`/`errSecInternalComponent`; ФИКС: `security list-keychains
+-d user -s ~/Library/Keychains/login.keychain-db` + `rm -rf DerivedData/Runner-*`; също `xcode-select` →
+`sudo xcode-select --switch /Applications/Xcode.app`. ⚠️ При билд на „Навици" върни habits-ci. TODO: вдигни
+MinimumOSVersion 13.0→15.0 — altool warning 90068, задължително Spring 2027.) ПРЕДИШНО:
 **v1.0.58+68 (2026-08-08) — Авто-завършване по подзадачи + login freeze fix + Google Play съответствие.
 ★Android ЖИВА в Play Production★; ★iOS 1.0.58(68) подадена → WAITING_FOR_REVIEW (Mac, 08-08)★. КАПАН при
 iOS билда: `pod install` гръмна (PurchasesHybridCommon 14.3.0 vs 18.29.0 конфликт) — Podfile.lock беше закован
@@ -189,6 +195,18 @@ Keep this current — it is the shared cross-machine context (see Cross-Machine 
   ако разписанието е РАЗЛИЧНО на 2 устройства (и двете редактирани офлайн), печели по-новото; за празно/
   нередактирано устройство винаги издърпва облака (localStamp 0). ОСТАВА за Иво: тест на 2 реални
   устройства (телефон+таблет, същ акаунт) + при желание bump+релийз.
+- **★iOS настигна Android → v1.0.59(69) WAITING_FOR_REVIEW (Mac, 2026-08-30):** `git pull` взе bump-натата
+  1.0.59+69 (student schedule v2). `flutter analyze` 0 грешки (192 info/warning, pre-existing). Рутинен iOS
+  release: `flutter build ipa --release` (Xcode 26 през оправения xcode-select път) → Taskify.ipa 44MB →
+  `altool` upload SUCCEEDED (ключ R342BR6F85) → ASC API: създадена версия **1.0.59** + whatsNew EN+BG (без
+  емоджи) в единствения **en-US** локал → attach build 69 (VALID) → submit → **WAITING_FOR_REVIEW** (ver id
+  c189cefe…, rs id d8e927ac…). Описанието НЕ пипано (актуално от 1.0.57). **★2 КАПАНА оправени:** (1)
+  `xcode-select` сочеше несъществуващ `Xcode-16.2.0.app` → `sudo xcode-select --switch /Applications/Xcode.app`;
+  (2) signing гръмна `Command CodeSign failed`/`errSecInternalComponent` защото keychain-ът `habits-ci`
+  (от app „Навици") беше в codesign search list-а със счупени копия на сертификатите → `security list-keychains
+  -d user -s ~/Library/Keychains/login.keychain-db` + `rm -rf DerivedData/Runner-*` → чист билд. ⚠️ Върни
+  habits-ci в search list-а при билд на „Навици". **★TODO следваща версия:** MinimumOSVersion 13.0→15.0
+  (altool warning 90068; задължително Spring 2027).
 - **Студентско разписание v2: група + четна/нечетна седмица + UI полир (PC, 2026-08-30, БЕЗ app bump,
   НЕ качено):** нови нива за студентския режим. **(1) Модел** (`models/weekly_schedule.dart`, SharedPreferences
   JSON, БЕЗ Hive bump): `enum WeekPattern{every,oddOnly,evenOnly}` + полета `weekPattern`/`colorValue`(ARGB int?)/
