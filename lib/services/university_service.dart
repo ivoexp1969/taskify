@@ -170,6 +170,22 @@ class UniversityService {
     return keyDates.where((d) => !d.date.isBefore(t)).toList();
   }
 
+  /// Началото на ТЕКУЩИЯ семестър — последната ключова дата от вид
+  /// `semesterStart`, която е ≤ днес. Използва се за броене на четна/нечетна
+  /// седмица. `null`, ако студентът не е въвел начало на семестър (тогава
+  /// разписанието се показва без филтър по седмица).
+  DateTime? currentSemesterStart([DateTime? now]) {
+    final today = now ?? DateTime.now();
+    final t = DateTime(today.year, today.month, today.day);
+    DateTime? best;
+    for (final d in _dates) {
+      if (d.kind != StudentDateKind.semesterStart) continue;
+      if (d.date.isAfter(t)) continue;
+      if (best == null || d.date.isAfter(best)) best = d.date;
+    }
+    return best;
+  }
+
   Future<StudentKeyDate> addKeyDate({
     required String title,
     required DateTime date,
@@ -189,6 +205,22 @@ class UniversityService {
   Future<void> removeKeyDate(String id) async {
     _dates = _dates.where((d) => d.id != id).toList();
     await _persistDates();
+  }
+
+  /// Редакция на съществуваща ключова дата (по id). Ако id-то липсва — no-op.
+  Future<void> updateKeyDate(StudentKeyDate updated) async {
+    if (!_dates.any((d) => d.id == updated.id)) return;
+    _dates =
+        _dates.map((d) => d.id == updated.id ? updated : d).toList();
+    await _persistDates();
+  }
+
+  /// Ключова дата по id (или null).
+  StudentKeyDate? keyDateById(String id) {
+    for (final d in _dates) {
+      if (d.id == id) return d;
+    }
+    return null;
   }
 
   Future<void> _persistDates() async {

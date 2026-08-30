@@ -91,6 +91,15 @@ class UniversityProfile {
   final int year; // курс 1–6
   final StudyForm form;
 
+  /// Студентска група (free-text: „1", „12А", „III-B"…). Всяка група в един курс
+  /// има различна програма. Незадължителна — може да се въведе после. Празно =
+  /// не е зададена.
+  final String groupNumber;
+
+  /// Кога последно е синхронизирано автоматично разписанието (v3 hook). `null`
+  /// за изцяло ръчно въведено разписание. Не се ползва в UI засега.
+  final DateTime? lastScheduleSync;
+
   const UniversityProfile({
     required this.uniId,
     this.uniName,
@@ -98,6 +107,8 @@ class UniversityProfile {
     this.program = '',
     this.year = 1,
     this.form = StudyForm.regular,
+    this.groupNumber = '',
+    this.lastScheduleSync,
   });
 
   bool get isComplete => uniId.isNotEmpty && year >= 1 && year <= 6;
@@ -109,6 +120,8 @@ class UniversityProfile {
     String? program,
     int? year,
     StudyForm? form,
+    String? groupNumber,
+    DateTime? lastScheduleSync,
   }) {
     return UniversityProfile(
       uniId: uniId ?? this.uniId,
@@ -117,6 +130,8 @@ class UniversityProfile {
       program: program ?? this.program,
       year: year ?? this.year,
       form: form ?? this.form,
+      groupNumber: groupNumber ?? this.groupNumber,
+      lastScheduleSync: lastScheduleSync ?? this.lastScheduleSync,
     );
   }
 
@@ -127,6 +142,9 @@ class UniversityProfile {
         'program': program,
         'year': year,
         'form': form.key,
+        if (groupNumber.isNotEmpty) 'group': groupNumber,
+        if (lastScheduleSync != null)
+          'last_sync': lastScheduleSync!.toIso8601String(),
       };
 
   static UniversityProfile? fromJson(Map<String, dynamic> j) {
@@ -136,6 +154,7 @@ class UniversityProfile {
     final year = rawYear is int
         ? rawYear
         : int.tryParse(rawYear?.toString() ?? '') ?? 1;
+    final rawSync = j['last_sync'];
     return UniversityProfile(
       uniId: uniId,
       uniName: (j['uni_name'] as String?)?.trim(),
@@ -143,6 +162,8 @@ class UniversityProfile {
       program: (j['program'] as String?)?.trim() ?? '',
       year: year.clamp(1, 6),
       form: StudyFormKey.fromKey(j['form'] as String?),
+      groupNumber: (j['group'] as String?)?.trim() ?? '',
+      lastScheduleSync: rawSync is String ? DateTime.tryParse(rawSync) : null,
     );
   }
 }

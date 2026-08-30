@@ -82,10 +82,36 @@ class WeeklyScheduleService {
     return list;
   }
 
+  /// Слотовете за деня, филтрирани по четна/нечетна седмица спрямо началото на
+  /// семестъра. Ако [semesterStart] е null → връща всички (без филтър, защото
+  /// не можем да определим номера на седмицата). Използва се от днешната карта.
+  List<ScheduleSlot> visibleForDay(
+    int day,
+    DateTime date,
+    DateTime? semesterStart, {
+    int? term,
+  }) {
+    final wk = currentWeekNumber(semesterStart, date);
+    return forDay(day, term: term).where((s) => s.matchesWeek(wk)).toList();
+  }
+
   /// Празно ли е разписанието за срок (по подразбиране — текущия).
   bool isEmptyForTerm([int? term]) {
     final t = term ?? _currentTerm;
     return !_slots.any((s) => s.term == t);
+  }
+
+  /// Съществуващият цвят на предмет със същото име (case-insensitive) в кой да е
+  /// слот, или `null`. За авто-предложение на цвят в диалога.
+  int? colorForSubject(String subject) {
+    final key = subject.trim().toLowerCase();
+    if (key.isEmpty) return null;
+    for (final s in _slots) {
+      if (s.colorValue != null && s.subject.trim().toLowerCase() == key) {
+        return s.colorValue;
+      }
+    }
+    return null;
   }
 
   bool get isEmpty => _slots.isEmpty;
@@ -122,6 +148,9 @@ class WeeklyScheduleService {
     required SlotKind kind,
     String? location,
     int? term,
+    WeekPattern weekPattern = WeekPattern.every,
+    int? colorValue,
+    String? source,
   }) {
     return ScheduleSlot(
       id: Uuid.v4(),
@@ -132,7 +161,16 @@ class WeeklyScheduleService {
       kind: kind,
       location: location,
       term: term ?? _currentTerm,
+      weekPattern: weekPattern,
+      colorValue: colorValue,
+      source: source,
     );
+  }
+
+  /// Изтрива ВСИЧКИ слотове (напр. при смяна на студентска група). Необратимо.
+  Future<void> clearAll() async {
+    _slots = const [];
+    await _persist();
   }
 
   Future<void> remove(String id) async {

@@ -156,6 +156,25 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **Студентско разписание v2: група + четна/нечетна седмица + UI полир (PC, 2026-08-30, БЕЗ app bump,
+  НЕ качено):** нови нива за студентския режим. **(1) Модел** (`models/weekly_schedule.dart`, SharedPreferences
+  JSON, БЕЗ Hive bump): `enum WeekPattern{every,oddOnly,evenOnly}` + полета `weekPattern`/`colorValue`(ARGB int?)/
+  `source`(v3 hook) в `ScheduleSlot`; top-level **`currentWeekNumber(semesterStart,today)`** (DST-устойчив —
+  брои по UTC epoch-дни; null/преди семестъра→0=без филтър; първи ден=седмица 1=нечетна); `matchesWeek()`;
+  `overlaps()` вече зачита weekPattern (четна+нечетна в 1 час НЕ е конфликт). `UniversityProfile` +
+  `groupNumber`(free-text) + `lastScheduleSync`(v3). **(2) Услуги:** `visibleForDay`/`colorForSubject`/`clearAll`
+  (weekly), **`currentSemesterStart()`** (university — последната ключова дата `semesterStart`≤днес). **(3) UI:**
+  онбординг + поле „Група" (питане за триене при смяна); `weekly_schedule_screen` РЕДИЗАЙН към ден-табове
+  (Пн–Пт) + карта-индикатор „седмица N (нечетна)" / бутон „Задай начало на семестъра →" + филтър Всички/Четна/
+  Нечетна + цветни часове (`kCategoryColors`, нов `_ColorDot`, авто-цвят по предмет) + централно празно
+  състояние (край на 5×„Няма часове"); диалог за слот: chip повтаряне (само студенти) + палитра; редактиране
+  на ключови дати (тап → `updateKeyDate`); **при СТУДЕНТИ типът е Упражнение/Лекция, при УЧЕНИЦИ само „Час"**
+  (без избор). `today_schedule_card`: акцент „Сега/Следва" най-отгоре + филтър по седмица + индикатор в хедъра +
+  цвят; при празно разписание се скрива (маха дублиращата подкана). **v3 оставено:** авто-извличане от сайтове
+  на ВУЗ (МУ-София/СУ/ТУ) — само `source`+`lastScheduleSync` hooks, НЕ имплементирано. `analyze` **0 грешки**,
+  **29 теста ✅** (`weekly_schedule_test`), 11 езика без TODO. Тестван на Note 9 (без краш). **Чист
+  cross-platform Dart → iOS=само Mac билд.** ⚠️ Заварен счупен build от недовършена редактор-екстракция →
+  поправен в отделен комит (виж git). ОСТАВА: bump+„Какво ново"+качване, ако Иво реши да релийзва.
 - **★v1.0.58+68 — авто-завършване по подзадачи + login freeze fix + Play съответствие → ЖИВА в Play
   Production 100% (PC, 2026-08-08):** 3 заявки от Иво + 2 Play предупреждения. **(1) Авто-завършване:**
   нов `Task.syncCompletionWithSubtasks()` (ако ИМА подзадачи и всички done→completed; иначе размаркира) —

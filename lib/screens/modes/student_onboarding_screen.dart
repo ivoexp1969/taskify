@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/university.dart';
 import '../../services/university_service.dart';
 import '../../services/school_calendar_service.dart';
+import '../../services/weekly_schedule_service.dart';
 import '../../utils/localization.dart';
 
 /// Онбординг на „Режим Студент": ВУЗ → факултет → специалност → курс → форма.
@@ -23,6 +24,7 @@ class StudentOnboardingScreen extends StatefulWidget {
 
 class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
   final _service = UniversityService();
+  final _wsvc = WeeklyScheduleService();
 
   List<University> _unis = const [];
   University? _uni;
@@ -30,6 +32,8 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
   final _facultyCtrl = TextEditingController();
   String _program = ''; // избрана от списъка специалност
   final _programCtrl = TextEditingController(); // за ръчна специалност
+  final _groupCtrl = TextEditingController(); // студентска група (free-text)
+  String _initialGroup = ''; // за детекция на смяна на групата
   bool _manualProgram = false; // true = въвежда ръчно („Друга")
   int _year = 1;
   StudyForm _form = StudyForm.regular;
@@ -43,6 +47,7 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
 
   Future<void> _init() async {
     final unis = await _service.loadUniversities();
+    await _wsvc.load(); // нужно за проверка при смяна на групата
     final p = _service.profile;
     setState(() {
       _unis = unis;
@@ -60,6 +65,8 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
         }
         _year = p.year;
         _form = p.form;
+        _groupCtrl.text = p.groupNumber;
+        _initialGroup = p.groupNumber;
       }
       _loading = false;
     });
@@ -70,6 +77,7 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
     _uniNameCtrl.dispose();
     _facultyCtrl.dispose();
     _programCtrl.dispose();
+    _groupCtrl.dispose();
     super.dispose();
   }
 
@@ -135,6 +143,55 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
     'en': 'Distance', 'bg': 'Дистанционно', 'de': 'Fernstudium', 'fr': 'À distance',
     'it': 'A distanza', 'el': 'Εξ αποστάσεως', 'es': 'A distancia', 'pt': 'À distância',
     'ru': 'Дистанционно', 'tr': 'Uzaktan', 'ja': '通信',
+  };
+  // Контекстно: студентска група (не спортна/друга) → ключ student_group_number.
+  static const _groupLabel = {
+    'en': 'Group (optional)', 'bg': 'Група (по избор)', 'de': 'Gruppe (optional)',
+    'fr': 'Groupe (facultatif)', 'it': 'Gruppo (facoltativo)',
+    'el': 'Ομάδα (προαιρετικό)', 'es': 'Grupo (opcional)', 'pt': 'Grupo (opcional)',
+    'ru': 'Группа (необязательно)', 'tr': 'Grup (isteğe bağlı)', 'ja': 'グループ（任意）',
+  };
+  static const _groupHint = {
+    'en': 'Your student group (see it in the academic calendar or the schedule).',
+    'bg': 'Твоята студентска група (виж я в академичния календар или разписанието на ВУЗ-а).',
+    'de': 'Deine Studiengruppe (im Studienkalender oder Stundenplan).',
+    'fr': 'Ton groupe étudiant (dans le calendrier ou l\'emploi du temps).',
+    'it': 'Il tuo gruppo studenti (nel calendario o nell\'orario).',
+    'el': 'Η φοιτητική σου ομάδα (στο ακαδημαϊκό ημερολόγιο ή το πρόγραμμα).',
+    'es': 'Tu grupo de estudiante (en el calendario o el horario).',
+    'pt': 'O teu grupo de estudante (no calendário ou no horário).',
+    'ru': 'Твоя студенческая группа (см. в календаре или расписании).',
+    'tr': 'Öğrenci grubun (akademik takvim veya ders programında).',
+    'ja': 'あなたの学生グループ（学年暦や時間割で確認）。',
+  };
+  static const _changeGroupTitle = {
+    'en': 'Group changed', 'bg': 'Смяна на група', 'de': 'Gruppe geändert',
+    'fr': 'Groupe modifié', 'it': 'Gruppo cambiato', 'el': 'Άλλαξε η ομάδα',
+    'es': 'Grupo cambiado', 'pt': 'Grupo alterado', 'ru': 'Группа изменена',
+    'tr': 'Grup değişti', 'ja': 'グループを変更',
+  };
+  static const _changeGroupBody = {
+    'en': 'Delete the current schedule and enter a new one?',
+    'bg': 'Да изтрия ли разписанието и да въведеш ново?',
+    'de': 'Aktuellen Stundenplan löschen und neu eingeben?',
+    'fr': 'Supprimer l\'emploi du temps actuel et en saisir un nouveau ?',
+    'it': 'Eliminare l\'orario attuale e inserirne uno nuovo?',
+    'el': 'Διαγραφή του τρέχοντος προγράμματος και εισαγωγή νέου;',
+    'es': '¿Eliminar el horario actual e introducir uno nuevo?',
+    'pt': 'Eliminar o horário atual e introduzir um novo?',
+    'ru': 'Удалить текущее расписание и ввести новое?',
+    'tr': 'Mevcut ders programını silip yenisini gir?',
+    'ja': '現在の時間割を削除して新しく入力しますか？',
+  };
+  static const _keepSchedule = {
+    'en': 'Keep it', 'bg': 'Запази', 'de': 'Behalten', 'fr': 'Garder',
+    'it': 'Mantieni', 'el': 'Διατήρηση', 'es': 'Mantener', 'pt': 'Manter',
+    'ru': 'Оставить', 'tr': 'Koru', 'ja': '保持',
+  };
+  static const _deleteSchedule = {
+    'en': 'Delete schedule', 'bg': 'Изтрий разписанието', 'de': 'Löschen',
+    'fr': 'Supprimer', 'it': 'Elimina', 'el': 'Διαγραφή', 'es': 'Eliminar',
+    'pt': 'Eliminar', 'ru': 'Удалить', 'tr': 'Sil', 'ja': '削除',
   };
   static const _pickHint = {
     'en': 'Tap to choose', 'bg': 'Докосни, за да избереш', 'de': 'Zum Wählen tippen',
@@ -267,6 +324,18 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
     final uni = _uni!;
     final manual = uni.programs.isEmpty || _manualProgram;
     final program = manual ? _programCtrl.text.trim() : _program;
+    final group = _groupCtrl.text.trim();
+
+    // Смяна на групата (стар профил с група → нова, различна) + има разписание →
+    // питаме дали да го изтрием (различната група обикновено има друга програма).
+    if (_initialGroup.isNotEmpty &&
+        group != _initialGroup &&
+        !_wsvc.isEmpty) {
+      final wipe = await _confirmGroupChange(lang);
+      if (wipe == null) return; // отказ → нищо не правим
+      if (wipe) await _wsvc.clearAll();
+    }
+
     final profile = UniversityProfile(
       uniId: uni.id,
       uniName: uni.isOther ? _uniNameCtrl.text.trim() : null,
@@ -274,12 +343,36 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
       program: program,
       year: _year,
       form: _form,
+      groupNumber: group,
+      lastScheduleSync: _service.profile?.lastScheduleSync,
     );
     await _service.setProfile(profile);
     await _service.setEnabled(true);
     // Режимите са взаимно изключващи се (ученик ИЛИ студент).
     await SchoolCalendarService().setEnabled(false);
     if (mounted) Navigator.pop(context, true);
+  }
+
+  /// Пита при смяна на групата: `true` = изтрий разписанието, `false` = запази,
+  /// `null` = отказ (не записваме).
+  Future<bool?> _confirmGroupChange(String lang) {
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(_t(_changeGroupTitle, lang)),
+        content: Text(_t(_changeGroupBody, lang)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(_t(_keepSchedule, lang)),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(_t(_deleteSchedule, lang)),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _turnOffMode() async {
@@ -395,6 +488,19 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
                         onSelected: (_) => setState(() => _year = y),
                       ),
                   ],
+                ),
+                const SizedBox(height: 20),
+
+                // ── Група (свободен текст, незадължителна) ──
+                TextField(
+                  controller: _groupCtrl,
+                  textCapitalization: TextCapitalization.characters,
+                  decoration: InputDecoration(
+                    labelText: _t(_groupLabel, lang),
+                    helperText: _t(_groupHint, lang),
+                    helperMaxLines: 3,
+                    border: const OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: 20),
 

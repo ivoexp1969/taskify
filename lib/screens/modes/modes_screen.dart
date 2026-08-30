@@ -101,6 +101,11 @@ class _ModesScreenState extends State<ModesScreen> {
     'it': 'classe', 'el': 'τάξη', 'es': 'grado', 'pt': 'ano',
     'ru': 'класс', 'tr': 'sınıf', 'ja': '年生',
   };
+  // Кратък етикет за студентска група (пред номера, напр. „гр. 12А").
+  static const _groupShort = {
+    'en': 'grp', 'bg': 'гр.', 'de': 'Gr.', 'fr': 'grp', 'it': 'gr.',
+    'el': 'ομ.', 'es': 'gr.', 'pt': 'gr.', 'ru': 'гр.', 'tr': 'grp', 'ja': '班',
+  };
   static const _examsTitle = {
     'en': 'Upcoming exams', 'bg': 'Предстоящи изпити', 'de': 'Anstehende Prüfungen',
     'fr': 'Examens à venir', 'it': 'Prossimi esami', 'el': 'Επερχόμενες εξετάσεις',
@@ -248,6 +253,7 @@ class _ModesScreenState extends State<ModesScreen> {
     if (p == null) return '';
     final parts = <String>[
       _courseLabel(lang, p.year),
+      if (p.groupNumber.isNotEmpty) '${_t(_groupShort, lang)} ${p.groupNumber}',
       if (p.program.isNotEmpty) p.program,
       _t(_formLabels[p.form.key] ?? _formLabels['redovno']!, lang),
     ];

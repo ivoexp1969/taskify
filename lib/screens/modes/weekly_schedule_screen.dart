@@ -3,7 +3,13 @@ import 'package:flutter/material.dart';
 import '../../models/weekly_schedule.dart';
 import '../../services/weekly_schedule_service.dart';
 import '../../services/university_service.dart';
+import '../../utils/category_colors.dart';
 import '../../utils/localization.dart';
+import 'study_events_screen.dart';
+
+/// Изглед на разписанието по седмичен шаблон: всички слотове, само видимите в
+/// четна или само в нечетна седмица.
+enum _WeekView { all, even, odd }
 
 /// Екран „Учебна програма" — прости слотове уроци/лекции по дни от седмицата,
 /// организирани по **срок (ученик) / семестър (студент)**. Слотовете се виждат
@@ -19,9 +25,18 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
   final _svc = WeeklyScheduleService();
   bool _loading = true;
 
+  /// Избран ден в таб-навигацията (1=пон … 5=пет). По подразбиране днешният
+  /// работен ден (или понеделник през уикенда).
+  late int _selectedDay;
+
+  /// Филтър на изгледа по седмичен шаблон (само студенти).
+  _WeekView _weekView = _WeekView.all;
+
   @override
   void initState() {
     super.initState();
+    final wd = DateTime.now().weekday;
+    _selectedDay = wd >= 1 && wd <= 5 ? wd : 1;
     _svc.load().then((_) {
       if (mounted) setState(() => _loading = false);
     });
@@ -83,6 +98,79 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
     'tr': 'Ders yok — eklemek için dokun.',
     'ja': '授業なし — タップで追加。',
   };
+  // Централно празно състояние (цялото разписание за срока е празно).
+  static const _emptyTitle = {
+    'en': 'No classes yet', 'bg': 'Още нямаш въведени часове',
+    'de': 'Noch keine Stunden', 'fr': 'Aucun cours pour l\'instant',
+    'it': 'Ancora nessuna lezione', 'el': 'Δεν υπάρχουν μαθήματα ακόμη',
+    'es': 'Aún no hay clases', 'pt': 'Ainda não há aulas',
+    'ru': 'Пока нет занятий', 'tr': 'Henüz ders yok', 'ja': 'まだ授業がありません',
+  };
+  static const _addFirst = {
+    'en': 'Add your first class →', 'bg': 'Добави първия си час →',
+    'de': 'Erste Stunde hinzufügen →', 'fr': 'Ajoute ton premier cours →',
+    'it': 'Aggiungi la prima lezione →', 'el': 'Πρόσθεσε το πρώτο μάθημα →',
+    'es': 'Añade tu primera clase →', 'pt': 'Adiciona a tua primeira aula →',
+    'ru': 'Добавь первое занятие →', 'tr': 'İlk dersini ekle →',
+    'ja': '最初の授業を追加 →',
+  };
+  // Индикатор за текущата седмица (студент + зададено начало на семестъра).
+  static const _thisWeekEven = {
+    'en': 'This week is even', 'bg': 'Тази седмица е четна',
+    'de': 'Diese Woche ist gerade', 'fr': 'Cette semaine est paire',
+    'it': 'Questa settimana è pari', 'el': 'Αυτή η εβδομάδα είναι ζυγή',
+    'es': 'Esta semana es par', 'pt': 'Esta semana é par',
+    'ru': 'Эта неделя чётная', 'tr': 'Bu hafta çift', 'ja': '今週は偶数週',
+  };
+  static const _thisWeekOdd = {
+    'en': 'This week is odd', 'bg': 'Тази седмица е нечетна',
+    'de': 'Diese Woche ist ungerade', 'fr': 'Cette semaine est impaire',
+    'it': 'Questa settimana è dispari', 'el': 'Αυτή η εβδομάδα είναι μονή',
+    'es': 'Esta semana es impar', 'pt': 'Esta semana é ímpar',
+    'ru': 'Эта неделя нечётная', 'tr': 'Bu hafta tek', 'ja': '今週は奇数週',
+  };
+  static const _weekNo = {
+    'en': 'week {n} of the semester', 'bg': 'седмица {n} от началото на семестъра',
+    'de': 'Woche {n} des Semesters', 'fr': 'semaine {n} du semestre',
+    'it': 'settimana {n} del semestre', 'el': 'εβδομάδα {n} του εξαμήνου',
+    'es': 'semana {n} del semestre', 'pt': 'semana {n} do semestre',
+    'ru': 'неделя {n} семестра', 'tr': 'dönemin {n}. haftası',
+    'ja': '学期の第{n}週',
+  };
+  static const _setSemesterStart = {
+    'en': 'Set semester start →', 'bg': 'Задай начало на семестъра →',
+    'de': 'Semesterbeginn festlegen →', 'fr': 'Définir le début du semestre →',
+    'it': 'Imposta inizio semestre →', 'el': 'Όρισε έναρξη εξαμήνου →',
+    'es': 'Definir inicio de semestre →', 'pt': 'Definir início do semestre →',
+    'ru': 'Указать начало семестра →', 'tr': 'Dönem başını ayarla →',
+    'ja': '学期の開始日を設定 →',
+  };
+  // Филтър на изгледа (студент).
+  static const _viewAll = {
+    'en': 'All', 'bg': 'Всички', 'de': 'Alle', 'fr': 'Toutes', 'it': 'Tutte',
+    'el': 'Όλα', 'es': 'Todas', 'pt': 'Todas', 'ru': 'Все', 'tr': 'Tümü',
+    'ja': 'すべて',
+  };
+  static const _viewEven = {
+    'en': 'Even', 'bg': 'Четна', 'de': 'Gerade', 'fr': 'Paire', 'it': 'Pari',
+    'el': 'Ζυγή', 'es': 'Par', 'pt': 'Par', 'ru': 'Чётная', 'tr': 'Çift',
+    'ja': '偶数',
+  };
+  static const _viewOdd = {
+    'en': 'Odd', 'bg': 'Нечетна', 'de': 'Ungerade', 'fr': 'Impaire',
+    'it': 'Dispari', 'el': 'Μονή', 'es': 'Impar', 'pt': 'Ímpar',
+    'ru': 'Нечётная', 'tr': 'Tek', 'ja': '奇数',
+  };
+  // Кратки етикети за седмичния шаблон на слота (badge в списъка).
+  static const _evenBadge = {
+    'en': 'even', 'bg': 'четна', 'de': 'gerade', 'fr': 'paire', 'it': 'pari',
+    'el': 'ζυγή', 'es': 'par', 'pt': 'par', 'ru': 'чёт.', 'tr': 'çift', 'ja': '偶',
+  };
+  static const _oddBadge = {
+    'en': 'odd', 'bg': 'нечетна', 'de': 'ungerade', 'fr': 'impaire',
+    'it': 'dispari', 'el': 'μονή', 'es': 'impar', 'pt': 'ímpar', 'ru': 'нечёт.',
+    'tr': 'tek', 'ja': '奇',
+  };
 
   static const _dayNames = {
     'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -97,11 +185,6 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
     'tr': ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
     'ja': ['月', '火', '水', '木', '金', '土', '日'],
   };
-
-  String _dayName(String lang, int day) {
-    final list = _dayNames[lang] ?? _dayNames['en']!;
-    return list[(day - 1).clamp(0, 6)];
-  }
 
   Future<void> _addOrEdit(String lang,
       {ScheduleSlot? existing,
@@ -144,28 +227,50 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
         day: day, initialFromMinutes: fromMin, initialToMinutes: toMin);
   }
 
+  bool _passesView(ScheduleSlot s) {
+    switch (_weekView) {
+      case _WeekView.all:
+        return true;
+      case _WeekView.even:
+        return s.weekPattern != WeekPattern.oddOnly;
+      case _WeekView.odd:
+        return s.weekPattern != WeekPattern.evenOnly;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final lang = LanguageScope.of(context).locale.languageCode;
     return Scaffold(
       appBar: AppBar(title: Text(_t(_title, lang))),
+      floatingActionButton: _loading
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () => _addForDay(lang, _selectedDay),
+              icon: const Icon(Icons.add),
+              label: Text(_t(_addLesson, lang)),
+            ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : AnimatedBuilder(
               animation: WeeklyScheduleService.revision,
               builder: (context, _) {
+                final termEmpty = _svc.isEmptyForTerm();
                 return Column(
                   children: [
                     _termSelector(context, lang),
+                    _weekIndicator(context, lang),
+                    _viewFilter(context, lang),
+                    _dayTabs(context, lang),
+                    const Divider(height: 1),
                     Expanded(
-                      child: ListView(
-                        padding: const EdgeInsets.fromLTRB(8, 8, 8, 96),
-                        children: [
-                          // Работната седмица: понеделник (1) – петък (5).
-                          for (int day = 1; day <= 5; day++)
-                            _daySection(context, lang, day),
-                        ],
-                      ),
+                      child: termEmpty
+                          ? _centralEmpty(context, lang)
+                          : ListView(
+                              padding:
+                                  const EdgeInsets.fromLTRB(8, 8, 8, 96),
+                              children: _dayContent(context, lang, _selectedDay),
+                            ),
                     ),
                   ],
                 );
@@ -196,73 +301,254 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
     );
   }
 
-  Widget _daySection(BuildContext context, String lang, int day) {
-    final slots = _svc.forDay(day);
+  /// Малка карта „Тази седмица е нечетна (седмица N)" — само за студент със
+  /// зададено начало на семестъра; иначе бутон „Задай начало на семестъра →".
+  Widget _weekIndicator(BuildContext context, String lang) {
+    if (!UniversityService().enabled) return const SizedBox.shrink();
     final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Заглавие на деня + бутон „+" за добавяне на час в този ден.
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 14, 4, 2),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(_dayName(lang, day),
-                    style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                        color: theme.colorScheme.primary)),
-              ),
-              IconButton(
-                icon: const Icon(Icons.add),
-                visualDensity: VisualDensity.compact,
-                tooltip: _t(_addLesson, lang),
-                onPressed: () => _addForDay(lang, day),
-              ),
-            ],
+    final start = UniversityService().currentSemesterStart();
+    final weekNo = currentWeekNumber(start, DateTime.now());
+    if (weekNo < 1) {
+      // Няма (или бъдещо) начало на семестъра → подкана да го зададе.
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(12, 6, 12, 2),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            style: TextButton.styleFrom(
+                minimumSize: const Size(0, 32),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+            icon: const Icon(Icons.event_available, size: 18),
+            label: Text(_t(_setSemesterStart, lang)),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const StudyEventsScreen()),
+            ),
           ),
         ),
-        if (slots.isEmpty)
-          InkWell(
-            onTap: () => _addForDay(lang, day),
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-              child: Text(_t(_noLessonsDay, lang),
-                  style: TextStyle(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontSize: 13)),
-            ),
-          )
-        else
-          for (final s in slots)
-            Card(
-              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              child: ListTile(
-                leading: Icon(
-                    s.kind == SlotKind.lecture
-                        ? Icons.school_outlined
-                        : Icons.menu_book_outlined,
-                    color: theme.colorScheme.primary),
-                title: Text(s.subject.isNotEmpty ? s.subject : '—'),
-                subtitle: Text([
-                  '${s.fromLabel}–${s.toLabel}',
-                  if (s.location != null) '📍 ${s.location}',
-                ].join('  ')),
-                trailing: IconButton(
-                  icon: Icon(Icons.delete_outline,
-                      color: theme.colorScheme.error),
-                  tooltip: _t(_deleteTip, lang),
-                  onPressed: () async {
-                    await _svc.remove(s.id);
-                    if (mounted) setState(() {});
-                  },
-                ),
-                onTap: () => _addOrEdit(lang, existing: s),
+      );
+    }
+    final isEven = weekNo % 2 == 0;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 6, 12, 2),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Icon(isEven ? Icons.looks_two_outlined : Icons.looks_one_outlined,
+              size: 20, color: theme.colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text.rich(TextSpan(children: [
+              TextSpan(
+                text: _t(isEven ? _thisWeekEven : _thisWeekOdd, lang),
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              TextSpan(
+                text:
+                    ' · ${_t(_weekNo, lang).replaceAll('{n}', '$weekNo')}',
+                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+              ),
+            ])),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Филтър „Всички / Четна / Нечетна" (само студенти). Пълна ширина, за да
+  /// се събира текстът на един ред.
+  Widget _viewFilter(BuildContext context, String lang) {
+    if (!UniversityService().enabled) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
+      child: SizedBox(
+        width: double.infinity,
+        child: SegmentedButton<_WeekView>(
+          style: const ButtonStyle(
+            visualDensity: VisualDensity.compact,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          segments: [
+            ButtonSegment(
+                value: _WeekView.all,
+                label: Text(_t(_viewAll, lang),
+                    maxLines: 1, overflow: TextOverflow.ellipsis)),
+            ButtonSegment(
+                value: _WeekView.even,
+                label: Text(_t(_viewEven, lang),
+                    maxLines: 1, overflow: TextOverflow.ellipsis)),
+            ButtonSegment(
+                value: _WeekView.odd,
+                label: Text(_t(_viewOdd, lang),
+                    maxLines: 1, overflow: TextOverflow.ellipsis)),
+          ],
+          selected: {_weekView},
+          showSelectedIcon: false,
+          onSelectionChanged: (s) => setState(() => _weekView = s.first),
+        ),
+      ),
+    );
+  }
+
+  /// Табове по дни (Пн–Пт). Показва точка, ако денят има часове в текущия срок.
+  Widget _dayTabs(BuildContext context, String lang) {
+    final theme = Theme.of(context);
+    final short = _dayNames[lang] ?? _dayNames['en']!;
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+      child: Row(
+        children: [
+          for (int day = 1; day <= 5; day++)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 3),
+              child: ChoiceChip(
+                label: Text(short[day - 1]),
+                selected: _selectedDay == day,
+                avatar: _svc.forDay(day).isNotEmpty
+                    ? Icon(Icons.circle,
+                        size: 8, color: theme.colorScheme.primary)
+                    : null,
+                onSelected: (_) => setState(() => _selectedDay = day),
               ),
             ),
-      ],
+        ],
+      ),
+    );
+  }
+
+  /// Съдържанието за избрания ден: часовете (филтрирани по изгледа), цветни;
+  /// празно → приятелски ред с покана.
+  List<Widget> _dayContent(BuildContext context, String lang, int day) {
+    final theme = Theme.of(context);
+    final slots = _svc.forDay(day).where(_passesView).toList();
+    if (slots.isEmpty) {
+      return [
+        InkWell(
+          onTap: () => _addForDay(lang, day),
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+            child: Row(
+              children: [
+                Icon(Icons.add_circle_outline,
+                    color: theme.colorScheme.onSurfaceVariant),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(_t(_noLessonsDay, lang),
+                      style: TextStyle(
+                          color: theme.colorScheme.onSurfaceVariant)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ];
+    }
+    return [for (final s in slots) _slotCard(context, lang, s)];
+  }
+
+  Widget _slotCard(BuildContext context, String lang, ScheduleSlot s) {
+    final theme = Theme.of(context);
+    final color = s.colorValue != null
+        ? Color(s.colorValue!)
+        : theme.colorScheme.primary;
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      child: ListTile(
+        leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+              s.kind == SlotKind.lecture
+                  ? Icons.school_outlined
+                  : Icons.menu_book_outlined,
+              color: color),
+        ),
+        title: Text(s.subject.isNotEmpty ? s.subject : '—'),
+        isThreeLine: s.location != null && s.location!.isNotEmpty,
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text('${s.fromLabel}–${s.toLabel}'),
+                if (s.weekPattern != WeekPattern.every) ...[
+                  const SizedBox(width: 6),
+                  _weekBadge(theme, lang, s.weekPattern),
+                ],
+              ],
+            ),
+            if (s.location != null && s.location!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text('📍 ${s.location}',
+                    maxLines: 2, overflow: TextOverflow.ellipsis),
+              ),
+          ],
+        ),
+        trailing: IconButton(
+          icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
+          tooltip: _t(_deleteTip, lang),
+          onPressed: () async {
+            await _svc.remove(s.id);
+            if (mounted) setState(() {});
+          },
+        ),
+        onTap: () => _addOrEdit(lang, existing: s),
+      ),
+    );
+  }
+
+  Widget _weekBadge(ThemeData theme, String lang, WeekPattern p) {
+    final txt =
+        _t(p == WeekPattern.evenOnly ? _evenBadge : _oddBadge, lang);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.tertiary.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(txt,
+          style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.tertiary)),
+    );
+  }
+
+  /// Централно празно състояние за целия срок (вместо 5× „Няма часове").
+  Widget _centralEmpty(BuildContext context, String lang) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.calendar_month_outlined,
+                size: 56, color: theme.colorScheme.primary.withValues(alpha: 0.7)),
+            const SizedBox(height: 16),
+            Text(_t(_emptyTitle, lang),
+                style: const TextStyle(
+                    fontSize: 17, fontWeight: FontWeight.w700),
+                textAlign: TextAlign.center),
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              onPressed: () => _addForDay(lang, _selectedDay),
+              icon: const Icon(Icons.add),
+              label: Text(_t(_addFirst, lang)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -303,6 +589,13 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
           ? TimeOfDay(hour: initialToMinutes ~/ 60, minute: initialToMinutes % 60)
           : const TimeOfDay(hour: 8, minute: 45));
   SlotKind kind = existing?.kind ?? SlotKind.lesson;
+  WeekPattern weekPattern = existing?.weekPattern ?? WeekPattern.every;
+  int? colorValue = existing?.colorValue;
+  // Ръчно избран цвят? (пази авто-предложението да не презапише избора.)
+  bool colorTouched = existing?.colorValue != null;
+  // Седмичният шаблон (четна/нечетна) е реалност за студенти → показва се само
+  // в режим Студент; учениците виждат опростен диалог.
+  final bool isStudent = UniversityService().enabled;
 
   const subjectLabel = {
     'en': 'Subject', 'bg': 'Предмет', 'de': 'Fach', 'fr': 'Matière',
@@ -327,9 +620,11 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
     'en': 'To', 'bg': 'До', 'de': 'Bis', 'fr': 'À', 'it': 'A', 'el': 'Έως',
     'es': 'Hasta', 'pt': 'Até', 'ru': 'До', 'tr': 'Bitiş', 'ja': '終了',
   };
-  const lessonLbl = {
-    'en': 'Lesson', 'bg': 'Урок', 'de': 'Unterricht', 'fr': 'Cours', 'it': 'Lezione',
-    'el': 'Μάθημα', 'es': 'Clase', 'pt': 'Aula', 'ru': 'Урок', 'tr': 'Ders', 'ja': '授業',
+  // За студенти „урокът" е упражнение/семинар (различно от лекция).
+  const exerciseLbl = {
+    'en': 'Exercise', 'bg': 'Упражнение', 'de': 'Übung', 'fr': 'Exercices',
+    'it': 'Esercitazione', 'el': 'Άσκηση', 'es': 'Práctica', 'pt': 'Prática',
+    'ru': 'Практика', 'tr': 'Uygulama', 'ja': '演習',
   };
   const lectureLbl = {
     'en': 'Lecture', 'bg': 'Лекция', 'de': 'Vorlesung', 'fr': 'Cours magistral',
@@ -378,6 +673,60 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
     'fr': 'un autre créneau', 'it': 'un altro slot', 'el': 'άλλη ώρα',
     'es': 'otro horario', 'pt': 'outro horário', 'ru': 'другим слотом',
     'tr': 'başka bir ders', 'ja': '別の予定',
+  };
+  const repeatLabel = {
+    'en': 'Repeats', 'bg': 'Повтаряне', 'de': 'Wiederholung', 'fr': 'Répétition',
+    'it': 'Ripetizione', 'el': 'Επανάληψη', 'es': 'Repetición', 'pt': 'Repetição',
+    'ru': 'Повтор', 'tr': 'Tekrar', 'ja': '繰り返し',
+  };
+  const everyWeek = {
+    'en': 'Every week', 'bg': 'Всяка седмица', 'de': 'Jede Woche',
+    'fr': 'Chaque semaine', 'it': 'Ogni settimana', 'el': 'Κάθε εβδομάδα',
+    'es': 'Cada semana', 'pt': 'Todas as semanas', 'ru': 'Каждую неделю',
+    'tr': 'Her hafta', 'ja': '毎週',
+  };
+  const evenWeek = {
+    'en': 'Even week', 'bg': 'Четна седмица', 'de': 'Gerade Woche',
+    'fr': 'Semaine paire', 'it': 'Settimana pari', 'el': 'Ζυγή εβδομάδα',
+    'es': 'Semana par', 'pt': 'Semana par', 'ru': 'Чётная неделя',
+    'tr': 'Çift hafta', 'ja': '偶数週',
+  };
+  const oddWeek = {
+    'en': 'Odd week', 'bg': 'Нечетна седмица', 'de': 'Ungerade Woche',
+    'fr': 'Semaine impaire', 'it': 'Settimana dispari', 'el': 'Μονή εβδομάδα',
+    'es': 'Semana impar', 'pt': 'Semana ímpar', 'ru': 'Нечётная неделя',
+    'tr': 'Tek hafta', 'ja': '奇数週',
+  };
+  const evenHelp = {
+    'en': 'Shows only in even weeks from the semester start.',
+    'bg': 'Показва се само в четните седмици от началото на семестъра.',
+    'de': 'Nur in geraden Wochen ab Semesterbeginn.',
+    'fr': 'Affiché uniquement les semaines paires depuis le début du semestre.',
+    'it': 'Mostrato solo nelle settimane pari dall\'inizio del semestre.',
+    'el': 'Εμφανίζεται μόνο σε ζυγές εβδομάδες από την έναρξη του εξαμήνου.',
+    'es': 'Se muestra solo en semanas pares desde el inicio del semestre.',
+    'pt': 'Aparece só nas semanas pares desde o início do semestre.',
+    'ru': 'Показывается только в чётные недели от начала семестра.',
+    'tr': 'Yalnızca dönem başından itibaren çift haftalarda görünür.',
+    'ja': '学期開始からの偶数週にのみ表示されます。',
+  };
+  const oddHelp = {
+    'en': 'Shows only in odd weeks from the semester start.',
+    'bg': 'Показва се само в нечетните седмици от началото на семестъра.',
+    'de': 'Nur in ungeraden Wochen ab Semesterbeginn.',
+    'fr': 'Affiché uniquement les semaines impaires depuis le début du semestre.',
+    'it': 'Mostrato solo nelle settimane dispari dall\'inizio del semestre.',
+    'el': 'Εμφανίζεται μόνο σε μονές εβδομάδες από την έναρξη του εξαμήνου.',
+    'es': 'Se muestra solo en semanas impares desde el inicio del semestre.',
+    'pt': 'Aparece só nas semanas ímpares desde o início do semestre.',
+    'ru': 'Показывается только в нечётные недели от начала семестра.',
+    'tr': 'Yalnızca dönem başından itibaren tek haftalarda görünür.',
+    'ja': '学期開始からの奇数週にのみ表示されます。',
+  };
+  const colorLabel = {
+    'en': 'Color', 'bg': 'Цвят', 'de': 'Farbe', 'fr': 'Couleur', 'it': 'Colore',
+    'el': 'Χρώμα', 'es': 'Color', 'pt': 'Cor', 'ru': 'Цвет', 'tr': 'Renk',
+    'ja': '色',
   };
   const dayNames = _WeeklyScheduleScreenState._dayNames;
 
@@ -447,21 +796,106 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
                     isDense: true,
                     border: const OutlineInputBorder(),
                   ),
+                  // Ако предмет със същото име вече има цвят → предложи го (освен
+                  // ако потребителят вече е избрал цвят ръчно).
+                  onChanged: (v) {
+                    if (colorTouched) return;
+                    final suggested = svc.colorForSubject(v);
+                    if (suggested != colorValue) {
+                      setD(() => colorValue = suggested);
+                    }
+                  },
                 ),
+                // Тип на часа само за студенти (упражнение/лекция). При
+                // учениците няма разлика — просто „час" (kind остава lesson).
+                if (isStudent) ...[
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      ChoiceChip(
+                        label: Text(t(exerciseLbl)),
+                        selected: kind == SlotKind.lesson,
+                        onSelected: (_) => setD(() => kind = SlotKind.lesson),
+                      ),
+                      ChoiceChip(
+                        label: Text(t(lectureLbl)),
+                        selected: kind == SlotKind.lecture,
+                        onSelected: (_) => setD(() => kind = SlotKind.lecture),
+                      ),
+                    ],
+                  ),
+                ],
+                // ── Повтаряне: всяка / четна / нечетна седмица (само студенти) ──
+                if (isStudent) ...[
+                  const SizedBox(height: 12),
+                  Text(t(repeatLabel),
+                      style: Theme.of(ctx).textTheme.labelMedium),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      ChoiceChip(
+                        label: Text(t(everyWeek)),
+                        selected: weekPattern == WeekPattern.every,
+                        onSelected: (_) =>
+                            setD(() => weekPattern = WeekPattern.every),
+                      ),
+                      ChoiceChip(
+                        label: Text(t(evenWeek)),
+                        selected: weekPattern == WeekPattern.evenOnly,
+                        onSelected: (_) =>
+                            setD(() => weekPattern = WeekPattern.evenOnly),
+                      ),
+                      ChoiceChip(
+                        label: Text(t(oddWeek)),
+                        selected: weekPattern == WeekPattern.oddOnly,
+                        onSelected: (_) =>
+                            setD(() => weekPattern = WeekPattern.oddOnly),
+                      ),
+                    ],
+                  ),
+                  if (weekPattern != WeekPattern.every)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                          t(weekPattern == WeekPattern.evenOnly
+                              ? evenHelp
+                              : oddHelp),
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(ctx)
+                                  .colorScheme
+                                  .onSurfaceVariant)),
+                    ),
+                ],
+                // ── Цвят на предмета ──
                 const SizedBox(height: 12),
+                Text(t(colorLabel), style: Theme.of(ctx).textTheme.labelMedium),
+                const SizedBox(height: 6),
                 Wrap(
                   spacing: 8,
+                  runSpacing: 8,
                   children: [
-                    ChoiceChip(
-                      label: Text(t(lessonLbl)),
-                      selected: kind == SlotKind.lesson,
-                      onSelected: (_) => setD(() => kind = SlotKind.lesson),
+                    // „Без цвят".
+                    _ColorDot(
+                      color: null,
+                      selected: colorValue == null,
+                      onTap: () => setD(() {
+                        colorValue = null;
+                        colorTouched = true;
+                      }),
                     ),
-                    ChoiceChip(
-                      label: Text(t(lectureLbl)),
-                      selected: kind == SlotKind.lecture,
-                      onSelected: (_) => setD(() => kind = SlotKind.lecture),
-                    ),
+                    for (final c in kCategoryColors)
+                      _ColorDot(
+                        color: c,
+                        selected: colorValue == c.toARGB32(),
+                        onTap: () => setD(() {
+                          colorValue = c.toARGB32();
+                          colorTouched = true;
+                        }),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -517,6 +951,9 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
                         subject: subjectCtrl.text.trim(),
                         kind: kind,
                         location: locationCtrl.text.trim(),
+                        weekPattern: weekPattern,
+                        colorValue: colorValue,
+                        clearColor: colorValue == null,
                       )
                     : svc.newSlot(
                         day: day,
@@ -527,6 +964,8 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
                         location: locationCtrl.text.trim().isEmpty
                             ? null
                             : locationCtrl.text.trim(),
+                        weekPattern: weekPattern,
+                        colorValue: colorValue,
                       );
                 // Валидация: краят след началото + без припокриване в деня.
                 if (!slot.hasValidRange) {
@@ -553,4 +992,45 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
       },
     ),
   );
+}
+
+/// Кръгче за избор на цвят на предмета. [color] == null → „без цвят".
+class _ColorDot extends StatelessWidget {
+  final Color? color;
+  final bool selected;
+  final VoidCallback onTap;
+  const _ColorDot({
+    required this.color,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      customBorder: const CircleBorder(),
+      child: Container(
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+          color: color ?? Colors.transparent,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: selected
+                ? theme.colorScheme.onSurface
+                : theme.colorScheme.outlineVariant,
+            width: selected ? 2.5 : 1,
+          ),
+        ),
+        child: color == null
+            ? Icon(Icons.block,
+                size: 16, color: theme.colorScheme.onSurfaceVariant)
+            : (selected
+                ? const Icon(Icons.check, size: 16, color: Colors.white)
+                : null),
+      ),
+    );
+  }
 }

@@ -218,6 +218,22 @@ class _StudyEventsScreenState extends State<StudyEventsScreen> {
     if (mounted) setState(() {});
   }
 
+  /// Редакция на съществуваща (ръчна) ключова дата — тап върху реда.
+  Future<void> _editKeyDate(String lang, String id) async {
+    final existing = _uni.keyDateById(id);
+    if (existing == null) return;
+    final result =
+        await showStudentKeyDateDialog(context, lang, existing: existing);
+    if (result == null) return;
+    await _uni.updateKeyDate(StudentKeyDate(
+      id: existing.id,
+      title: result.title,
+      date: result.date,
+      kind: result.kind,
+    ));
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final lang = LanguageScope.of(context).locale.languageCode;
@@ -263,6 +279,11 @@ class _StudyEventsScreenState extends State<StudyEventsScreen> {
                           Text(e.emoji, style: const TextStyle(fontSize: 24)),
                       title: Text(e.title),
                       subtitle: Text('$dateStr · ${_relative(lang, e.date)}'),
+                      // Ръчните дати (studentDateId != null) са редактируеми при тап
+                      // и се трият с иконата; извлечените (ваканции/НВО) — не.
+                      onTap: e.studentDateId != null
+                          ? () => _editKeyDate(lang, e.studentDateId!)
+                          : null,
                       trailing: e.studentDateId != null
                           ? IconButton(
                               icon: const Icon(Icons.delete_outline),
@@ -306,11 +327,11 @@ class StudentKeyDateInput {
 
 /// Диалог за добавяне на студентска ключова дата (тип + заглавие + дата).
 Future<StudentKeyDateInput?> showStudentKeyDateDialog(
-    BuildContext context, String lang) {
+    BuildContext context, String lang, {StudentKeyDate? existing}) {
   String t(Map<String, String> m) => m[lang] ?? m['en']!;
-  StudentDateKind kind = StudentDateKind.exam;
-  final titleCtrl = TextEditingController();
-  DateTime? date;
+  StudentDateKind kind = existing?.kind ?? StudentDateKind.exam;
+  final titleCtrl = TextEditingController(text: existing?.title ?? '');
+  DateTime? date = existing?.date;
 
   const titleLabel = {
     'en': 'Title (optional)', 'bg': 'Заглавие (по избор)', 'de': 'Titel (optional)',
@@ -338,6 +359,17 @@ Future<StudentKeyDateInput?> showStudentKeyDateDialog(
     'it': 'Aggiungi', 'el': 'Προσθήκη', 'es': 'Añadir', 'pt': 'Adicionar',
     'ru': 'Добавить', 'tr': 'Ekle', 'ja': '追加',
   };
+  const saveLbl = {
+    'en': 'Save', 'bg': 'Запази', 'de': 'Speichern', 'fr': 'Enregistrer',
+    'it': 'Salva', 'el': 'Αποθήκευση', 'es': 'Guardar', 'pt': 'Guardar',
+    'ru': 'Сохранить', 'tr': 'Kaydet', 'ja': '保存',
+  };
+  const editTitle = {
+    'en': 'Edit date', 'bg': 'Редактирай дата', 'de': 'Datum bearbeiten',
+    'fr': 'Modifier la date', 'it': 'Modifica data', 'el': 'Επεξεργασία ημ/νίας',
+    'es': 'Editar fecha', 'pt': 'Editar data', 'ru': 'Изменить дату',
+    'tr': 'Tarihi düzenle', 'ja': '日付を編集',
+  };
 
   return showDialog<StudentKeyDateInput>(
     context: context,
@@ -350,7 +382,7 @@ Future<StudentKeyDateInput?> showStudentKeyDateDialog(
               ? t(pickDate)
               : '${date!.day} ${months[date!.month - 1]} ${date!.year}';
           return AlertDialog(
-            title: Text(t(_StudyEventsScreenState._addDate)),
+            title: Text(t(existing != null ? editTitle : _StudyEventsScreenState._addDate)),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -415,7 +447,7 @@ Future<StudentKeyDateInput?> showStudentKeyDateDialog(
                             kind: kind,
                           ),
                         ),
-                child: Text(t(add)),
+                child: Text(t(existing != null ? saveLbl : add)),
               ),
             ],
           );

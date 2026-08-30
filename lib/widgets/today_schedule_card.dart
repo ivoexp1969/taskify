@@ -4,6 +4,7 @@ import '../models/weekly_schedule.dart';
 import '../models/school_calendar.dart';
 import '../services/weekly_schedule_service.dart';
 import '../services/school_calendar_service.dart';
+import '../services/university_service.dart';
 import '../screens/modes/weekly_schedule_screen.dart';
 import '../utils/localization.dart';
 
@@ -53,14 +54,6 @@ class _TodayScheduleCardState extends State<TodayScheduleCard> {
     'es': '¡Buen día! 🌴', 'pt': 'Bom dia! 🌴',
     'ru': 'Хорошего дня! 🌴', 'tr': 'İyi günler! 🌴', 'ja': '良い一日を！🌴',
   };
-  static const _addSchedule = {
-    'en': 'Add your schedule →', 'bg': 'Въведи разписанието си →',
-    'de': 'Stundenplan hinzufügen →', 'fr': 'Ajoute ton emploi du temps →',
-    'it': 'Aggiungi il tuo orario →', 'el': 'Πρόσθεσε το πρόγραμμά σου →',
-    'es': 'Añade tu horario →', 'pt': 'Adiciona o teu horário →',
-    'ru': 'Добавь расписание →', 'tr': 'Programını ekle →',
-    'ja': '時間割を追加 →',
-  };
   static const _seeWeek = {
     'en': 'See full week', 'bg': 'Виж цялата седмица',
     'de': 'Ganze Woche', 'fr': 'Voir la semaine', 'it': 'Vedi la settimana',
@@ -71,6 +64,31 @@ class _TodayScheduleCardState extends State<TodayScheduleCard> {
     'en': 'now', 'bg': 'сега', 'de': 'jetzt', 'fr': 'maintenant',
     'it': 'ora', 'el': 'τώρα', 'es': 'ahora', 'pt': 'agora',
     'ru': 'сейчас', 'tr': 'şimdi', 'ja': '今',
+  };
+  static const _nowUpper = {
+    'en': 'Now', 'bg': 'Сега', 'de': 'Jetzt', 'fr': 'Maintenant',
+    'it': 'Ora', 'el': 'Τώρα', 'es': 'Ahora', 'pt': 'Agora',
+    'ru': 'Сейчас', 'tr': 'Şimdi', 'ja': '今',
+  };
+  static const _nextUp = {
+    'en': 'Next', 'bg': 'Следва', 'de': 'Als Nächstes', 'fr': 'À suivre',
+    'it': 'Prossima', 'el': 'Επόμενο', 'es': 'Siguiente', 'pt': 'A seguir',
+    'ru': 'Далее', 'tr': 'Sıradaki', 'ja': '次',
+  };
+  // Кратък индикатор за седмицата в хедъра (студент + начало на семестъра).
+  static const _weekWord = {
+    'en': 'week', 'bg': 'седмица', 'de': 'Woche', 'fr': 'semaine',
+    'it': 'settimana', 'el': 'εβδομάδα', 'es': 'semana', 'pt': 'semana',
+    'ru': 'неделя', 'tr': 'hafta', 'ja': '週',
+  };
+  static const _evenParen = {
+    'en': 'even', 'bg': 'четна', 'de': 'gerade', 'fr': 'paire', 'it': 'pari',
+    'el': 'ζυγή', 'es': 'par', 'pt': 'par', 'ru': 'чёт.', 'tr': 'çift', 'ja': '偶',
+  };
+  static const _oddParen = {
+    'en': 'odd', 'bg': 'нечетна', 'de': 'ungerade', 'fr': 'impaire',
+    'it': 'dispari', 'el': 'μονή', 'es': 'impar', 'pt': 'ímpar', 'ru': 'нечёт.',
+    'tr': 'tek', 'ja': '奇',
   };
 
   static const _dayNames = {
@@ -134,22 +152,18 @@ class _TodayScheduleCardState extends State<TodayScheduleCard> {
         final theme = Theme.of(context);
         final now = DateTime.now();
         final weekday = now.weekday; // 1..7
-        final slots = _svc.forDay(weekday); // текущ срок, сортирани
         final nowMin = now.hour * 60 + now.minute;
 
-        // Изцяло празно разписание → подкана за въвеждане.
-        if (_svc.isEmpty) {
-          return Card(
-            margin: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-            child: ListTile(
-              leading: const Text('📅', style: TextStyle(fontSize: 24)),
-              title: Text(_t(_addSchedule, lang),
-                  style: const TextStyle(fontWeight: FontWeight.w600)),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _openWeek,
-            ),
-          );
-        }
+        // Изцяло празно разписание → скрий картата (таб „Обучение" вече показва
+        // отделна карта „Моето разписание" — да не дублираме подканата).
+        if (_svc.isEmpty) return const SizedBox.shrink();
+
+        // Начало на семестъра (студент) → филтрираме по четна/нечетна седмица.
+        final isStudent = UniversityService().enabled;
+        final semStart =
+            isStudent ? UniversityService().currentSemesterStart(now) : null;
+        final weekNo = currentWeekNumber(semStart, now);
+        final slots = _svc.visibleForDay(weekday, now, semStart);
 
         // Индекс на „следващия" час (първият с начало след сегашния момент).
         int nextIdx = -1;
@@ -159,6 +173,25 @@ class _TodayScheduleCardState extends State<TodayScheduleCard> {
             break;
           }
         }
+        // Текущ час (тече в момента), ако има.
+        ScheduleSlot? currentSlot;
+        for (final s in slots) {
+          if (s.fromMinutes <= nowMin && nowMin < s.toMinutes) {
+            currentSlot = s;
+            break;
+          }
+        }
+        final ScheduleSlot? nextSlot =
+            nextIdx >= 0 ? slots[nextIdx] : null;
+
+        // Индикатор за седмицата в хедъра (само студент с начало на семестъра).
+        String weekHeader = '';
+        if (weekNo >= 1) {
+          final parity =
+              _t(weekNo % 2 == 0 ? _evenParen : _oddParen, lang);
+          weekHeader =
+              '   ·   ${_t(_weekWord, lang)} $weekNo ($parity)';
+        }
 
         return Card(
           margin: const EdgeInsets.fromLTRB(12, 4, 12, 8),
@@ -167,12 +200,16 @@ class _TodayScheduleCardState extends State<TodayScheduleCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('📅 ${_t(_todayWord, lang)} — ${_dayName(lang, weekday)}',
+                Text(
+                    '📅 ${_t(_todayWord, lang)} — ${_dayName(lang, weekday)}$weekHeader',
                     style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
                         color: theme.colorScheme.primary)),
                 const SizedBox(height: 8),
+                // Акцент „Сега" / „Следва" най-отгоре, ако има какво.
+                if (currentSlot != null || nextSlot != null)
+                  _accent(theme, lang, currentSlot, nextSlot, nowMin),
                 if (slots.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -213,16 +250,84 @@ class _TodayScheduleCardState extends State<TodayScheduleCard> {
     return _t(_noLessons, lang);
   }
 
+  /// Ярък акцент най-отгоре: „Сега: X" ако тече час, иначе „Следва: X · след
+  /// N мин". Прави следващия/текущия час видим, не просто ред в списъка.
+  Widget _accent(ThemeData theme, String lang, ScheduleSlot? current,
+      ScheduleSlot? next, int nowMin) {
+    final bool showCurrent = current != null;
+    final ScheduleSlot s = current ?? next!;
+    final Color accent = s.colorValue != null
+        ? Color(s.colorValue!)
+        : (showCurrent
+            ? theme.colorScheme.primary
+            : theme.colorScheme.tertiary);
+    final String tag =
+        showCurrent ? _t(_nowUpper, lang) : _t(_nextUp, lang);
+    final parts = <String>[
+      if (!showCurrent) _inLabel(lang, s.fromMinutes - nowMin),
+      '${s.fromLabel}–${s.toLabel}',
+      if (s.location != null && s.location!.isNotEmpty) '📍 ${s.location}',
+    ];
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border(left: BorderSide(color: accent, width: 4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: accent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(tag,
+                    style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white)),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  s.subject.isNotEmpty ? s.subject : '—',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w800),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 3),
+          Text(parts.join('  ·  '),
+              style: TextStyle(
+                  fontSize: 12.5, color: theme.colorScheme.onSurfaceVariant)),
+        ],
+      ),
+    );
+  }
+
   Widget _slotRow(ThemeData theme, String lang, ScheduleSlot s, int nowMin,
       bool isNext) {
     final isCurrent = s.fromMinutes <= nowMin && nowMin < s.toMinutes;
     final isPast = s.toMinutes <= nowMin;
+    final Color? subjColor =
+        s.colorValue != null ? Color(s.colorValue!) : null;
 
-    final Color barColor = isCurrent
-        ? theme.colorScheme.primary
-        : (isPast
-            ? theme.colorScheme.outlineVariant
-            : theme.colorScheme.primary.withValues(alpha: 0.4));
+    final Color barColor = isPast
+        ? theme.colorScheme.outlineVariant
+        : (subjColor ??
+            (isCurrent
+                ? theme.colorScheme.primary
+                : theme.colorScheme.primary.withValues(alpha: 0.4)));
     final double opacity = isPast ? 0.5 : 1.0;
 
     Widget trailing = const SizedBox.shrink();
