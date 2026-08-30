@@ -15,66 +15,66 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Нови инсталации НЕ го виждат (те виждат welcome диалога).
 class WhatsNewDialog {
   /// Билдът, за който са точките по-долу (= `pubspec.yaml` build number).
-  static const int _build = 68;
+  static const int _build = 69;
 
   static const String _prefKey = 'whats_new_seen_build';
 
   /// Точките за текущата версия, по език.
   static const Map<String, List<String>> _items = {
     'bg': [
-      '✅ Отметнеш ли всички подзадачи, задачата се завършва автоматично — и при личните, и при споделените.',
-      '👥 Завършените споделени задачи вече изчезват от секцията „Споделени".',
-      '🔑 Върнат вход с имейл и парола в Профил + вече не забива при бавна връзка.',
+      '🎓 Студентско разписание: въведи групата си и часове само за четни/нечетни седмици — виждаш точно тази седмица.',
+      '🎨 По-подредено разписание: цветни часове по предмет, дни в табове и акцент „Сега / Следва".',
+      '📅 Учебните дати (начало на семестъра, изпити…) вече се редактират с едно докосване.',
     ],
     'en': [
-      '✅ Check off all subtasks and the task auto-completes — for personal and shared tasks alike.',
-      '👥 Completed shared tasks now leave the “Shared” section.',
-      '🔑 Email & password sign-in is back in Profile — and no longer freezes on a slow connection.',
+      '🎓 Student schedule: add your group and classes for even/odd weeks — you see exactly this week.',
+      '🎨 Cleaner timetable: color-coded classes by subject, day tabs and a “Now / Next” highlight.',
+      '📅 Study dates (semester start, exams…) can now be edited with a single tap.',
     ],
     'de': [
-      '✅ Alle Unteraufgaben abgehakt → die Aufgabe wird automatisch erledigt — bei eigenen und geteilten.',
-      '👥 Erledigte geteilte Aufgaben verlassen jetzt den Bereich „Geteilt“.',
-      '🔑 Anmeldung mit E-Mail und Passwort ist zurück im Profil — und friert bei langsamer Verbindung nicht mehr ein.',
+      '🎓 Studenten-Stundenplan: Gruppe eintragen und Kurse für gerade/ungerade Wochen — du siehst genau diese Woche.',
+      '🎨 Übersichtlicher Plan: farbige Kurse nach Fach, Tage als Tabs und eine „Jetzt / Als Nächstes“-Hervorhebung.',
+      '📅 Lern-Termine (Semesterbeginn, Prüfungen …) lassen sich jetzt mit einem Tippen bearbeiten.',
     ],
     'fr': [
-      '✅ Coche toutes les sous-tâches et la tâche se termine automatiquement — pour les tâches perso et partagées.',
-      '👥 Les tâches partagées terminées quittent désormais la section « Partagé ».',
-      '🔑 La connexion par e-mail et mot de passe est de retour dans le Profil — et ne se fige plus sur une connexion lente.',
+      '🎓 Emploi du temps étudiant : ajoute ton groupe et tes cours pour les semaines paires/impaires — tu vois exactement cette semaine.',
+      '🎨 Emploi du temps plus clair : cours colorés par matière, jours en onglets et un repère « Maintenant / À suivre ».',
+      '📅 Les dates d’études (début de semestre, examens…) se modifient désormais d’un seul appui.',
     ],
     'it': [
-      '✅ Spunta tutte le attività secondarie e l’attività si completa da sola — sia personali che condivise.',
-      '👥 Le attività condivise completate ora lasciano la sezione “Condivisi”.',
-      '🔑 L’accesso con email e password è tornato nel Profilo — e non si blocca più con una connessione lenta.',
+      '🎓 Orario studente: aggiungi il tuo gruppo e le lezioni per settimane pari/dispari — vedi esattamente questa settimana.',
+      '🎨 Orario più ordinato: lezioni colorate per materia, giorni a schede e un evidenziatore “Ora / Prossima”.',
+      '📅 Le date di studio (inizio semestre, esami…) ora si modificano con un tocco.',
     ],
     'el': [
-      '✅ Τσέκαρε όλες τις υποεργασίες και η εργασία ολοκληρώνεται αυτόματα — σε προσωπικές και κοινές.',
-      '👥 Οι ολοκληρωμένες κοινές εργασίες φεύγουν πλέον από την ενότητα «Κοινά».',
-      '🔑 Η σύνδεση με email και κωδικό επέστρεψε στο Προφίλ — και δεν κολλάει πια σε αργή σύνδεση.',
+      '🎓 Πρόγραμμα φοιτητή: πρόσθεσε την ομάδα σου και μαθήματα για ζυγές/μονές εβδομάδες — βλέπεις ακριβώς αυτή την εβδομάδα.',
+      '🎨 Πιο καθαρό πρόγραμμα: χρωματιστά μαθήματα ανά μάθημα, ημέρες σε καρτέλες και επισήμανση «Τώρα / Επόμενο».',
+      '📅 Οι ημερομηνίες σπουδών (έναρξη εξαμήνου, εξετάσεις…) επεξεργάζονται πλέον με ένα άγγιγμα.',
     ],
     'es': [
-      '✅ Marca todas las subtareas y la tarea se completa sola — tanto en personales como compartidas.',
-      '👥 Las tareas compartidas completadas ahora salen de la sección “Compartido”.',
-      '🔑 El inicio de sesión con correo y contraseña vuelve al Perfil — y ya no se congela con conexión lenta.',
+      '🎓 Horario de estudiante: añade tu grupo y clases para semanas pares/impares — ves justo esta semana.',
+      '🎨 Horario más claro: clases con color por asignatura, días en pestañas y un resaltado “Ahora / Siguiente”.',
+      '📅 Las fechas de estudio (inicio de semestre, exámenes…) ya se editan con un toque.',
     ],
     'pt': [
-      '✅ Marca todas as subtarefas e a tarefa conclui-se sozinha — nas pessoais e nas partilhadas.',
-      '👥 As tarefas partilhadas concluídas saem agora da secção “Partilhado”.',
-      '🔑 O início de sessão com email e palavra-passe voltou ao Perfil — e já não bloqueia com ligação lenta.',
+      '🎓 Horário de estudante: adiciona o teu grupo e aulas para semanas pares/ímpares — vês exatamente esta semana.',
+      '🎨 Horário mais claro: aulas coloridas por disciplina, dias em separadores e um destaque “Agora / A seguir”.',
+      '📅 As datas de estudo (início do semestre, exames…) já se editam com um toque.',
     ],
     'ru': [
-      '✅ Отметьте все подзадачи — и задача завершится автоматически, как в личных, так и в общих.',
-      '👥 Завершённые общие задачи теперь исчезают из раздела «Общие».',
-      '🔑 Вход по email и паролю вернулся в Профиль — и больше не зависает при медленном соединении.',
+      '🎓 Студенческое расписание: укажи свою группу и занятия по чётным/нечётным неделям — видишь именно эту неделю.',
+      '🎨 Понятнее расписание: занятия с цветом по предмету, дни во вкладках и подсветка «Сейчас / Далее».',
+      '📅 Учебные даты (начало семестра, экзамены…) теперь редактируются одним касанием.',
     ],
     'tr': [
-      '✅ Tüm alt görevleri işaretle, görev otomatik tamamlansın — kişisel ve paylaşılan görevlerde.',
-      '👥 Tamamlanan paylaşılan görevler artık “Paylaşılan” bölümünden ayrılıyor.',
-      '🔑 E-posta ve şifre ile giriş Profil’e geri döndü — ve yavaş bağlantıda artık donmuyor.',
+      '🎓 Öğrenci ders programı: grubunu ve çift/tek hafta derslerini ekle — tam bu haftayı görürsün.',
+      '🎨 Daha derli toplu program: derse göre renkli dersler, sekmeli günler ve “Şimdi / Sıradaki” vurgusu.',
+      '📅 Ders tarihleri (dönem başı, sınavlar…) artık tek dokunuşla düzenlenir.',
     ],
     'ja': [
-      '✅ すべてのサブタスクにチェックを入れると、タスクが自動的に完了します（個人・共有どちらも）。',
-      '👥 完了した共有タスクが「共有」セクションから消えるようになりました。',
-      '🔑 メールとパスワードでのサインインがプロフィールに復活 — 低速回線でも固まらなくなりました。',
+      '🎓 大学生の時間割：グループと偶数/奇数週の授業を追加 — 今週の分だけが表示されます。',
+      '🎨 見やすい時間割：科目ごとの色分け、日ごとのタブ、「今 / 次」のハイライト。',
+      '📅 学習の日付（学期開始・試験など）がワンタップで編集できるようになりました。',
     ],
   };
 
