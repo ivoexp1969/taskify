@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../services/auth_service.dart';
 import '../../services/sync_service.dart';
+import '../../services/prefs_sync_service.dart';
 import '../../utils/localization.dart';
 
 // 10-language maps for login screen
@@ -137,6 +140,9 @@ class _LoginScreenState extends State<LoginScreen> {
       final result = await SyncService()
           .mergeWithCloud()
           .timeout(const Duration(seconds: 20));
+      // Слива и prefs данните (разписание/профили) след вход — тихо, отделно
+      // от резултата на задачите.
+      unawaited(PrefsSyncService().mergeNow());
       if (!mounted) return;
       setState(() => _isLoading = false);
       if (result.success &&

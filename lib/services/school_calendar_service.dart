@@ -11,6 +11,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/school_calendar.dart';
 import 'analytics_service.dart';
+import 'prefs_sync_service.dart';
 
 /// „Училищен режим" — данни за българската учебна година (ваканции, срокове,
 /// НВО/ДЗИ), с обратно броене до следваща ваканция.
@@ -99,6 +100,7 @@ class SchoolCalendarService {
       await prefs.setString(_prefSchool, _school!);
     }
     revision.value++;
+    PrefsSyncService.markDirty('pupil_profile');
   }
 
   Future<void> setEnabled(bool value) async {
@@ -107,6 +109,7 @@ class SchoolCalendarService {
     await prefs.setBool(_prefEnabled, value);
     enabledNotifier.value = value;
     revision.value++;
+    PrefsSyncService.markDirty('pupil_profile');
     if (value && !was) {
       AnalyticsService().logModeActivated('pupil');
     } else if (!value && was) {
@@ -119,6 +122,34 @@ class SchoolCalendarService {
     _grade = grade;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_prefGrade, grade);
+    revision.value++;
+    PrefsSyncService.markDirty('pupil_profile');
+  }
+
+  /// Прилага облачно състояние (cross-device sync) БЕЗ analytics и БЕЗ да
+  /// задейства нов push. Синхронизира се само потребителският избор (вкл/изкл,
+  /// клас, училище) — учебната година идва от remote config. Виж [PrefsSyncService].
+  Future<void> applyFromSync({
+    required bool enabled,
+    int? grade,
+    String? school,
+  }) async {
+    _grade = (grade != null && grade >= 1 && grade <= 12) ? grade : null;
+    final trimmed = school?.trim();
+    _school = (trimmed == null || trimmed.isEmpty) ? null : trimmed;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_prefEnabled, enabled);
+    if (_grade != null) {
+      await prefs.setInt(_prefGrade, _grade!);
+    } else {
+      await prefs.remove(_prefGrade);
+    }
+    if (_school != null) {
+      await prefs.setString(_prefSchool, _school!);
+    } else {
+      await prefs.remove(_prefSchool);
+    }
+    enabledNotifier.value = enabled;
     revision.value++;
   }
 

@@ -156,6 +156,32 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **★Cross-device sync за разписание + студентски/ученически профил (PC, 2026-09-10, БЕЗ app bump, НЕ
+  качено):** досега само задачите+категориите се синхронизираха между устройства (`SyncService`,
+  `users/{uid}/tasks`+`categories`). Документите ВЕЧЕ се синхронизираха (те са обикновени `Task` с
+  `template=='document'` от v1.0.41 → минават през `SyncService`; старият `DocumentsService`/Hive
+  `bg_documents` е мъртъв legacy) → Фаза 2 НЕ беше нужна. Разписанието (`WeeklyScheduleService`,
+  SharedPreferences JSON) и студентският/ученическият профил (`UniversityService`/`SchoolCalendarService`,
+  SharedPreferences) НЕ се синхронизираха. **Ново `services/prefs_sync_service.dart` (`PrefsSyncService`,
+  singleton като `SyncService`):** 3 ОТДЕЛНИ Firestore документа `users/{uid}/prefs/{weekly_schedule,
+  student_context,pupil_profile}` (по един на domain-услуга; Иво избра отделни документи). **Whole-doc
+  last-write-wins** по `updatedAtMillis` (не per-slot tombstones — данните са малки, един редактор;
+  триене/изчистване се разпространява като push на празно състояние над съществуващ облачен документ).
+  Гейт = логнат НЕ-анонимен акаунт (★като задачите — НЯМА явна Pro проверка★). Покрито от съществуващото
+  правило `users/{uid}/{subcollection=**}` → **firestore.rules НЕ е пипан**. Механика: всяка mutation
+  метода вика `PrefsSyncService.markDirty(domain)` (стампва локален `prefs_sync_ua_<doc>` = now + debounce
+  merge); `markDirty` е no-op докато `_active==false` (важно за unit тестовете) и при `_suppress` (по
+  време на apply). Нови `applyFromSync(...)` на трите услуги пишат директно в SharedPreferences БЕЗ
+  analytics и БЕЗ повторен push. Тригери: `main.dart start()`+authStateChanges, `home_screen` resume,
+  `login_screen` след merge, ръчният бутон „Синхронизирай сега" (`cloud_sync_section` вика и
+  `mergeNow()`). **UI (Фаза 3):** дискретен облачен индикатор в AppBar на `weekly_schedule_screen`
+  (`_ScheduleSyncIndicator` — спинер/облак, тап=ръчен sync) + ред „Синхронизира се: Задачи · Документи ·
+  Разписание · Профили" в Настройки (11 ез. inline). ★НЕ пипани★: `SyncService` (задачи), paywall,
+  RevenueCat. `analyze` **0 грешки** (0 нови issues), **91 теста ✅** (вкл. 29 weekly_schedule + App
+  starts). **Чист cross-platform Dart → iOS=само Mac билд.** ⚠️ЗАБЕЛЕЖКА: whole-doc LWW не прави union —
+  ако разписанието е РАЗЛИЧНО на 2 устройства (и двете редактирани офлайн), печели по-новото; за празно/
+  нередактирано устройство винаги издърпва облака (localStamp 0). ОСТАВА за Иво: тест на 2 реални
+  устройства (телефон+таблет, същ акаунт) + при желание bump+релийз.
 - **Студентско разписание v2: група + четна/нечетна седмица + UI полир (PC, 2026-08-30, БЕЗ app bump,
   НЕ качено):** нови нива за студентския режим. **(1) Модел** (`models/weekly_schedule.dart`, SharedPreferences
   JSON, БЕЗ Hive bump): `enum WeekPattern{every,oddOnly,evenOnly}` + полета `weekPattern`/`colorValue`(ARGB int?)/

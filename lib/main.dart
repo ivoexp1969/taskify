@@ -36,6 +36,7 @@ import 'services/weekly_schedule_service.dart';
 import 'services/tombstone_service.dart';
 import 'services/migration_service.dart';
 import 'services/sync_service.dart';
+import 'services/prefs_sync_service.dart';
 import 'services/analytics_service.dart';
 
 Future<void> _checkMorningBriefingOnLaunch() async {
@@ -173,8 +174,14 @@ Future<void> main() async {
   // при вход в акаунт (authStateChanges — сесията може да се възстанови по-късно).
   SyncService().startAutoSync();
   SyncService().syncNow();
+  // Cross-device sync за SharedPreferences данни (разписание, студентски/
+  // ученически профил) — отделни документи в users/{uid}/prefs/.
+  PrefsSyncService().start();
   FirebaseAuth.instance.authStateChanges().listen((user) {
-    if (user != null) SyncService().syncNow();
+    if (user != null) {
+      SyncService().syncNow();
+      PrefsSyncService().syncNow();
+    }
   });
 
   // Morning briefing — refresh top 3 tasks on every launch

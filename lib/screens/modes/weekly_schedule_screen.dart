@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/weekly_schedule.dart';
 import '../../services/weekly_schedule_service.dart';
 import '../../services/university_service.dart';
+import '../../services/prefs_sync_service.dart';
 import '../../utils/category_colors.dart';
 import '../../utils/localization.dart';
 import 'study_events_screen.dart';
@@ -242,7 +243,10 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
   Widget build(BuildContext context) {
     final lang = LanguageScope.of(context).locale.languageCode;
     return Scaffold(
-      appBar: AppBar(title: Text(_t(_title, lang))),
+      appBar: AppBar(
+        title: Text(_t(_title, lang)),
+        actions: const [_ScheduleSyncIndicator()],
+      ),
       floatingActionButton: _loading
           ? null
           : FloatingActionButton.extended(
@@ -1031,6 +1035,44 @@ class _ColorDot extends StatelessWidget {
                 ? const Icon(Icons.check, size: 16, color: Colors.white)
                 : null),
       ),
+    );
+  }
+}
+
+/// Дискретен индикатор за облачния синхрон на разписанието (Фаза 3.1). Върти
+/// малък спинер, докато тече синхрон; иначе показва бледа облачна иконка, чийто
+/// тап пуска ръчен синхрон. При не-логнат акаунт тапът просто не прави нищо
+/// (синхронът връща `not-signed-in` тихо).
+class _ScheduleSyncIndicator extends StatelessWidget {
+  const _ScheduleSyncIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context)
+        .colorScheme
+        .onSurface
+        .withValues(alpha: 0.45);
+    return ValueListenableBuilder<bool>(
+      valueListenable: PrefsSyncService().syncing,
+      builder: (context, syncing, _) {
+        if (syncing) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Center(
+              child: SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        }
+        return IconButton(
+          icon: Icon(Icons.cloud_done_outlined, color: color),
+          tooltip: 'Sync',
+          onPressed: () => PrefsSyncService().mergeNow(),
+        );
+      },
     );
   }
 }

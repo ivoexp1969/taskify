@@ -16,6 +16,7 @@ import '../../services/holidays_service.dart';
 import '../../services/school_calendar_service.dart';
 import '../../services/university_service.dart';
 import '../../services/sync_service.dart';
+import '../../services/prefs_sync_service.dart';
 import '../../services/widget_service.dart';
 import '../paywall/paywall_screen.dart';
 
@@ -154,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       SyncService().syncNow();
+      PrefsSyncService().syncNow();
       if (!kIsWeb) {
         _consumeWidgetAction(); // „+" от widget-а, докато app-ът върви
         WidgetService.syncFromWidget(); // отметки от widget-а (iOS чек-бутон)

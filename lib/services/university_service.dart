@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/university.dart';
 import '../utils/uuid.dart';
 import 'analytics_service.dart';
+import 'prefs_sync_service.dart';
 
 /// „Режим Студент" — списък с български ВУЗ (вграден asset) + профил на студента
 /// + ръчно въведени ключови дати за обратното броене (Ф2).
@@ -141,6 +142,7 @@ class UniversityService {
     await prefs.setBool(_prefEnabled, value);
     enabledNotifier.value = value;
     revision.value++;
+    PrefsSyncService.markDirty('student_context');
     if (value && !was) {
       AnalyticsService().logModeActivated('student');
     } else if (!value && was) {
@@ -152,6 +154,30 @@ class UniversityService {
     _profile = profile;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefProfile, json.encode(profile.toJson()));
+    revision.value++;
+    PrefsSyncService.markDirty('student_context');
+  }
+
+  /// Прилага облачно състояние (cross-device sync) БЕЗ analytics и БЕЗ да
+  /// задейства нов push. Виж [PrefsSyncService].
+  Future<void> applyFromSync({
+    required bool enabled,
+    UniversityProfile? profile,
+    required List<StudentKeyDate> dates,
+  }) async {
+    _profile = profile;
+    _dates = List<StudentKeyDate>.from(dates);
+    _loadedState = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_prefEnabled, enabled);
+    if (profile != null) {
+      await prefs.setString(_prefProfile, json.encode(profile.toJson()));
+    } else {
+      await prefs.remove(_prefProfile);
+    }
+    await prefs.setString(
+        _prefDates, json.encode(_dates.map((d) => d.toJson()).toList()));
+    enabledNotifier.value = enabled;
     revision.value++;
   }
 
@@ -228,5 +254,6 @@ class UniversityService {
     await prefs.setString(
         _prefDates, json.encode(_dates.map((d) => d.toJson()).toList()));
     revision.value++;
+    PrefsSyncService.markDirty('student_context');
   }
 }

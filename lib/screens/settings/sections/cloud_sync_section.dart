@@ -13,6 +13,7 @@ import '../../../services/google_calendar_service.dart';
 import '../../../services/calendar_import_service.dart';
 import '../../../services/ios_calendar_service.dart';
 import '../../../services/sync_service.dart';
+import '../../../services/prefs_sync_service.dart';
 import 'settings_group.dart';
 
 /// Секция „Облачна синхронизация" в Настройки: единен избор на календарен
@@ -180,6 +181,8 @@ class _CloudSyncSectionState extends State<CloudSyncSection> {
     final t = AppText.of(context);
     setState(() => _isSyncing = true);
     final result = await SyncService().mergeWithCloud();
+    // Синхронизира и prefs данните (разписание, студентски/ученически профил).
+    await PrefsSyncService().mergeNow();
     if (!mounted) return;
     setState(() => _isSyncing = false);
     if (result.error == 'in-progress') return; // тих — вече тече синхрон
@@ -286,6 +289,29 @@ class _CloudSyncSectionState extends State<CloudSyncSection> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(t.syncSuccess)),
     );
+  }
+
+  String _lang(BuildContext context) =>
+      LanguageScope.of(context).locale.languageCode;
+
+  /// „Какво се синхронизира" — дискретен ред (Фаза 3.2). Задачите и документите
+  /// (задачи с template `document`) вървят през [SyncService]; разписанието и
+  /// профилите — през [PrefsSyncService].
+  static String _syncsLabel(String lang) {
+    const m = {
+      'en': 'Synced: Tasks · Documents · Schedule · Profiles',
+      'bg': 'Синхронизира се: Задачи · Документи · Разписание · Профили',
+      'de': 'Synchronisiert: Aufgaben · Dokumente · Stundenplan · Profile',
+      'fr': 'Synchronisé : Tâches · Documents · Emploi du temps · Profils',
+      'it': 'Sincronizzati: Attività · Documenti · Orario · Profili',
+      'el': 'Συγχρονισμός: Εργασίες · Έγγραφα · Πρόγραμμα · Προφίλ',
+      'es': 'Sincronizado: Tareas · Documentos · Horario · Perfiles',
+      'pt': 'Sincronizado: Tarefas · Documentos · Horário · Perfis',
+      'ru': 'Синхронизируется: Задачи · Документы · Расписание · Профили',
+      'tr': 'Eşitlenir: Görevler · Belgeler · Ders programı · Profiller',
+      'ja': '同期対象：タスク・書類・時間割・プロフィール',
+    };
+    return m[lang] ?? m['en']!;
   }
 
   @override
@@ -504,6 +530,18 @@ class _CloudSyncSectionState extends State<CloudSyncSection> {
                       style: const TextStyle(fontSize: 12)),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: _isSyncing ? null : _resetSync,
+                ),
+                const Divider(height: 1),
+                // Дискретен списък „какво се синхронизира" (Фаза 3.2).
+                ListTile(
+                  dense: true,
+                  leading: Icon(Icons.cloud_done_outlined,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+                  title: Text(_syncsLabel(_lang(context)),
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.6))),
                 ),
               ],
             ),

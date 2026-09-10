@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/weekly_schedule.dart';
 import '../utils/uuid.dart';
+import 'prefs_sync_service.dart';
 
 /// Съхранява седмичния разпис (Режими Уча) в SharedPreferences като JSON списък.
 /// Чист Dart, реактивен чрез [revision] (календарът/екранът се обновяват без
@@ -36,6 +37,7 @@ class WeeklyScheduleService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_prefTerm, t);
     revision.value++;
+    PrefsSyncService.markDirty('weekly_schedule');
   }
 
   Future<void> load() async {
@@ -182,6 +184,21 @@ class WeeklyScheduleService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
         _pref, json.encode(_slots.map((s) => s.toJson()).toList()));
+    revision.value++;
+    PrefsSyncService.markDirty('weekly_schedule');
+  }
+
+  /// Прилага облачно състояние (cross-device sync) БЕЗ да задейства нов push.
+  /// Пише директно в SharedPreferences (не минава през [_persist], за да не
+  /// стампне „локална промяна"). Виж [PrefsSyncService].
+  Future<void> applyFromSync(List<ScheduleSlot> slots, int term) async {
+    _slots = List.unmodifiable(slots);
+    _currentTerm = term == 2 ? 2 : 1;
+    _loaded = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+        _pref, json.encode(_slots.map((s) => s.toJson()).toList()));
+    await prefs.setInt(_prefTerm, _currentTerm);
     revision.value++;
   }
 }
