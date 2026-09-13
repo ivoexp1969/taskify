@@ -50,6 +50,13 @@ flutter build appbundle --release
 без този диалог новите функции остават неоткрити.
 
 ## Current Version
+**v1.0.59+69 (2026-09-13) — Студентско разписание v2 (група + четна/нечетна седмица + UI полир) +
+cross-device sync за разписание/студентски/ученически профил (`PrefsSyncService`) + „Какво ново" диалог
+(`_build`=69). Bump-нато и КОМИТНАТО (commits `807291f`/`1746032`/`624eb60`), но ★ОЩЕ НЕ качено в Play★
+(живо в Production остава 1.0.58+68). Всичко чист cross-platform Dart → iOS=само Mac билд. PC (09-13):
+`flutter clean` → APK инсталиран безжично на Note 9 (192.168.0.117:5555) за тест на живо (вход от web +
+2-устройствен sync на разписанието). ОСТАВА за Иво: тест на 2 реални устройства (телефон+таблет, същ
+акаунт) + решение за качване в Play (`tools/play_upload.py --status completed`). ПРЕДИШНО:
 **v1.0.58+68 (2026-08-08) — Авто-завършване по подзадачи + login freeze fix + Google Play съответствие.
 ★Android ЖИВА в Play Production★; ★iOS 1.0.58(68) подадена → WAITING_FOR_REVIEW (Mac, 08-08)★. КАПАН при
 iOS билда: `pod install` гръмна (PurchasesHybridCommon 14.3.0 vs 18.29.0 конфликт) — Podfile.lock беше закован
