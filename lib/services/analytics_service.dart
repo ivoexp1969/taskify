@@ -84,7 +84,10 @@ class AnalyticsService {
     if (!firstLogged) {
       await box.put('is_first_open_logged', true);
       await box.put('first_open_date', today);
-      await _log('app_first_open');
+      await _log('app_first_open', {
+        'platform': _platform(),
+        'locale': _deviceLocaleCode(),
+      });
     } else {
       final firstDay = box.get('first_open_date') as int?;
       final day2Logged = box.get('day_2_logged') as bool? ?? false;
@@ -97,6 +100,29 @@ class AnalyticsService {
 
   /// Ден като цяло число YYYYMMDD (сравнимо, локална дата, без час/часова зона).
   int _dayKey(DateTime d) => d.year * 10000 + d.month * 100 + d.day;
+
+  /// Платформа за `app_first_open` param: "android" | "ios" | "web" | "other".
+  String _platform() {
+    if (kIsWeb) return 'web';
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return 'android';
+      case TargetPlatform.iOS:
+        return 'ios';
+      default:
+        return 'other';
+    }
+  }
+
+  /// Езиков код на устройството при първо отваряне (bg/en/…). Взима се от
+  /// системния locale, защото потребителят още не е избрал език в приложението.
+  String _deviceLocaleCode() {
+    try {
+      return PlatformDispatcher.instance.locale.languageCode;
+    } catch (_) {
+      return 'unknown';
+    }
+  }
 
   // ── Onboarding funnel ──────────────────────────────────────────────────
 
@@ -120,7 +146,10 @@ class AnalyticsService {
     }
   }
 
-  Future<void> logTaskCompleted() => _log('task_completed');
+  /// Логва `task_completed` + `task_type` (същата стойност като `task_created`).
+  /// За споделени/групови задачи (различен модел) → default `standard`.
+  Future<void> logTaskCompleted([Task? task]) => _log('task_completed',
+      {'task_type': task != null ? _taskType(task) : 'standard'});
 
   String _taskType(Task task) {
     final t = task.template;
@@ -140,12 +169,22 @@ class AnalyticsService {
       await box.put('first_mode_logged', true);
       await _log('first_mode_activated', {'mode': mode});
     } else {
-      await _log('mode_changed', {'mode': mode});
+      await _log('mode_changed', {'from': _storedMode(), 'to': mode});
     }
     await setActiveMode(mode);
   }
 
-  Future<void> logModeDeactivated(String mode) => _log('mode_changed', {'mode': 'none'});
+  /// Изключване на режим → `mode_changed` (from = изключвания режим, to = none)
+  /// + нулиране на user prop `active_mode` на "none".
+  Future<void> logModeDeactivated(String mode) async {
+    if (!_enabled) return;
+    await _log('mode_changed', {'from': mode, 'to': 'none'});
+    await setActiveMode('none');
+  }
+
+  /// Последно записаният активен режим (за `from` при смяна); default "none".
+  String _storedMode() =>
+      (_box?.get('active_mode_value') as String?) ?? 'none';
 
   // ── User properties ────────────────────────────────────────────────────
 
@@ -153,6 +192,7 @@ class AnalyticsService {
   Future<void> setActiveMode(String mode) async {
     if (!_enabled) return;
     try {
+      await _box?.put('active_mode_value', mode);
       await _fa!.setUserProperty(name: 'active_mode', value: mode);
     } catch (e) {
       debugPrint('Analytics setActiveMode failed: $e');

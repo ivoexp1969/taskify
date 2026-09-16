@@ -204,7 +204,7 @@ class TaskListTile extends StatelessWidget {
           await task.save();
           if (task.isCompleted) AdService().onUserAction();
           if (!wasCompleted && task.isCompleted) {
-            AnalyticsService().logTaskCompleted();
+            AnalyticsService().logTaskCompleted(task);
           }
           if (task.isCompleted && context.mounted) {
             ConversionService.instance.onTaskCompleted(context);
@@ -387,7 +387,7 @@ class TaskListTile extends StatelessWidget {
               await task.save();
               if (!wasCompleted && task.isCompleted) AdService().onUserAction();
               if (!wasCompleted && task.isCompleted) {
-                AnalyticsService().logTaskCompleted();
+                AnalyticsService().logTaskCompleted(task);
               }
               if (!wasCompleted && task.isCompleted && context.mounted) {
                 ConversionService.instance.onTaskCompleted(context);

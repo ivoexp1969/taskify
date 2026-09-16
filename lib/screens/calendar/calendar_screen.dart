@@ -1879,7 +1879,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           task.completedAt = task.isCompleted ? DateTime.now() : null;
                           await task.save();
                           if (!wasCompleted && task.isCompleted) {
-                            AnalyticsService().logTaskCompleted();
+                            AnalyticsService().logTaskCompleted(task);
                           }
                           if (!wasCompleted && task.isCompleted && task.recurrence != null) {
                             final nextDate = _nextDueDate(task.dueDate, task.recurrence!);
