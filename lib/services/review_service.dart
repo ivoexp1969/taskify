@@ -21,12 +21,17 @@ class ReviewService {
   final InAppReview _inAppReview = InAppReview.instance;
 
   // Настройки
-  static const int _minCompletedTasks = 10;
+  static const int _minCompletedTasks = 5;
   static const int _daysBetweenPrompts = 30;
   static const String _lastPromptKey = 'review_last_prompt_date';
   static const String _completedTasksKey = 'review_completed_tasks_count';
   static const String _hasRatedKey = 'review_has_rated';
   static const String _hasDeclinedKey = 'review_has_declined';
+  static const String _declinedDateKey = 'review_declined_date';
+  static const int _daysAfterDecline = 90;
+
+  // In-flight guard срещу застъпени pre-dialog-и (виж maybeShowReviewDialog).
+  bool _isShowing = false;
 
   /// Увеличава брояча на завършени задачи
   Future<void> incrementCompletedTasks() async {
@@ -54,7 +59,21 @@ class ReviewService {
         debugPrint('ReviewService: Already rated, skipping');
         return false;
       }
-      
+
+      // Ако е натиснал "Има какво да се подобри" - изчакваме 90 дни (втори шанс).
+      // Ако няма записана дата (стар declined отпреди тази логика) → пускаме сега.
+      if (prefs.getBool(_hasDeclinedKey) ?? false) {
+        final declinedStr = prefs.getString(_declinedDateKey);
+        if (declinedStr != null) {
+          final daysSinceDeclined =
+              DateTime.now().difference(DateTime.parse(declinedStr)).inDays;
+          if (daysSinceDeclined < _daysAfterDecline) {
+            debugPrint('ReviewService: Declined recently ($daysSinceDeclined < $_daysAfterDecline days)');
+            return false;
+          }
+        }
+      }
+
       // Проверка за минимален брой задачи
       final completedTasks = prefs.getInt(_completedTasksKey) ?? 0;
       if (completedTasks < _minCompletedTasks) {
@@ -92,31 +111,41 @@ class ReviewService {
   /// Извиквай след celebration анимация
   Future<void> maybeShowReviewDialog(BuildContext context) async {
     if (kIsWeb) return;
-    if (!context.mounted) return;
-    
-    final canShow = await canShowReviewPrompt();
-    if (!canShow) return;
-    
-    // Запомняме датата на prompt-а
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_lastPromptKey, DateTime.now().toIso8601String());
-    
-    if (!context.mounted) return;
-    
-    // Показваме pre-dialog
-    final result = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => _ReviewPreDialog(),
-    );
-    
-    if (result == true) {
-      // Потребителят харесва приложението - показваме review
-      await _showInAppReview();
-      await prefs.setBool(_hasRatedKey, true);
-    } else {
-      // Потребителят не харесва или затвори - запомняме
-      await prefs.setBool(_hasDeclinedKey, true);
+    // Atomic check-and-set: Dart е single-threaded → между проверката и сет-а няма
+    // await, така че застъпени бързи completion-и не могат да отворят втори
+    // pre-dialog. finally гарантира нулиране по ВСЕКИ изходен път (return/грешка).
+    if (_isShowing) return;
+    _isShowing = true;
+    try {
+      if (!context.mounted) return;
+
+      final canShow = await canShowReviewPrompt();
+      if (!canShow) return;
+
+      // Запомняме датата на prompt-а
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_lastPromptKey, DateTime.now().toIso8601String());
+
+      if (!context.mounted) return;
+
+      // Показваме pre-dialog
+      final result = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => _ReviewPreDialog(),
+      );
+
+      if (result == true) {
+        // Потребителят харесва приложението - показваме review
+        await _showInAppReview();
+        await prefs.setBool(_hasRatedKey, true);
+      } else {
+        // Потребителят не харесва или затвори - запомняме + дата (90-дневен gate)
+        await prefs.setBool(_hasDeclinedKey, true);
+        await prefs.setString(_declinedDateKey, DateTime.now().toIso8601String());
+      }
+    } finally {
+      _isShowing = false;
     }
   }
 
@@ -137,6 +166,7 @@ class ReviewService {
     await prefs.remove(_completedTasksKey);
     await prefs.remove(_hasRatedKey);
     await prefs.remove(_hasDeclinedKey);
+    await prefs.remove(_declinedDateKey);
     debugPrint('ReviewService: Reset complete');
   }
 }

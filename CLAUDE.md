@@ -50,6 +50,17 @@ flutter build appbundle --release
 без този диалог новите функции остават неоткрити.
 
 ## Current Version
+**v1.0.60+70 (2026-09-18) — ★Android release: targetSdk 36★. `flutter clean`→AAB (59.9MB,
+`build/app/outputs/bundle/release/app-release.aab`); merged manifest потвърди targetSdk=36 реално в
+билда (затваря Play API изискването до 01.11.2026), vc70, USE_FULL_SCREEN_INTENT пази. Качен **DRAFT
+в production** (`tools/play_upload.py --status draft`, vc70) — ★ОСТАВА за Иво финален rollout★
+(`play_promote.py --version-code 70 --status completed` или от Console). review_service.dart тунинг
+(праг 10→5, has_declined 90-дн gate, race guard `_isShowing`). ★Firebase login freeze РЕШЕН★: добавен
+липсващ SHA-256 (Play App Signing ключ `952227…28b1`) във Firebase `taskify-1969` през Management API
+(`serviceAccountKey.json`) → важи и за ПРОДУКЦИЯ. Нови tools: `play_listing.py` (pull Play listing →
+`store_metadata/play/{bg,en-US}/*.txt`; локали само bg+en-US), `play_screenshots.py` (8 брандирани
+1080×1920). ★iOS: `release_notes/1.0.60_ios_handoff.md` — iOS 1.0.60(70) ВЕЧЕ в ревю (commit
+`4792eee`), но текущият код е по-нов → нов iOS билд иска build 71.★ ПРЕДИШНО:
 **v1.0.59+69 (2026-09-13) — Студентско разписание v2 (група + четна/нечетна седмица + UI полир) +
 cross-device sync за разписание/студентски/ученически профил (`PrefsSyncService`) + „Какво ново" диалог
 (`_build`=69). Bump-нато и КОМИТНАТО (commits `807291f`/`1746032`/`624eb60`), но ★ОЩЕ НЕ качено в Play★

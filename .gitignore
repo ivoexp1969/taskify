@@ -54,3 +54,17 @@ flutter_*.png
 
 # Cloudflare Wrangler local state
 .wrangler/
+# Secrets / service accounts — NEVER commit (Play API + Firebase admin keys)
+serviceAccountKey.json
+*service-account*.json
+play-service-account.json
+
+# One-off user export / verify scripts (contain user data)
+users.json
+users_check.json
+verify-user.mjs
+
+# Node artifacts from one-off scripts
+node_modules/
+package.json
+package-lock.json

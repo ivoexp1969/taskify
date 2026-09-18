@@ -1,0 +1,68 @@
+Stop juggling tasks across calendar, notes, and to-do lists. Taskify is the smart task manager built for people who actually
+  use Google Calendar — now with built-in AI, real two-way sync, native home screen widgets, and a lifetime option that costs
+  less than two months of competitors.
+
+  ✨ NEW — AI BUILT IN
+  • Smart Add — type or speak a task in plain language ("call mom tomorrow at 5pm") and AI fills in the date, time, priority and
+  category for you
+  • AI Breakdown — turn any big task into clear, doable subtasks with one tap
+  • Voice input — just speak and your words become a task automatically, in your language
+
+  🎓 NEW — LEARNING MODE (pupils and students)
+  • Weekly timetable with color-coded classes by subject and a “Today” card with a “Now / Next” highlight
+  • Students: your group + even/odd-week classes — see exactly this week
+  • Countdown to holidays and exams
+
+  Why Taskify is different:
+
+  • REAL Google Calendar two-way sync — not just one-way import. Your tasks live in both apps. Change a date in Taskify, it
+  updates in Calendar. Change in Calendar, it updates in Taskify. No manual refresh, no broken duplicates.
+
+  • Native home screen widgets (2×1 and 3×1) — see your day on the home screen. Tap to complete. No app open required.
+
+  • Recurring tasks that actually work — daily, weekly, monthly, custom intervals. Dismiss without breaking the schedule.
+  Complete one without affecting the next.
+
+  • 10 languages, fully localized — English, Bulgarian, German, French, Italian, Greek, Spanish, Portuguese, Russian, Turkish.
+  Not just menu translation — full notification text, date formats, weekday names.
+
+  • Lifetime premium option — pay once, use forever. No monthly subscription, no recurring charge, no annual renewal. The
+  lifetime tier costs less than two months of Todoist or TickTick.
+
+  • 14-day free trial of premium — full access to all features. No card required to start.
+
+  • Available on Android and iOS — your tasks travel with you across both platforms.
+
+  Who Taskify is for:
+
+  If you live in Google Calendar, Taskify is the missing layer between calendar events and the things that don't have a fixed
+  time but still need to get done. If you're a freelancer or student who wants a task manager in your native language with a
+  lifetime option, Taskify fits. If you have ADHD and need clear visual cues — overdue tinting, subtask progress bars, notes
+  preview on every card — Taskify is built around that.
+
+  Key features at a glance:
+
+  • AI Smart Add — natural-language and voice task entry
+  • AI Breakdown — auto-generate subtasks for big tasks
+  • Two-way Google Calendar sync via OAuth 2.0
+  • Home screen widgets — 2×1 and 3×1
+  • Recurring tasks with custom intervals
+  • Subtasks with progress bars
+  • Notes preview on every task card
+  • Overdue tinting and visual priority
+  • Smart, customizable reminders and notifications
+  • Dark mode and light mode
+  • 10 fully localized languages
+  • Offline-first — works without internet
+  • Cloud backup via Firebase
+  • Premium tiers: monthly, yearly, lifetime
+
+  What makes Taskify different from Todoist, TickTick, Microsoft To Do, and Google Tasks:
+
+  Taskify is built by a solo developer who uses it every day. No VC pressure to add features that don't matter. No monthly
+  subscription pressure — buy lifetime once and you're done. No English-only experience — Bulgarian, Italian, Turkish, Greek are
+  first-class, not afterthoughts. A real widget on your home screen, not an icon that opens the app.
+
+  Download Taskify free, try premium 14 days, and decide if it's worth the lifetime.
+
+  Keywords: AI task manager, voice tasks, to-do app, daily planner, Google Calendar sync, home screen widget, recurring tasks, class schedule, student timetable, school planner, student planner, productivity app, ADHD task manager, calendar app.
