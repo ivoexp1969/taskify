@@ -15,44 +15,44 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Нови инсталации НЕ го виждат (те виждат welcome диалога).
 class WhatsNewDialog {
   /// Билдът, за който са точките по-долу (= `pubspec.yaml` build number).
-  static const int _build = 70;
+  static const int _build = 71;
 
   static const String _prefKey = 'whats_new_seen_build';
 
   /// Точките за текущата версия, по език.
   static const Map<String, List<String>> _items = {
     'bg': [
-      '☁️ Синхронизация между устройства: разписанието и профилът (ученик/студент) вече се пазят в облака и се появяват на всичките ти устройства.',
+      '⭐ По-деликатна покана за оценка след завършена задача + дребни подобрения и стабилност.',
     ],
     'en': [
-      '☁️ Cross-device sync: your schedule and school/student profile now stay in sync across your devices.',
+      '⭐ Smoother in-app rating after completing a task, plus small fixes and stability.',
     ],
     'de': [
-      '☁️ Geräteübergreifende Synchronisierung: Dein Stundenplan und dein Schüler-/Studentenprofil werden jetzt auf allen Geräten synchron gehalten.',
+      '⭐ Dezentere Bewertungsanfrage nach erledigter Aufgabe, plus kleine Fehlerbehebungen und Stabilität.',
     ],
     'fr': [
-      '☁️ Synchronisation multi-appareils : ton emploi du temps et ton profil élève/étudiant sont désormais synchronisés sur tous tes appareils.',
+      '⭐ Invitation à noter plus discrète après une tâche terminée, plus corrections et stabilité.',
     ],
     'it': [
-      '☁️ Sincronizzazione tra dispositivi: il tuo orario e il profilo studente ora restano sincronizzati su tutti i dispositivi.',
+      "⭐ Richiesta di valutazione più discreta dopo un'attività completata, più correzioni e stabilità.",
     ],
     'el': [
-      '☁️ Συγχρονισμός μεταξύ συσκευών: το πρόγραμμά σου και το μαθητικό/φοιτητικό προφίλ συγχρονίζονται πλέον σε όλες τις συσκευές σου.',
+      '⭐ Πιο διακριτική πρόσκληση αξιολόγησης μετά την ολοκλήρωση εργασίας, μικρές διορθώσεις και σταθερότητα.',
     ],
     'es': [
-      '☁️ Sincronización entre dispositivos: tu horario y tu perfil de estudiante ahora se sincronizan en todos tus dispositivos.',
+      '⭐ Invitación a valorar más discreta tras completar una tarea, además de correcciones y estabilidad.',
     ],
     'pt': [
-      '☁️ Sincronização entre dispositivos: o teu horário e o perfil de aluno/estudante agora ficam sincronizados em todos os teus dispositivos.',
+      '⭐ Convite de avaliação mais discreto após concluir uma tarefa, mais correções e estabilidade.',
     ],
     'ru': [
-      '☁️ Синхронизация между устройствами: расписание и профиль ученика/студента теперь синхронизируются на всех ваших устройствах.',
+      '⭐ Более деликатное предложение оценить приложение после выполнения задачи, мелкие исправления и стабильность.',
     ],
     'tr': [
-      '☁️ Cihazlar arası senkronizasyon: ders programın ve öğrenci profilin artık tüm cihazlarında senkron kalıyor.',
+      '⭐ Bir görevi tamamladıktan sonra daha nazik değerlendirme isteği, küçük düzeltmeler ve kararlılık.',
     ],
     'ja': [
-      '☁️ デバイス間同期：時間割と生徒・学生プロフィールが、すべての端末で同期されるようになりました。',
+      '⭐ タスク完了後の評価のお願いをより控えめに。細かな修正と安定性の向上。',
     ],
   };
 
