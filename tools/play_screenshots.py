@@ -1,19 +1,25 @@
 # -*- coding: utf-8 -*-
-"""Generate Google Play phone screenshots (1080x1920, exact 9:16) for Taskify.
+"""Generate branded store screenshots for Taskify.
 
-Takes raw device captures (1080x2220) from the input folder and composes each
-onto a branded canvas: dark vertical gradient background, a centered white bold
-caption (auto-wrapped, up to 3 lines) with a short rounded accent bar beneath
-it, and the raw screenshot scaled into a rounded phone frame below.
+Two output modes, ONE visual style (dark vertical gradient, centered white bold
+caption with an accent keyword + a short rounded accent bar beneath it, and the
+raw device capture scaled into a rounded phone frame):
 
-Output: store_metadata/play/screenshots_generated/<locale>/NN.png
+  Google Play (default): 1080x1920 (exact 9:16) -> store_metadata/play/screenshots_generated/<locale>/NN.png
+  App Store  (--ios)   : 1290x2796 (iPhone 6.9")  -> store_metadata/appstore/en-US/NN.png (EN only)
+
+The iOS layout constants are the Play constants scaled by COEF = 2796/1920
+(≈1.456) so the vertical rhythm/frame stay in the same proportions on the taller,
+narrower iOS canvas (computed, not hand-tuned).
 
 Usage:
-  python tools/play_screenshots.py --verify   # only validate inputs
-  python tools/play_screenshots.py            # generate
+  python tools/play_screenshots.py --verify        # validate Play inputs
+  python tools/play_screenshots.py                 # generate Play (1080x1920)
+  python tools/play_screenshots.py --ios --verify  # validate iOS (EN) inputs
+  python tools/play_screenshots.py --ios           # generate App Store (1290x2796)
 
-Every input must exist and be exactly 1080x2220; otherwise the script stops
-with a clear error (it never silently crops).
+Every input must exist and be exactly 1080x2220; otherwise the script stops with
+a clear error (it never silently crops).
 """
 import os
 import sys
@@ -24,22 +30,26 @@ from PIL import Image, ImageDraw, ImageFont
 # ---- Paths ----
 INPUT_DIR = r"C:\Users\Admin\Desktop\task_manager 10012026 GOOGLEPLAY\Screenshots 18092026"
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT_BASE = os.path.join(REPO_ROOT, "store_metadata", "play", "screenshots_generated")
+OUT_BASE_PLAY = os.path.join(REPO_ROOT, "store_metadata", "play", "screenshots_generated")
+OUT_BASE_APPSTORE = os.path.join(REPO_ROOT, "store_metadata", "appstore")
 
-# ---- Canvas ----
+# ---- Canvas (Play defaults; overridden by configure(ios=True)) ----
 OUT_W, OUT_H = 1080, 1920           # exact 9:16
-REQ_W, REQ_H = 1080, 2220           # required raw input size
+REQ_W, REQ_H = 1080, 2220           # required raw input size (both modes)
 
-# ---- Brand palette ----
+# ---- iOS scale factor (taller/narrower 1290x2796 canvas) ----
+IOS_W, IOS_H = 1290, 2796           # iPhone 6.9" required App Store size
+COEF = IOS_H / 1920                 # ≈1.45625 — scale Play layout up to iOS height
+
+# ---- Brand palette (identical in both modes) ----
 GRAD_TOP = (0x12, 0x0C, 0x20)       # #120C20
 GRAD_BOTTOM = (0x08, 0x06, 0x0F)    # #08060F
-# bg intentionally uses the SAME green accents as en (per request).
-ACCENT_BAR = {"en": (0x0A, 0xA6, 0x74), "bg": (0x0A, 0xA6, 0x74)}   # saturated bar
-ACCENT_TEXT = {"en": (0x2C, 0xD4, 0xA0), "bg": (0x2C, 0xD4, 0xA0)}  # lighter, keyword text
+ACCENT_BAR = {"en": (0x0A, 0xA6, 0x74), "bg": (0x0A, 0xA6, 0x74)}   # #0AA674 saturated bar
+ACCENT_TEXT = {"en": (0x2C, 0xD4, 0xA0), "bg": (0x2C, 0xD4, 0xA0)}  # #2CD4A0 keyword text
 TEXT_COLOR = (245, 245, 250)
 FRAME_BORDER = (150, 140, 175)      # thin phone-frame border
 
-# ---- Layout ----
+# ---- Layout (Play values; scaled by COEF in configure(ios=True)) ----
 SIDE_MARGIN = 80                    # text wrap margin
 TEXT_TOP = 110                      # caption baseline start
 LINE_SPACING = 12
@@ -50,10 +60,14 @@ PHONE_SIDE_MARGIN = 95              # min side margin for the phone image
 BOTTOM_MARGIN = 80
 FRAME_RADIUS = 60
 FRAME_BORDER_W = 3
+FONT_SIZE = 62
+
+# ---- Output routing (set by configure) ----
+OUT_BASE = OUT_BASE_PLAY
+ACTIVE_LOCALES = ("en", "bg")       # Play does both; iOS overrides to ("en",)
+LOCALE_DIR = {"en": "en", "bg": "bg"}  # iOS overrides en -> "en-US"
 
 # ---- Screenshot sets (index, filename, caption, accent_phrase) ----
-# accent_phrase must be a contiguous run of words inside caption; those words are
-# drawn in the lighter brand accent color, the rest stays white.
 SETS = {
     "en": [
         (1, "Screenshot_20260918-172359.jpg", "Your tasks and calendar, together", "together"),
@@ -73,7 +87,40 @@ FONT_CANDIDATES = [
     r"C:\Windows\Fonts\arialbd.ttf",
     r"C:\Windows\Fonts\seguisb.ttf",
     r"C:\Windows\Fonts\arial.ttf",
+    # macOS fallbacks (so a preview can render on the Mac too):
+    "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+    "/Library/Fonts/Arial Bold.ttf",
 ]
+
+
+def configure(ios):
+    """Switch all canvas/layout/output globals between Play and iOS modes.
+
+    iOS scales every Play layout constant by COEF so the composition keeps the
+    same visual proportions on the taller 1290x2796 canvas (computed from the
+    coefficient, not hand-picked)."""
+    global OUT_W, OUT_H, SIDE_MARGIN, TEXT_TOP, LINE_SPACING, ACCENT_W, ACCENT_H
+    global ACCENT_GAP, PHONE_GAP, PHONE_SIDE_MARGIN, BOTTOM_MARGIN, FRAME_RADIUS
+    global FRAME_BORDER_W, FONT_SIZE, OUT_BASE, ACTIVE_LOCALES, LOCALE_DIR
+    if not ios:
+        return
+    s = lambda v: int(round(v * COEF))
+    OUT_W, OUT_H = IOS_W, IOS_H
+    SIDE_MARGIN = s(80)
+    TEXT_TOP = s(110)
+    LINE_SPACING = s(12)
+    ACCENT_W, ACCENT_H = s(150), s(12)
+    ACCENT_GAP = s(46)
+    PHONE_GAP = s(60)
+    PHONE_SIDE_MARGIN = s(95)
+    BOTTOM_MARGIN = s(80)
+    FRAME_RADIUS = s(60)
+    FRAME_BORDER_W = max(1, s(3))
+    FONT_SIZE = s(62)
+    OUT_BASE = OUT_BASE_APPSTORE
+    ACTIVE_LOCALES = ("en",)
+    LOCALE_DIR = {"en": "en-US"}
 
 
 def load_font(size):
@@ -100,12 +147,8 @@ def make_gradient(w, h, top, bottom):
 
 
 def build_units(caption, accent_phrase):
-    """Split caption into drawable units of (text, is_accent).
-
-    The accent phrase becomes ONE unit (never broken across lines); every other
-    word is its own white unit. Fails loudly if the accent phrase is not found as
-    a contiguous run of words (so a typo can't silently drop the highlight).
-    """
+    """Split caption into drawable units of (text, is_accent). The accent phrase
+    is ONE unit (never broken across lines); fails loudly if not found."""
     words = caption.split()
     acc = accent_phrase.split()
     start = -1
@@ -129,8 +172,6 @@ def build_units(caption, accent_phrase):
 
 
 def wrap_units(draw, units, font, max_width, max_lines=3):
-    """Greedy word-wrap over units; each unit stays whole. Returns list of lines,
-    each a list of (text, is_accent)."""
     space_w = draw.textlength(" ", font=font)
     lines, cur, cur_w = [], [], 0.0
     for unit in units:
@@ -149,8 +190,8 @@ def wrap_units(draw, units, font, max_width, max_lines=3):
 
 def verify_inputs():
     errors = []
-    for locale, items in SETS.items():
-        for idx, fname, _cap, _acc in items:
+    for locale in ACTIVE_LOCALES:
+        for idx, fname, _cap, _acc in SETS[locale]:
             path = os.path.join(INPUT_DIR, fname)
             if not os.path.exists(path):
                 errors.append("%s #%02d: MISSING file %s" % (locale, idx, path))
@@ -166,12 +207,13 @@ def verify_inputs():
     return errors
 
 
-def compose(locale, fname, caption, accent_phrase):
+def compose(locale, raw, caption, accent_phrase):
+    """Compose one branded screenshot. [raw] is an already-open RGB Image at the
+    raw capture size (so callers can supply a placeholder for previews)."""
     canvas = make_gradient(OUT_W, OUT_H, GRAD_TOP, GRAD_BOTTOM)
     draw = ImageDraw.Draw(canvas)
 
-    # --- Caption: two-color (white + brand accent keyword), centered, ≤3 lines ---
-    font = load_font(62)
+    font = load_font(FONT_SIZE)
     max_text_w = OUT_W - 2 * SIDE_MARGIN
     units = build_units(caption, accent_phrase)
     lines = wrap_units(draw, units, font, max_text_w, max_lines=3)
@@ -190,15 +232,13 @@ def compose(locale, fname, caption, accent_phrase):
         y += line_h + LINE_SPACING
     text_bottom = y - LINE_SPACING
 
-    # --- Accent bar ---
     ax0 = (OUT_W - ACCENT_W) // 2
     ay0 = text_bottom + ACCENT_GAP
     draw.rounded_rectangle([ax0, ay0, ax0 + ACCENT_W, ay0 + ACCENT_H],
                            radius=ACCENT_H // 2, fill=ACCENT_BAR[locale])
     accent_bottom = ay0 + ACCENT_H
 
-    # --- Phone image (scaled into rounded frame) ---
-    raw = Image.open(os.path.join(INPUT_DIR, fname)).convert("RGB")
+    raw = raw.convert("RGB")
     phone_top = accent_bottom + PHONE_GAP
     avail_w = OUT_W - 2 * PHONE_SIDE_MARGIN
     avail_h = OUT_H - BOTTOM_MARGIN - phone_top
@@ -207,15 +247,13 @@ def compose(locale, fname, caption, accent_phrase):
     phone = raw.resize((pw, ph), Image.LANCZOS)
 
     px = (OUT_W - pw) // 2
-    py = phone_top + (avail_h - ph) // 2   # vertically centered in its region
+    py = phone_top + (avail_h - ph) // 2
 
-    # rounded-corner mask
     mask = Image.new("L", (pw, ph), 0)
     ImageDraw.Draw(mask).rounded_rectangle([0, 0, pw - 1, ph - 1],
                                            radius=FRAME_RADIUS, fill=255)
     canvas.paste(phone, (px, py), mask)
 
-    # thin rounded border
     draw.rounded_rectangle([px, py, px + pw - 1, py + ph - 1],
                            radius=FRAME_RADIUS, outline=FRAME_BORDER,
                            width=FRAME_BORDER_W)
@@ -224,11 +262,12 @@ def compose(locale, fname, caption, accent_phrase):
 
 def generate():
     written = []
-    for locale, items in SETS.items():
-        out_dir = os.path.join(OUT_BASE, locale)
+    for locale in ACTIVE_LOCALES:
+        out_dir = os.path.join(OUT_BASE, LOCALE_DIR[locale])
         os.makedirs(out_dir, exist_ok=True)
-        for idx, fname, caption, accent in items:
-            img = compose(locale, fname, caption, accent)
+        for idx, fname, caption, accent in SETS[locale]:
+            raw = Image.open(os.path.join(INPUT_DIR, fname))
+            img = compose(locale, raw, caption, accent)
             if (img.width, img.height) != (OUT_W, OUT_H):
                 raise SystemExit("Composed size wrong: %dx%d" % (img.width, img.height))
             out_path = os.path.join(out_dir, "%02d.png" % idx)
@@ -243,7 +282,10 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--verify", action="store_true",
                     help="Only validate inputs (existence + exact 1080x2220).")
+    ap.add_argument("--ios", action="store_true",
+                    help="App Store mode: 1290x2796 (iPhone 6.9''), EN only.")
     args = ap.parse_args()
+    configure(ios=args.ios)
 
     errors = verify_inputs()
     if errors:
@@ -251,7 +293,8 @@ def main():
         for e in errors:
             print("  " + e, file=sys.stderr)
         sys.exit(1)
-    print("Input verification OK: all 8 files exist and are %dx%d." % (REQ_W, REQ_H))
+    n = sum(len(SETS[l]) for l in ACTIVE_LOCALES)
+    print("Input verification OK: all %d files exist and are %dx%d." % (n, REQ_W, REQ_H))
 
     if args.verify:
         return
