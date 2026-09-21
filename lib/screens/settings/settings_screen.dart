@@ -3,7 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:hive_flutter/hive_flutter.dart';
 
+import '../../models/task.dart';
+import '../../widgets/more_from_1969_section.dart';
 import '../../utils/localization.dart';
 import '../../services/auth_service.dart';
 import '../../services/group_service.dart';
@@ -534,6 +537,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // (Изтрий акаунт е в Профил → Опасна зона — Пакет 2.)
           const SizedBox(height: 16),
+
+          // „Още от 1969" — кръстосана промоция на „Навици" (не на web).
+          // Броят задачи е синхронен — кутията е отворена в main().
+          if (!kIsWeb)
+            MoreFrom1969Section(
+              currentTaskCount: Hive.box<Task>('tasks').length,
+            ),
 
           // „За приложението" — най-долу.
           const AboutSection(),

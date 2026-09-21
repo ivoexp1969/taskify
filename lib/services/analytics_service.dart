@@ -208,4 +208,26 @@ class AnalyticsService {
       debugPrint('Analytics setAppLocale failed: $e');
     }
   }
+
+  // ── Кръстосана промоция („Още от 1969") ────────────────────────────────
+
+  /// Показана секция/карта. [surface] ∈ {simple_link, bonus_card}.
+  Future<void> logCompanionAppShown(String targetApp, String surface) =>
+      _log('companion_app_shown', {
+        'target_app': targetApp,
+        'surface': surface,
+      });
+
+  /// Клик. [action] ∈ {install, open}, [surface] ∈ {simple_link, bonus_card}.
+  Future<void> logCompanionAppClicked(
+          String targetApp, String action, String surface) =>
+      _log('companion_app_clicked', {
+        'target_app': targetApp,
+        'action': action,
+        'surface': surface,
+      });
+
+  /// Dismiss на bonus картата (× бутон).
+  Future<void> logCompanionAppDismissed(String targetApp) =>
+      _log('companion_app_dismissed', {'target_app': targetApp});
 }

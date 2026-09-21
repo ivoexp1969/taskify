@@ -43,6 +43,8 @@
         <package android:name="com.whatsapp" />
         <package android:name="com.whatsapp.w4b" />
         <package android:name="com.viber.voip" />
+        <!-- Кръстосана промоция „Навици" (детекция + отваряне, БЕЗ QUERY_ALL_PACKAGES) -->
+        <package android:name="com.ivoexp.habits" />
     </queries>
 
     <application

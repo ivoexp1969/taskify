@@ -180,6 +180,26 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **★Кръстосана промоция „Навици" в Taskify — секция „Още от 1969" (PC, 2026-09-21, БЕЗ app bump, НЕ
+  качено, само тествано на Note 9):** нова секция НАЙ-ДОЛУ в Настройки (над `AboutSection`) за cross-promo
+  на другото приложение на 1969 — „Навици" (`com.ivoexp.habits` Android / App Store id `6806278691` iOS).
+  **(1)** Нов `services/companion_app_service.dart` (singleton): детекция `InstalledApps.isAppInstalled` +
+  `<package android:name="com.ivoexp.habits"/>` в `<queries>` (★БЕЗ `QUERY_ALL_PACKAGES`★, за да няма Play
+  декларация); `openOrInstall` (Android: `startApp`→иначе Play Store с UTM referrer; iOS: App Store линк);
+  30-дн dismiss на bonus картата (Hive кутия `companion_app_state`, ключ `navici_bonus_dismissed_until`).
+  **(2)** Нов `widgets/more_from_1969_section.dart`: ПРОСТ линк (винаги видим — „Отвори" ако е инсталирано,
+  иначе „Свали") + BONUS карта (условно: Android + Навици НЕ е инсталирано + `Hive.box<Task>('tasks').length`
+  ≥5 + не dismiss-нато; NAVICI30 → 30 дни Pro). **(3)** 3 нови Analytics event-а
+  (`companion_app_shown`/`clicked`/`dismissed` + `surface` simple_link vs bonus_card). Нов dep
+  `installed_apps: ^1.5.2` (резолвна 1.6.0, **Android-only плъгин** → iOS импортът е безопасен, gate-нат с
+  `Platform.isAndroid`; iOS показва само простия линк, без детекция/bonus — bonus идва в отделен iOS промпт).
+  Нови локал. ключове (11 ез.): `open`, `dismiss`, `moreFrom1969Title/NaviciTitle/NaviciSubtitle`,
+  `companionBonus{Title,Body,Cta,Footer}` (`download`+`cancel` преизползвани). `analyze` **0 нови issues**,
+  debug APK билднат, инсталиран на Note 9 (Навици беше инсталиран→„Отвори" тества `startApp`; после Навици
+  деинсталиран + 5 задачи → bonus картата потвърдена OK от Иво). ★ОСТАВА за Иво: създай промо код
+  **NAVICI30** в Firestore ръчно (`type:"days"`, `days:30`, `maxUses:500`, `usedCount:0`, `usedBy:[]`,
+  `expiresAt:null`, `isActive:true`) през HTML tool-а; bump+релийз при следващ обичаен ъпдейт.★ ⚠️ Note 9
+  сега има DEBUG билд (Play версията беше деинсталирана заради signature mismatch → локалните данни нулирани).
 - **★Cross-device sync за разписание + студентски/ученически профил (PC, 2026-09-10, БЕЗ app bump, НЕ
   качено):** досега само задачите+категориите се синхронизираха между устройства (`SyncService`,
   `users/{uid}/tasks`+`categories`). Документите ВЕЧЕ се синхронизираха (те са обикновени `Task` с
