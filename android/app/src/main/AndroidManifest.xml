@@ -1,4 +1,11 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Плъгинът installed_apps декларира тези чувствителни permissions за
+         getInstalledApps(). Ние ползваме само isAppInstalled(конкретен пакет),
+         което работи през <queries><package>. Махаме ги от merged manifest, за
+         да НЯМА Play декларация за QUERY_ALL_PACKAGES. -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:node="remove" />
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" tools:node="remove" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />

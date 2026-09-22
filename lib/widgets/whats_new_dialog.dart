@@ -15,44 +15,44 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Нови инсталации НЕ го виждат (те виждат welcome диалога).
 class WhatsNewDialog {
   /// Билдът, за който са точките по-долу (= `pubspec.yaml` build number).
-  static const int _build = 71;
+  static const int _build = 72;
 
   static const String _prefKey = 'whats_new_seen_build';
 
   /// Точките за текущата версия, по език.
   static const Map<String, List<String>> _items = {
     'bg': [
-      '⭐ По-деликатна покана за оценка след завършена задача + дребни подобрения и стабилност.',
+      '🎉 Нова секция „Още от 1969" в Настройки — препоръка за „Навици", моето приложение за навици. С код NAVICI30 → 30 дни Pro в Taskify при инсталация на Навици.',
     ],
     'en': [
-      '⭐ Smoother in-app rating after completing a task, plus small fixes and stability.',
+      '🎉 New "More from 1969" section in Settings — recommending Навици, my habit tracker. Use code NAVICI30 for 30 days of Taskify Pro when you install Навици.',
     ],
     'de': [
-      '⭐ Dezentere Bewertungsanfrage nach erledigter Aufgabe, plus kleine Fehlerbehebungen und Stabilität.',
+      '🎉 Neuer Bereich „Mehr von 1969" in den Einstellungen — Empfehlung für Навици, meine Gewohnheits-App. Mit Code NAVICI30 → 30 Tage Taskify Pro bei Installation von Навици.',
     ],
     'fr': [
-      '⭐ Invitation à noter plus discrète après une tâche terminée, plus corrections et stabilité.',
+      '🎉 Nouvelle section « Plus de 1969 » dans les Réglages — Навици, mon appli d\'habitudes. Code NAVICI30 → 30 jours de Taskify Pro à l\'installation de Навици.',
     ],
     'it': [
-      "⭐ Richiesta di valutazione più discreta dopo un'attività completata, più correzioni e stabilità.",
+      '🎉 Nuova sezione "Altro da 1969" nelle Impostazioni — Навици, la mia app per le abitudini. Codice NAVICI30 → 30 giorni di Taskify Pro installando Навици.',
     ],
     'el': [
-      '⭐ Πιο διακριτική πρόσκληση αξιολόγησης μετά την ολοκλήρωση εργασίας, μικρές διορθώσεις και σταθερότητα.',
+      '🎉 Νέα ενότητα «Περισσότερα από το 1969» στις Ρυθμίσεις — το Навици, η εφαρμογή μου για συνήθειες. Κωδικός NAVICI30 → 30 ημέρες Taskify Pro με την εγκατάσταση του Навици.',
     ],
     'es': [
-      '⭐ Invitación a valorar más discreta tras completar una tarea, además de correcciones y estabilidad.',
+      '🎉 Nueva sección "Más de 1969" en Ajustes — Навици, mi app de hábitos. Con el código NAVICI30 → 30 días de Taskify Pro al instalar Навици.',
     ],
     'pt': [
-      '⭐ Convite de avaliação mais discreto após concluir uma tarefa, mais correções e estabilidade.',
+      '🎉 Nova seção "Mais de 1969" nas Configurações — Навици, meu app de hábitos. Com o código NAVICI30 → 30 dias de Taskify Pro ao instalar Навици.',
     ],
     'ru': [
-      '⭐ Более деликатное предложение оценить приложение после выполнения задачи, мелкие исправления и стабильность.',
+      '🎉 Новый раздел «Ещё от 1969» в Настройках — Навици, моё приложение для привычек. Код NAVICI30 → 30 дней Taskify Pro при установке Навици.',
     ],
     'tr': [
-      '⭐ Bir görevi tamamladıktan sonra daha nazik değerlendirme isteği, küçük düzeltmeler ve kararlılık.',
+      '🎉 Ayarlar\'da yeni "1969\'dan daha fazlası" bölümü — alışkanlık uygulamam Навици. NAVICI30 kodu → Навици\'yi yükleyince 30 gün Taskify Pro.',
     ],
     'ja': [
-      '⭐ タスク完了後の評価のお願いをより控えめに。細かな修正と安定性の向上。',
+      '🎉 設定に新セクション「1969のその他のアプリ」— 習慣アプリ Навици のおすすめ。コード NAVICI30 で、Навици をインストールすると Taskify Pro が30日間。',
     ],
   };
 
