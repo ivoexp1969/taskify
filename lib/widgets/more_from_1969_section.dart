@@ -6,8 +6,8 @@ import '../utils/localization.dart';
 
 /// Секция „Още от 1969" в Настройки — кръстосана промоция на „Навици".
 ///
-/// • ПРОСТ линк — винаги видим (Android: отвори/свали; iOS: свали от App Store).
-/// • BONUS карта — само Android, при [currentTaskCount] >= 5, Навици НЕ е
+/// • ПРОСТ линк — винаги видим (Android/iOS: отвори ако е инсталирано, иначе свали).
+/// • BONUS карта — Android + iOS, при [currentTaskCount] >= 5, Навици НЕ е
 ///   инсталирано и не е dismiss-нато последните 30 дни.
 class MoreFrom1969Section extends StatefulWidget {
   final int currentTaskCount;

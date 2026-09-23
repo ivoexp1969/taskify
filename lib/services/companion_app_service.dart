@@ -34,25 +34,38 @@ class CompanionAppService {
     _box ??= await Hive.openBox(hiveBoxName);
   }
 
-  /// Проверява дали Навици е инсталирано (само Android за сега).
-  /// На iOS/web винаги false → там не правим детекция.
+  /// Проверява дали Навици е инсталирано.
+  /// Android: `InstalledApps.isAppInstalled` (+ `<queries>` в манифеста).
+  /// iOS: `canLaunchUrl('navici://')` — Навици декларира схемата, Taskify я
+  /// listва в `LSApplicationQueriesSchemes`. Web винаги false.
   Future<bool> isNaviciInstalled() async {
-    if (kIsWeb || !Platform.isAndroid) return false;
-    try {
-      final installed =
-          await InstalledApps.isAppInstalled(naviciAndroidPackage);
-      return installed ?? false;
-    } catch (e) {
-      debugPrint('CompanionAppService.isNaviciInstalled failed: $e');
-      return false;
+    if (kIsWeb) return false;
+    if (Platform.isAndroid) {
+      try {
+        final installed =
+            await InstalledApps.isAppInstalled(naviciAndroidPackage);
+        return installed ?? false;
+      } catch (e) {
+        debugPrint('CompanionAppService.isNaviciInstalled failed: $e');
+        return false;
+      }
     }
+    if (Platform.isIOS) {
+      try {
+        return await canLaunchUrl(Uri.parse('navici://'));
+      } catch (e) {
+        debugPrint('CompanionAppService.isNaviciInstalled (iOS) failed: $e');
+        return false;
+      }
+    }
+    return false;
   }
 
   /// Дали BONUS КАРТАТА може да се показва (обикновеният линк се показва
-  /// винаги). Само Android + не е dismiss-нат последните 30 дни. Извикващият
-  /// проверява отделно броя задачи (>=5) и че Навици НЕ е инсталирано.
+  /// винаги). Android + iOS, стига да не е dismiss-нат последните 30 дни.
+  /// Извикващият проверява отделно броя задачи (>=5) и че Навици НЕ е инсталирано.
   Future<bool> shouldShowBonusCard() async {
-    if (kIsWeb || !Platform.isAndroid) return false;
+    if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) return false;
     await _ensureBox();
     final dismissedUntilMillis = _box?.get(bonusDismissedKey) as int?;
     if (dismissedUntilMillis != null) {

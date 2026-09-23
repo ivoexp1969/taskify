@@ -70,6 +70,12 @@
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Taskify needs permission to save exported files to your photo library.</string>
 
+	<!-- Детекция на другото ни приложение „Навици" през canLaunchUrl('navici://') -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>navici</string>
+	</array>
+
 	<!-- URL schemes за Google Sign-In — ще се попълни с реалния REVERSED_CLIENT_ID от GoogleService-Info.plist -->
 	<key>CFBundleURLTypes</key>
 	<array>

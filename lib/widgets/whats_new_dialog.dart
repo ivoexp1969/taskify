@@ -15,44 +15,44 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Нови инсталации НЕ го виждат (те виждат welcome диалога).
 class WhatsNewDialog {
   /// Билдът, за който са точките по-долу (= `pubspec.yaml` build number).
-  static const int _build = 72;
+  static const int _build = 73;
 
   static const String _prefKey = 'whats_new_seen_build';
 
   /// Точките за текущата версия, по език.
   static const Map<String, List<String>> _items = {
     'bg': [
-      '🎉 Нова секция „Още от 1969" в Настройки — препоръка за „Навици", моето приложение за навици. С код NAVICI30 → 30 дни Pro в Taskify при инсталация на Навици.',
+      '🎉 Секцията „Още от 1969" вече работи и на iOS — с детекция дали Навици е инсталирано. С код NAVICI30 → 30 дни Pro в Taskify при инсталация на Навици.',
     ],
     'en': [
-      '🎉 New "More from 1969" section in Settings — recommending Навици, my habit tracker. Use code NAVICI30 for 30 days of Taskify Pro when you install Навици.',
+      '🎉 The "More from 1969" section now works on iOS — with detection of whether Навици is installed. Code NAVICI30 → 30 days of Taskify Pro when you install Навици.',
     ],
     'de': [
-      '🎉 Neuer Bereich „Mehr von 1969" in den Einstellungen — Empfehlung für Навици, meine Gewohnheits-App. Mit Code NAVICI30 → 30 Tage Taskify Pro bei Installation von Навици.',
+      '🎉 Der Bereich „Mehr von 1969" funktioniert jetzt auch auf iOS — mit Erkennung, ob Навици installiert ist. Code NAVICI30 → 30 Tage Taskify Pro bei Installation von Навици.',
     ],
     'fr': [
-      '🎉 Nouvelle section « Plus de 1969 » dans les Réglages — Навици, mon appli d\'habitudes. Code NAVICI30 → 30 jours de Taskify Pro à l\'installation de Навици.',
+      '🎉 La section « Plus de 1969 » fonctionne désormais sur iOS — avec détection si Навици est installé. Code NAVICI30 → 30 jours de Taskify Pro à l\'installation de Навици.',
     ],
     'it': [
-      '🎉 Nuova sezione "Altro da 1969" nelle Impostazioni — Навици, la mia app per le abitudini. Codice NAVICI30 → 30 giorni di Taskify Pro installando Навици.',
+      '🎉 La sezione "Altro da 1969" ora funziona anche su iOS — con rilevamento se Навици è installato. Codice NAVICI30 → 30 giorni di Taskify Pro installando Навици.',
     ],
     'el': [
-      '🎉 Νέα ενότητα «Περισσότερα από το 1969» στις Ρυθμίσεις — το Навици, η εφαρμογή μου για συνήθειες. Κωδικός NAVICI30 → 30 ημέρες Taskify Pro με την εγκατάσταση του Навици.',
+      '🎉 Η ενότητα «Περισσότερα από το 1969» λειτουργεί τώρα και σε iOS — με ανίχνευση αν το Навици είναι εγκατεστημένο. Κωδικός NAVICI30 → 30 ημέρες Taskify Pro με την εγκατάσταση του Навици.',
     ],
     'es': [
-      '🎉 Nueva sección "Más de 1969" en Ajustes — Навици, mi app de hábitos. Con el código NAVICI30 → 30 días de Taskify Pro al instalar Навици.',
+      '🎉 La sección "Más de 1969" ahora funciona en iOS — con detección de si Навици está instalado. Código NAVICI30 → 30 días de Taskify Pro al instalar Навици.',
     ],
     'pt': [
-      '🎉 Nova seção "Mais de 1969" nas Configurações — Навици, meu app de hábitos. Com o código NAVICI30 → 30 dias de Taskify Pro ao instalar Навици.',
+      '🎉 A seção "Mais de 1969" agora funciona no iOS — com detecção de se o Навици está instalado. Código NAVICI30 → 30 dias de Taskify Pro ao instalar Навици.',
     ],
     'ru': [
-      '🎉 Новый раздел «Ещё от 1969» в Настройках — Навици, моё приложение для привычек. Код NAVICI30 → 30 дней Taskify Pro при установке Навици.',
+      '🎉 Раздел «Ещё от 1969» теперь работает и на iOS — с определением, установлено ли Навици. Код NAVICI30 → 30 дней Taskify Pro при установке Навици.',
     ],
     'tr': [
-      '🎉 Ayarlar\'da yeni "1969\'dan daha fazlası" bölümü — alışkanlık uygulamam Навици. NAVICI30 kodu → Навици\'yi yükleyince 30 gün Taskify Pro.',
+      '🎉 "1969\'dan daha fazlası" bölümü artık iOS\'ta da çalışıyor — Навици\'nin yüklü olup olmadığını algılar. NAVICI30 kodu → Навици\'yi yükleyince 30 gün Taskify Pro.',
     ],
     'ja': [
-      '🎉 設定に新セクション「1969のその他のアプリ」— 習慣アプリ Навици のおすすめ。コード NAVICI30 で、Навици をインストールすると Taskify Pro が30日間。',
+      '🎉 「1969のその他のアプリ」が iOS でも動作 — Навици がインストール済みか検出します。コード NAVICI30 で、Навици をインストールすると Taskify Pro が30日間。',
     ],
   };
 
