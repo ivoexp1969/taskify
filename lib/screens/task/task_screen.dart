@@ -400,16 +400,16 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
         ? ' · ${formatTime(TimeOfDay.fromDateTime(d))}'
         : '';
     if (diff == 0) {
-      const m = {'en': 'Today', 'bg': 'Днес', 'de': 'Heute', 'fr': 'Auj.', 'it': 'Oggi', 'el': 'Σήμερα', 'es': 'Hoy', 'pt': 'Hoje', 'ru': 'Сегодня', 'tr': 'Bugün', 'ja': '今日'};
+      const m = {'en': 'Today', 'nl': 'Vandaag', 'uk': 'Сьогодні', 'bg': 'Днес', 'de': 'Heute', 'fr': 'Auj.', 'it': 'Oggi', 'el': 'Σήμερα', 'es': 'Hoy', 'pt': 'Hoje', 'ru': 'Сегодня', 'tr': 'Bugün', 'ja': '今日'};
       return '${m[lang] ?? m['en']!}$timeStr';
     }
     if (diff == 1) {
-      const m = {'en': 'Tomorrow', 'bg': 'Утре', 'de': 'Morgen', 'fr': 'Demain', 'it': 'Domani', 'el': 'Αύριο', 'es': 'Mañana', 'pt': 'Amanhã', 'ru': 'Завтра', 'tr': 'Yarın', 'ja': '明日'};
+      const m = {'en': 'Tomorrow', 'nl': 'Morgen', 'uk': 'Завтра', 'bg': 'Утре', 'de': 'Morgen', 'fr': 'Demain', 'it': 'Domani', 'el': 'Αύριο', 'es': 'Mañana', 'pt': 'Amanhã', 'ru': 'Завтра', 'tr': 'Yarın', 'ja': '明日'};
       return '${m[lang] ?? m['en']!}$timeStr';
     }
     if (diff > 1 && diff < 7) {
       const wd = <String, List<String>>{
-        'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], 'nl': ['ma', 'di', 'wo', 'do', 'vr', 'za', 'zo'], 'uk': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
         'bg': ['Пон', 'Вт', 'Ср', 'Чет', 'Пет', 'Съб', 'Нед'],
         'de': ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
         'fr': ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
@@ -498,7 +498,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
   }
 
   static const Map<String, String> _sharedHint = {
-    'en': 'Lists with family or your team', 'bg': 'Списъци със семейството или екипа',
+    'en': 'Lists with family or your team', 'nl': 'Lijsten met familie of je team', 'uk': 'Списки з родиною чи командою', 'bg': 'Списъци със семейството или екипа',
     'de': 'Listen mit Familie oder Team', 'fr': 'Listes avec ta famille ou ton équipe',
     'it': 'Liste con famiglia o team', 'el': 'Λίστες με οικογένεια ή ομάδα',
     'es': 'Listas con familia o equipo', 'pt': 'Listas com a família ou equipa',

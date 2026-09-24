@@ -19,30 +19,30 @@ class StudyTodayTasksCard extends StatelessWidget {
   static String _t(Map<String, String> m, String lang) => m[lang] ?? m['en']!;
 
   static const _title = {
-    'en': 'Study tasks', 'bg': 'Днешни задачи', 'de': 'Lernaufgaben',
+    'en': 'Study tasks', 'nl': 'Studietaken', 'uk': 'Навчальні завдання', 'bg': 'Днешни задачи', 'de': 'Lernaufgaben',
     'fr': 'Tâches d\'étude', 'it': 'Compiti', 'el': 'Εργασίες',
     'es': 'Tareas', 'pt': 'Tarefas', 'ru': 'Учебные задачи',
     'tr': 'Görevler', 'ja': '学習タスク',
   };
   static const _seeAll = {
-    'en': 'See all tasks', 'bg': 'Виж всички задачи',
+    'en': 'See all tasks', 'nl': 'Alle taken bekijken', 'uk': 'Переглянути всі завдання', 'bg': 'Виж всички задачи',
     'de': 'Alle Aufgaben', 'fr': 'Voir toutes les tâches',
     'it': 'Tutti i compiti', 'el': 'Όλες οι εργασίες', 'es': 'Ver todas',
     'pt': 'Ver todas', 'ru': 'Все задачи', 'tr': 'Tüm görevler',
     'ja': 'すべて見る',
   };
   static const _byWord = {
-    'en': 'by', 'bg': 'до', 'de': 'bis', 'fr': 'pour', 'it': 'entro',
+    'en': 'by', 'nl': 'door', 'uk': 'від', 'bg': 'до', 'de': 'bis', 'fr': 'pour', 'it': 'entro',
     'el': 'έως', 'es': 'para', 'pt': 'até', 'ru': 'до', 'tr': '', 'ja': 'まで',
   };
   static const _todayWord = {
-    'en': 'today', 'bg': 'днес', 'de': 'heute', 'fr': "aujourd'hui",
+    'en': 'today', 'nl': 'vandaag', 'uk': 'сьогодні', 'bg': 'днес', 'de': 'heute', 'fr': "aujourd'hui",
     'it': 'oggi', 'el': 'σήμερα', 'es': 'hoy', 'pt': 'hoje',
     'ru': 'сегодня', 'tr': 'bugün', 'ja': '今日',
   };
 
   static const _dayNames = {
-    'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], 'nl': ['ma', 'di', 'wo', 'do', 'vr', 'za', 'zo'], 'uk': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
     'bg': ['понеделник', 'вторник', 'сряда', 'четвъртък', 'петък', 'събота', 'неделя'],
     'de': ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
     'fr': ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam', 'dim'],

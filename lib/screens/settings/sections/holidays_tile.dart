@@ -67,14 +67,14 @@ class _HolidaysTileState extends State<HolidaysTile> {
     final lang = widget.lang;
     final theme = Theme.of(context);
     const title = {
-      'en': 'Public holidays', 'bg': 'Официални празници',
+      'en': 'Public holidays', 'nl': 'Feestdagen', 'uk': 'Офіційні свята', 'bg': 'Официални празници',
       'de': 'Gesetzliche Feiertage', 'fr': 'Jours fériés',
       'it': 'Festività ufficiali', 'el': 'Επίσημες αργίες',
       'es': 'Días festivos', 'pt': 'Feriados oficiais',
       'ru': 'Официальные праздники', 'tr': 'Resmi tatiller', 'ja': '祝日',
     };
     const subtitle = {
-      'en': 'Holidays for your country in the calendar',
+      'en': 'Holidays for your country in the calendar', 'nl': 'Feestdagen voor jouw land in de agenda', 'uk': 'Свята вашої країни в календарі',
       'bg': 'Празниците на твоята държава в календара',
       'de': 'Feiertage deines Landes im Kalender',
       'fr': 'Les jours fériés de ton pays dans le calendrier',
@@ -86,7 +86,7 @@ class _HolidaysTileState extends State<HolidaysTile> {
       'tr': 'Ülkenin tatilleri takvimde', 'ja': 'カレンダーにお住まいの国の祝日を表示',
     };
     const countryLabel = {
-      'en': 'Country', 'bg': 'Държава', 'de': 'Land', 'fr': 'Pays',
+      'en': 'Country', 'nl': 'Land', 'uk': 'Країна', 'bg': 'Държава', 'de': 'Land', 'fr': 'Pays',
       'it': 'Paese', 'el': 'Χώρα', 'es': 'País', 'pt': 'País',
       'ru': 'Страна', 'tr': 'Ülke', 'ja': '国',
     };

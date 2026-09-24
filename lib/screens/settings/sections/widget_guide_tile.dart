@@ -10,13 +10,13 @@ class WidgetGuideTile extends StatelessWidget {
   // ── Упътване „Как да добавя widget" (iOS) ─────────────────────────────
   static const Map<String, Map<String, String>> _widgetGuide = {
     'title': {
-      'en': 'Add the widget', 'bg': 'Добави widget', 'de': 'Widget hinzufügen',
+      'en': 'Add the widget', 'nl': 'De widget toevoegen', 'uk': 'Додати віджет', 'bg': 'Добави widget', 'de': 'Widget hinzufügen',
       'fr': 'Ajouter le widget', 'it': 'Aggiungi il widget', 'el': 'Πρόσθεσε το widget',
       'es': 'Añadir el widget', 'pt': 'Adicionar o widget', 'ru': 'Добавить виджет',
       'tr': 'Widget ekle', 'ja': 'ウィジェットを追加',
     },
     'subtitle': {
-      'en': "See today's tasks on your Home Screen",
+      'en': "See today's tasks on your Home Screen", 'nl': 'Bekijk de taken van vandaag op je beginscherm', 'uk': 'Дивіться завдання на сьогодні на головному екрані',
       'bg': 'Виж днешните си задачи на началния екран',
       'de': 'Zeige heutige Aufgaben auf dem Home-Bildschirm',
       'fr': "Vois tes tâches du jour sur l'écran d'accueil",
@@ -29,7 +29,7 @@ class WidgetGuideTile extends StatelessWidget {
       'ja': 'ホーム画面で今日のタスクを表示',
     },
     's1': {
-      'en': 'Touch and hold an empty spot on the Home Screen.',
+      'en': 'Touch and hold an empty spot on the Home Screen.', 'nl': 'Houd een lege plek op het beginscherm ingedrukt.', 'uk': 'Натисніть і утримуйте порожнє місце на головному екрані.',
       'bg': 'Задръж пръст върху празно място на началния екран.',
       'de': 'Halte eine leere Stelle auf dem Home-Bildschirm gedrückt.',
       'fr': "Appuie longuement sur une zone vide de l'écran d'accueil.",
@@ -42,7 +42,7 @@ class WidgetGuideTile extends StatelessWidget {
       'ja': 'ホーム画面の空いている場所を長押しします。',
     },
     's2': {
-      'en': 'Tap the + button in the top corner.',
+      'en': 'Tap the + button in the top corner.', 'nl': 'Tik op de +-knop in de bovenhoek.', 'uk': 'Торкніться кнопки + у верхньому куті.',
       'bg': 'Натисни бутона + в горния ъгъл.',
       'de': 'Tippe auf + in der oberen Ecke.',
       'fr': 'Touche le bouton + dans le coin supérieur.',
@@ -55,14 +55,14 @@ class WidgetGuideTile extends StatelessWidget {
       'ja': '上隅の + ボタンをタップします。',
     },
     's3': {
-      'en': 'Search for “Taskify”.', 'bg': 'Потърси „Taskify".',
+      'en': 'Search for “Taskify”.', 'nl': 'Zoek naar “Taskify”.', 'uk': 'Знайдіть «Taskify».', 'bg': 'Потърси „Taskify".',
       'de': 'Suche nach „Taskify".', 'fr': 'Cherche « Taskify ».',
       'it': 'Cerca “Taskify”.', 'el': 'Αναζήτησε «Taskify».',
       'es': 'Busca «Taskify».', 'pt': 'Procura “Taskify”.',
       'ru': 'Найди «Taskify».', 'tr': '“Taskify” ara.', 'ja': '「Taskify」を検索します。',
     },
     's4': {
-      'en': 'Pick a size and tap “Add Widget”.',
+      'en': 'Pick a size and tap “Add Widget”.', 'nl': 'Kies een formaat en tik op “Widget toevoegen”.', 'uk': 'Виберіть розмір і торкніться «Додати віджет».',
       'bg': 'Избери размер и натисни „Добави widget".',
       'de': 'Wähle eine Größe und tippe auf „Widget hinzufügen".',
       'fr': 'Choisis une taille et touche « Ajouter le widget ».',
@@ -75,7 +75,7 @@ class WidgetGuideTile extends StatelessWidget {
       'ja': 'サイズを選んで「ウィジェットを追加」をタップします。',
     },
     'ok': {
-      'en': 'Got it', 'bg': 'Разбрах', 'de': 'Verstanden', 'fr': 'Compris',
+      'en': 'Got it', 'nl': 'Begrepen', 'uk': 'Зрозуміло', 'bg': 'Разбрах', 'de': 'Verstanden', 'fr': 'Compris',
       'it': 'Ho capito', 'el': 'Κατάλαβα', 'es': 'Entendido', 'pt': 'Percebi',
       'ru': 'Понятно', 'tr': 'Anladım', 'ja': 'わかりました',
     },

@@ -145,7 +145,7 @@ class SchoolCountdownCard extends StatelessWidget {
   Widget _emptyState(BuildContext context, String lang) {
     final theme = Theme.of(context);
     const msg = {
-      'en': 'The dates for this school year haven\'t been published yet.',
+      'en': 'The dates for this school year haven\'t been published yet.', 'nl': 'De data voor dit schooljaar zijn nog niet gepubliceerd.', 'uk': 'Дати цього навчального року ще не опубліковано.',
       'bg': 'Датите за тази учебна година още не са публикувани.',
       'de': 'Die Termine für dieses Schuljahr sind noch nicht veröffentlicht.',
       'fr': 'Les dates de cette année scolaire ne sont pas encore publiées.',
@@ -220,28 +220,28 @@ class SchoolCountdownCard extends StatelessWidget {
   String _vacationName(String lang, SchoolCountdown cd) {
     const names = {
       'autumn': {
-        'en': 'autumn break', 'bg': 'Есенната ваканция', 'de': 'die Herbstferien',
+        'en': 'autumn break', 'nl': 'herfstvakantie', 'uk': 'осінні канікули', 'bg': 'Есенната ваканция', 'de': 'die Herbstferien',
         'fr': 'les vacances d\'automne', 'it': 'le vacanze autunnali',
         'el': 'τις φθινοπωρινές διακοπές', 'es': 'las vacaciones de otoño',
         'pt': 'as férias de outono', 'ru': 'осенних каникул',
         'tr': 'sonbahar tatili', 'ja': '秋休み',
       },
       'winter': {
-        'en': 'winter break', 'bg': 'Коледната ваканция', 'de': 'die Weihnachtsferien',
+        'en': 'winter break', 'nl': 'kerstvakantie', 'uk': 'зимові канікули', 'bg': 'Коледната ваканция', 'de': 'die Weihnachtsferien',
         'fr': 'les vacances de Noël', 'it': 'le vacanze di Natale',
         'el': 'τις χριστουγεννιάτικες διακοπές', 'es': 'las vacaciones de Navidad',
         'pt': 'as férias de Natal', 'ru': 'зимних каникул',
         'tr': 'kış tatili', 'ja': '冬休み',
       },
       'midterm': {
-        'en': 'the mid-term break', 'bg': 'Междусрочната ваканция',
+        'en': 'the mid-term break', 'nl': 'de tussentijdse vakantie', 'uk': 'канікули в середині семестру', 'bg': 'Междусрочната ваканция',
         'de': 'die Halbjahresferien', 'fr': 'les vacances de mi-trimestre',
         'it': 'la pausa di metà anno', 'el': 'τις ενδιάμεσες διακοπές',
         'es': 'las vacaciones de mitad de curso', 'pt': 'as férias de meio de ano',
         'ru': 'межсеместровых каникул', 'tr': 'yarıyıl tatili', 'ja': '学期間の休み',
       },
       'spring': {
-        'en': 'spring break', 'bg': 'Пролетната ваканция', 'de': 'die Osterferien',
+        'en': 'spring break', 'nl': 'voorjaarsvakantie', 'uk': 'весняні канікули', 'bg': 'Пролетната ваканция', 'de': 'die Osterferien',
         'fr': 'les vacances de printemps', 'it': 'le vacanze di primavera',
         'el': 'τις ανοιξιάτικες διακοπές', 'es': 'las vacaciones de primavera',
         'pt': 'as férias da primavera', 'ru': 'весенних каникул',
@@ -276,7 +276,7 @@ class SchoolCountdownCard extends StatelessWidget {
 
   String _summerName(String lang) {
     const m = {
-      'en': 'summer break', 'bg': 'лятната ваканция', 'de': 'die Sommerferien',
+      'en': 'summer break', 'nl': 'zomervakantie', 'uk': 'літні канікули', 'bg': 'лятната ваканция', 'de': 'die Sommerferien',
       'fr': 'les vacances d\'été', 'it': 'le vacanze estive',
       'el': 'τις καλοκαιρινές διακοπές', 'es': 'las vacaciones de verano',
       'pt': 'as férias de verão', 'ru': 'летних каникул', 'tr': 'yaz tatili',
@@ -317,7 +317,7 @@ class SchoolCountdownCard extends StatelessWidget {
   String _startsToday(String lang, String name) {
     // Начална буква нагоре при нужда (BG имената идват с главна).
     const m = {
-      'en': '{name} starts today!', 'bg': '{name} започва днес!',
+      'en': '{name} starts today!', 'nl': '{name} begint vandaag!', 'uk': '{name} починається сьогодні!', 'bg': '{name} започва днес!',
       'de': '{name} beginnt heute!', 'fr': '{name} commence aujourd\'hui !',
       'it': '{name} inizia oggi!', 'el': '{name} ξεκινά σήμερα!',
       'es': '¡{name} empieza hoy!', 'pt': '{name} começa hoje!',
@@ -330,7 +330,7 @@ class SchoolCountdownCard extends StatelessWidget {
   String _inVacationText(String lang, int daysLeft) {
     if (daysLeft <= 0) {
       const m = {
-        'en': 'Vacation! Last day of the break 🎉',
+        'en': 'Vacation! Last day of the break 🎉', 'nl': 'Vakantie! Laatste dag van de vakantie 🎉', 'uk': 'Канікули! Останній день відпочинку 🎉',
         'bg': 'Ваканция! Последен ден почивка 🎉',
         'de': 'Ferien! Letzter freier Tag 🎉',
         'fr': 'Vacances ! Dernier jour de repos 🎉',
@@ -373,7 +373,7 @@ class SchoolCountdownCard extends StatelessWidget {
 
   String _summerBreakText(String lang) {
     const m = {
-      'en': 'Summer break! Enjoy ☀️', 'bg': 'Лятна ваканция! Почивай ☀️',
+      'en': 'Summer break! Enjoy ☀️', 'nl': 'Zomervakantie! Geniet ☀️', 'uk': 'Літні канікули! Насолоджуйтесь ☀️', 'bg': 'Лятна ваканция! Почивай ☀️',
       'de': 'Sommerferien! Genieß es ☀️', 'fr': 'Vacances d\'été ! Profite ☀️',
       'it': 'Vacanze estive! Goditele ☀️', 'el': 'Καλοκαιρινές διακοπές! ☀️',
       'es': '¡Vacaciones de verano! ☀️', 'pt': 'Férias de verão! ☀️',
@@ -385,7 +385,7 @@ class SchoolCountdownCard extends StatelessWidget {
 
   String _beforeStartText(String lang, int n) {
     const first = {
-      'en': 'first day of school', 'bg': 'първия учебен ден',
+      'en': 'first day of school', 'nl': 'eerste schooldag', 'uk': 'перший день навчання', 'bg': 'първия учебен ден',
       'de': 'zum Schulanfang', 'fr': 'la rentrée', 'it': 'il primo giorno di scuola',
       'el': 'την πρώτη μέρα σχολείου', 'es': 'el primer día de clases',
       'pt': 'o primeiro dia de aulas', 'ru': 'первого учебного дня',
@@ -394,7 +394,7 @@ class SchoolCountdownCard extends StatelessWidget {
     final name = first[lang] ?? first['en']!;
     if (n == 0) {
       const today = {
-        'en': 'School starts today! 📚', 'bg': 'Училището започва днес! 📚',
+        'en': 'School starts today! 📚', 'nl': 'Vandaag begint de school! 📚', 'uk': 'Сьогодні починається навчання! 📚', 'bg': 'Училището започва днес! 📚',
         'de': 'Die Schule beginnt heute! 📚', 'fr': 'L\'école commence aujourd\'hui ! 📚',
         'it': 'La scuola inizia oggi! 📚', 'el': 'Το σχολείο ξεκινά σήμερα! 📚',
         'es': '¡La escuela empieza hoy! 📚', 'pt': 'A escola começa hoje! 📚',
@@ -409,7 +409,7 @@ class SchoolCountdownCard extends StatelessWidget {
   String _examText(String lang, String examName, int n) {
     if (n <= 0) {
       const m = {
-        'en': '{e} is today', 'bg': '{e} е днес', 'de': '{e} ist heute',
+        'en': '{e} is today', 'nl': '{e} is vandaag', 'uk': '{e} сьогодні', 'bg': '{e} е днес', 'de': '{e} ist heute',
         'fr': '{e} c\'est aujourd\'hui', 'it': '{e} è oggi', 'el': '{e} είναι σήμερα',
         'es': '{e} es hoy', 'pt': '{e} é hoje', 'ru': '{e} — сегодня',
         'tr': '{e} bugün', 'ja': '{e}は今日',
@@ -418,7 +418,7 @@ class SchoolCountdownCard extends StatelessWidget {
     }
     final d = _dayWord(lang, n);
     const tpl = {
-      'en': '{n} {d} until {e}', 'bg': 'Още {n} {d} до {e}',
+      'en': '{n} {d} until {e}', 'nl': '{n} {d} tot {e}', 'uk': '{n} {d} до {e}', 'bg': 'Още {n} {d} до {e}',
       'de': 'Noch {n} {d} bis {e}', 'fr': 'Encore {n} {d} avant {e}',
       'it': 'Ancora {n} {d} a {e}', 'el': 'Ακόμα {n} {d} για {e}',
       'es': '{n} {d} para {e}', 'pt': '{n} {d} para {e}',
@@ -479,7 +479,7 @@ class SchoolCountdownCard extends StatelessWidget {
   }
 
   static const Map<String, List<String>> _months = {
-    'en': ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    'en': ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], 'nl': ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'], 'uk': ['січ', 'лют', 'бер', 'квіт', 'трав', 'черв', 'лип', 'серп', 'вер', 'жовт', 'лист', 'груд'],
     'bg': ['яну','фев','мар','апр','май','юни','юли','авг','сеп','окт','ное','дек'],
     'de': ['Jan','Feb','März','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'],
     'fr': ['janv','févr','mars','avr','mai','juin','juil','août','sept','oct','nov','déc'],

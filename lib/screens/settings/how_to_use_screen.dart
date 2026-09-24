@@ -16,7 +16,7 @@ class HowToUseScreen extends StatelessWidget {
     String tr(Map<String, String> m) => m[lang] ?? m['en']!;
 
     const title = {
-      'en': 'How to use', 'bg': 'Как се ползва', 'de': 'Anleitung',
+      'en': 'How to use', 'nl': 'Hoe te gebruiken', 'uk': 'Як користуватися', 'bg': 'Как се ползва', 'de': 'Anleitung',
       'fr': 'Comment ça marche', 'it': 'Come si usa', 'el': 'Πώς λειτουργεί',
       'es': 'Cómo se usa', 'pt': 'Como usar', 'ru': 'Как пользоваться',
       'tr': 'Nasıl kullanılır', 'ja': '使い方',
@@ -26,7 +26,7 @@ class HowToUseScreen extends StatelessWidget {
       _HowToItem(
         icon: Icons.add_circle_outline,
         title: const {
-          'en': 'Adding a task', 'bg': 'Добавяне на задача',
+          'en': 'Adding a task', 'nl': 'Een taak toevoegen', 'uk': 'Додавання завдання', 'bg': 'Добавяне на задача',
           'de': 'Aufgabe hinzufügen', 'fr': 'Ajouter une tâche',
           'it': "Aggiungere un'attività", 'el': 'Προσθήκη εργασίας',
           'es': 'Añadir una tarea', 'pt': 'Adicionar tarefa',
@@ -34,7 +34,7 @@ class HowToUseScreen extends StatelessWidget {
         },
         body: const {
           'en':
-              'Tap +, type your task. You can write in natural language too — "dentist tomorrow at 10" — and Taskify detects the date, time and category for you.',
+              'Tap +, type your task. You can write in natural language too — "dentist tomorrow at 10" — and Taskify detects the date, time and category for you.', 'nl': 'Tik op +, typ je taak. Je kunt ook gewone taal gebruiken — "tandarts morgen om 10" — en Taskify herkent de datum, tijd en categorie voor je.', 'uk': 'Торкніться +, введіть завдання. Можна писати звичайною мовою — «стоматолог завтра о 10» — і Taskify визначить дату, час і категорію.',
           'bg':
               'Натисни +, напиши задачата. Можеш да пишеш и на естествен език — „зъболекар утре в 10" — и Taskify сам разпознава дата, час и категория.',
           'de':
@@ -60,7 +60,7 @@ class HowToUseScreen extends StatelessWidget {
       _HowToItem(
         icon: Icons.checklist_rounded,
         title: const {
-          'en': 'Subtasks & priority', 'bg': 'Подзадачи и приоритет',
+          'en': 'Subtasks & priority', 'nl': 'Subtaken & prioriteit', 'uk': 'Підзавдання та пріоритет', 'bg': 'Подзадачи и приоритет',
           'de': 'Teilaufgaben & Priorität', 'fr': 'Sous-tâches et priorité',
           'it': 'Sotto-attività e priorità', 'el': 'Υποεργασίες & προτεραιότητα',
           'es': 'Subtareas y prioridad', 'pt': 'Subtarefas e prioridade',
@@ -69,7 +69,7 @@ class HowToUseScreen extends StatelessWidget {
         },
         body: const {
           'en':
-              'Break a task into subtasks, set a priority, and make it repeat (daily, weekly, monthly).',
+              'Break a task into subtasks, set a priority, and make it repeat (daily, weekly, monthly).', 'nl': 'Splits een taak op in subtaken, stel een prioriteit in en laat hem herhalen (dagelijks, wekelijks, maandelijks).', 'uk': 'Розбийте завдання на підзавдання, задайте пріоритет і зробіть його повторюваним (щодня, щотижня, щомісяця).',
           'bg':
               'Раздели задачата на подзадачи, задай приоритет и повторение (всеки ден, седмица или месец).',
           'de':
@@ -94,7 +94,7 @@ class HowToUseScreen extends StatelessWidget {
       _HowToItem(
         icon: Icons.grid_view_rounded,
         title: const {
-          'en': 'Eisenhower matrix', 'bg': 'Матрица на Айзенхауер',
+          'en': 'Eisenhower matrix', 'nl': 'Eisenhower-matrix', 'uk': 'Матриця Ейзенхауера', 'bg': 'Матрица на Айзенхауер',
           'de': 'Eisenhower-Matrix', 'fr': "Matrice d'Eisenhower",
           'it': 'Matrice di Eisenhower', 'el': 'Πίνακας Eisenhower',
           'es': 'Matriz de Eisenhower', 'pt': 'Matriz de Eisenhower',
@@ -102,7 +102,7 @@ class HowToUseScreen extends StatelessWidget {
           'ja': 'アイゼンハワーマトリクス',
         },
         body: const {
-          'en': 'Sort your tasks by importance and urgency.',
+          'en': 'Sort your tasks by importance and urgency.', 'nl': 'Sorteer je taken op belang en urgentie.', 'uk': 'Сортуйте завдання за важливістю та терміновістю.',
           'bg': 'Подреди задачите по важност и спешност.',
           'de': 'Sortiere deine Aufgaben nach Wichtigkeit und Dringlichkeit.',
           'fr': 'Classe tes tâches par importance et urgence.',
@@ -118,7 +118,7 @@ class HowToUseScreen extends StatelessWidget {
       _HowToItem(
         icon: Icons.event_rounded,
         title: const {
-          'en': 'Calendar & sync', 'bg': 'Календар и синхронизация',
+          'en': 'Calendar & sync', 'nl': 'Agenda & synchronisatie', 'uk': 'Календар і синхронізація', 'bg': 'Календар и синхронизация',
           'de': 'Kalender & Synchronisierung',
           'fr': 'Calendrier et synchronisation',
           'it': 'Calendario e sincronizzazione', 'el': 'Ημερολόγιο & συγχρονισμός',
@@ -128,7 +128,7 @@ class HowToUseScreen extends StatelessWidget {
         },
         body: const {
           'en':
-              'See everything in the calendar and connect Google Calendar with a single switch.',
+              'See everything in the calendar and connect Google Calendar with a single switch.', 'nl': 'Zie alles in de agenda en verbind Google Agenda met één schakelaar.', 'uk': 'Дивіться все в календарі та підключіть Google Календар одним перемикачем.',
           'bg':
               'Виж всичко в календара и свържи Google Calendar с един превключвател.',
           'de':
@@ -153,7 +153,7 @@ class HowToUseScreen extends StatelessWidget {
       _HowToItem(
         icon: Icons.flag_rounded,
         title: const {
-          'en': 'Holidays, name days & documents',
+          'en': 'Holidays, name days & documents', 'nl': 'Feestdagen, naamdagen & documenten', 'uk': 'Свята, іменини та документи',
           'bg': 'Празници, именни дни и документи',
           'de': 'Feiertage, Namenstage & Dokumente',
           'fr': 'Jours fériés, fêtes & documents',
@@ -167,7 +167,7 @@ class HowToUseScreen extends StatelessWidget {
         },
         body: const {
           'en':
-              'Official holidays, Bulgarian name days, and reminders for expiring documents.',
+              'Official holidays, Bulgarian name days, and reminders for expiring documents.', 'nl': 'Officiële feestdagen, Bulgaarse naamdagen en herinneringen voor verlopende documenten.', 'uk': 'Офіційні свята, болгарські іменини та нагадування про документи, термін яких спливає.',
           'bg':
               'Официални празници, български именни дни и напомняния за изтичащи документи.',
           'de':
@@ -192,14 +192,14 @@ class HowToUseScreen extends StatelessWidget {
       _HowToItem(
         icon: Icons.groups_rounded,
         title: const {
-          'en': 'Shared lists', 'bg': 'Споделени списъци', 'de': 'Geteilte Listen',
+          'en': 'Shared lists', 'nl': 'Gedeelde lijsten', 'uk': 'Спільні списки', 'bg': 'Споделени списъци', 'de': 'Geteilte Listen',
           'fr': 'Listes partagées', 'it': 'Liste condivise',
           'el': 'Κοινόχρηστες λίστες', 'es': 'Listas compartidas',
           'pt': 'Listas partilhadas', 'ru': 'Общие списки',
           'tr': 'Paylaşılan listeler', 'ja': '共有リスト',
         },
         body: const {
-          'en': 'Create a group and invite your family with a code.',
+          'en': 'Create a group and invite your family with a code.', 'nl': 'Maak een groep en nodig je familie uit met een code.', 'uk': 'Створіть групу та запросіть родину за кодом.',
           'bg': 'Създай група и покани близките си с код.',
           'de': 'Erstelle eine Gruppe und lade deine Liebsten mit einem Code ein.',
           'fr': 'Crée un groupe et invite tes proches avec un code.',

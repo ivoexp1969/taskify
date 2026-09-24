@@ -25,7 +25,7 @@ class NameDayCardUtil {
   ];
 
   static const Map<String, String> _greeting = {
-    'en': 'Happy name day!', 'bg': 'Честит имен ден!',
+    'en': 'Happy name day!', 'nl': 'Gefeliciteerd met je naamdag!', 'uk': 'З іменинами!', 'bg': 'Честит имен ден!',
     'de': 'Alles Gute zum Namenstag!', 'fr': 'Bonne fête !',
     'it': 'Buon onomastico!', 'el': 'Χρόνια πολλά!',
     'es': '¡Feliz santo!', 'pt': 'Feliz dia do nome!',
@@ -33,12 +33,12 @@ class NameDayCardUtil {
     'ja': '聖名祝日おめでとう！',
   };
   static const Map<String, String> _shareLbl = {
-    'en': 'Share', 'bg': 'Сподели', 'de': 'Teilen', 'fr': 'Partager',
+    'en': 'Share', 'nl': 'Delen', 'uk': 'Поділитися', 'bg': 'Сподели', 'de': 'Teilen', 'fr': 'Partager',
     'it': 'Condividi', 'el': 'Κοινοποίηση', 'es': 'Compartir',
     'pt': 'Partilhar', 'ru': 'Поделиться', 'tr': 'Paylaş', 'ja': '共有',
   };
   static const Map<String, String> _closeLbl = {
-    'en': 'Close', 'bg': 'Затвори', 'de': 'Schließen', 'fr': 'Fermer',
+    'en': 'Close', 'nl': 'Sluiten', 'uk': 'Закрити', 'bg': 'Затвори', 'de': 'Schließen', 'fr': 'Fermer',
     'it': 'Chiudi', 'el': 'Κλείσιμο', 'es': 'Cerrar', 'pt': 'Fechar',
     'ru': 'Закрыть', 'tr': 'Kapat', 'ja': '閉じる',
   };

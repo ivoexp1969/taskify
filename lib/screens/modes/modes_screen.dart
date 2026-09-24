@@ -41,27 +41,27 @@ class _ModesScreenState extends State<ModesScreen> {
       m[lang] ?? m['en']!;
 
   static const _title = {
-    'en': 'Learning', 'bg': 'Обучение', 'de': 'Bildung', 'fr': 'Éducation',
+    'en': 'Learning', 'nl': 'Leren', 'uk': 'Навчання', 'bg': 'Обучение', 'de': 'Bildung', 'fr': 'Éducation',
     'it': 'Istruzione', 'el': 'Εκπαίδευση', 'es': 'Educación', 'pt': 'Educação',
     'ru': 'Обучение', 'tr': 'Eğitim', 'ja': '学び',
   };
   static const _pupil = {
-    'en': 'Pupil', 'bg': 'Ученик', 'de': 'Schüler', 'fr': 'Élève',
+    'en': 'Pupil', 'nl': 'Leerling', 'uk': 'Учень', 'bg': 'Ученик', 'de': 'Schüler', 'fr': 'Élève',
     'it': 'Alunno', 'el': 'Μαθητής', 'es': 'Alumno', 'pt': 'Aluno',
     'ru': 'Ученик', 'tr': 'Öğrenci', 'ja': '生徒',
   };
   static const _student = {
-    'en': 'Student', 'bg': 'Студент', 'de': 'Student', 'fr': 'Étudiant',
+    'en': 'Student', 'nl': 'Student', 'uk': 'Студент', 'bg': 'Студент', 'de': 'Student', 'fr': 'Étudiant',
     'it': 'Studente', 'el': 'Φοιτητής', 'es': 'Estudiante', 'pt': 'Estudante',
     'ru': 'Студент', 'tr': 'Üniversite', 'ja': '大学生',
   };
   static const _gradeShort = {
-    'en': 'grade', 'bg': 'клас', 'de': 'Klasse', 'fr': 'classe',
+    'en': 'grade', 'nl': 'klas', 'uk': 'клас', 'bg': 'клас', 'de': 'Klasse', 'fr': 'classe',
     'it': 'classe', 'el': 'τάξη', 'es': 'grado', 'pt': 'ano',
     'ru': 'класс', 'tr': 'sınıf', 'ja': '年生',
   };
   static const _pickInSettings = {
-    'en': 'Choose Pupil or Student in Settings → School mode.',
+    'en': 'Choose Pupil or Student in Settings → School mode.', 'nl': 'Kies Leerling of Student bij Instellingen → Schoolmodus.', 'uk': 'Оберіть Учень або Студент у Налаштування → Шкільний режим.',
     'bg': 'Избери Ученик или Студент от Настройки → Училищен режим.',
     'de': 'Wähle Schüler oder Student in Einstellungen → Schulmodus.',
     'fr': 'Choisis Élève ou Étudiant dans Réglages → Mode école.',
@@ -74,51 +74,51 @@ class _ModesScreenState extends State<ModesScreen> {
     'ja': '設定 → 学校モードで生徒か大学生を選択。',
   };
   static const _pickGrade = {
-    'en': 'Pick your grade', 'bg': 'Избери класа си', 'de': 'Wähle deine Klasse',
+    'en': 'Pick your grade', 'nl': 'Kies je klas', 'uk': 'Виберіть свій клас', 'bg': 'Избери класа си', 'de': 'Wähle deine Klasse',
     'fr': 'Choisis ta classe', 'it': 'Scegli la classe', 'el': 'Διάλεξε τάξη',
     'es': 'Elige tu grado', 'pt': 'Escolhe o teu ano', 'ru': 'Выбери класс',
     'tr': 'Sınıfını seç', 'ja': '学年を選ぶ',
   };
   static const _turnOff = {
-    'en': 'Turn off', 'bg': 'Изключи', 'de': 'Ausschalten', 'fr': 'Désactiver',
+    'en': 'Turn off', 'nl': 'Uitschakelen', 'uk': 'Вимкнути', 'bg': 'Изключи', 'de': 'Ausschalten', 'fr': 'Désactiver',
     'it': 'Disattiva', 'el': 'Απενεργοποίηση', 'es': 'Desactivar',
     'pt': 'Desativar', 'ru': 'Выключить', 'tr': 'Kapat', 'ja': 'オフにする',
   };
   static const _schoolLabel = {
-    'en': 'School (optional)', 'bg': 'Училище (по избор)', 'de': 'Schule (optional)',
+    'en': 'School (optional)', 'nl': 'School (optioneel)', 'uk': 'Школа (необов\'язково)', 'bg': 'Училище (по избор)', 'de': 'Schule (optional)',
     'fr': 'École (facultatif)', 'it': 'Scuola (facoltativo)', 'el': 'Σχολείο (προαιρετικό)',
     'es': 'Escuela (opcional)', 'pt': 'Escola (opcional)', 'ru': 'Школа (необязательно)',
     'tr': 'Okul (isteğe bağlı)', 'ja': '学校（任意）',
   };
   static const _mySchedule = {
-    'en': 'My schedule', 'bg': 'Моето разписание', 'de': 'Mein Stundenplan',
+    'en': 'My schedule', 'nl': 'Mijn rooster', 'uk': 'Мій розклад', 'bg': 'Моето разписание', 'de': 'Mein Stundenplan',
     'fr': 'Mon emploi du temps', 'it': 'Il mio orario', 'el': 'Το πρόγραμμά μου',
     'es': 'Mi horario', 'pt': 'O meu horário', 'ru': 'Моё расписание',
     'tr': 'Ders programım', 'ja': '時間割',
   };
   static const _classWord = {
-    'en': 'grade', 'bg': 'клас', 'de': 'Klasse', 'fr': 'classe',
+    'en': 'grade', 'nl': 'klas', 'uk': 'клас', 'bg': 'клас', 'de': 'Klasse', 'fr': 'classe',
     'it': 'classe', 'el': 'τάξη', 'es': 'grado', 'pt': 'ano',
     'ru': 'класс', 'tr': 'sınıf', 'ja': '年生',
   };
   // Кратък етикет за студентска група (пред номера, напр. „гр. 12А").
   static const _groupShort = {
-    'en': 'grp', 'bg': 'гр.', 'de': 'Gr.', 'fr': 'grp', 'it': 'gr.',
+    'en': 'grp', 'nl': 'grp', 'uk': 'гр', 'bg': 'гр.', 'de': 'Gr.', 'fr': 'grp', 'it': 'gr.',
     'el': 'ομ.', 'es': 'gr.', 'pt': 'gr.', 'ru': 'гр.', 'tr': 'grp', 'ja': '班',
   };
   static const _examsTitle = {
-    'en': 'Upcoming exams', 'bg': 'Предстоящи изпити', 'de': 'Anstehende Prüfungen',
+    'en': 'Upcoming exams', 'nl': 'Aankomende examens', 'uk': 'Найближчі іспити', 'bg': 'Предстоящи изпити', 'de': 'Anstehende Prüfungen',
     'fr': 'Examens à venir', 'it': 'Prossimi esami', 'el': 'Επερχόμενες εξετάσεις',
     'es': 'Próximos exámenes', 'pt': 'Próximos exames', 'ru': 'Предстоящие экзамены',
     'tr': 'Yaklaşan sınavlar', 'ja': '今後の試験',
   };
   static const _todayWord = {
-    'en': 'today', 'bg': 'днес', 'de': 'heute', 'fr': "aujourd'hui",
+    'en': 'today', 'nl': 'vandaag', 'uk': 'сьогодні', 'bg': 'днес', 'de': 'heute', 'fr': "aujourd'hui",
     'it': 'oggi', 'el': 'σήμερα', 'es': 'hoy', 'pt': 'hoje',
     'ru': 'сегодня', 'tr': 'bugün', 'ja': '今日',
   };
   static const _inDays = {
-    'en': 'in {n} days', 'bg': 'след {n} дни', 'de': 'in {n} Tagen',
+    'en': 'in {n} days', 'nl': 'over {n} dagen', 'uk': 'через {n} днів', 'bg': 'след {n} дни', 'de': 'in {n} Tagen',
     'fr': 'dans {n} jours', 'it': 'tra {n} giorni', 'el': 'σε {n} μέρες',
     'es': 'en {n} días', 'pt': 'em {n} dias', 'ru': 'через {n} дн.',
     'tr': '{n} gün sonra', 'ja': 'あと{n}日',
@@ -126,17 +126,17 @@ class _ModesScreenState extends State<ModesScreen> {
   // Форма на обучение (студент) по ключ.
   static const _formLabels = {
     'redovno': {
-      'en': 'Full-time', 'bg': 'Редовно', 'de': 'Vollzeit', 'fr': 'Présentiel',
+      'en': 'Full-time', 'nl': 'Voltijd', 'uk': 'Денна форма', 'bg': 'Редовно', 'de': 'Vollzeit', 'fr': 'Présentiel',
       'it': 'Diurno', 'el': 'Πλήρης', 'es': 'Presencial', 'pt': 'Presencial',
       'ru': 'Очно', 'tr': 'Örgün', 'ja': '通学',
     },
     'zadochno': {
-      'en': 'Part-time', 'bg': 'Задочно', 'de': 'Teilzeit', 'fr': 'À distance',
+      'en': 'Part-time', 'nl': 'Deeltijd', 'uk': 'Заочна форма', 'bg': 'Задочно', 'de': 'Teilzeit', 'fr': 'À distance',
       'it': 'Part-time', 'el': 'Μερική', 'es': 'A distancia', 'pt': 'Pós-laboral',
       'ru': 'Заочно', 'tr': 'Uzaktan', 'ja': '通信',
     },
     'distancionno': {
-      'en': 'Distance', 'bg': 'Дистанционно', 'de': 'Fernstudium', 'fr': 'En ligne',
+      'en': 'Distance', 'nl': 'Afstand', 'uk': 'Відстань', 'bg': 'Дистанционно', 'de': 'Fernstudium', 'fr': 'En ligne',
       'it': 'A distanza', 'el': 'Εξ αποστάσεως', 'es': 'En línea', 'pt': 'À distância',
       'ru': 'Дистанционно', 'tr': 'Çevrimiçi', 'ja': 'オンライン',
     },

@@ -235,25 +235,25 @@ class _DisclosureSheet extends StatelessWidget {
 String _tr(Map<String, String> m, String lang) => m[lang] ?? m['en']!;
 
 const _renewNow = {
-  'en': 'Renew now', 'bg': 'Поднови сега', 'de': 'Jetzt verlängern',
+  'en': 'Renew now', 'nl': 'Nu verlengen', 'uk': 'Поновити зараз', 'bg': 'Поднови сега', 'de': 'Jetzt verlängern',
   'fr': 'Renouveler', 'it': 'Rinnova ora', 'el': 'Ανανέωση τώρα',
   'es': 'Renovar ahora', 'pt': 'Renovar agora', 'ru': 'Продлить',
   'tr': 'Şimdi yenile', 'ja': '今すぐ更新',
 };
 const _howToRenew = {
-  'en': 'How to renew?', 'bg': 'Как да подновя?', 'de': 'Wie verlängern?',
+  'en': 'How to renew?', 'nl': 'Hoe verlengen?', 'uk': 'Як поновити?', 'bg': 'Как да подновя?', 'de': 'Wie verlängern?',
   'fr': 'Comment renouveler ?', 'it': 'Come rinnovare?', 'el': 'Πώς να ανανεώσω;',
   'es': '¿Cómo renovar?', 'pt': 'Como renovar?', 'ru': 'Как продлить?',
   'tr': 'Nasıl yenilenir?', 'ja': '更新方法は？',
 };
 const _disclosureTitle = {
-  'en': 'Partner link', 'bg': 'Партньорска препратка', 'de': 'Partnerlink',
+  'en': 'Partner link', 'nl': 'Partnerlink', 'uk': 'Партнерське посилання', 'bg': 'Партньорска препратка', 'de': 'Partnerlink',
   'fr': 'Lien partenaire', 'it': 'Link partner', 'el': 'Σύνδεσμος συνεργάτη',
   'es': 'Enlace de socio', 'pt': 'Link de parceiro', 'ru': 'Партнёрская ссылка',
   'tr': 'Ortak bağlantısı', 'ja': 'パートナーリンク',
 };
 const _disclosureBody = {
-  'en': 'This is a partner link. Taskify may earn a commission — at no extra cost to you. Your data stays on your device.',
+  'en': 'This is a partner link. Taskify may earn a commission — at no extra cost to you. Your data stays on your device.', 'nl': 'Dit is een partnerlink. Taskify kan een commissie verdienen — zonder extra kosten voor jou. Je gegevens blijven op je apparaat.', 'uk': 'Це партнерське посилання. Taskify може отримати комісію — без додаткових витрат для вас. Ваші дані залишаються на пристрої.',
   'bg': 'Това е партньорски линк. Taskify може да получи комисиона, без това да те оскъпява. Данните ти остават на устройството.',
   'de': 'Dies ist ein Partnerlink. Taskify erhält evtl. eine Provision – ohne Mehrkosten für dich. Deine Daten bleiben auf dem Gerät.',
   'fr': 'Ceci est un lien partenaire. Taskify peut percevoir une commission, sans frais pour vous. Vos données restent sur l\'appareil.',
@@ -266,13 +266,13 @@ const _disclosureBody = {
   'ja': 'これはパートナーリンクです。Taskifyは手数料を得る場合がありますが、追加費用はかかりません。データは端末内に留まります。',
 };
 const _comingSoonTitle = {
-  'en': 'Coming soon!', 'bg': 'Очаквайте скоро!', 'de': 'Demnächst verfügbar!',
+  'en': 'Coming soon!', 'nl': 'Binnenkort!', 'uk': 'Незабаром!', 'bg': 'Очаквайте скоро!', 'de': 'Demnächst verfügbar!',
   'fr': 'Bientôt disponible !', 'it': 'Presto disponibile!', 'el': 'Έρχεται σύντομα!',
   'es': '¡Muy pronto!', 'pt': 'Em breve!', 'ru': 'Скоро!',
   'tr': 'Çok yakında!', 'ja': '近日公開！',
 };
 const _comingSoonBody = {
-  'en': 'Online renewal will be available here very soon. Thanks for your interest!',
+  'en': 'Online renewal will be available here very soon. Thanks for your interest!', 'nl': 'Online verlengen kan hier binnenkort. Bedankt voor je interesse!', 'uk': 'Онлайн-поновлення тут з\'явиться дуже скоро. Дякуємо за цікавість!',
   'bg': 'Онлайн подновяването ще е достъпно тук съвсем скоро. Благодарим за интереса!',
   'de': 'Die Online-Verlängerung ist hier bald verfügbar. Danke für dein Interesse!',
   'fr': 'Le renouvellement en ligne sera bientôt disponible ici. Merci de votre intérêt !',
@@ -285,17 +285,17 @@ const _comingSoonBody = {
   'ja': 'オンライン更新はまもなくご利用いただけます。ご関心ありがとうございます！',
 };
 const _ok = {
-  'en': 'OK', 'bg': 'Разбрах', 'de': 'OK', 'fr': 'OK', 'it': 'OK',
+  'en': 'OK', 'nl': 'Oké', 'uk': 'Гаразд', 'bg': 'Разбрах', 'de': 'OK', 'fr': 'OK', 'it': 'OK',
   'el': 'Εντάξει', 'es': 'Vale', 'pt': 'OK', 'ru': 'Понятно',
   'tr': 'Tamam', 'ja': 'OK',
 };
 const _continue = {
-  'en': 'Continue', 'bg': 'Продължи', 'de': 'Weiter', 'fr': 'Continuer',
+  'en': 'Continue', 'nl': 'Doorgaan', 'uk': 'Продовжити', 'bg': 'Продължи', 'de': 'Weiter', 'fr': 'Continuer',
   'it': 'Continua', 'el': 'Συνέχεια', 'es': 'Continuar', 'pt': 'Continuar',
   'ru': 'Продолжить', 'tr': 'Devam', 'ja': '続ける',
 };
 const _cancel = {
-  'en': 'Cancel', 'bg': 'Отказ', 'de': 'Abbrechen', 'fr': 'Annuler',
+  'en': 'Cancel', 'nl': 'Annuleren', 'uk': 'Скасувати', 'bg': 'Отказ', 'de': 'Abbrechen', 'fr': 'Annuler',
   'it': 'Annulla', 'el': 'Άκυρο', 'es': 'Cancelar', 'pt': 'Cancelar',
   'ru': 'Отмена', 'tr': 'İptal', 'ja': 'キャンセル',
 };

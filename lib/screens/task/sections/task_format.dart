@@ -44,7 +44,7 @@ String localizedCategoryName(Category? c, AppText t) {
 
 /// Етикет „Училище" на 11 езика (за синтетичния чип „🎒 Училище").
 const Map<String, String> schoolLabel = {
-  'en': 'School', 'bg': 'Училище', 'de': 'Schule', 'fr': 'École',
+  'en': 'School', 'nl': 'School', 'uk': 'Школа', 'bg': 'Училище', 'de': 'Schule', 'fr': 'École',
   'it': 'Scuola', 'el': 'Σχολείο', 'es': 'Escuela', 'pt': 'Escola',
   'ru': 'Школа', 'tr': 'Okul', 'ja': '学校',
 };

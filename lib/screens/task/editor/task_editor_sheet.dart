@@ -347,7 +347,7 @@ class _TaskEditorSheetState extends State<TaskEditorSheet>
             
             // Локали за гласово въвеждане
             const voiceLocales = {
-              'en': 'en-US', 'bg': 'bg-BG', 'de': 'de-DE', 'fr': 'fr-FR', 
+              'en': 'en-US', 'nl': 'nl-NL', 'uk': 'uk-UA', 'bg': 'bg-BG', 'de': 'de-DE', 'fr': 'fr-FR', 
               'it': 'it-IT', 'el': 'el-GR', 'es': 'es-ES', 'pt': 'pt-PT',
               'ru': 'ru-RU', 'tr': 'tr-TR', 'ja': 'ja-JP',
             };

@@ -113,13 +113,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   static const _choosePhoto = {
-    'en': 'Choose photo', 'bg': 'Избери снимка', 'de': 'Foto wählen',
+    'en': 'Choose photo', 'nl': 'Foto kiezen', 'uk': 'Вибрати фото', 'bg': 'Избери снимка', 'de': 'Foto wählen',
     'fr': 'Choisir une photo', 'it': 'Scegli foto', 'el': 'Επίλεξε φωτογραφία',
     'es': 'Elegir foto', 'pt': 'Escolher foto', 'ru': 'Выбрать фото',
     'tr': 'Fotoğraf seç', 'ja': '写真を選ぶ',
   };
   static const _removePhotoLabel = {
-    'en': 'Remove photo', 'bg': 'Премахни снимката', 'de': 'Foto entfernen',
+    'en': 'Remove photo', 'nl': 'Foto verwijderen', 'uk': 'Видалити фото', 'bg': 'Премахни снимката', 'de': 'Foto entfernen',
     'fr': 'Supprimer la photo', 'it': 'Rimuovi foto', 'el': 'Αφαίρεση φωτογραφίας',
     'es': 'Quitar foto', 'pt': 'Remover foto', 'ru': 'Удалить фото',
     'tr': 'Fotoğrafı kaldır', 'ja': '写真を削除',
@@ -129,78 +129,78 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // ── Локализирани стрингове (нови за Профил) ──
   static const _titleProfile = {
-    'en': 'Profile', 'bg': 'Профил', 'de': 'Profil', 'fr': 'Profil',
+    'en': 'Profile', 'nl': 'Profiel', 'uk': 'Профіль', 'bg': 'Профил', 'de': 'Profil', 'fr': 'Profil',
     'it': 'Profilo', 'el': 'Προφίλ', 'es': 'Perfil', 'pt': 'Perfil',
     'ru': 'Профиль', 'tr': 'Profil', 'ja': 'プロフィール',
   };
   static const _modeSection = {
-    'en': 'Mode', 'bg': 'Режим', 'de': 'Modus', 'fr': 'Mode', 'it': 'Modalità',
+    'en': 'Mode', 'nl': 'Modus', 'uk': 'Режим', 'bg': 'Режим', 'de': 'Modus', 'fr': 'Mode', 'it': 'Modalità',
     'el': 'Λειτουργία', 'es': 'Modo', 'pt': 'Modo', 'ru': 'Режим',
     'tr': 'Mod', 'ja': 'モード',
   };
   static const _activateMode = {
-    'en': 'Activate a mode', 'bg': 'Активирай режим', 'de': 'Modus aktivieren',
+    'en': 'Activate a mode', 'nl': 'Een modus activeren', 'uk': 'Увімкнути режим', 'bg': 'Активирай режим', 'de': 'Modus aktivieren',
     'fr': 'Activer un mode', 'it': 'Attiva una modalità', 'el': 'Ενεργοποίηση λειτουργίας',
     'es': 'Activar un modo', 'pt': 'Ativar um modo', 'ru': 'Активируй режим',
     'tr': 'Bir mod etkinleştir', 'ja': 'モードを有効化',
   };
   static const _pupil = {
-    'en': 'Pupil', 'bg': 'Ученик', 'de': 'Schüler', 'fr': 'Élève', 'it': 'Alunno',
+    'en': 'Pupil', 'nl': 'Leerling', 'uk': 'Учень', 'bg': 'Ученик', 'de': 'Schüler', 'fr': 'Élève', 'it': 'Alunno',
     'el': 'Μαθητής', 'es': 'Alumno', 'pt': 'Aluno', 'ru': 'Ученик',
     'tr': 'Öğrenci', 'ja': '生徒',
   };
   static const _student = {
-    'en': 'Student', 'bg': 'Студент', 'de': 'Student', 'fr': 'Étudiant',
+    'en': 'Student', 'nl': 'Student', 'uk': 'Студент', 'bg': 'Студент', 'de': 'Student', 'fr': 'Étudiant',
     'it': 'Studente', 'el': 'Φοιτητής', 'es': 'Estudiante', 'pt': 'Estudante',
     'ru': 'Студент', 'tr': 'Üniversite', 'ja': '大学生',
   };
   static const _gradeWord = {
-    'en': 'grade', 'bg': 'клас', 'de': 'Klasse', 'fr': 'classe', 'it': 'classe',
+    'en': 'grade', 'nl': 'klas', 'uk': 'клас', 'bg': 'клас', 'de': 'Klasse', 'fr': 'classe', 'it': 'classe',
     'el': 'τάξη', 'es': 'grado', 'pt': 'ano', 'ru': 'класс', 'tr': 'sınıf',
     'ja': '年生',
   };
   static const _yearWord = {
-    'en': 'year', 'bg': 'курс', 'de': 'Studienjahr', 'fr': 'année', 'it': 'anno',
+    'en': 'year', 'nl': 'jaar', 'uk': 'рік', 'bg': 'курс', 'de': 'Studienjahr', 'fr': 'année', 'it': 'anno',
     'el': 'έτος', 'es': 'curso', 'pt': 'ano', 'ru': 'курс', 'tr': 'sınıf',
     'ja': '年',
   };
   static const _switchToStudent = {
-    'en': 'Switch to Student', 'bg': 'Смени на Студент', 'de': 'Zu Student wechseln',
+    'en': 'Switch to Student', 'nl': 'Overschakelen naar Student', 'uk': 'Перемкнути на Студента', 'bg': 'Смени на Студент', 'de': 'Zu Student wechseln',
     'fr': 'Passer à Étudiant', 'it': 'Passa a Studente', 'el': 'Άλλαξε σε Φοιτητή',
     'es': 'Cambiar a Estudiante', 'pt': 'Mudar para Estudante',
     'ru': 'Переключить на Студента', 'tr': 'Üniversiteye geç', 'ja': '大学生に切替',
   };
   static const _switchToPupil = {
-    'en': 'Switch to Pupil', 'bg': 'Смени на Ученик', 'de': 'Zu Schüler wechseln',
+    'en': 'Switch to Pupil', 'nl': 'Overschakelen naar Leerling', 'uk': 'Перемкнути на Учня', 'bg': 'Смени на Ученик', 'de': 'Zu Schüler wechseln',
     'fr': 'Passer à Élève', 'it': 'Passa a Alunno', 'el': 'Άλλαξε σε Μαθητή',
     'es': 'Cambiar a Alumno', 'pt': 'Mudar para Aluno',
     'ru': 'Переключить на Ученика', 'tr': 'Öğrenciye geç', 'ja': '生徒に切替',
   };
   static const _turnOffMode = {
-    'en': 'Turn off mode', 'bg': 'Изключи режима', 'de': 'Modus ausschalten',
+    'en': 'Turn off mode', 'nl': 'Modus uitschakelen', 'uk': 'Вимкнути режим', 'bg': 'Изключи режима', 'de': 'Modus ausschalten',
     'fr': 'Désactiver le mode', 'it': 'Disattiva la modalità', 'el': 'Απενεργοποίηση',
     'es': 'Desactivar el modo', 'pt': 'Desativar o modo', 'ru': 'Выключить режим',
     'tr': 'Modu kapat', 'ja': 'モードをオフ',
   };
   static const _dangerZone = {
-    'en': 'Danger zone', 'bg': 'Опасна зона', 'de': 'Gefahrenzone',
+    'en': 'Danger zone', 'nl': 'Gevarenzone', 'uk': 'Небезпечна зона', 'bg': 'Опасна зона', 'de': 'Gefahrenzone',
     'fr': 'Zone dangereuse', 'it': 'Zona pericolosa', 'el': 'Ζώνη κινδύνου',
     'es': 'Zona de peligro', 'pt': 'Zona de perigo', 'ru': 'Опасная зона',
     'tr': 'Tehlikeli bölge', 'ja': '危険ゾーン',
   };
   static const _formLabels = {
     'redovno': {
-      'en': 'Full-time', 'bg': 'редовно', 'de': 'Vollzeit', 'fr': 'temps plein',
+      'en': 'Full-time', 'nl': 'Voltijd', 'uk': 'Денна форма', 'bg': 'редовно', 'de': 'Vollzeit', 'fr': 'temps plein',
       'it': 'tempo pieno', 'el': 'πλήρης', 'es': 'presencial', 'pt': 'tempo integral',
       'ru': 'очно', 'tr': 'örgün', 'ja': '通学',
     },
     'zadochno': {
-      'en': 'Part-time', 'bg': 'задочно', 'de': 'Teilzeit', 'fr': 'temps partiel',
+      'en': 'Part-time', 'nl': 'Deeltijd', 'uk': 'Заочна форма', 'bg': 'задочно', 'de': 'Teilzeit', 'fr': 'temps partiel',
       'it': 'part-time', 'el': 'μερική', 'es': 'semipresencial', 'pt': 'tempo parcial',
       'ru': 'заочно', 'tr': 'ikinci öğretim', 'ja': '夜間',
     },
     'distancionno': {
-      'en': 'Distance', 'bg': 'дистанционно', 'de': 'Fernstudium', 'fr': 'à distance',
+      'en': 'Distance', 'nl': 'Afstand', 'uk': 'Відстань', 'bg': 'дистанционно', 'de': 'Fernstudium', 'fr': 'à distance',
       'it': 'a distanza', 'el': 'εξ αποστάσεως', 'es': 'a distancia', 'pt': 'à distância',
       'ru': 'дистанционно', 'tr': 'uzaktan', 'ja': '通信',
     },
@@ -211,7 +211,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<int?> _pickGrade(String lang) {
     String tr(Map<String, String> m) => m[lang] ?? m['en']!;
     const question = {
-      'en': 'Which grade are you in?', 'bg': 'В кой клас си?',
+      'en': 'Which grade are you in?', 'nl': 'In welke klas zit je?', 'uk': 'У якому ви класі?', 'bg': 'В кой клас си?',
       'de': 'In welcher Klasse bist du?', 'fr': 'Tu es en quelle classe ?',
       'it': 'In che classe sei?', 'el': 'Σε ποια τάξη είσαι;',
       'es': '¿En qué grado estás?', 'pt': 'Em que ano estás?',

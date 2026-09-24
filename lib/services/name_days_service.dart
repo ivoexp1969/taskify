@@ -152,14 +152,14 @@ class NameDaysService {
     if (!hasData) return;
 
     const title = {
-      'en': 'Name day 🎉', 'bg': 'Имен ден 🎉', 'de': 'Namenstag 🎉',
+      'en': 'Name day 🎉', 'nl': 'Naamdag 🎉', 'uk': 'Іменини 🎉', 'bg': 'Имен ден 🎉', 'de': 'Namenstag 🎉',
       'fr': 'Fête du prénom 🎉', 'it': 'Onomastico 🎉',
       'el': 'Ονομαστική εορτή 🎉', 'es': 'Onomástica 🎉',
       'pt': 'Dia do nome 🎉', 'ru': 'Именины 🎉', 'tr': 'İsim günü 🎉', 'ja': '聖名祝日 🎉',
     };
     // {names} се заменя с имената; тонът е топъл и личен.
     const bodyTpl = {
-      'en': 'Today {names} celebrate — send your wishes? 🎉',
+      'en': 'Today {names} celebrate — send your wishes? 🎉', 'nl': 'Vandaag vieren {names} — je wensen sturen? 🎉', 'uk': 'Сьогодні {names} святкують — надіслати побажання? 🎉',
       'bg': 'Днес имен ден празнуват {names} — да честитиш? 🎉',
       'de': 'Heute feiern {names} Namenstag — gratulierst du? 🎉',
       'fr': "Aujourd'hui {names} fêtent leur prénom — un petit mot? 🎉",

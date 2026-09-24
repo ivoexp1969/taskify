@@ -120,7 +120,7 @@ class GreetingCardButton extends StatelessWidget {
 }
 
 const _makeCard = {
-  'en': 'Make a card', 'bg': 'Направи картичка', 'de': 'Karte erstellen',
+  'en': 'Make a card', 'nl': 'Een kaart maken', 'uk': 'Зробити листівку', 'bg': 'Направи картичка', 'de': 'Karte erstellen',
   'fr': 'Créer une carte', 'it': 'Crea una cartolina', 'el': 'Φτιάξε κάρτα',
   'es': 'Crear tarjeta', 'pt': 'Criar cartão', 'ru': 'Сделать открытку',
   'tr': 'Kart oluştur', 'ja': 'カードを作る',
@@ -129,7 +129,7 @@ const _makeCard = {
 String _tr(Map<String, String> m, String lang) => m[lang] ?? m['en']!;
 
 const _sendGift = {
-  'en': 'Send flowers / gift', 'bg': 'Изпрати цветя/подарък',
+  'en': 'Send flowers / gift', 'nl': 'Bloemen / cadeau sturen', 'uk': 'Надіслати квіти / подарунок', 'bg': 'Изпрати цветя/подарък',
   'de': 'Blumen / Geschenk senden', 'fr': 'Envoyer fleurs / cadeau',
   'it': 'Invia fiori / regalo', 'el': 'Στείλε λουλούδια / δώρο',
   'es': 'Enviar flores / regalo', 'pt': 'Enviar flores / presente',
@@ -137,13 +137,13 @@ const _sendGift = {
   'ja': '花・ギフトを贈る',
 };
 const _comingSoonTitle = {
-  'en': 'Coming soon!', 'bg': 'Очаквайте скоро!', 'de': 'Demnächst verfügbar!',
+  'en': 'Coming soon!', 'nl': 'Binnenkort!', 'uk': 'Незабаром!', 'bg': 'Очаквайте скоро!', 'de': 'Demnächst verfügbar!',
   'fr': 'Bientôt disponible !', 'it': 'Presto disponibile!', 'el': 'Έρχεται σύντομα!',
   'es': '¡Muy pronto!', 'pt': 'Em breve!', 'ru': 'Скоро!',
   'tr': 'Çok yakında!', 'ja': '近日公開！',
 };
 const _comingSoonBody = {
-  'en': 'Sending flowers and gifts straight from Taskify is coming very soon. Thanks for your interest!',
+  'en': 'Sending flowers and gifts straight from Taskify is coming very soon. Thanks for your interest!', 'nl': 'Bloemen en cadeaus rechtstreeks vanuit Taskify sturen kan binnenkort. Bedankt voor je interesse!', 'uk': 'Надсилання квітів і подарунків прямо з Taskify з\'явиться дуже скоро. Дякуємо за цікавість!',
   'bg': 'Скоро ще можеш да пращаш цветя и подаръци директно от Taskify. Благодарим за интереса!',
   'de': 'Blumen und Geschenke direkt aus Taskify zu senden, ist bald möglich. Danke für dein Interesse!',
   'fr': 'Envoyer des fleurs et des cadeaux directement depuis Taskify arrive bientôt. Merci de votre intérêt !',
@@ -156,7 +156,7 @@ const _comingSoonBody = {
   'ja': 'Taskifyから直接お花やギフトを贈る機能はまもなく登場します。ご関心ありがとうございます！',
 };
 const _ok = {
-  'en': 'OK', 'bg': 'Разбрах', 'de': 'OK', 'fr': 'OK', 'it': 'OK',
+  'en': 'OK', 'nl': 'Oké', 'uk': 'Гаразд', 'bg': 'Разбрах', 'de': 'OK', 'fr': 'OK', 'it': 'OK',
   'el': 'Εντάξει', 'es': 'Vale', 'pt': 'OK', 'ru': 'Понятно',
   'tr': 'Tamam', 'ja': 'OK',
 };

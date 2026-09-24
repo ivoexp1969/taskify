@@ -23,7 +23,7 @@ import '../paywall/paywall_screen.dart';
 /// Етикет за таб „Обучение" (11 езика) — обединява Ученик + Студент; неутрален,
 /// защото и двамата учат. Кратък за долната навигация.
 const Map<String, String> _studyLabel = {
-  'en': 'Learning', 'bg': 'Обучение', 'de': 'Bildung', 'fr': 'Éducation',
+  'en': 'Learning', 'nl': 'Leren', 'uk': 'Навчання', 'bg': 'Обучение', 'de': 'Bildung', 'fr': 'Éducation',
   'it': 'Istruzione', 'el': 'Εκπαίδευση', 'es': 'Educación', 'pt': 'Educação',
   'ru': 'Обучение', 'tr': 'Eğitim', 'ja': '学び',
 };
@@ -185,14 +185,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!mounted) return;
 
     const title = {
-      'en': 'Public holidays', 'bg': 'Официални празници',
+      'en': 'Public holidays', 'nl': 'Feestdagen', 'uk': 'Офіційні свята', 'bg': 'Официални празници',
       'de': 'Gesetzliche Feiertage', 'fr': 'Jours fériés',
       'it': 'Festività ufficiali', 'el': 'Επίσημες αργίες',
       'es': 'Días festivos', 'pt': 'Feriados oficiais',
       'ru': 'Официальные праздники', 'tr': 'Resmi tatiller', 'ja': '祝日',
     };
     const body = {
-      'en': "I see you're in Bulgaria. Want me to show the official holidays in your calendar? 🇧🇬",
+      'en': "I see you're in Bulgaria. Want me to show the official holidays in your calendar? 🇧🇬", 'nl': 'Ik zie dat je in Bulgarije bent. Zal ik de officiële feestdagen in je agenda tonen? 🇧🇬', 'uk': 'Бачу, ви в Болгарії. Показати офіційні свята у вашому календарі? 🇧🇬',
       'bg': 'Виждам, че си в България. Да ти показвам ли официалните празници в календара? 🇧🇬',
       'de': 'Ich sehe, du bist in Bulgarien. Soll ich die Feiertage in deinem Kalender anzeigen? 🇧🇬',
       'fr': 'Je vois que tu es en Bulgarie. Je t\'affiche les jours fériés dans le calendrier? 🇧🇬',
@@ -204,12 +204,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       'tr': 'Bulgaristan\'da olduğunu görüyorum. Resmi tatilleri takvimde göstereyim mi? 🇧🇬', 'ja': 'ブルガリアにいらっしゃるようですね。公式の祝日をカレンダーに表示しますか？🇧🇬',
     };
     const yes = {
-      'en': 'Yes, please', 'bg': 'Да, покажи', 'de': 'Ja, gern',
+      'en': 'Yes, please', 'nl': 'Ja, graag', 'uk': 'Так, будь ласка', 'bg': 'Да, покажи', 'de': 'Ja, gern',
       'fr': 'Oui', 'it': 'Sì', 'el': 'Ναι', 'es': 'Sí',
       'pt': 'Sim', 'ru': 'Да', 'tr': 'Evet', 'ja': 'はい、お願いします',
     };
     const no = {
-      'en': 'Not now', 'bg': 'Не сега', 'de': 'Nicht jetzt',
+      'en': 'Not now', 'nl': 'Niet nu', 'uk': 'Не зараз', 'bg': 'Не сега', 'de': 'Nicht jetzt',
       'fr': 'Pas maintenant', 'it': 'Non ora', 'el': 'Όχι τώρα',
       'es': 'Ahora no', 'pt': 'Agora não', 'ru': 'Не сейчас', 'tr': 'Şimdi değil', 'ja': '後で',
     };
@@ -270,14 +270,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     String tr(Map<String, String> m) => m[lang] ?? m['en']!;
     const title = {
-      'en': 'School mode 🎒', 'bg': 'Училищен режим 🎒', 'de': 'Schulmodus 🎒',
+      'en': 'School mode 🎒', 'nl': 'Schoolmodus 🎒', 'uk': 'Шкільний режим 🎒', 'bg': 'Училищен режим 🎒', 'de': 'Schulmodus 🎒',
       'fr': 'Mode école 🎒', 'it': 'Modalità scuola 🎒',
       'el': 'Λειτουργία σχολείου 🎒', 'es': 'Modo escolar 🎒',
       'pt': 'Modo escolar 🎒', 'ru': 'Школьный режим 🎒', 'tr': 'Okul modu 🎒',
       'ja': '学校モード 🎒',
     };
     const body = {
-      'en': 'Want a countdown to the next school vacation right on your home '
+      'en': 'Want a countdown to the next school vacation right on your home ', 'nl': 'Wil je een aftelklok naar de volgende schoolvakantie op je beginscherm ', 'uk': 'Хочете відлік до наступних канікул прямо на головному екрані '
           'screen? Turn on School mode in Settings → Bulgaria and pick your grade.',
       'bg': 'Искаш ли обратно броене до следващата ваканция направо на началния '
           'екран? Включи Училищен режим от Настройки → България и избери класа си.',
@@ -301,12 +301,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           '設定 → ブルガリア で学校モードをオンにして学年を選びましょう。',
     };
     const later = {
-      'en': 'Later', 'bg': 'По-късно', 'de': 'Später', 'fr': 'Plus tard',
+      'en': 'Later', 'nl': 'Later', 'uk': 'Пізніше', 'bg': 'По-късно', 'de': 'Später', 'fr': 'Plus tard',
       'it': 'Più tardi', 'el': 'Αργότερα', 'es': 'Más tarde', 'pt': 'Mais tarde',
       'ru': 'Позже', 'tr': 'Sonra', 'ja': '後で',
     };
     const gotIt = {
-      'en': 'Got it', 'bg': 'Разбрах', 'de': 'Verstanden', 'fr': 'Compris',
+      'en': 'Got it', 'nl': 'Begrepen', 'uk': 'Зрозуміло', 'bg': 'Разбрах', 'de': 'Verstanden', 'fr': 'Compris',
       'it': 'Capito', 'el': 'Κατάλαβα', 'es': 'Entendido', 'pt': 'Percebi',
       'ru': 'Понятно', 'tr': 'Anladım', 'ja': 'わかった',
     };
@@ -406,7 +406,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       String tr(Map<String, String> m) => m[lang] ?? m['en']!;
 
       const dTitle = {
-        'en': 'Thank you for being here 🙏',
+        'en': 'Thank you for being here 🙏', 'nl': 'Bedankt dat je er bent 🙏', 'uk': 'Дякуємо, що ви з нами 🙏',
         'bg': 'Благодарим ти, че си с нас 🙏',
         'de': 'Danke, dass du dabei bist 🙏',
         'fr': 'Merci d\'être là 🙏',
@@ -419,7 +419,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         'ja': 'ご利用ありがとうございます 🙏',
       };
       const dBody = {
-        'en': 'Your free trial has ended. Nothing is lost — all your tasks and categories stay. Here\'s what\'s free, and what Pro unlocks:',
+        'en': 'Your free trial has ended. Nothing is lost — all your tasks and categories stay. Here\'s what\'s free, and what Pro unlocks:', 'nl': 'Je gratis proefperiode is afgelopen. Er gaat niets verloren — al je taken en categorieën blijven. Dit is gratis, en dit ontgrendelt Pro:', 'uk': 'Ваш безкоштовний пробний період завершився. Нічого не втрачено — усі завдання та категорії залишаються. Ось що безкоштовно, а що відкриває Pro:',
         'bg': 'Пробният ти период приключи. Нищо не се губи — всичките ти задачи и категории остават. Ето какво е безплатно и какво отключва Pro:',
         'de': 'Deine kostenlose Testphase ist vorbei. Nichts geht verloren — alle Aufgaben und Kategorien bleiben. Das ist kostenlos, das schaltet Pro frei:',
         'fr': 'Ta période d\'essai est terminée. Rien n\'est perdu — toutes tes tâches et catégories restent. Voici ce qui est gratuit et ce que Pro débloque :',
@@ -432,7 +432,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         'ja': '無料トライアルが終了しました。何も失われません — タスクとカテゴリはすべて残ります。無料の内容と、Proで解除される内容はこちら:',
       };
       const dFree = {
-        'en': 'Free: up to 50 tasks & 10 categories, recurring tasks, voice input, themes & languages.',
+        'en': 'Free: up to 50 tasks & 10 categories, recurring tasks, voice input, themes & languages.', 'nl': 'Gratis: tot 50 taken & 10 categorieën, terugkerende taken, spraakinvoer, thema\'s & talen.', 'uk': 'Безкоштовно: до 50 завдань і 10 категорій, повторювані завдання, голосове введення, теми та мови.',
         'bg': 'Безплатно: до 50 задачи и 10 категории, повтарящи се задачи, гласово въвеждане, теми и езици.',
         'de': 'Kostenlos: bis zu 50 Aufgaben & 10 Kategorien, wiederkehrende Aufgaben, Spracheingabe, Themes & Sprachen.',
         'fr': 'Gratuit : jusqu\'à 50 tâches et 10 catégories, tâches récurrentes, saisie vocale, thèmes et langues.',
@@ -445,7 +445,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         'ja': '無料: 最大50タスク・10カテゴリ、繰り返しタスク、音声入力、テーマと言語。',
       };
       const dPro = {
-        'en': 'Pro unlocks: Calendar, Documents, Statistics, AI, cloud sync, widgets, shared lists, name days — and removes ads.',
+        'en': 'Pro unlocks: Calendar, Documents, Statistics, AI, cloud sync, widgets, shared lists, name days — and removes ads.', 'nl': 'Pro ontgrendelt: Agenda, Documenten, Statistieken, AI, cloudsync, widgets, gedeelde lijsten, naamdagen — en verwijdert advertenties.', 'uk': 'Pro відкриває: Календар, Документи, Статистику, AI, хмарну синхронізацію, віджети, спільні списки, іменини — і прибирає рекламу.',
         'bg': 'Pro отключва: Календар, Документи, Статистика, AI, облак, widgets, споделени списъци, именни дни — и маха рекламите.',
         'de': 'Pro schaltet frei: Kalender, Dokumente, Statistik, KI, Cloud-Sync, Widgets, geteilte Listen, Namenstage — und entfernt Werbung.',
         'fr': 'Pro débloque : Calendrier, Documents, Statistiques, IA, sync cloud, widgets, listes partagées, fêtes des prénoms — et retire les pubs.',
@@ -458,7 +458,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         'ja': 'Proで解除: カレンダー、ドキュメント、統計、AI、クラウド同期、ウィジェット、共有リスト、聖名祝日 — さらに広告も消えます。',
       };
       const dGift = {
-        'en': 'As a thank-you for your early support, here are 7 days of Pro on us. 💛',
+        'en': 'As a thank-you for your early support, here are 7 days of Pro on us. 💛', 'nl': 'Als dank voor je vroege steun krijg je 7 dagen Pro van ons. 💛', 'uk': 'На знак подяки за вашу ранню підтримку — 7 днів Pro від нас. 💛',
         'bg': 'Като благодарност за ранната ти подкрепа — 7 дни Pro от нас. 💛',
         'de': 'Als Dank für deine frühe Unterstützung: 7 Tage Pro geschenkt. 💛',
         'fr': 'Pour te remercier de ton soutien précoce, voici 7 jours de Pro offerts. 💛',
@@ -471,24 +471,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         'ja': '早期からのご支援への感謝を込めて、7日間のProをプレゼントします。💛',
       };
       const bContinueFree = {
-        'en': 'Continue free', 'bg': 'Продължи безплатно', 'de': 'Kostenlos weiter',
+        'en': 'Continue free', 'nl': 'Gratis doorgaan', 'uk': 'Продовжити безкоштовно', 'bg': 'Продължи безплатно', 'de': 'Kostenlos weiter',
         'fr': 'Continuer gratuit', 'it': 'Continua gratis', 'el': 'Συνέχεια δωρεάν',
         'es': 'Seguir gratis', 'pt': 'Continuar grátis', 'ru': 'Продолжить бесплатно',
         'tr': 'Ücretsiz devam', 'ja': '無料で続ける',
       };
       const bGetPro = {
-        'en': 'Get Pro', 'bg': 'Вземи Pro', 'de': 'Pro holen', 'fr': 'Obtenir Pro',
+        'en': 'Get Pro', 'nl': 'Pro nemen', 'uk': 'Отримати Pro', 'bg': 'Вземи Pro', 'de': 'Pro holen', 'fr': 'Obtenir Pro',
         'it': 'Ottieni Pro', 'el': 'Απόκτηση Pro', 'es': 'Obtener Pro',
         'pt': 'Obter Pro', 'ru': 'Получить Pro', 'tr': 'Pro al', 'ja': 'Proを入手',
       };
       const bAcceptGift = {
-        'en': 'Accept 7 free days', 'bg': 'Приеми 7 дни', 'de': '7 Tage annehmen',
+        'en': 'Accept 7 free days', 'nl': 'Accepteer 7 gratis dagen', 'uk': 'Отримати 7 безкоштовних днів', 'bg': 'Приеми 7 дни', 'de': '7 Tage annehmen',
         'fr': 'Accepter 7 jours', 'it': 'Accetta 7 giorni', 'el': 'Δέξου 7 ημέρες',
         'es': 'Aceptar 7 días', 'pt': 'Aceitar 7 dias', 'ru': 'Взять 7 дней',
         'tr': '7 günü al', 'ja': '7日間を受け取る',
       };
       const giftSnack = {
-        'en': 'Enjoy 7 days of Pro! 💛', 'bg': 'Приятни 7 дни Pro! 💛',
+        'en': 'Enjoy 7 days of Pro! 💛', 'nl': 'Geniet van 7 dagen Pro! 💛', 'uk': 'Насолоджуйтесь 7 днями Pro! 💛', 'bg': 'Приятни 7 дни Pro! 💛',
         'de': 'Viel Spaß mit 7 Tagen Pro! 💛', 'fr': 'Profite de 7 jours de Pro ! 💛',
         'it': 'Goditi 7 giorni di Pro! 💛', 'el': 'Απόλαυσε 7 ημέρες Pro! 💛',
         'es': '¡Disfruta 7 días de Pro! 💛', 'pt': 'Aproveita 7 dias de Pro! 💛',
@@ -583,9 +583,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         final languageController = LanguageScope.of(context);
         final lang = languageController.locale.languageCode;
         
-        const welcomeTitle = {'en': 'Welcome!', 'bg': 'Добре дошъл!', 'de': 'Willkommen!', 'fr': 'Bienvenue!', 'it': 'Benvenuto!', 'el': 'Καλώς ήρθες!', 'es': '¡Bienvenido!', 'pt': 'Bem-vindo!', 'ru': 'Добро пожаловать!', 'tr': 'Hoş geldin!', 'ja': 'ようこそ！'};
-        const welcomeBody = {'en': 'You have 14 days free Pro access!\n\nTry all features and see how Taskify can help you be more productive.', 'bg': 'Имаш 14 дни безплатен Pro достъп!\n\nИзползвай всички функции и виж как Taskify ще ти помогне да си по-продуктивен.', 'de': 'Du hast 14 Tage kostenlosen Pro-Zugang!\n\nProbiere alle Funktionen aus.', 'fr': 'Vous avez 14 jours d\'accès Pro gratuit!\n\nEssayez toutes les fonctionnalités.', 'it': 'Hai 14 giorni di accesso Pro gratuito!\n\nProva tutte le funzionalità.', 'el': 'Έχεις 14 ημέρες δωρεάν Pro πρόσβαση!\n\nΔοκίμασε όλες τις λειτουργίες.', 'es': '¡Tienes 14 días de acceso Pro gratis!\n\nPrueba todas las funciones.', 'pt': 'Você tem 14 dias de acesso Pro grátis!\n\nExperimente todos os recursos.', 'ru': 'У вас 14 дней бесплатного Pro доступа!\n\nПопробуйте все функции.', 'tr': '14 gün ücretsiz Pro erişiminiz var!\n\nTüm özellikleri deneyin.', 'ja': '14日間の無料Proアクセスがあります！\n\nすべての機能を試して、Taskifyがどれだけ生産性を高めるか体験してください。'};
-        const welcomeBtn = {'en': 'Awesome!', 'bg': 'Страхотно!', 'de': 'Super!', 'fr': 'Génial!', 'it': 'Fantastico!', 'el': 'Τέλεια!', 'es': '¡Genial!', 'pt': 'Incrível!', 'ru': 'Отлично!', 'tr': 'Harika!', 'ja': '最高！'};
+        const welcomeTitle = {'en': 'Welcome!', 'nl': 'Welkom!', 'uk': 'Ласкаво просимо!', 'bg': 'Добре дошъл!', 'de': 'Willkommen!', 'fr': 'Bienvenue!', 'it': 'Benvenuto!', 'el': 'Καλώς ήρθες!', 'es': '¡Bienvenido!', 'pt': 'Bem-vindo!', 'ru': 'Добро пожаловать!', 'tr': 'Hoş geldin!', 'ja': 'ようこそ！'};
+        const welcomeBody = {'en': 'You have 14 days free Pro access!\n\nTry all features and see how Taskify can help you be more productive.', 'nl': 'Je hebt 14 dagen gratis Pro-toegang!\n\nProbeer alle functies en ontdek hoe Taskify je productiever kan maken.', 'uk': 'У вас 14 днів безкоштовного доступу до Pro!\n\nСпробуйте всі функції та побачте, як Taskify допомагає бути продуктивнішими.', 'bg': 'Имаш 14 дни безплатен Pro достъп!\n\nИзползвай всички функции и виж как Taskify ще ти помогне да си по-продуктивен.', 'de': 'Du hast 14 Tage kostenlosen Pro-Zugang!\n\nProbiere alle Funktionen aus.', 'fr': 'Vous avez 14 jours d\'accès Pro gratuit!\n\nEssayez toutes les fonctionnalités.', 'it': 'Hai 14 giorni di accesso Pro gratuito!\n\nProva tutte le funzionalità.', 'el': 'Έχεις 14 ημέρες δωρεάν Pro πρόσβαση!\n\nΔοκίμασε όλες τις λειτουργίες.', 'es': '¡Tienes 14 días de acceso Pro gratis!\n\nPrueba todas las funciones.', 'pt': 'Você tem 14 dias de acesso Pro grátis!\n\nExperimente todos os recursos.', 'ru': 'У вас 14 дней бесплатного Pro доступа!\n\nПопробуйте все функции.', 'tr': '14 gün ücretsiz Pro erişiminiz var!\n\nTüm özellikleri deneyin.', 'ja': '14日間の無料Proアクセスがあります！\n\nすべての機能を試して、Taskifyがどれだけ生産性を高めるか体験してください。'};
+        const welcomeBtn = {'en': 'Awesome!', 'nl': 'Geweldig!', 'uk': 'Чудово!', 'bg': 'Страхотно!', 'de': 'Super!', 'fr': 'Génial!', 'it': 'Fantastico!', 'el': 'Τέλεια!', 'es': '¡Genial!', 'pt': 'Incrível!', 'ru': 'Отлично!', 'tr': 'Harika!', 'ja': '最高！'};
         
         showDialog(
           context: context,
@@ -612,7 +612,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!kIsWeb && index == 2 && !_proService.canUseCalendar) {
       final languageController = LanguageScope.of(context);
       final lang = languageController.locale.languageCode;
-      const calendarName = {'en': 'Calendar', 'bg': 'Календар', 'de': 'Kalender', 'fr': 'Calendrier', 'it': 'Calendario', 'el': 'Ημερολόγιο', 'es': 'Calendario', 'pt': 'Calendário', 'ru': 'Календарь', 'tr': 'Takvim', 'ja': 'カレンダー'};
+      const calendarName = {'en': 'Calendar', 'nl': 'Agenda', 'uk': 'Календар', 'bg': 'Календар', 'de': 'Kalender', 'fr': 'Calendrier', 'it': 'Calendario', 'el': 'Ημερολόγιο', 'es': 'Calendario', 'pt': 'Calendário', 'ru': 'Календарь', 'tr': 'Takvim', 'ja': 'カレンダー'};
 
       final upgraded = await showPaywallIfNeeded(
         context,
@@ -831,7 +831,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final theme = Theme.of(context);
     final lang = LanguageScope.of(context).locale.languageCode;
     const label = {
-      'en': 'Unlock Pro features', 'bg': 'Отключи Pro функциите',
+      'en': 'Unlock Pro features', 'nl': 'Pro-functies ontgrendelen', 'uk': 'Відкрити Pro-функції', 'bg': 'Отключи Pro функциите',
       'de': 'Pro-Funktionen freischalten', 'fr': 'Débloquer les fonctions Pro',
       'it': 'Sblocca le funzioni Pro', 'el': 'Ξεκλείδωσε τις λειτουργίες Pro',
       'es': 'Desbloquea las funciones Pro', 'pt': 'Desbloqueia as funções Pro',

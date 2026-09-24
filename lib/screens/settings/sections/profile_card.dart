@@ -37,7 +37,7 @@ class ProfileCard extends StatelessWidget {
     final title = name.isNotEmpty
         ? name
         : (email.isNotEmpty ? email : tr(const {
-            'en': 'Profile', 'bg': 'Профил', 'de': 'Profil', 'fr': 'Profil',
+            'en': 'Profile', 'nl': 'Profiel', 'uk': 'Профіль', 'bg': 'Профил', 'de': 'Profil', 'fr': 'Profil',
             'it': 'Profilo', 'el': 'Προφίλ', 'es': 'Perfil', 'pt': 'Perfil',
             'ru': 'Профиль', 'tr': 'Profil', 'ja': 'プロフィール',
           }));
@@ -49,17 +49,17 @@ class ProfileCard extends StatelessWidget {
     final uni = UniversityService();
     if (school.enabled && school.grade != null) {
       modeLine = '🎒 ${tr(const {
-        'en': 'Pupil', 'bg': 'Ученик', 'de': 'Schüler', 'fr': 'Élève',
+        'en': 'Pupil', 'nl': 'Leerling', 'uk': 'Учень', 'bg': 'Ученик', 'de': 'Schüler', 'fr': 'Élève',
         'it': 'Alunno', 'el': 'Μαθητής', 'es': 'Alumno', 'pt': 'Aluno',
         'ru': 'Ученик', 'tr': 'Öğrenci', 'ja': '生徒',
       })} · ${school.grade} ${tr(const {
-        'en': 'grade', 'bg': 'клас', 'de': 'Klasse', 'fr': 'classe',
+        'en': 'grade', 'nl': 'klas', 'uk': 'клас', 'bg': 'клас', 'de': 'Klasse', 'fr': 'classe',
         'it': 'classe', 'el': 'τάξη', 'es': 'grado', 'pt': 'ano',
         'ru': 'класс', 'tr': 'sınıf', 'ja': '年生',
       })}';
     } else if (uni.enabled && uni.profile != null) {
       modeLine = '🎓 ${tr(const {
-        'en': 'Student', 'bg': 'Студент', 'de': 'Student', 'fr': 'Étudiant',
+        'en': 'Student', 'nl': 'Student', 'uk': 'Студент', 'bg': 'Студент', 'de': 'Student', 'fr': 'Étudiant',
         'it': 'Studente', 'el': 'Φοιτητής', 'es': 'Estudiante', 'pt': 'Estudante',
         'ru': 'Студент', 'tr': 'Üniversite', 'ja': '大学生',
       })}${uni.displayUniversityName != null ? ' · ${uni.displayUniversityName}' : ''}';

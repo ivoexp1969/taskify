@@ -132,7 +132,7 @@ class _StudentCardState extends State<_StudentCard> {
   static String _t(Map<String, String> m, String lang) => m[lang] ?? m['en']!;
 
   static const _emptyPrompt = {
-    'en': 'Add a key date to see the countdown',
+    'en': 'Add a key date to see the countdown', 'nl': 'Voeg een belangrijke datum toe om het aftellen te zien', 'uk': 'Додайте важливу дату, щоб побачити відлік',
     'bg': 'Добави ключова дата, за да видиш броенето',
     'de': 'Füge einen Termin hinzu, um den Countdown zu sehen',
     'fr': 'Ajoute une date clé pour voir le compte à rebours',
@@ -145,7 +145,7 @@ class _StudentCardState extends State<_StudentCard> {
     'ja': 'カウントダウンを見るには日付を追加',
   };
   static const _todayWord = {
-    'en': 'is today!', 'bg': 'е днес!', 'de': 'ist heute!', 'fr': "c'est aujourd'hui !",
+    'en': 'is today!', 'nl': 'is vandaag!', 'uk': 'сьогодні!', 'bg': 'е днес!', 'de': 'ist heute!', 'fr': "c'est aujourd'hui !",
     'it': 'è oggi!', 'el': 'είναι σήμερα!', 'es': '¡es hoy!', 'pt': 'é hoje!',
     'ru': 'сегодня!', 'tr': 'bugün!', 'ja': 'は今日！',
   };

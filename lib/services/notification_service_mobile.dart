@@ -26,7 +26,7 @@ Future<void> _onNotificationActionBackground(NotificationResponse details) async
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     await plugin.initialize(const InitializationSettings(android: androidInit));
     final lang = prefs.getString('app_language') ?? 'en';
-    const confirmTitle = {'en': 'Task added ✓', 'bg': 'Задача добавена ✓', 'de': 'Aufgabe hinzugefügt ✓', 'fr': 'Tâche ajoutée ✓', 'it': 'Attività aggiunta ✓', 'el': 'Εργασία προστέθηκε ✓', 'es': 'Tarea añadida ✓', 'pt': 'Tarefa adicionada ✓', 'ru': 'Задача добавлена ✓', 'tr': 'Görev eklendi ✓', 'ja': 'タスクを追加しました ✓'};
+    const confirmTitle = {'en': 'Task added ✓', 'nl': 'Taak toegevoegd ✓', 'uk': 'Завдання додано ✓', 'bg': 'Задача добавена ✓', 'de': 'Aufgabe hinzugefügt ✓', 'fr': 'Tâche ajoutée ✓', 'it': 'Attività aggiunta ✓', 'el': 'Εργασία προστέθηκε ✓', 'es': 'Tarea añadida ✓', 'pt': 'Tarefa adicionada ✓', 'ru': 'Задача добавлена ✓', 'tr': 'Görev eklendi ✓', 'ja': 'タスクを追加しました ✓'};
     await plugin.show(
       99998,
       confirmTitle[lang] ?? confirmTitle['en']!,
@@ -62,20 +62,20 @@ Future<void> _onNotificationActionBackground(NotificationResponse details) async
   final id = details.id ?? 0;
 
   const fallbackTitle = {
-    'en': 'Reminder', 'bg': 'Напомняне', 'de': 'Erinnerung', 'fr': 'Rappel',
+    'en': 'Reminder', 'nl': 'Herinnering', 'uk': 'Нагадування', 'bg': 'Напомняне', 'de': 'Erinnerung', 'fr': 'Rappel',
     'it': 'Promemoria', 'el': 'Υπενθύμιση', 'es': 'Recordatorio',
     'pt': 'Lembrete', 'ru': 'Напоминание', 'tr': 'Hatırlatıcı', 'ja': 'リマインダー',
   };
   final title = prefs.getString('alarm_${id}_title') ?? (fallbackTitle[lang] ?? fallbackTitle['en']!);
 
   const snoozeBody = {
-    'en': 'Snoozed • 30 minutes', 'bg': 'Отложено • 30 минути', 'de': 'Verschoben • 30 Minuten',
+    'en': 'Snoozed • 30 minutes', 'nl': 'Uitgesteld • 30 minuten', 'uk': 'Відкладено • 30 хвилин', 'bg': 'Отложено • 30 минути', 'de': 'Verschoben • 30 Minuten',
     'fr': 'Reporté • 30 minutes', 'it': 'Posticipato • 30 minuti', 'el': 'Αναβλήθηκε • 30 λεπτά',
     'es': 'Pospuesto • 30 minutos', 'pt': 'Adiado • 30 minutos',
     'ru': 'Отложено • 30 минут', 'tr': 'Ertelendi • 30 dakika', 'ja': 'スヌーズ • 30分',
   };
   const snoozeLabel = {
-    'en': '⏰ +30 min', 'bg': '⏰ +30 мин', 'de': '⏰ +30 Min', 'fr': '⏰ +30 min',
+    'en': '⏰ +30 min', 'nl': '⏰ +30 min', 'uk': '⏰ +30 хв', 'bg': '⏰ +30 мин', 'de': '⏰ +30 Min', 'fr': '⏰ +30 min',
     'it': '⏰ +30 min', 'el': '⏰ +30 λεπτά', 'es': '⏰ +30 min',
     'pt': '⏰ +30 min', 'ru': '⏰ +30 мин', 'tr': '⏰ +30 dk', 'ja': '⏰ +30分',
   };
@@ -271,22 +271,22 @@ class NotificationService {
 
   String _reminderLabel(String reminderType, String lang) {
     const labels = {
-      'at_time': {'en': 'Time is now!', 'bg': 'Сега е времето!', 'de': 'Zeit ist da!', 'fr': "C'est l'heure!", 'it': "È ora!", 'el': 'Ήρθε η ώρα!', 'es': '¡Es la hora!', 'pt': 'Chegou a hora!', 'ru': 'Время пришло!', 'tr': 'Şimdi zamanı!', 'ja': '時間です！'},
-      'minus_5m': {'en': 'In 5 minutes', 'bg': 'След 5 минути', 'de': 'In 5 Minuten', 'fr': 'Dans 5 minutes', 'it': 'Tra 5 minuti', 'el': 'Σε 5 λεπτά', 'es': 'En 5 minutos', 'pt': 'Em 5 minutos', 'ru': 'Через 5 минут', 'tr': '5 dakika içinde', 'ja': '5分後'},
-      'minus_15m': {'en': 'In 15 minutes', 'bg': 'След 15 минути', 'de': 'In 15 Minuten', 'fr': 'Dans 15 minutes', 'it': 'Tra 15 minuti', 'el': 'Σε 15 λεπτά', 'es': 'En 15 minutos', 'pt': 'Em 15 minutos', 'ru': 'Через 15 минут', 'tr': '15 dakika içinde', 'ja': '15分後'},
-      'minus_30m': {'en': 'In 30 minutes', 'bg': 'След 30 минути', 'de': 'In 30 Minuten', 'fr': 'Dans 30 minutes', 'it': 'Tra 30 minuti', 'el': 'Σε 30 λεπτά', 'es': 'En 30 minutos', 'pt': 'Em 30 minutos', 'ru': 'Через 30 минут', 'tr': '30 dakika içinde', 'ja': '30分後'},
-      'minus_1h': {'en': 'In 1 hour', 'bg': 'След 1 час', 'de': 'In 1 Stunde', 'fr': 'Dans 1 heure', 'it': 'Tra 1 ora', 'el': 'Σε 1 ώρα', 'es': 'En 1 hora', 'pt': 'Em 1 hora', 'ru': 'Через 1 час', 'tr': '1 saat içinde', 'ja': '1時間後'},
-      'minus_2h': {'en': 'In 2 hours', 'bg': 'След 2 часа', 'de': 'In 2 Stunden', 'fr': 'Dans 2 heures', 'it': 'Tra 2 ore', 'el': 'Σε 2 ώρες', 'es': 'En 2 horas', 'pt': 'Em 2 horas', 'ru': 'Через 2 часа', 'tr': '2 saat içinde', 'ja': '2時間後'},
-      'minus_1d': {'en': 'Tomorrow', 'bg': 'Утре', 'de': 'Morgen', 'fr': 'Demain', 'it': 'Domani', 'el': 'Αύριο', 'es': 'Mañana', 'pt': 'Amanhã', 'ru': 'Завтра', 'tr': 'Yarın', 'ja': '明日'},
-      'minus_3d': {'en': 'In 3 days', 'bg': 'След 3 дни', 'de': 'In 3 Tagen', 'fr': 'Dans 3 jours', 'it': 'Tra 3 giorni', 'el': 'Σε 3 ημέρες', 'es': 'En 3 días', 'pt': 'Em 3 dias', 'ru': 'Через 3 дня', 'tr': '3 gün içinde', 'ja': '3日後'},
-      'minus_1w': {'en': 'In 1 week', 'bg': 'След 1 седмица', 'de': 'In 1 Woche', 'fr': 'Dans 1 semaine', 'it': 'Tra 1 settimana', 'el': 'Σε 1 εβδομάδα', 'es': 'En 1 semana', 'pt': 'Em 1 semana', 'ru': 'Через 1 неделю', 'tr': '1 hafta içinde', 'ja': '1週間後'},
-      'minus_2w': {'en': 'In 2 weeks', 'bg': 'След 2 седмици', 'de': 'In 2 Wochen', 'fr': 'Dans 2 semaines', 'it': 'Tra 2 settimane', 'el': 'Σε 2 εβδομάδες', 'es': 'En 2 semanas', 'pt': 'Em 2 semanas', 'ru': 'Через 2 недели', 'tr': '2 hafta içinde', 'ja': '2週間後'},
-      'minus_1mo': {'en': 'In 1 month', 'bg': 'След 1 месец', 'de': 'In 1 Monat', 'fr': 'Dans 1 mois', 'it': 'Tra 1 mese', 'el': 'Σε 1 μήνα', 'es': 'En 1 mes', 'pt': 'Em 1 mês', 'ru': 'Через 1 месяц', 'tr': '1 ay içinde', 'ja': '1か月後'},
-      'minus_2mo': {'en': 'In 2 months', 'bg': 'След 2 месеца', 'de': 'In 2 Monaten', 'fr': 'Dans 2 mois', 'it': 'Tra 2 mesi', 'el': 'Σε 2 μήνες', 'es': 'En 2 meses', 'pt': 'Em 2 meses', 'ru': 'Через 2 месяца', 'tr': '2 ay içinde', 'ja': '2か月後'},
-      'same_day_8': {'en': 'Today', 'bg': 'Днес', 'de': 'Heute', 'fr': "Aujourd'hui", 'it': 'Oggi', 'el': 'Σήμερα', 'es': 'Hoy', 'pt': 'Hoje', 'ru': 'Сегодня', 'tr': 'Bugün', 'ja': '今日'},
+      'at_time': {'en': 'Time is now!', 'nl': 'De tijd is nu!', 'uk': 'Час настав!', 'bg': 'Сега е времето!', 'de': 'Zeit ist da!', 'fr': "C'est l'heure!", 'it': "È ora!", 'el': 'Ήρθε η ώρα!', 'es': '¡Es la hora!', 'pt': 'Chegou a hora!', 'ru': 'Время пришло!', 'tr': 'Şimdi zamanı!', 'ja': '時間です！'},
+      'minus_5m': {'en': 'In 5 minutes', 'nl': 'Over 5 minuten', 'uk': 'Через 5 хвилин', 'bg': 'След 5 минути', 'de': 'In 5 Minuten', 'fr': 'Dans 5 minutes', 'it': 'Tra 5 minuti', 'el': 'Σε 5 λεπτά', 'es': 'En 5 minutos', 'pt': 'Em 5 minutos', 'ru': 'Через 5 минут', 'tr': '5 dakika içinde', 'ja': '5分後'},
+      'minus_15m': {'en': 'In 15 minutes', 'nl': 'Over 15 minuten', 'uk': 'Через 15 хвилин', 'bg': 'След 15 минути', 'de': 'In 15 Minuten', 'fr': 'Dans 15 minutes', 'it': 'Tra 15 minuti', 'el': 'Σε 15 λεπτά', 'es': 'En 15 minutos', 'pt': 'Em 15 minutos', 'ru': 'Через 15 минут', 'tr': '15 dakika içinde', 'ja': '15分後'},
+      'minus_30m': {'en': 'In 30 minutes', 'nl': 'Over 30 minuten', 'uk': 'Через 30 хвилин', 'bg': 'След 30 минути', 'de': 'In 30 Minuten', 'fr': 'Dans 30 minutes', 'it': 'Tra 30 minuti', 'el': 'Σε 30 λεπτά', 'es': 'En 30 minutos', 'pt': 'Em 30 minutos', 'ru': 'Через 30 минут', 'tr': '30 dakika içinde', 'ja': '30分後'},
+      'minus_1h': {'en': 'In 1 hour', 'nl': 'Over 1 uur', 'uk': 'Через 1 годину', 'bg': 'След 1 час', 'de': 'In 1 Stunde', 'fr': 'Dans 1 heure', 'it': 'Tra 1 ora', 'el': 'Σε 1 ώρα', 'es': 'En 1 hora', 'pt': 'Em 1 hora', 'ru': 'Через 1 час', 'tr': '1 saat içinde', 'ja': '1時間後'},
+      'minus_2h': {'en': 'In 2 hours', 'nl': 'Over 2 uur', 'uk': 'Через 2 години', 'bg': 'След 2 часа', 'de': 'In 2 Stunden', 'fr': 'Dans 2 heures', 'it': 'Tra 2 ore', 'el': 'Σε 2 ώρες', 'es': 'En 2 horas', 'pt': 'Em 2 horas', 'ru': 'Через 2 часа', 'tr': '2 saat içinde', 'ja': '2時間後'},
+      'minus_1d': {'en': 'Tomorrow', 'nl': 'Morgen', 'uk': 'Завтра', 'bg': 'Утре', 'de': 'Morgen', 'fr': 'Demain', 'it': 'Domani', 'el': 'Αύριο', 'es': 'Mañana', 'pt': 'Amanhã', 'ru': 'Завтра', 'tr': 'Yarın', 'ja': '明日'},
+      'minus_3d': {'en': 'In 3 days', 'nl': 'Over 3 dagen', 'uk': 'Через 3 дні', 'bg': 'След 3 дни', 'de': 'In 3 Tagen', 'fr': 'Dans 3 jours', 'it': 'Tra 3 giorni', 'el': 'Σε 3 ημέρες', 'es': 'En 3 días', 'pt': 'Em 3 dias', 'ru': 'Через 3 дня', 'tr': '3 gün içinde', 'ja': '3日後'},
+      'minus_1w': {'en': 'In 1 week', 'nl': 'Over 1 week', 'uk': 'Через 1 тиждень', 'bg': 'След 1 седмица', 'de': 'In 1 Woche', 'fr': 'Dans 1 semaine', 'it': 'Tra 1 settimana', 'el': 'Σε 1 εβδομάδα', 'es': 'En 1 semana', 'pt': 'Em 1 semana', 'ru': 'Через 1 неделю', 'tr': '1 hafta içinde', 'ja': '1週間後'},
+      'minus_2w': {'en': 'In 2 weeks', 'nl': 'Over 2 weken', 'uk': 'Через 2 тижні', 'bg': 'След 2 седмици', 'de': 'In 2 Wochen', 'fr': 'Dans 2 semaines', 'it': 'Tra 2 settimane', 'el': 'Σε 2 εβδομάδες', 'es': 'En 2 semanas', 'pt': 'Em 2 semanas', 'ru': 'Через 2 недели', 'tr': '2 hafta içinde', 'ja': '2週間後'},
+      'minus_1mo': {'en': 'In 1 month', 'nl': 'Over 1 maand', 'uk': 'Через 1 місяць', 'bg': 'След 1 месец', 'de': 'In 1 Monat', 'fr': 'Dans 1 mois', 'it': 'Tra 1 mese', 'el': 'Σε 1 μήνα', 'es': 'En 1 mes', 'pt': 'Em 1 mês', 'ru': 'Через 1 месяц', 'tr': '1 ay içinde', 'ja': '1か月後'},
+      'minus_2mo': {'en': 'In 2 months', 'nl': 'Over 2 maanden', 'uk': 'Через 2 місяці', 'bg': 'След 2 месеца', 'de': 'In 2 Monaten', 'fr': 'Dans 2 mois', 'it': 'Tra 2 mesi', 'el': 'Σε 2 μήνες', 'es': 'En 2 meses', 'pt': 'Em 2 meses', 'ru': 'Через 2 месяца', 'tr': '2 ay içinde', 'ja': '2か月後'},
+      'same_day_8': {'en': 'Today', 'nl': 'Vandaag', 'uk': 'Сьогодні', 'bg': 'Днес', 'de': 'Heute', 'fr': "Aujourd'hui", 'it': 'Oggi', 'el': 'Σήμερα', 'es': 'Hoy', 'pt': 'Hoje', 'ru': 'Сегодня', 'tr': 'Bugün', 'ja': '今日'},
     };
     const defaultLabel = {
-      'en': 'Reminder', 'bg': 'Напомняне', 'de': 'Erinnerung', 'fr': 'Rappel',
+      'en': 'Reminder', 'nl': 'Herinnering', 'uk': 'Нагадування', 'bg': 'Напомняне', 'de': 'Erinnerung', 'fr': 'Rappel',
       'it': 'Promemoria', 'el': 'Υπενθύμιση', 'es': 'Recordatorio',
       'pt': 'Lembrete', 'ru': 'Напоминание', 'tr': 'Hatırlatıcı', 'ja': 'リマインダー',
     };
@@ -297,17 +297,17 @@ class NotificationService {
   NotificationDetails _buildNotificationDetails(
       {String? lang, String? renewDoctype, String? giftKind}) {
     const snoozeLabels = {
-      'en': '⏰ +30 min', 'bg': '⏰ +30 мин', 'de': '⏰ +30 Min', 'fr': '⏰ +30 min',
+      'en': '⏰ +30 min', 'nl': '⏰ +30 min', 'uk': '⏰ +30 хв', 'bg': '⏰ +30 мин', 'de': '⏰ +30 Min', 'fr': '⏰ +30 min',
       'it': '⏰ +30 min', 'el': '⏰ +30 λεπτά', 'es': '⏰ +30 min',
       'pt': '⏰ +30 min', 'ru': '⏰ +30 мин', 'tr': '⏰ +30 dk', 'ja': '⏰ +30分',
     };
     const renewLabels = {
-      'en': '🔄 Renew', 'bg': '🔄 Поднови', 'de': '🔄 Verlängern', 'fr': '🔄 Renouveler',
+      'en': '🔄 Renew', 'nl': '🔄 Verlengen', 'uk': '🔄 Поновити', 'bg': '🔄 Поднови', 'de': '🔄 Verlängern', 'fr': '🔄 Renouveler',
       'it': '🔄 Rinnova', 'el': '🔄 Ανανέωση', 'es': '🔄 Renovar',
       'pt': '🔄 Renovar', 'ru': '🔄 Продлить', 'tr': '🔄 Yenile', 'ja': '🔄 更新',
     };
     const giftLabels = {
-      'en': '🌸 Flowers/gift', 'bg': '🌸 Цветя/подарък', 'de': '🌸 Blumen/Geschenk',
+      'en': '🌸 Flowers/gift', 'nl': '🌸 Bloemen/cadeau', 'uk': '🌸 Квіти/подарунок', 'bg': '🌸 Цветя/подарък', 'de': '🌸 Blumen/Geschenk',
       'fr': '🌸 Fleurs/cadeau', 'it': '🌸 Fiori/regalo', 'el': '🌸 Λουλούδια/δώρο',
       'es': '🌸 Flores/regalo', 'pt': '🌸 Flores/presente', 'ru': '🌸 Цветы/подарок',
       'tr': '🌸 Çiçek/hediye', 'ja': '🌸 花・ギフト',
@@ -546,7 +546,7 @@ class NotificationService {
 
       final lang = prefs.getString('app_language') ?? 'en';
       const titles = {
-        'en': '⏰ Pro trial ends in 3 days',
+        'en': '⏰ Pro trial ends in 3 days', 'nl': '⏰ Pro-proef eindigt over 3 dagen', 'uk': '⏰ Пробний Pro завершиться через 3 дні',
         'bg': '⏰ Pro пробният период е до 3 дни',
         'de': '⏰ Pro-Test endet in 3 Tagen',
         'fr': '⏰ L\'essai Pro se termine dans 3 jours',
@@ -558,7 +558,7 @@ class NotificationService {
         'tr': '⏰ Pro deneme süresi 3 gün sonra sona eriyor', 'ja': '⏰ Proトライアルは3日後に終了',
       };
       const bodies = {
-        'en': 'Upgrade now to keep all your tasks, reminders and calendar sync.',
+        'en': 'Upgrade now to keep all your tasks, reminders and calendar sync.', 'nl': 'Upgrade nu om al je taken, herinneringen en agendasynchronisatie te behouden.', 'uk': 'Оновіть зараз, щоб зберегти всі завдання, нагадування та синхронізацію календаря.',
         'bg': 'Надстрой сега, за да запазиш задачите, напомнянията и синхронизацията.',
         'de': 'Jetzt upgraden, um Aufgaben, Erinnerungen und Kalender zu behalten.',
         'fr': 'Mettez à niveau pour conserver vos tâches, rappels et la synchronisation.',

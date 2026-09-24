@@ -299,7 +299,7 @@ class _CloudSyncSectionState extends State<CloudSyncSection> {
   /// профилите — през [PrefsSyncService].
   static String _syncsLabel(String lang) {
     const m = {
-      'en': 'Synced: Tasks · Documents · Schedule · Profiles',
+      'en': 'Synced: Tasks · Documents · Schedule · Profiles', 'nl': 'Gesynchroniseerd: Taken · Documenten · Rooster · Profielen', 'uk': 'Синхронізовано: Завдання · Документи · Розклад · Профілі',
       'bg': 'Синхронизира се: Задачи · Документи · Разписание · Профили',
       'de': 'Synchronisiert: Aufgaben · Dokumente · Stundenplan · Profile',
       'fr': 'Synchronisé : Tâches · Documents · Emploi du temps · Profils',

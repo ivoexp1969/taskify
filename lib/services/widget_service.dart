@@ -188,7 +188,7 @@ class WidgetService {
   }
 
   static const Map<String, String> _docToday = {
-    'en': '{name} expires today', 'bg': '{name} изтича ДНЕС',
+    'en': '{name} expires today', 'nl': '{name} verloopt vandaag', 'uk': '{name} спливає сьогодні', 'bg': '{name} изтича ДНЕС',
     'de': '{name} läuft heute ab', 'fr': "{name} expire aujourd'hui",
     'it': '{name} scade oggi', 'el': '{name} λήγει σήμερα',
     'es': '{name} caduca hoy', 'pt': '{name} expira hoje',
@@ -197,7 +197,7 @@ class WidgetService {
   };
 
   static const Map<String, String> _docTomorrow = {
-    'en': '{name} expires tomorrow', 'bg': '{name} изтича утре',
+    'en': '{name} expires tomorrow', 'nl': '{name} verloopt morgen', 'uk': '{name} спливає завтра', 'bg': '{name} изтича утре',
     'de': '{name} läuft morgen ab', 'fr': '{name} expire demain',
     'it': '{name} scade domani', 'el': '{name} λήγει αύριο',
     'es': '{name} caduca mañana', 'pt': '{name} expira amanhã',
@@ -206,7 +206,7 @@ class WidgetService {
   };
 
   static const Map<String, String> _docInDays = {
-    'en': '{name} expires in {days} days', 'bg': '{name} изтича след {days} дни',
+    'en': '{name} expires in {days} days', 'nl': '{name} verloopt over {days} dagen', 'uk': '{name} спливає через {days} днів', 'bg': '{name} изтича след {days} дни',
     'de': '{name} läuft in {days} Tagen ab',
     'fr': '{name} expire dans {days} jours',
     'it': '{name} scade tra {days} giorni',
@@ -219,7 +219,7 @@ class WidgetService {
   };
 
   static const Map<String, String> _nameDayToday = {
-    'en': 'Today {names} celebrate their name day',
+    'en': 'Today {names} celebrate their name day', 'nl': 'Vandaag vieren {names} hun naamdag', 'uk': 'Сьогодні {names} святкують іменини',
     'bg': 'Днес имен ден празнуват {names}',
     'de': 'Heute haben {names} Namenstag',
     'fr': "Aujourd'hui {names} fêtent leur prénom",
@@ -233,7 +233,7 @@ class WidgetService {
   };
 
   static const Map<String, String> _holidayToday = {
-    'en': 'Today is {name}', 'bg': 'Днес е {name}', 'de': 'Heute ist {name}',
+    'en': 'Today is {name}', 'nl': 'Vandaag is het {name}', 'uk': 'Сьогодні {name}', 'bg': 'Днес е {name}', 'de': 'Heute ist {name}',
     'fr': "Aujourd'hui c'est {name}", 'it': 'Oggi è {name}',
     'el': 'Σήμερα είναι {name}', 'es': 'Hoy es {name}',
     'pt': 'Hoje é {name}', 'ru': 'Сегодня {name}', 'tr': 'Bugün {name}',
@@ -241,7 +241,7 @@ class WidgetService {
   };
 
   static const Map<String, String> _holidayTomorrow = {
-    'en': 'Tomorrow is {name}', 'bg': 'Утре е {name}',
+    'en': 'Tomorrow is {name}', 'nl': 'Morgen is het {name}', 'uk': 'Завтра {name}', 'bg': 'Утре е {name}',
     'de': 'Morgen ist {name}', 'fr': "Demain c'est {name}",
     'it': 'Domani è {name}', 'el': 'Αύριο είναι {name}',
     'es': 'Mañana es {name}', 'pt': 'Amanhã é {name}',

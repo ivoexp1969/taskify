@@ -56,7 +56,7 @@ class ConversionService {
   // ── Локализирани текстове (inline, ×11 езика — като другите services) ──
   static const Map<String, Map<String, String>> _tx = {
     'seventhTitle': {
-      'en': 'Already 7 tasks done! 🎉', 'bg': 'Вече 7 свършени задачи! 🎉',
+      'en': 'Already 7 tasks done! 🎉', 'nl': 'Al 7 taken gedaan! 🎉', 'uk': 'Уже 7 завдань виконано! 🎉', 'bg': 'Вече 7 свършени задачи! 🎉',
       'de': 'Schon 7 Aufgaben erledigt! 🎉', 'fr': 'Déjà 7 tâches terminées ! 🎉',
       'it': 'Già 7 attività completate! 🎉', 'el': 'Ήδη 7 εργασίες ολοκληρώθηκαν! 🎉',
       'es': '¡Ya 7 tareas completadas! 🎉', 'pt': 'Já 7 tarefas concluídas! 🎉',
@@ -64,7 +64,7 @@ class ConversionService {
       'ja': 'もう7つのタスク完了！🎉',
     },
     'seventhBody': {
-      'en': 'Unlock unlimited AI and no ads with Premium.',
+      'en': 'Unlock unlimited AI and no ads with Premium.', 'nl': 'Ontgrendel onbeperkte AI en geen advertenties met Premium.', 'uk': 'Відкрийте необмежений AI та вимкнення реклами з Преміум.',
       'bg': 'Отключи неограничен AI и без реклами с Premium.',
       'de': 'Schalte unbegrenzte KI und werbefrei mit Premium frei.',
       'fr': 'Débloquez l\'IA illimitée et sans publicité avec Premium.',
@@ -77,18 +77,18 @@ class ConversionService {
       'ja': 'Premiumで無制限のAIと広告なしを解放しましょう。',
     },
     'seedPremium': {
-      'en': 'See Premium', 'bg': 'Виж Premium', 'de': 'Premium ansehen',
+      'en': 'See Premium', 'nl': 'Bekijk Premium', 'uk': 'Переглянути Преміум', 'bg': 'Виж Premium', 'de': 'Premium ansehen',
       'fr': 'Voir Premium', 'it': 'Scopri Premium', 'el': 'Δείτε το Premium',
       'es': 'Ver Premium', 'pt': 'Ver Premium', 'ru': 'Смотреть Premium',
       'tr': 'Premium\'u gör', 'ja': 'Premiumを見る',
     },
     'notNow': {
-      'en': 'Not now', 'bg': 'Не сега', 'de': 'Nicht jetzt', 'fr': 'Plus tard',
+      'en': 'Not now', 'nl': 'Niet nu', 'uk': 'Не зараз', 'bg': 'Не сега', 'de': 'Nicht jetzt', 'fr': 'Plus tard',
       'it': 'Non ora', 'el': 'Όχι τώρα', 'es': 'Ahora no', 'pt': 'Agora não',
       'ru': 'Не сейчас', 'tr': 'Şimdi değil', 'ja': '今はしない',
     },
     'day3Title': {
-      'en': 'Tip: let Taskify read your task 🪄',
+      'en': 'Tip: let Taskify read your task 🪄', 'nl': 'Tip: laat Taskify je taak lezen 🪄', 'uk': 'Порада: дозвольте Taskify прочитати ваше завдання 🪄',
       'bg': 'Съвет: остави Taskify да разпознае задачата 🪄',
       'de': 'Tipp: Taskify erkennt deine Aufgabe 🪄',
       'fr': 'Astuce : laissez Taskify comprendre votre tâche 🪄',
@@ -101,7 +101,7 @@ class ConversionService {
       'ja': 'ヒント：Taskifyにタスクを読み取らせましょう 🪄',
     },
     'day3Body': {
-      'en': 'Type "doctor thursday 2pm" and Taskify recognizes it automatically.',
+      'en': 'Type "doctor thursday 2pm" and Taskify recognizes it automatically.', 'nl': 'Typ "dokter donderdag 14:00" en Taskify herkent het automatisch.', 'uk': 'Напишіть «лікар четвер 14:00» — і Taskify розпізнає це автоматично.',
       'bg': 'Напиши „лекар четвъртък 14:00" и Taskify сам ще разпознае задачата.',
       'de': 'Tippe „Arzt Donnerstag 14 Uhr" und Taskify erkennt es automatisch.',
       'fr': 'Tapez « médecin jeudi 14h » et Taskify le reconnaît automatiquement.',
@@ -114,7 +114,7 @@ class ConversionService {
       'ja': '「医者 木曜 14時」と入力すると、Taskifyが自動で認識します。',
     },
     'day7Title': {
-      'en': 'A week with Taskify! 🚀', 'bg': 'Седмица с Taskify! 🚀',
+      'en': 'A week with Taskify! 🚀', 'nl': 'Een week met Taskify! 🚀', 'uk': 'Тиждень із Taskify! 🚀', 'bg': 'Седмица с Taskify! 🚀',
       'de': 'Eine Woche mit Taskify! 🚀', 'fr': 'Une semaine avec Taskify ! 🚀',
       'it': 'Una settimana con Taskify! 🚀', 'el': 'Μια εβδομάδα με το Taskify! 🚀',
       'es': '¡Una semana con Taskify! 🚀', 'pt': 'Uma semana com o Taskify! 🚀',
@@ -122,7 +122,7 @@ class ConversionService {
       'ja': 'Taskifyと1週間！🚀',
     },
     'day7Body': {
-      'en': 'See what Premium unlocks for you.',
+      'en': 'See what Premium unlocks for you.', 'nl': 'Zie wat Premium voor je ontgrendelt.', 'uk': 'Подивіться, що відкриває Преміум.',
       'bg': 'Виж какво отключва Premium за теб.',
       'de': 'Sieh, was Premium für dich freischaltet.',
       'fr': 'Découvrez ce que Premium débloque pour vous.',

@@ -7,7 +7,7 @@ import '../screens/paywall/paywall_screen.dart';
 // ФАЗА 4.2: дискретен Premium линк в celebration момента (вместо отделен popup —
 // моментът е техен). Показва се само на free. Локализиран ×11.
 const Map<String, String> _kUnlockPremium = {
-  'en': 'Unlock Premium', 'bg': 'Отключи Premium', 'de': 'Premium freischalten',
+  'en': 'Unlock Premium', 'nl': 'Premium ontgrendelen', 'uk': 'Відкрити Преміум', 'bg': 'Отключи Premium', 'de': 'Premium freischalten',
   'fr': 'Débloquer Premium', 'it': 'Sblocca Premium', 'el': 'Ξεκλείδωμα Premium',
   'es': 'Desbloquear Premium', 'pt': 'Desbloquear Premium', 'ru': 'Открыть Premium',
   'tr': 'Premium\'u aç', 'ja': 'Premiumを解放',

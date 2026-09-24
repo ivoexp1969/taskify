@@ -17,13 +17,13 @@ class GoProCard extends StatelessWidget {
     String tr(Map<String, String> m) => m[lang] ?? m['en']!;
 
     const title = {
-      'en': 'Get Taskify Pro', 'bg': 'Стани Pro', 'de': 'Taskify Pro holen',
+      'en': 'Get Taskify Pro', 'nl': 'Taskify Pro nemen', 'uk': 'Отримати Taskify Pro', 'bg': 'Стани Pro', 'de': 'Taskify Pro holen',
       'fr': 'Passer à Pro', 'it': 'Passa a Pro', 'el': 'Απόκτησε το Pro',
       'es': 'Hazte Pro', 'pt': 'Seja Pro', 'ru': 'Стать Pro',
       'tr': 'Pro\'ya geç', 'ja': 'Taskify Pro にアップグレード',
     };
     const subtitle = {
-      'en': 'Calendar, AI, cloud sync, no ads and more',
+      'en': 'Calendar, AI, cloud sync, no ads and more', 'nl': 'Agenda, AI, cloudsync, geen advertenties en meer', 'uk': 'Календар, AI, хмарна синхронізація, без реклами та інше',
       'bg': 'Календар, AI, облак, без реклами и още',
       'de': 'Kalender, KI, Cloud-Sync, keine Werbung und mehr',
       'fr': 'Calendrier, IA, sync cloud, sans pubs et plus',
@@ -36,13 +36,13 @@ class GoProCard extends StatelessWidget {
       'ja': 'カレンダー、AI、クラウド同期、広告なしなど',
     };
     const getButton = {
-      'en': 'Get Pro', 'bg': 'Вземи Pro', 'de': 'Pro holen',
+      'en': 'Get Pro', 'nl': 'Pro nemen', 'uk': 'Отримати Pro', 'bg': 'Вземи Pro', 'de': 'Pro holen',
       'fr': 'Obtenir Pro', 'it': 'Ottieni Pro', 'el': 'Απόκτηση Pro',
       'es': 'Obtener Pro', 'pt': 'Obter Pro', 'ru': 'Получить Pro',
       'tr': 'Pro al', 'ja': 'Pro を入手',
     };
     const restoreButton = {
-      'en': 'Restore purchases', 'bg': 'Възстанови покупки',
+      'en': 'Restore purchases', 'nl': 'Aankopen herstellen', 'uk': 'Відновити покупки', 'bg': 'Възстанови покупки',
       'de': 'Käufe wiederherstellen', 'fr': 'Restaurer les achats',
       'it': 'Ripristina acquisti', 'el': 'Επαναφορά αγορών',
       'es': 'Restaurar compras', 'pt': 'Restaurar compras',

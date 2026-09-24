@@ -58,13 +58,13 @@ class _BulgariaSectionState extends State<BulgariaSection> {
     final lang = LanguageScope.of(context).locale.languageCode;
 
     const nameDaysTitle = {
-      'en': 'Name days', 'bg': 'Именни дни', 'de': 'Namenstage',
+      'en': 'Name days', 'nl': 'Naamdagen', 'uk': 'Іменини', 'bg': 'Именни дни', 'de': 'Namenstage',
       'fr': 'Fêtes des prénoms', 'it': 'Onomastici', 'el': 'Ονομαστικές εορτές',
       'es': 'Onomásticas', 'pt': 'Dias do nome', 'ru': 'Именины',
       'tr': 'İsim günleri', 'ja': '聖名祝日',
     };
     const nameDaysSubtitle = {
-      'en': 'Bulgarian name days in the calendar',
+      'en': 'Bulgarian name days in the calendar', 'nl': 'Bulgaarse naamdagen in de agenda', 'uk': 'Болгарські іменини в календарі',
       'bg': 'Български именни дни в календара',
       'de': 'Bulgarische Namenstage im Kalender',
       'fr': 'Fêtes des prénoms bulgares dans le calendrier',
@@ -76,7 +76,7 @@ class _BulgariaSectionState extends State<BulgariaSection> {
       'tr': 'Takvimde Bulgarca isim günleri', 'ja': 'カレンダーにブルガリアの聖名祝日を表示',
     };
     const contactsTitle = {
-      'en': 'Contacts celebrating', 'bg': 'Контакти с имен ден',
+      'en': 'Contacts celebrating', 'nl': 'Contacten die iets vieren', 'uk': 'Контакти, що святкують', 'bg': 'Контакти с имен ден',
       'de': 'Feiernde Kontakte', 'fr': 'Contacts en fête',
       'it': 'Contatti in festa', 'el': 'Επαφές που γιορτάζουν',
       'es': 'Contactos que celebran', 'pt': 'Contactos em festa',
@@ -84,7 +84,7 @@ class _BulgariaSectionState extends State<BulgariaSection> {
       'ja': '記念日の連絡先',
     };
     const contactsSubtitle = {
-      'en': 'Show which of your contacts have a name day — stays on your device',
+      'en': 'Show which of your contacts have a name day — stays on your device', 'nl': 'Toon welke contacten een naamdag hebben — blijft op je apparaat', 'uk': 'Показувати, у кого з контактів іменини — залишається на вашому пристрої',
       'bg': 'Покажи кои от контактите ти празнуват — остава на устройството',
       'de': 'Zeigt, welche Kontakte Namenstag haben — bleibt auf dem Gerät',
       'fr': "Affiche quels contacts fêtent leur prénom — reste sur l'appareil",
@@ -97,7 +97,7 @@ class _BulgariaSectionState extends State<BulgariaSection> {
       'ja': '記念日の連絡先を表示 — データは端末内のみ',
     };
     const contactsPermDenied = {
-      'en': 'Contacts permission is required for this feature',
+      'en': 'Contacts permission is required for this feature', 'nl': 'Voor deze functie is toegang tot contacten nodig', 'uk': 'Для цієї функції потрібен доступ до контактів',
       'bg': 'Нужно е разрешение за контакти',
       'de': 'Kontaktberechtigung erforderlich',
       'fr': 'Autorisation des contacts requise',
@@ -109,7 +109,7 @@ class _BulgariaSectionState extends State<BulgariaSection> {
       'tr': 'Kişiler izni gerekli', 'ja': '連絡先へのアクセス許可が必要です',
     };
     const contactsRefresh = {
-      'en': 'Refresh contacts', 'bg': 'Опресни контактите',
+      'en': 'Refresh contacts', 'nl': 'Contacten vernieuwen', 'uk': 'Оновити контакти', 'bg': 'Опресни контактите',
       'de': 'Kontakte aktualisieren', 'fr': 'Actualiser les contacts',
       'it': 'Aggiorna i contatti', 'el': 'Ανανέωση επαφών',
       'es': 'Actualizar contactos', 'pt': 'Atualizar contactos',
@@ -117,7 +117,7 @@ class _BulgariaSectionState extends State<BulgariaSection> {
       'ja': '連絡先を更新',
     };
     const contactsRefreshHint = {
-      'en': 'Rebuild the local index after contact changes',
+      'en': 'Rebuild the local index after contact changes', 'nl': 'Bouw de lokale index opnieuw op na wijzigingen in contacten', 'uk': 'Перебудувати локальний індекс після змін у контактах',
       'bg': 'Преизгражда локалния индекс след промени',
       'de': 'Lokalen Index nach Änderungen neu aufbauen',
       'fr': "Reconstruit l'index local après modifications",
@@ -130,7 +130,7 @@ class _BulgariaSectionState extends State<BulgariaSection> {
       'ja': '変更後にローカル索引を再構築',
     };
     const contactsRefreshed = {
-      'en': 'Contacts refreshed', 'bg': 'Контактите са обновени',
+      'en': 'Contacts refreshed', 'nl': 'Contacten vernieuwd', 'uk': 'Контакти оновлено', 'bg': 'Контактите са обновени',
       'de': 'Kontakte aktualisiert', 'fr': 'Contacts actualisés',
       'it': 'Contatti aggiornati', 'el': 'Οι επαφές ανανεώθηκαν',
       'es': 'Contactos actualizados', 'pt': 'Contactos atualizados',

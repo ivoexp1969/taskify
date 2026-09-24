@@ -22,49 +22,55 @@ class WhatsNewDialog {
   /// Точките за текущата версия, по език.
   static const Map<String, List<String>> _items = {
     'bg': [
-      '🎉 Секцията „Още от 1969" вече работи и на iOS — с детекция дали Навици е инсталирано. С код NAVICI30 → 30 дни Pro в Taskify при инсталация на Навици.',
+      '🌍 Taskify вече говори нидерландски и украински! Смени езика от Настройки → Език.',
     ],
     'en': [
-      '🎉 The "More from 1969" section now works on iOS — with detection of whether Навици is installed. Code NAVICI30 → 30 days of Taskify Pro when you install Навици.',
+      '🌍 Taskify now speaks Dutch and Ukrainian! Change it in Settings → Language.',
+    ],
+    'nl': [
+      '🌍 Taskify spreekt nu Nederlands en Oekraïens! Wijzig het bij Instellingen → Taal.',
+    ],
+    'uk': [
+      '🌍 Taskify тепер розмовляє нідерландською та українською! Змініть у Налаштування → Мова.',
     ],
     'de': [
-      '🎉 Der Bereich „Mehr von 1969" funktioniert jetzt auch auf iOS — mit Erkennung, ob Навици installiert ist. Code NAVICI30 → 30 Tage Taskify Pro bei Installation von Навици.',
+      '🌍 Taskify spricht jetzt Niederländisch und Ukrainisch! Ändere es in Einstellungen → Sprache.',
     ],
     'fr': [
-      '🎉 La section « Plus de 1969 » fonctionne désormais sur iOS — avec détection si Навици est installé. Code NAVICI30 → 30 jours de Taskify Pro à l\'installation de Навици.',
+      '🌍 Taskify parle désormais néerlandais et ukrainien ! Changez-le dans Réglages → Langue.',
     ],
     'it': [
-      '🎉 La sezione "Altro da 1969" ora funziona anche su iOS — con rilevamento se Навици è installato. Codice NAVICI30 → 30 giorni di Taskify Pro installando Навици.',
+      '🌍 Taskify ora parla olandese e ucraino! Cambia lingua in Impostazioni → Lingua.',
     ],
     'el': [
-      '🎉 Η ενότητα «Περισσότερα από το 1969» λειτουργεί τώρα και σε iOS — με ανίχνευση αν το Навици είναι εγκατεστημένο. Κωδικός NAVICI30 → 30 ημέρες Taskify Pro με την εγκατάσταση του Навици.',
+      '🌍 Το Taskify μιλάει τώρα ολλανδικά και ουκρανικά! Άλλαξέ το στις Ρυθμίσεις → Γλώσσα.',
     ],
     'es': [
-      '🎉 La sección "Más de 1969" ahora funciona en iOS — con detección de si Навици está instalado. Código NAVICI30 → 30 días de Taskify Pro al instalar Навици.',
+      '🌍 ¡Taskify ahora habla neerlandés y ucraniano! Cámbialo en Ajustes → Idioma.',
     ],
     'pt': [
-      '🎉 A seção "Mais de 1969" agora funciona no iOS — com detecção de se o Навици está instalado. Código NAVICI30 → 30 dias de Taskify Pro ao instalar Навици.',
+      '🌍 O Taskify agora fala holandês e ucraniano! Altere em Configurações → Idioma.',
     ],
     'ru': [
-      '🎉 Раздел «Ещё от 1969» теперь работает и на iOS — с определением, установлено ли Навици. Код NAVICI30 → 30 дней Taskify Pro при установке Навици.',
+      '🌍 Taskify теперь говорит на нидерландском и украинском! Измените в Настройках → Язык.',
     ],
     'tr': [
-      '🎉 "1969\'dan daha fazlası" bölümü artık iOS\'ta da çalışıyor — Навици\'nin yüklü olup olmadığını algılar. NAVICI30 kodu → Навици\'yi yükleyince 30 gün Taskify Pro.',
+      '🌍 Taskify artık Felemenkçe ve Ukraynaca konuşuyor! Ayarlar → Dil bölümünden değiştir.',
     ],
     'ja': [
-      '🎉 「1969のその他のアプリ」が iOS でも動作 — Навици がインストール済みか検出します。コード NAVICI30 で、Навици をインストールすると Taskify Pro が30日間。',
+      '🌍 Taskify がオランダ語とウクライナ語に対応しました！設定 → 言語 で変更できます。',
     ],
   };
 
   static const Map<String, String> _title = {
-    'en': "What's new", 'bg': 'Какво ново', 'de': 'Was ist neu',
+    'en': "What's new", 'nl': 'Wat is er nieuw', 'uk': 'Що нового', 'bg': 'Какво ново', 'de': 'Was ist neu',
     'fr': 'Quoi de neuf', 'it': 'Novità', 'el': 'Τι νέο υπάρχει',
     'es': 'Novedades', 'pt': 'Novidades', 'ru': 'Что нового',
     'tr': 'Yenilikler', 'ja': '新着情報',
   };
 
   static const Map<String, String> _button = {
-    'en': 'Got it!', 'bg': 'Супер!', 'de': 'Super!', 'fr': 'Compris!',
+    'en': 'Got it!', 'nl': 'Begrepen!', 'uk': 'Зрозуміло!', 'bg': 'Супер!', 'de': 'Super!', 'fr': 'Compris!',
     'it': 'Ottimo!', 'el': 'Τέλεια!', 'es': '¡Genial!', 'pt': 'Ótimo!',
     'ru': 'Отлично!', 'tr': 'Harika!', 'ja': '了解！',
   };

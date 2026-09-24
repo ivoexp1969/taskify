@@ -65,20 +65,20 @@ class ExamHelperCard extends StatelessWidget {
   String _sectionTitle(String lang, int grade) {
     if (grade == 12) {
       return _t(const {
-        'en': 'State matriculation (Matura)', 'bg': 'ДЗИ (матура)',
+        'en': 'State matriculation (Matura)', 'nl': 'Staatsexamen (Matura)', 'uk': 'Державні іспити (Matura)', 'bg': 'ДЗИ (матура)',
         'de': 'Abiturprüfungen', 'fr': 'Baccalauréat', 'it': 'Esame di maturità',
         'el': 'Απολυτήριες εξετάσεις', 'es': 'Bachillerato', 'pt': 'Exames finais',
         'ru': 'Выпускные экзамены', 'tr': 'Olgunluk sınavı', 'ja': '卒業試験',
       }, lang);
     }
     final nvo = _t(const {
-      'en': 'National exams', 'bg': 'НВО', 'de': 'Landesweite Prüfungen',
+      'en': 'National exams', 'nl': 'Landelijke examens', 'uk': 'Національні іспити', 'bg': 'НВО', 'de': 'Landesweite Prüfungen',
       'fr': 'Épreuves nationales', 'it': 'Prove nazionali', 'el': 'Εθνικές εξετάσεις',
       'es': 'Pruebas nacionales', 'pt': 'Provas nacionais', 'ru': 'Нац. оценивание',
       'tr': 'Ulusal sınavlar', 'ja': '全国テスト',
     }, lang);
     final gradeWord = _t(const {
-      'en': 'grade', 'bg': 'клас', 'de': 'Klasse', 'fr': 'classe', 'it': 'classe',
+      'en': 'grade', 'nl': 'klas', 'uk': 'клас', 'bg': 'клас', 'de': 'Klasse', 'fr': 'classe', 'it': 'classe',
       'el': 'τάξη', 'es': 'grado', 'pt': 'ano', 'ru': 'класс', 'tr': 'sınıf',
       'ja': '年生',
     }, lang);
@@ -92,12 +92,12 @@ class ExamHelperCard extends StatelessWidget {
     final dateStr = '${e.date.day} ${months[e.date.month - 1]}';
     final rel = n <= 0
         ? _t(const {
-            'en': 'today', 'bg': 'днес', 'de': 'heute', 'fr': "aujourd'hui",
+            'en': 'today', 'nl': 'vandaag', 'uk': 'сьогодні', 'bg': 'днес', 'de': 'heute', 'fr': "aujourd'hui",
             'it': 'oggi', 'el': 'σήμερα', 'es': 'hoy', 'pt': 'hoje',
             'ru': 'сегодня', 'tr': 'bugün', 'ja': '今日',
           }, lang)
         : _t(const {
-            'en': 'in {n} days', 'bg': 'след {n} дни', 'de': 'in {n} Tagen',
+            'en': 'in {n} days', 'nl': 'over {n} dagen', 'uk': 'через {n} днів', 'bg': 'след {n} дни', 'de': 'in {n} Tagen',
             'fr': 'dans {n} jours', 'it': 'tra {n} giorni', 'el': 'σε {n} μέρες',
             'es': 'en {n} días', 'pt': 'em {n} dias', 'ru': 'через {n} дн.',
             'tr': '{n} gün sonra', 'ja': 'あと{n}日',
@@ -122,7 +122,7 @@ class ExamHelperCard extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 6),
                   child: Text(
                     _t(const {
-                      'en': 'optional', 'bg': 'по избор', 'de': 'optional',
+                      'en': 'optional', 'nl': 'optioneel', 'uk': 'необов\'язково', 'bg': 'по избор', 'de': 'optional',
                       'fr': 'au choix', 'it': 'facoltativo', 'el': 'προαιρετικό',
                       'es': 'opcional', 'pt': 'opcional', 'ru': 'по выбору',
                       'tr': 'seçmeli', 'ja': '選択',
@@ -150,7 +150,7 @@ class ExamHelperCard extends StatelessWidget {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap),
               icon: const Icon(Icons.add_task, size: 16),
               label: Text(_t(const {
-                'en': 'Create study task', 'bg': 'Създай учебна задача',
+                'en': 'Create study task', 'nl': 'Studietaak aanmaken', 'uk': 'Створити навчальне завдання', 'bg': 'Създай учебна задача',
                 'de': 'Lernaufgabe erstellen', 'fr': 'Créer une tâche de révision',
                 'it': 'Crea attività di studio', 'el': 'Δημιουργία εργασίας μελέτης',
                 'es': 'Crear tarea de estudio', 'pt': 'Criar tarefa de estudo',
@@ -186,7 +186,7 @@ class ExamHelperCard extends StatelessWidget {
     final end = windowEnd.isBefore(examDay) ? windowEnd : examDay;
     final months = _months[lang] ?? _months['en']!;
     final sessionWord = _t(const {
-      'en': 'Study session', 'bg': 'Учебна сесия', 'de': 'Lerneinheit',
+      'en': 'Study session', 'nl': 'Studiesessie', 'uk': 'Навчальна сесія', 'bg': 'Учебна сесия', 'de': 'Lerneinheit',
       'fr': 'Session de révision', 'it': 'Sessione di studio', 'el': 'Μελέτη',
       'es': 'Sesión de estudio', 'pt': 'Sessão de estudo', 'ru': 'Учебная сессия',
       'tr': 'Çalışma', 'ja': '学習セッション',
@@ -201,7 +201,7 @@ class ExamHelperCard extends StatelessWidget {
     }
 
     final prep = _t(const {
-      'en': 'Prepare for', 'bg': 'Подготовка за', 'de': 'Vorbereitung auf',
+      'en': 'Prepare for', 'nl': 'Voorbereiden op', 'uk': 'Підготуватися до', 'bg': 'Подготовка за', 'de': 'Vorbereitung auf',
       'fr': 'Préparer', 'it': 'Preparazione per', 'el': 'Προετοιμασία για',
       'es': 'Preparación para', 'pt': 'Preparação para', 'ru': 'Подготовка к',
       'tr': 'Hazırlık', 'ja': '準備',
@@ -223,7 +223,7 @@ class ExamHelperCard extends StatelessWidget {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(_t(const {
-          'en': 'Study task created', 'bg': 'Учебната задача е създадена',
+          'en': 'Study task created', 'nl': 'Studietaak aangemaakt', 'uk': 'Навчальне завдання створено', 'bg': 'Учебната задача е създадена',
           'de': 'Lernaufgabe erstellt', 'fr': 'Tâche de révision créée',
           'it': 'Attività di studio creata', 'el': 'Δημιουργήθηκε εργασία μελέτης',
           'es': 'Tarea de estudio creada', 'pt': 'Tarefa de estudo criada',
@@ -242,7 +242,7 @@ class ExamHelperCard extends StatelessWidget {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setD) => AlertDialog(
           title: Text(_t(const {
-            'en': 'How many days to prepare?', 'bg': 'Колко дни подготовка?',
+            'en': 'How many days to prepare?', 'nl': 'Hoeveel dagen om je voor te bereiden?', 'uk': 'Скільки днів на підготовку?', 'bg': 'Колко дни подготовка?',
             'de': 'Wie viele Tage vorbereiten?', 'fr': 'Combien de jours ?',
             'it': 'Quanti giorni di preparazione?', 'el': 'Πόσες μέρες προετοιμασία;',
             'es': '¿Cuántos días de preparación?', 'pt': 'Quantos dias de preparação?',
@@ -269,7 +269,7 @@ class ExamHelperCard extends StatelessWidget {
             TextButton(
               onPressed: () => Navigator.pop(ctx),
               child: Text(_t(const {
-                'en': 'Cancel', 'bg': 'Отказ', 'de': 'Abbrechen', 'fr': 'Annuler',
+                'en': 'Cancel', 'nl': 'Annuleren', 'uk': 'Скасувати', 'bg': 'Отказ', 'de': 'Abbrechen', 'fr': 'Annuler',
                 'it': 'Annulla', 'el': 'Άκυρο', 'es': 'Cancelar', 'pt': 'Cancelar',
                 'ru': 'Отмена', 'tr': 'İptal', 'ja': 'キャンセル',
               }, lang)),
@@ -277,7 +277,7 @@ class ExamHelperCard extends StatelessWidget {
             FilledButton(
               onPressed: () => Navigator.pop(ctx, days),
               child: Text(_t(const {
-                'en': 'Create', 'bg': 'Създай', 'de': 'Erstellen', 'fr': 'Créer',
+                'en': 'Create', 'nl': 'Aanmaken', 'uk': 'Створити', 'bg': 'Създай', 'de': 'Erstellen', 'fr': 'Créer',
                 'it': 'Crea', 'el': 'Δημιουργία', 'es': 'Crear', 'pt': 'Criar',
                 'ru': 'Создать', 'tr': 'Oluştur', 'ja': '作成',
               }, lang)),
@@ -289,7 +289,7 @@ class ExamHelperCard extends StatelessWidget {
   }
 
   static const Map<String, List<String>> _months = {
-    'en': ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    'en': ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], 'nl': ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'], 'uk': ['січ', 'лют', 'бер', 'квіт', 'трав', 'черв', 'лип', 'серп', 'вер', 'жовт', 'лист', 'груд'],
     'bg': ['яну','фев','мар','апр','май','юни','юли','авг','сеп','окт','ное','дек'],
     'de': ['Jan','Feb','März','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'],
     'fr': ['janv','févr','mars','avr','mai','juin','juil','août','sept','oct','nov','déc'],

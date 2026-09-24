@@ -28,43 +28,43 @@ class AboutSection extends StatelessWidget {
     String tr(Map<String, String> m) => m[lang] ?? m['en']!;
 
     const sectionTitle = {
-      'en': 'About', 'bg': 'За приложението', 'de': 'Über die App',
+      'en': 'About', 'nl': 'Over', 'uk': 'Про застосунок', 'bg': 'За приложението', 'de': 'Über die App',
       'fr': 'À propos', 'it': 'Informazioni', 'el': 'Σχετικά',
       'es': 'Acerca de', 'pt': 'Sobre', 'ru': 'О приложении',
       'tr': 'Hakkında', 'ja': 'アプリについて',
     };
     const versionWord = {
-      'en': 'Version', 'bg': 'Версия', 'de': 'Version', 'fr': 'Version',
+      'en': 'Version', 'nl': 'Versie', 'uk': 'Версія', 'bg': 'Версия', 'de': 'Version', 'fr': 'Version',
       'it': 'Versione', 'el': 'Έκδοση', 'es': 'Versión', 'pt': 'Versão',
       'ru': 'Версия', 'tr': 'Sürüm', 'ja': 'バージョン',
     };
     const howToTitle = {
-      'en': 'How to use', 'bg': 'Как се ползва', 'de': 'Anleitung',
+      'en': 'How to use', 'nl': 'Hoe te gebruiken', 'uk': 'Як користуватися', 'bg': 'Как се ползва', 'de': 'Anleitung',
       'fr': 'Comment ça marche', 'it': 'Come si usa', 'el': 'Πώς λειτουργεί',
       'es': 'Cómo se usa', 'pt': 'Como usar', 'ru': 'Как пользоваться',
       'tr': 'Nasıl kullanılır', 'ja': '使い方',
     };
     const howToSubtitle = {
-      'en': 'Quick guide', 'bg': 'Кратко ръководство', 'de': 'Kurzanleitung',
+      'en': 'Quick guide', 'nl': 'Snelgids', 'uk': 'Короткий гід', 'bg': 'Кратко ръководство', 'de': 'Kurzanleitung',
       'fr': 'Guide rapide', 'it': 'Guida rapida', 'el': 'Σύντομος οδηγός',
       'es': 'Guía rápida', 'pt': 'Guia rápido', 'ru': 'Краткое руководство',
       'tr': 'Hızlı kılavuz', 'ja': 'クイックガイド',
     };
     const privacyLabel = {
-      'en': 'Privacy Policy', 'bg': 'Политика за поверителност',
+      'en': 'Privacy Policy', 'nl': 'Privacybeleid', 'uk': 'Політика конфіденційності', 'bg': 'Политика за поверителност',
       'de': 'Datenschutz', 'fr': 'Confidentialité', 'it': 'Privacy',
       'el': 'Απόρρητο', 'es': 'Privacidad', 'pt': 'Privacidade',
       'ru': 'Конфиденциальность', 'tr': 'Gizlilik', 'ja': 'プライバシー',
     };
     const termsLabel = {
-      'en': 'Terms of Use', 'bg': 'Условия за ползване',
+      'en': 'Terms of Use', 'nl': 'Gebruiksvoorwaarden', 'uk': 'Умови використання', 'bg': 'Условия за ползване',
       'de': 'Nutzungsbedingungen', 'fr': "Conditions d'utilisation",
       'it': "Termini d'uso", 'el': 'Όροι χρήσης', 'es': 'Términos de uso',
       'pt': 'Termos de uso', 'ru': 'Условия использования',
       'tr': 'Kullanım koşulları', 'ja': '利用規約',
     };
     const nameDaysLicense = {
-      'en': 'Name days: data from Wikipedia (CC BY-SA 4.0)',
+      'en': 'Name days: data from Wikipedia (CC BY-SA 4.0)', 'nl': 'Naamdagen: gegevens van Wikipedia (CC BY-SA 4.0)', 'uk': 'Іменини: дані з Wikipedia (CC BY-SA 4.0)',
       'bg': 'Именни дни: данни от Уикипедия (CC BY-SA 4.0)',
       'de': 'Namenstage: Daten aus Wikipedia (CC BY-SA 4.0)',
       'fr': 'Fêtes des prénoms : données de Wikipédia (CC BY-SA 4.0)',

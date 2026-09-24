@@ -281,7 +281,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   // Етикет за синтетичния „Училище" чип (11 езика).
   static const Map<String, String> _schoolLabel = {
-    'en': 'School', 'bg': 'Училище', 'de': 'Schule', 'fr': 'École',
+    'en': 'School', 'nl': 'School', 'uk': 'Школа', 'bg': 'Училище', 'de': 'Schule', 'fr': 'École',
     'it': 'Scuola', 'el': 'Σχολείο', 'es': 'Escuela', 'pt': 'Escola',
     'ru': 'Школа', 'tr': 'Okul', 'ja': '学校',
   };
@@ -519,7 +519,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     String monthLabel(DateTime day) {
       const months = {
-        'en': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        'en': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'], 'nl': ['Januari', 'Februari', 'Maart', 'April', 'Mei', 'Juni', 'Juli', 'Augustus', 'September', 'Oktober', 'November', 'December'], 'uk': ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'],
         'bg': ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'],
         'de': ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
         'fr': ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
@@ -537,7 +537,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     String weekdayLabel(int weekday) {
       const weekdays = {
-        'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], 'nl': ['ma', 'di', 'wo', 'do', 'vr', 'za', 'zo'], 'uk': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
         'bg': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
         'de': ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
         'fr': ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
@@ -1532,7 +1532,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     String monthYearLabel(DateTime day) {
       const months = {
-        'en': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        'en': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'], 'nl': ['Januari', 'Februari', 'Maart', 'April', 'Mei', 'Juni', 'Juli', 'Augustus', 'September', 'Oktober', 'November', 'December'], 'uk': ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'],
         'bg': ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'],
         'de': ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
         'fr': ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
@@ -1550,7 +1550,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     String weekdayLabel(int weekday) {
       const weekdays = {
-        'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], 'nl': ['ma', 'di', 'wo', 'do', 'vr', 'za', 'zo'], 'uk': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
         'bg': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
         'de': ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
         'fr': ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
@@ -2079,7 +2079,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     final lang = LanguageScope.of(context).locale.languageCode;
     const label = {
-      'en': 'Name day',
+      'en': 'Name day', 'nl': 'Naamdag', 'uk': 'Іменини',
       'bg': 'Имен ден',
       'de': 'Namenstag',
       'fr': 'Fête du prénom',
@@ -2097,7 +2097,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ? ContactNameIndex().contactsForNames(nameDay.names)
         : const <ContactMatch>[];
     const fromContacts = {
-      'en': 'From your contacts:', 'bg': 'От твоите контакти:',
+      'en': 'From your contacts:', 'nl': 'Uit je contacten:', 'uk': 'З ваших контактів:', 'bg': 'От твоите контакти:',
       'de': 'Aus deinen Kontakten:', 'fr': 'Parmi tes contacts :',
       'it': 'Dai tuoi contatti:', 'el': 'Από τις επαφές σου:',
       'es': 'De tus contactos:', 'pt': 'Dos teus contactos:',
@@ -2190,7 +2190,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   /// Готовата честитка за имен ден (локализирана).
   String _wishText(String name, String lang) {
     const wishTpl = {
-      'en': 'Happy name day, {name}! 🎉', 'bg': 'Честит имен ден, {name}! 🎉',
+      'en': 'Happy name day, {name}! 🎉', 'nl': 'Fijne naamdag, {name}! 🎉', 'uk': 'З іменинами, {name}! 🎉', 'bg': 'Честит имен ден, {name}! 🎉',
       'de': 'Alles Gute zum Namenstag, {name}! 🎉',
       'fr': 'Bonne fête, {name} ! 🎉', 'it': 'Buon onomastico, {name}! 🎉',
       'el': 'Χρόνια πολλά, {name}! 🎉', 'es': '¡Feliz santo, {name}! 🎉',
@@ -2207,7 +2207,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       List<ContactMatch> contacts, String feast, String lang) {
     final theme = Theme.of(context);
     const closeLbl = {
-      'en': 'Close', 'bg': 'Затвори', 'de': 'Schließen', 'fr': 'Fermer',
+      'en': 'Close', 'nl': 'Sluiten', 'uk': 'Закрити', 'bg': 'Затвори', 'de': 'Schließen', 'fr': 'Fermer',
       'it': 'Chiudi', 'el': 'Κλείσιμο', 'es': 'Cerrar', 'pt': 'Fechar',
       'ru': 'Закрыть', 'tr': 'Kapat', 'ja': '閉じる',
     };
@@ -2285,28 +2285,28 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final feast = NameDaysService().forDate(_selectedDay)?.feast ?? '';
 
     const callLbl = {
-      'en': 'Call', 'bg': 'Обаждане', 'de': 'Anrufen', 'fr': 'Appeler',
+      'en': 'Call', 'nl': 'Bellen', 'uk': 'Подзвонити', 'bg': 'Обаждане', 'de': 'Anrufen', 'fr': 'Appeler',
       'it': 'Chiama', 'el': 'Κλήση', 'es': 'Llamar', 'pt': 'Ligar',
       'ru': 'Позвонить', 'tr': 'Ara', 'ja': '電話',
     };
     const smsLbl = {
-      'en': 'Message', 'bg': 'Съобщение', 'de': 'Nachricht', 'fr': 'SMS',
+      'en': 'Message', 'nl': 'Bericht', 'uk': 'Повідомлення', 'bg': 'Съобщение', 'de': 'Nachricht', 'fr': 'SMS',
       'it': 'Messaggio', 'el': 'Μήνυμα', 'es': 'Mensaje', 'pt': 'Mensagem',
       'ru': 'Сообщение', 'tr': 'Mesaj', 'ja': 'メッセージ',
     };
     const cardLbl = {
-      'en': 'Greeting card', 'bg': 'Картичка', 'de': 'Grußkarte',
+      'en': 'Greeting card', 'nl': 'Wenskaart', 'uk': 'Вітальна листівка', 'bg': 'Картичка', 'de': 'Grußkarte',
       'fr': 'Carte', 'it': 'Cartolina', 'el': 'Κάρτα', 'es': 'Tarjeta',
       'pt': 'Cartão', 'ru': 'Открытка', 'tr': 'Kart', 'ja': 'カード',
     };
     const shareLbl = {
-      'en': 'Share wish', 'bg': 'Сподели честитка', 'de': 'Glückwunsch teilen',
+      'en': 'Share wish', 'nl': 'Wens delen', 'uk': 'Поділитися побажанням', 'bg': 'Сподели честитка', 'de': 'Glückwunsch teilen',
       'fr': 'Partager', 'it': 'Condividi', 'el': 'Κοινοποίηση',
       'es': 'Compartir', 'pt': 'Partilhar', 'ru': 'Поделиться',
       'tr': 'Paylaş', 'ja': '共有',
     };
     const giftLbl = {
-      'en': 'Send flowers / gift', 'bg': 'Изпрати цветя/подарък',
+      'en': 'Send flowers / gift', 'nl': 'Bloemen / cadeau sturen', 'uk': 'Надіслати квіти / подарунок', 'bg': 'Изпрати цветя/подарък',
       'de': 'Blumen / Geschenk senden', 'fr': 'Envoyer fleurs / cadeau',
       'it': 'Invia fiori / regalo', 'el': 'Στείλε λουλούδια / δώρο',
       'es': 'Enviar flores / regalo', 'pt': 'Enviar flores / presente',
@@ -2314,7 +2314,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       'ja': '花・ギフトを贈る',
     };
     const noPhoneLbl = {
-      'en': 'No phone number', 'bg': 'Няма телефонен номер',
+      'en': 'No phone number', 'nl': 'Geen telefoonnummer', 'uk': 'Немає номера телефону', 'bg': 'Няма телефонен номер',
       'de': 'Keine Telefonnummer', 'fr': 'Pas de numéro',
       'it': 'Nessun numero', 'el': 'Χωρίς αριθμό', 'es': 'Sin número',
       'pt': 'Sem número', 'ru': 'Нет номера', 'tr': 'Numara yok',
@@ -2438,7 +2438,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   void _toastLaunchFail() {
     final lang = LanguageScope.of(context).locale.languageCode;
     const failLbl = {
-      'en': 'Could not open the app', 'bg': 'Приложението не може да се отвори',
+      'en': 'Could not open the app', 'nl': 'Kan de app niet openen', 'uk': 'Не вдалося відкрити застосунок', 'bg': 'Приложението не може да се отвори',
       'de': 'App konnte nicht geöffnet werden', 'fr': "Impossible d'ouvrir",
       'it': "Impossibile aprire l'app", 'el': 'Δεν άνοιξε η εφαρμογή',
       'es': 'No se pudo abrir la app', 'pt': 'Não foi possível abrir',

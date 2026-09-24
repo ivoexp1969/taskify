@@ -368,13 +368,13 @@ class StudyTaskDialog {
   static String _tr(Map<String, String> m, String lang) => m[lang] ?? m['en']!;
 
   static String _subjectLabel(String lang) => _tr(const {
-        'en': 'Subject', 'bg': 'Предмет', 'de': 'Fach', 'fr': 'Matière',
+        'en': 'Subject', 'nl': 'Vak', 'uk': 'Предмет', 'bg': 'Предмет', 'de': 'Fach', 'fr': 'Matière',
         'it': 'Materia', 'el': 'Μάθημα', 'es': 'Asignatura', 'pt': 'Disciplina',
         'ru': 'Предмет', 'tr': 'Ders', 'ja': '科目',
       }, lang);
 
   static String _noSubjects(String lang) => _tr(const {
-        'en': 'Add a category first to use as a subject.',
+        'en': 'Add a category first to use as a subject.', 'nl': 'Voeg eerst een categorie toe om als vak te gebruiken.', 'uk': 'Спершу додайте категорію, щоб використати як предмет.',
         'bg': 'Добави първо категория, която да ползваш като предмет.',
         'de': 'Füge zuerst eine Kategorie als Fach hinzu.',
         'fr': "Ajoute d'abord une catégorie comme matière.",
@@ -388,13 +388,13 @@ class StudyTaskDialog {
       }, lang);
 
   static String _dueLabel(String lang) => _tr(const {
-        'en': 'Deadline', 'bg': 'Краен срок', 'de': 'Frist', 'fr': 'Échéance',
+        'en': 'Deadline', 'nl': 'Deadline', 'uk': 'Дедлайн', 'bg': 'Краен срок', 'de': 'Frist', 'fr': 'Échéance',
         'it': 'Scadenza', 'el': 'Προθεσμία', 'es': 'Fecha límite',
         'pt': 'Prazo', 'ru': 'Срок', 'tr': 'Son tarih', 'ja': '締切',
       }, lang);
 
   static String _complexityLabel(String lang) => _tr(const {
-        'en': 'Complexity', 'bg': 'Сложност', 'de': 'Komplexität',
+        'en': 'Complexity', 'nl': 'Complexiteit', 'uk': 'Складність', 'bg': 'Сложност', 'de': 'Komplexität',
         'fr': 'Complexité', 'it': 'Complessità', 'el': 'Δυσκολία',
         'es': 'Complejidad', 'pt': 'Complexidade', 'ru': 'Сложность',
         'tr': 'Zorluk', 'ja': '難易度',
@@ -402,17 +402,17 @@ class StudyTaskDialog {
 
   static String _complexityName(String lang, int c) {
     const easy = {
-      'en': 'Simple', 'bg': 'Лесна', 'de': 'Einfach', 'fr': 'Simple',
+      'en': 'Simple', 'nl': 'Eenvoudig', 'uk': 'Просте', 'bg': 'Лесна', 'de': 'Einfach', 'fr': 'Simple',
       'it': 'Semplice', 'el': 'Απλή', 'es': 'Simple', 'pt': 'Simples',
       'ru': 'Простая', 'tr': 'Basit', 'ja': '簡単',
     };
     const medium = {
-      'en': 'Medium', 'bg': 'Средна', 'de': 'Mittel', 'fr': 'Moyenne',
+      'en': 'Medium', 'nl': 'Gemiddeld', 'uk': 'Середній', 'bg': 'Средна', 'de': 'Mittel', 'fr': 'Moyenne',
       'it': 'Media', 'el': 'Μέτρια', 'es': 'Media', 'pt': 'Média',
       'ru': 'Средняя', 'tr': 'Orta', 'ja': '普通',
     };
     const hard = {
-      'en': 'Complex', 'bg': 'Сложна', 'de': 'Komplex', 'fr': 'Complexe',
+      'en': 'Complex', 'nl': 'Complex', 'uk': 'Складне', 'bg': 'Сложна', 'de': 'Komplex', 'fr': 'Complexe',
       'it': 'Complessa', 'el': 'Σύνθετη', 'es': 'Compleja', 'pt': 'Complexa',
       'ru': 'Сложная', 'tr': 'Karmaşık', 'ja': '複雑',
     };
@@ -427,7 +427,7 @@ class StudyTaskDialog {
   }
 
   static String _autoBreakHint(String lang) => _tr(const {
-        'en': 'Subtasks will be created automatically and scheduled toward the deadline.',
+        'en': 'Subtasks will be created automatically and scheduled toward the deadline.', 'nl': 'Subtaken worden automatisch aangemaakt en ingepland richting de deadline.', 'uk': 'Підзавдання створяться автоматично та розподіляться до дедлайну.',
         'bg': 'Подзадачите ще се създадат автоматично и разпределят до срока.',
         'de': 'Teilaufgaben werden automatisch erstellt und bis zur Frist verteilt.',
         'fr': 'Des sous-tâches seront créées automatiquement jusqu\'à l\'échéance.',

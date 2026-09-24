@@ -84,75 +84,75 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
   static String _t(Map<String, String> m, String lang) => m[lang] ?? m['en']!;
 
   static const _title = {
-    'en': 'Student mode', 'bg': 'Режим Студент', 'de': 'Studenten-Modus',
+    'en': 'Student mode', 'nl': 'Studentmodus', 'uk': 'Студентський режим', 'bg': 'Режим Студент', 'de': 'Studenten-Modus',
     'fr': 'Mode Étudiant', 'it': 'Modalità Studente', 'el': 'Λειτουργία Φοιτητή',
     'es': 'Modo Estudiante', 'pt': 'Modo Estudante', 'ru': 'Режим Студент',
     'tr': 'Öğrenci modu', 'ja': '大学生モード',
   };
   static const _uniLabel = {
-    'en': 'University', 'bg': 'ВУЗ', 'de': 'Hochschule', 'fr': 'Université',
+    'en': 'University', 'nl': 'Universiteit', 'uk': 'Університет', 'bg': 'ВУЗ', 'de': 'Hochschule', 'fr': 'Université',
     'it': 'Università', 'el': 'Πανεπιστήμιο', 'es': 'Universidad',
     'pt': 'Universidade', 'ru': 'Вуз', 'tr': 'Üniversite', 'ja': '大学',
   };
   static const _uniNameLabel = {
-    'en': 'University name', 'bg': 'Име на университета', 'de': 'Name der Hochschule',
+    'en': 'University name', 'nl': 'Naam universiteit', 'uk': 'Назва університету', 'bg': 'Име на университета', 'de': 'Name der Hochschule',
     'fr': "Nom de l'université", 'it': 'Nome università', 'el': 'Όνομα πανεπιστημίου',
     'es': 'Nombre de la universidad', 'pt': 'Nome da universidade',
     'ru': 'Название вуза', 'tr': 'Üniversite adı', 'ja': '大学名',
   };
   static const _facultyLabel = {
-    'en': 'Faculty (optional)', 'bg': 'Факултет (по избор)', 'de': 'Fakultät (optional)',
+    'en': 'Faculty (optional)', 'nl': 'Faculteit (optioneel)', 'uk': 'Факультет (необов\'язково)', 'bg': 'Факултет (по избор)', 'de': 'Fakultät (optional)',
     'fr': 'Faculté (facultatif)', 'it': 'Facoltà (facoltativo)',
     'el': 'Σχολή (προαιρετικό)', 'es': 'Facultad (opcional)',
     'pt': 'Faculdade (opcional)', 'ru': 'Факультет (необязательно)',
     'tr': 'Fakülte (isteğe bağlı)', 'ja': '学部（任意）',
   };
   static const _programLabel = {
-    'en': 'Program', 'bg': 'Специалност', 'de': 'Studiengang', 'fr': 'Filière',
+    'en': 'Program', 'nl': 'Programma', 'uk': 'Програма', 'bg': 'Специалност', 'de': 'Studiengang', 'fr': 'Filière',
     'it': 'Corso di laurea', 'el': 'Ειδικότητα', 'es': 'Especialidad',
     'pt': 'Curso', 'ru': 'Специальность', 'tr': 'Bölüm', 'ja': '専攻',
   };
   static const _programOther = {
-    'en': 'Other — type it', 'bg': 'Друга — въведи ръчно', 'de': 'Andere — eingeben',
+    'en': 'Other — type it', 'nl': 'Overige — typ het', 'uk': 'Інше — введіть вручну', 'bg': 'Друга — въведи ръчно', 'de': 'Andere — eingeben',
     'fr': 'Autre — saisir', 'it': 'Altro — inserisci', 'el': 'Άλλο — πληκτρολόγησε',
     'es': 'Otra — escríbela', 'pt': 'Outra — escreve', 'ru': 'Другая — введите',
     'tr': 'Diğer — yaz', 'ja': 'その他 — 入力',
   };
   static const _yearLabel = {
-    'en': 'Year', 'bg': 'Курс', 'de': 'Studienjahr', 'fr': 'Année',
+    'en': 'Year', 'nl': 'Jaar', 'uk': 'Рік', 'bg': 'Курс', 'de': 'Studienjahr', 'fr': 'Année',
     'it': 'Anno', 'el': 'Έτος', 'es': 'Curso', 'pt': 'Ano', 'ru': 'Курс',
     'tr': 'Sınıf', 'ja': '学年',
   };
   static const _formLabel = {
-    'en': 'Study form', 'bg': 'Форма на обучение', 'de': 'Studienform',
+    'en': 'Study form', 'nl': 'Studievorm', 'uk': 'Форма навчання', 'bg': 'Форма на обучение', 'de': 'Studienform',
     'fr': "Forme d'études", 'it': 'Forma di studio', 'el': 'Μορφή σπουδών',
     'es': 'Modalidad', 'pt': 'Forma de estudo', 'ru': 'Форма обучения',
     'tr': 'Öğrenim şekli', 'ja': '就学形態',
   };
   static const _formRegular = {
-    'en': 'Full-time', 'bg': 'Редовно', 'de': 'Vollzeit', 'fr': 'À temps plein',
+    'en': 'Full-time', 'nl': 'Voltijd', 'uk': 'Денна форма', 'bg': 'Редовно', 'de': 'Vollzeit', 'fr': 'À temps plein',
     'it': 'A tempo pieno', 'el': 'Πλήρης', 'es': 'Presencial', 'pt': 'Tempo integral',
     'ru': 'Очно', 'tr': 'Örgün', 'ja': '通学',
   };
   static const _formPartTime = {
-    'en': 'Part-time', 'bg': 'Задочно', 'de': 'Teilzeit', 'fr': 'À temps partiel',
+    'en': 'Part-time', 'nl': 'Deeltijd', 'uk': 'Заочна форма', 'bg': 'Задочно', 'de': 'Teilzeit', 'fr': 'À temps partiel',
     'it': 'Part-time', 'el': 'Μερική', 'es': 'Semipresencial', 'pt': 'Tempo parcial',
     'ru': 'Заочно', 'tr': 'İkinci öğretim', 'ja': '夜間',
   };
   static const _formDistance = {
-    'en': 'Distance', 'bg': 'Дистанционно', 'de': 'Fernstudium', 'fr': 'À distance',
+    'en': 'Distance', 'nl': 'Afstand', 'uk': 'Відстань', 'bg': 'Дистанционно', 'de': 'Fernstudium', 'fr': 'À distance',
     'it': 'A distanza', 'el': 'Εξ αποστάσεως', 'es': 'A distancia', 'pt': 'À distância',
     'ru': 'Дистанционно', 'tr': 'Uzaktan', 'ja': '通信',
   };
   // Контекстно: студентска група (не спортна/друга) → ключ student_group_number.
   static const _groupLabel = {
-    'en': 'Group (optional)', 'bg': 'Група (по избор)', 'de': 'Gruppe (optional)',
+    'en': 'Group (optional)', 'nl': 'Groep (optioneel)', 'uk': 'Група (необов\'язково)', 'bg': 'Група (по избор)', 'de': 'Gruppe (optional)',
     'fr': 'Groupe (facultatif)', 'it': 'Gruppo (facoltativo)',
     'el': 'Ομάδα (προαιρετικό)', 'es': 'Grupo (opcional)', 'pt': 'Grupo (opcional)',
     'ru': 'Группа (необязательно)', 'tr': 'Grup (isteğe bağlı)', 'ja': 'グループ（任意）',
   };
   static const _groupHint = {
-    'en': 'Your student group (see it in the academic calendar or the schedule).',
+    'en': 'Your student group (see it in the academic calendar or the schedule).', 'nl': 'Je studiegroep (te vinden in de academische kalender of het rooster).', 'uk': 'Ваша студентська група (див. в академічному календарі або розкладі).',
     'bg': 'Твоята студентска група (виж я в академичния календар или разписанието на ВУЗ-а).',
     'de': 'Deine Studiengruppe (im Studienkalender oder Stundenplan).',
     'fr': 'Ton groupe étudiant (dans le calendrier ou l\'emploi du temps).',
@@ -165,13 +165,13 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
     'ja': 'あなたの学生グループ（学年暦や時間割で確認）。',
   };
   static const _changeGroupTitle = {
-    'en': 'Group changed', 'bg': 'Смяна на група', 'de': 'Gruppe geändert',
+    'en': 'Group changed', 'nl': 'Groep gewijzigd', 'uk': 'Групу змінено', 'bg': 'Смяна на група', 'de': 'Gruppe geändert',
     'fr': 'Groupe modifié', 'it': 'Gruppo cambiato', 'el': 'Άλλαξε η ομάδα',
     'es': 'Grupo cambiado', 'pt': 'Grupo alterado', 'ru': 'Группа изменена',
     'tr': 'Grup değişti', 'ja': 'グループを変更',
   };
   static const _changeGroupBody = {
-    'en': 'Delete the current schedule and enter a new one?',
+    'en': 'Delete the current schedule and enter a new one?', 'nl': 'Het huidige rooster verwijderen en een nieuw invoeren?', 'uk': 'Видалити поточний розклад і ввести новий?',
     'bg': 'Да изтрия ли разписанието и да въведеш ново?',
     'de': 'Aktuellen Stundenplan löschen und neu eingeben?',
     'fr': 'Supprimer l\'emploi du temps actuel et en saisir un nouveau ?',
@@ -184,34 +184,34 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen> {
     'ja': '現在の時間割を削除して新しく入力しますか？',
   };
   static const _keepSchedule = {
-    'en': 'Keep it', 'bg': 'Запази', 'de': 'Behalten', 'fr': 'Garder',
+    'en': 'Keep it', 'nl': 'Behouden', 'uk': 'Залишити', 'bg': 'Запази', 'de': 'Behalten', 'fr': 'Garder',
     'it': 'Mantieni', 'el': 'Διατήρηση', 'es': 'Mantener', 'pt': 'Manter',
     'ru': 'Оставить', 'tr': 'Koru', 'ja': '保持',
   };
   static const _deleteSchedule = {
-    'en': 'Delete schedule', 'bg': 'Изтрий разписанието', 'de': 'Löschen',
+    'en': 'Delete schedule', 'nl': 'Rooster verwijderen', 'uk': 'Видалити розклад', 'bg': 'Изтрий разписанието', 'de': 'Löschen',
     'fr': 'Supprimer', 'it': 'Elimina', 'el': 'Διαγραφή', 'es': 'Eliminar',
     'pt': 'Eliminar', 'ru': 'Удалить', 'tr': 'Sil', 'ja': '削除',
   };
   static const _pickHint = {
-    'en': 'Tap to choose', 'bg': 'Докосни, за да избереш', 'de': 'Zum Wählen tippen',
+    'en': 'Tap to choose', 'nl': 'Tik om te kiezen', 'uk': 'Торкніться, щоб вибрати', 'bg': 'Докосни, за да избереш', 'de': 'Zum Wählen tippen',
     'fr': 'Touche pour choisir', 'it': 'Tocca per scegliere', 'el': 'Πάτησε για επιλογή',
     'es': 'Toca para elegir', 'pt': 'Toca para escolher', 'ru': 'Нажми, чтобы выбрать',
     'tr': 'Seçmek için dokun', 'ja': 'タップして選択',
   };
   static const _search = {
-    'en': 'Search…', 'bg': 'Търси…', 'de': 'Suchen…', 'fr': 'Rechercher…',
+    'en': 'Search…', 'nl': 'Zoeken…', 'uk': 'Пошук…', 'bg': 'Търси…', 'de': 'Suchen…', 'fr': 'Rechercher…',
     'it': 'Cerca…', 'el': 'Αναζήτηση…', 'es': 'Buscar…', 'pt': 'Pesquisar…',
     'ru': 'Поиск…', 'tr': 'Ara…', 'ja': '検索…',
   };
   static const _saveLabel = {
-    'en': 'Save & turn on', 'bg': 'Запази и включи', 'de': 'Speichern & an',
+    'en': 'Save & turn on', 'nl': 'Opslaan & inschakelen', 'uk': 'Зберегти й увімкнути', 'bg': 'Запази и включи', 'de': 'Speichern & an',
     'fr': 'Enregistrer & activer', 'it': 'Salva e attiva', 'el': 'Αποθήκευση & ενεργ.',
     'es': 'Guardar y activar', 'pt': 'Guardar e ativar', 'ru': 'Сохранить и вкл.',
     'tr': 'Kaydet ve aç', 'ja': '保存してオン',
   };
   static const _turnOff = {
-    'en': 'Turn off', 'bg': 'Изключи', 'de': 'Ausschalten', 'fr': 'Désactiver',
+    'en': 'Turn off', 'nl': 'Uitschakelen', 'uk': 'Вимкнути', 'bg': 'Изключи', 'de': 'Ausschalten', 'fr': 'Désactiver',
     'it': 'Disattiva', 'el': 'Απενεργοποίηση', 'es': 'Desactivar', 'pt': 'Desativar',
     'ru': 'Выключить', 'tr': 'Kapat', 'ja': 'オフにする',
   };

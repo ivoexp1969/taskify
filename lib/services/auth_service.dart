@@ -246,7 +246,7 @@ class AuthService {
 
   static const Map<String, Map<String, String>> _authErrors = {
     'verify-email': {
-      'en': 'Please verify your email address',
+      'en': 'Please verify your email address', 'nl': 'Verifieer je e-mailadres', 'uk': 'Підтвердьте свою адресу пошти',
       'bg': 'Моля, потвърдете имейла си',
       'de': 'Bitte bestätigen Sie Ihre E-Mail-Adresse',
       'fr': 'Veuillez vérifier votre adresse e-mail',
@@ -258,7 +258,7 @@ class AuthService {
       'tr': 'Lütfen e-posta adresinizi doğrulayın', 'ja': 'メールアドレスを認証してください',
     },
     'email-already-in-use': {
-      'en': 'This email is already registered',
+      'en': 'This email is already registered', 'nl': 'Dit e-mailadres is al geregistreerd', 'uk': 'Ця пошта вже зареєстрована',
       'bg': 'Този имейл вече е регистриран',
       'de': 'Diese E-Mail ist bereits registriert',
       'fr': 'Cet e-mail est déjà enregistré',
@@ -270,7 +270,7 @@ class AuthService {
       'tr': 'Bu e-posta zaten kayıtlı', 'ja': 'このメールはすでに登録されています',
     },
     'invalid-email': {
-      'en': 'Invalid email address',
+      'en': 'Invalid email address', 'nl': 'Ongeldig e-mailadres', 'uk': 'Недійсна адреса пошти',
       'bg': 'Невалиден имейл адрес',
       'de': 'Ungültige E-Mail-Adresse',
       'fr': 'Adresse e-mail invalide',
@@ -282,7 +282,7 @@ class AuthService {
       'tr': 'Geçersiz e-posta adresi', 'ja': '無効なメールアドレス',
     },
     'weak-password': {
-      'en': 'Password is too weak (min. 6 characters)',
+      'en': 'Password is too weak (min. 6 characters)', 'nl': 'Wachtwoord is te zwak (min. 6 tekens)', 'uk': 'Пароль надто слабкий (мін. 6 символів)',
       'bg': 'Паролата е твърде слаба (мин. 6 символа)',
       'de': 'Passwort zu schwach (mind. 6 Zeichen)',
       'fr': 'Mot de passe trop faible (min. 6 caractères)',
@@ -294,7 +294,7 @@ class AuthService {
       'tr': 'Şifre çok zayıf (en az 6 karakter)', 'ja': 'パスワードが弱すぎます（最低6文字）',
     },
     'user-not-found': {
-      'en': 'No account found with this email',
+      'en': 'No account found with this email', 'nl': 'Geen account gevonden met dit e-mailadres', 'uk': 'Обліковий запис із цією поштою не знайдено',
       'bg': 'Няма потребител с този имейл',
       'de': 'Kein Konto mit dieser E-Mail gefunden',
       'fr': 'Aucun compte trouvé avec cet e-mail',
@@ -306,7 +306,7 @@ class AuthService {
       'tr': 'Bu e-posta ile hesap bulunamadı', 'ja': 'このメールのアカウントが見つかりません',
     },
     'wrong-password': {
-      'en': 'Incorrect password',
+      'en': 'Incorrect password', 'nl': 'Onjuist wachtwoord', 'uk': 'Невірний пароль',
       'bg': 'Грешна парола',
       'de': 'Falsches Passwort',
       'fr': 'Mot de passe incorrect',
@@ -318,7 +318,7 @@ class AuthService {
       'tr': 'Yanlış şifre', 'ja': 'パスワードが正しくありません',
     },
     'invalid-credential': {
-      'en': 'Incorrect email or password',
+      'en': 'Incorrect email or password', 'nl': 'Onjuiste e-mail of wachtwoord', 'uk': 'Невірна пошта або пароль',
       'bg': 'Грешен имейл или парола',
       'de': 'Falsche E-Mail oder falsches Passwort',
       'fr': 'E-mail ou mot de passe incorrect',
@@ -330,7 +330,7 @@ class AuthService {
       'tr': 'Yanlış e-posta veya şifre', 'ja': 'メールアドレスまたはパスワードが正しくありません',
     },
     'too-many-requests': {
-      'en': 'Too many attempts. Please try again later',
+      'en': 'Too many attempts. Please try again later', 'nl': 'Te veel pogingen. Probeer het later opnieuw', 'uk': 'Забагато спроб. Спробуйте пізніше',
       'bg': 'Твърде много опити. Опитай по-късно',
       'de': 'Zu viele Versuche. Bitte später erneut versuchen',
       'fr': 'Trop de tentatives. Réessayez plus tard',
@@ -344,7 +344,7 @@ class AuthService {
     // Firebase Auth понякога виси (напр. reCAPTCHA/Play Integrity с празен
     // токен при неригистриран SHA или мрежов проблем) → таймаутът връща това.
     'timeout': {
-      'en': 'Sign-in is taking too long. Check your connection and try again.',
+      'en': 'Sign-in is taking too long. Check your connection and try again.', 'nl': 'Inloggen duurt te lang. Controleer je verbinding en probeer opnieuw.', 'uk': 'Вхід триває надто довго. Перевірте з\'єднання та спробуйте ще раз.',
       'bg': 'Входът се бави твърде дълго. Провери връзката и опитай пак.',
       'de': 'Die Anmeldung dauert zu lange. Prüfe deine Verbindung und versuche es erneut.',
       'fr': 'La connexion prend trop de temps. Vérifiez votre connexion et réessayez.',
@@ -357,7 +357,7 @@ class AuthService {
       'ja': 'ログインに時間がかかっています。接続を確認してもう一度お試しください。',
     },
     'network-request-failed': {
-      'en': 'Network error. Check your connection and try again.',
+      'en': 'Network error. Check your connection and try again.', 'nl': 'Netwerkfout. Controleer je verbinding en probeer opnieuw.', 'uk': 'Помилка мережі. Перевірте з\'єднання та спробуйте ще раз.',
       'bg': 'Мрежова грешка. Провери връзката и опитай пак.',
       'de': 'Netzwerkfehler. Prüfe deine Verbindung und versuche es erneut.',
       'fr': 'Erreur réseau. Vérifiez votre connexion et réessayez.',
@@ -370,7 +370,7 @@ class AuthService {
       'ja': 'ネットワークエラー。接続を確認してもう一度お試しください。',
     },
     'user-disabled': {
-      'en': 'This account has been disabled',
+      'en': 'This account has been disabled', 'nl': 'Dit account is uitgeschakeld', 'uk': 'Цей обліковий запис вимкнено',
       'bg': 'Акаунтът е деактивиран',
       'de': 'Dieses Konto wurde deaktiviert',
       'fr': 'Ce compte a été désactivé',
@@ -382,7 +382,7 @@ class AuthService {
       'tr': 'Bu hesap devre dışı bırakıldı', 'ja': 'このアカウントは無効化されています',
     },
     'default': {
-      'en': 'Error: {code}',
+      'en': 'Error: {code}', 'nl': 'Fout: {code}', 'uk': 'Помилка: {code}',
       'bg': 'Грешка: {code}',
       'de': 'Fehler: {code}',
       'fr': 'Erreur: {code}',

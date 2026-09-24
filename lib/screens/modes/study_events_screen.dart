@@ -10,48 +10,48 @@ import '../../utils/localization.dart';
 /// списъка, диалога за добавяне и картата за обратно броене).
 const Map<StudentDateKind, Map<String, String>> kStudentDateKindLabels = {
   StudentDateKind.schoolYearStart: {
-    'en': 'Start of school year', 'bg': 'Начало на учебната година',
+    'en': 'Start of school year', 'nl': 'Begin van het schooljaar', 'uk': 'Початок навчального року', 'bg': 'Начало на учебната година',
     'de': 'Schuljahresbeginn', 'fr': "Début de l'année scolaire",
     'it': "Inizio dell'anno scolastico", 'el': 'Έναρξη σχολικής χρονιάς',
     'es': 'Inicio del año escolar', 'pt': 'Início do ano letivo',
     'ru': 'Начало учебного года', 'tr': 'Öğretim yılı başı', 'ja': '学年開始',
   },
   StudentDateKind.termStart: {
-    'en': 'Start of term', 'bg': 'Начало на срок', 'de': 'Beginn des Halbjahres',
+    'en': 'Start of term', 'nl': 'Begin van het trimester', 'uk': 'Початок семестру', 'bg': 'Начало на срок', 'de': 'Beginn des Halbjahres',
     'fr': 'Début du trimestre', 'it': 'Inizio del trimestre', 'el': 'Έναρξη τριμήνου',
     'es': 'Inicio del trimestre', 'pt': 'Início do período', 'ru': 'Начало четверти',
     'tr': 'Dönem başı', 'ja': '学期開始',
   },
   StudentDateKind.vacation: {
-    'en': 'Vacation', 'bg': 'Ваканция', 'de': 'Ferien', 'fr': 'Vacances',
+    'en': 'Vacation', 'nl': 'Vakantie', 'uk': 'Відпустка', 'bg': 'Ваканция', 'de': 'Ferien', 'fr': 'Vacances',
     'it': 'Vacanze', 'el': 'Διακοπές', 'es': 'Vacaciones', 'pt': 'Férias',
     'ru': 'Каникулы', 'tr': 'Tatil', 'ja': '休み',
   },
   StudentDateKind.semesterStart: {
-    'en': 'Semester start', 'bg': 'Начало на семестър', 'de': 'Semesterbeginn',
+    'en': 'Semester start', 'nl': 'Begin semester', 'uk': 'Початок семестру', 'bg': 'Начало на семестър', 'de': 'Semesterbeginn',
     'fr': 'Début de semestre', 'it': 'Inizio semestre', 'el': 'Έναρξη εξαμήνου',
     'es': 'Inicio de semestre', 'pt': 'Início do semestre', 'ru': 'Начало семестра',
     'tr': 'Dönem başı', 'ja': '学期開始',
   },
   StudentDateKind.semesterEnd: {
-    'en': 'Semester end', 'bg': 'Край на семестър', 'de': 'Semesterende',
+    'en': 'Semester end', 'nl': 'Einde semester', 'uk': 'Кінець семестру', 'bg': 'Край на семестър', 'de': 'Semesterende',
     'fr': 'Fin de semestre', 'it': 'Fine semestre', 'el': 'Λήξη εξαμήνου',
     'es': 'Fin de semestre', 'pt': 'Fim do semestre', 'ru': 'Конец семестра',
     'tr': 'Dönem sonu', 'ja': '学期終了',
   },
   StudentDateKind.sessionStart: {
-    'en': 'Exam session', 'bg': 'Начало на сесия', 'de': 'Prüfungszeit',
+    'en': 'Exam session', 'nl': 'Tentamenperiode', 'uk': 'Екзаменаційна сесія', 'bg': 'Начало на сесия', 'de': 'Prüfungszeit',
     'fr': "Session d'examens", 'it': "Sessione d'esami", 'el': 'Εξεταστική',
     'es': 'Periodo de exámenes', 'pt': 'Época de exames', 'ru': 'Начало сессии',
     'tr': 'Sınav dönemi', 'ja': '試験期間',
   },
   StudentDateKind.exam: {
-    'en': 'Exam', 'bg': 'Изпит', 'de': 'Prüfung', 'fr': 'Examen', 'it': 'Esame',
+    'en': 'Exam', 'nl': 'Examen', 'uk': 'Іспит', 'bg': 'Изпит', 'de': 'Prüfung', 'fr': 'Examen', 'it': 'Esame',
     'el': 'Εξέταση', 'es': 'Examen', 'pt': 'Exame', 'ru': 'Экзамен',
     'tr': 'Sınav', 'ja': '試験',
   },
   StudentDateKind.other: {
-    'en': 'Other', 'bg': 'Друго', 'de': 'Sonstiges', 'fr': 'Autre', 'it': 'Altro',
+    'en': 'Other', 'nl': 'Overige', 'uk': 'Інше', 'bg': 'Друго', 'de': 'Sonstiges', 'fr': 'Autre', 'it': 'Altro',
     'el': 'Άλλο', 'es': 'Otro', 'pt': 'Outro', 'ru': 'Другое', 'tr': 'Diğer',
     'ja': 'その他',
   },
@@ -88,12 +88,12 @@ class _StudyEventsScreenState extends State<StudyEventsScreen> {
   static String _t(Map<String, String> m, String lang) => m[lang] ?? m['en']!;
 
   static const _title = {
-    'en': 'Upcoming', 'bg': 'Предстоящи', 'de': 'Anstehend', 'fr': 'À venir',
+    'en': 'Upcoming', 'nl': 'Aankomend', 'uk': 'Майбутні', 'bg': 'Предстоящи', 'de': 'Anstehend', 'fr': 'À venir',
     'it': 'In arrivo', 'el': 'Επόμενα', 'es': 'Próximos', 'pt': 'Próximos',
     'ru': 'Предстоящие', 'tr': 'Yaklaşan', 'ja': '予定',
   };
   static const _empty = {
-    'en': 'No upcoming events yet.', 'bg': 'Още няма предстоящи събития.',
+    'en': 'No upcoming events yet.', 'nl': 'Nog geen aankomende items.', 'uk': 'Найближчих подій поки немає.', 'bg': 'Още няма предстоящи събития.',
     'de': 'Noch keine anstehenden Ereignisse.', 'fr': 'Aucun événement à venir.',
     'it': 'Nessun evento in arrivo.', 'el': 'Δεν υπάρχουν επόμενα γεγονότα.',
     'es': 'Aún no hay eventos próximos.', 'pt': 'Ainda não há eventos.',
@@ -101,24 +101,24 @@ class _StudyEventsScreenState extends State<StudyEventsScreen> {
     'ja': '予定はまだありません。',
   };
   static const _addDate = {
-    'en': 'Add key date', 'bg': 'Добави ключова дата', 'de': 'Termin hinzufügen',
+    'en': 'Add key date', 'nl': 'Belangrijke datum toevoegen', 'uk': 'Додати важливу дату', 'bg': 'Добави ключова дата', 'de': 'Termin hinzufügen',
     'fr': 'Ajouter une date', 'it': 'Aggiungi data', 'el': 'Προσθήκη ημερομηνίας',
     'es': 'Añadir fecha', 'pt': 'Adicionar data', 'ru': 'Добавить дату',
     'tr': 'Tarih ekle', 'ja': '日付を追加',
   };
   static const _todayWord = {
-    'en': 'Today', 'bg': 'Днес', 'de': 'Heute', 'fr': "Aujourd'hui",
+    'en': 'Today', 'nl': 'Vandaag', 'uk': 'Сьогодні', 'bg': 'Днес', 'de': 'Heute', 'fr': "Aujourd'hui",
     'it': 'Oggi', 'el': 'Σήμερα', 'es': 'Hoy', 'pt': 'Hoje', 'ru': 'Сегодня',
     'tr': 'Bugün', 'ja': '今日',
   };
   static const _inDays = {
-    'en': 'in {n} days', 'bg': 'след {n} дни', 'de': 'in {n} Tagen',
+    'en': 'in {n} days', 'nl': 'over {n} dagen', 'uk': 'через {n} днів', 'bg': 'след {n} дни', 'de': 'in {n} Tagen',
     'fr': 'dans {n} jours', 'it': 'tra {n} giorni', 'el': 'σε {n} μέρες',
     'es': 'en {n} días', 'pt': 'em {n} dias', 'ru': 'через {n} дн.',
     'tr': '{n} gün sonra', 'ja': 'あと{n}日',
   };
   static const _tomorrow = {
-    'en': 'Tomorrow', 'bg': 'Утре', 'de': 'Morgen', 'fr': 'Demain',
+    'en': 'Tomorrow', 'nl': 'Morgen', 'uk': 'Завтра', 'bg': 'Утре', 'de': 'Morgen', 'fr': 'Demain',
     'it': 'Domani', 'el': 'Αύριο', 'es': 'Mañana', 'pt': 'Amanhã',
     'ru': 'Завтра', 'tr': 'Yarın', 'ja': '明日',
   };
@@ -165,7 +165,7 @@ class _StudyEventsScreenState extends State<StudyEventsScreen> {
   String get _summerLabel {
     // Локализира се от картата; тук просто етикет по подразбиране.
     const m = {
-      'en': 'Summer break', 'bg': 'Лятна ваканция', 'de': 'Sommerferien',
+      'en': 'Summer break', 'nl': 'Zomervakantie', 'uk': 'Літні канікули', 'bg': 'Лятна ваканция', 'de': 'Sommerferien',
       'fr': "Vacances d'été", 'it': 'Vacanze estive', 'el': 'Καλοκαιρινές διακοπές',
       'es': 'Vacaciones de verano', 'pt': 'Férias de verão', 'ru': 'Летние каникулы',
       'tr': 'Yaz tatili', 'ja': '夏休み',
@@ -302,7 +302,7 @@ class _StudyEventsScreenState extends State<StudyEventsScreen> {
   }
 
   static const Map<String, List<String>> _months = {
-    'en': ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    'en': ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], 'nl': ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'], 'uk': ['січ', 'лют', 'бер', 'квіт', 'трав', 'черв', 'лип', 'серп', 'вер', 'жовт', 'лист', 'груд'],
     'bg': ['яну','фев','мар','апр','май','юни','юли','авг','сеп','окт','ное','дек'],
     'de': ['Jan','Feb','März','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'],
     'fr': ['janv','févr','mars','avr','mai','juin','juil','août','sept','oct','nov','déc'],
@@ -334,38 +334,38 @@ Future<StudentKeyDateInput?> showStudentKeyDateDialog(
   DateTime? date = existing?.date;
 
   const titleLabel = {
-    'en': 'Title (optional)', 'bg': 'Заглавие (по избор)', 'de': 'Titel (optional)',
+    'en': 'Title (optional)', 'nl': 'Titel (optioneel)', 'uk': 'Назва (необов\'язково)', 'bg': 'Заглавие (по избор)', 'de': 'Titel (optional)',
     'fr': 'Titre (facultatif)', 'it': 'Titolo (facoltativo)', 'el': 'Τίτλος (προαιρετικό)',
     'es': 'Título (opcional)', 'pt': 'Título (opcional)', 'ru': 'Название (необязательно)',
     'tr': 'Başlık (isteğe bağlı)', 'ja': 'タイトル（任意）',
   };
   const typeLabel = {
-    'en': 'Type', 'bg': 'Тип', 'de': 'Typ', 'fr': 'Type', 'it': 'Tipo',
+    'en': 'Type', 'nl': 'Type', 'uk': 'Тип', 'bg': 'Тип', 'de': 'Typ', 'fr': 'Type', 'it': 'Tipo',
     'el': 'Τύπος', 'es': 'Tipo', 'pt': 'Tipo', 'ru': 'Тип', 'tr': 'Tür', 'ja': '種類',
   };
   const pickDate = {
-    'en': 'Pick a date', 'bg': 'Избери дата', 'de': 'Datum wählen',
+    'en': 'Pick a date', 'nl': 'Kies een datum', 'uk': 'Виберіть дату', 'bg': 'Избери дата', 'de': 'Datum wählen',
     'fr': 'Choisir une date', 'it': 'Scegli data', 'el': 'Επίλεξε ημερομηνία',
     'es': 'Elige fecha', 'pt': 'Escolhe data', 'ru': 'Выбери дату', 'tr': 'Tarih seç',
     'ja': '日付を選択',
   };
   const cancel = {
-    'en': 'Cancel', 'bg': 'Отказ', 'de': 'Abbrechen', 'fr': 'Annuler',
+    'en': 'Cancel', 'nl': 'Annuleren', 'uk': 'Скасувати', 'bg': 'Отказ', 'de': 'Abbrechen', 'fr': 'Annuler',
     'it': 'Annulla', 'el': 'Άκυρο', 'es': 'Cancelar', 'pt': 'Cancelar',
     'ru': 'Отмена', 'tr': 'İptal', 'ja': 'キャンセル',
   };
   const add = {
-    'en': 'Add', 'bg': 'Добави', 'de': 'Hinzufügen', 'fr': 'Ajouter',
+    'en': 'Add', 'nl': 'Toevoegen', 'uk': 'Додати', 'bg': 'Добави', 'de': 'Hinzufügen', 'fr': 'Ajouter',
     'it': 'Aggiungi', 'el': 'Προσθήκη', 'es': 'Añadir', 'pt': 'Adicionar',
     'ru': 'Добавить', 'tr': 'Ekle', 'ja': '追加',
   };
   const saveLbl = {
-    'en': 'Save', 'bg': 'Запази', 'de': 'Speichern', 'fr': 'Enregistrer',
+    'en': 'Save', 'nl': 'Opslaan', 'uk': 'Зберегти', 'bg': 'Запази', 'de': 'Speichern', 'fr': 'Enregistrer',
     'it': 'Salva', 'el': 'Αποθήκευση', 'es': 'Guardar', 'pt': 'Guardar',
     'ru': 'Сохранить', 'tr': 'Kaydet', 'ja': '保存',
   };
   const editTitle = {
-    'en': 'Edit date', 'bg': 'Редактирай дата', 'de': 'Datum bearbeiten',
+    'en': 'Edit date', 'nl': 'Datum bewerken', 'uk': 'Редагувати дату', 'bg': 'Редактирай дата', 'de': 'Datum bearbeiten',
     'fr': 'Modifier la date', 'it': 'Modifica data', 'el': 'Επεξεργασία ημ/νίας',
     'es': 'Editar fecha', 'pt': 'Editar data', 'ru': 'Изменить дату',
     'tr': 'Tarihi düzenle', 'ja': '日付を編集',

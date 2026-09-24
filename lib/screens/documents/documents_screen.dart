@@ -206,20 +206,20 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
 
 // --- Локализация на статуса (същите низове като стария раздел) ---
 const _expiresInPrefix = {
-  'en': 'Expires in {days} days', 'bg': 'Изтича след {days} дни',
+  'en': 'Expires in {days} days', 'nl': 'Verloopt over {days} dagen', 'uk': 'Спливає через {days} днів', 'bg': 'Изтича след {days} дни',
   'de': 'Läuft in {days} Tagen ab', 'fr': 'Expire dans {days} jours',
   'it': 'Scade tra {days} giorni', 'el': 'Λήγει σε {days} ημέρες',
   'es': 'Caduca en {days} días', 'pt': 'Expira em {days} dias',
   'ru': 'Истекает через {days} дней', 'tr': '{days} gün içinde doluyor', 'ja': '{days}日後に期限切れ',
 };
 const _expiresToday = {
-  'en': 'Expires today', 'bg': 'Изтича днес', 'de': 'Läuft heute ab',
+  'en': 'Expires today', 'nl': 'Verloopt vandaag', 'uk': 'Спливає сьогодні', 'bg': 'Изтича днес', 'de': 'Läuft heute ab',
   'fr': "Expire aujourd'hui", 'it': 'Scade oggi', 'el': 'Λήγει σήμερα',
   'es': 'Caduca hoy', 'pt': 'Expira hoje', 'ru': 'Истекает сегодня',
   'tr': 'Bugün doluyor', 'ja': '本日期限切れ',
 };
 const _expiredOn = {
-  'en': 'Expired on', 'bg': 'Изтекъл на', 'de': 'Abgelaufen am',
+  'en': 'Expired on', 'nl': 'Verlopen op', 'uk': 'Минув', 'bg': 'Изтекъл на', 'de': 'Abgelaufen am',
   'fr': 'Expiré le', 'it': 'Scaduto il', 'el': 'Έληξε στις',
   'es': 'Caducó el', 'pt': 'Expirou em', 'ru': 'Истёк', 'tr': 'Doldu:', 'ja': '有効期限',
 };

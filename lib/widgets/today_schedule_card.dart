@@ -35,12 +35,12 @@ class _TodayScheduleCardState extends State<TodayScheduleCard> {
   static String _t(Map<String, String> m, String lang) => m[lang] ?? m['en']!;
 
   static const _todayWord = {
-    'en': 'Today', 'bg': 'Днес', 'de': 'Heute', 'fr': "Aujourd'hui",
+    'en': 'Today', 'nl': 'Vandaag', 'uk': 'Сьогодні', 'bg': 'Днес', 'de': 'Heute', 'fr': "Aujourd'hui",
     'it': 'Oggi', 'el': 'Σήμερα', 'es': 'Hoy', 'pt': 'Hoje',
     'ru': 'Сегодня', 'tr': 'Bugün', 'ja': '今日',
   };
   static const _noLessons = {
-    'en': 'No classes today ☕', 'bg': 'Днес нямаш часове ☕',
+    'en': 'No classes today ☕', 'nl': 'Vandaag geen lessen ☕', 'uk': 'Сьогодні немає занять ☕', 'bg': 'Днес нямаш часове ☕',
     'de': 'Heute keine Stunden ☕', 'fr': 'Pas de cours aujourd\'hui ☕',
     'it': 'Nessuna lezione oggi ☕', 'el': 'Κανένα μάθημα σήμερα ☕',
     'es': 'Hoy no hay clases ☕', 'pt': 'Hoje sem aulas ☕',
@@ -48,51 +48,51 @@ class _TodayScheduleCardState extends State<TodayScheduleCard> {
     'ja': '今日は授業なし ☕',
   };
   static const _enjoyDay = {
-    'en': 'Enjoy your day! 🌴', 'bg': 'Приятен ден! 🌴',
+    'en': 'Enjoy your day! 🌴', 'nl': 'Fijne dag! 🌴', 'uk': 'Гарного дня! 🌴', 'bg': 'Приятен ден! 🌴',
     'de': 'Schönen Tag! 🌴', 'fr': 'Bonne journée ! 🌴',
     'it': 'Buona giornata! 🌴', 'el': 'Καλή σου μέρα! 🌴',
     'es': '¡Buen día! 🌴', 'pt': 'Bom dia! 🌴',
     'ru': 'Хорошего дня! 🌴', 'tr': 'İyi günler! 🌴', 'ja': '良い一日を！🌴',
   };
   static const _seeWeek = {
-    'en': 'See full week', 'bg': 'Виж цялата седмица',
+    'en': 'See full week', 'nl': 'Volledige week bekijken', 'uk': 'Переглянути весь тиждень', 'bg': 'Виж цялата седмица',
     'de': 'Ganze Woche', 'fr': 'Voir la semaine', 'it': 'Vedi la settimana',
     'el': 'Όλη η εβδομάδα', 'es': 'Ver la semana', 'pt': 'Ver a semana',
     'ru': 'Вся неделя', 'tr': 'Tüm hafta', 'ja': '週間を見る',
   };
   static const _now = {
-    'en': 'now', 'bg': 'сега', 'de': 'jetzt', 'fr': 'maintenant',
+    'en': 'now', 'nl': 'nu', 'uk': 'зараз', 'bg': 'сега', 'de': 'jetzt', 'fr': 'maintenant',
     'it': 'ora', 'el': 'τώρα', 'es': 'ahora', 'pt': 'agora',
     'ru': 'сейчас', 'tr': 'şimdi', 'ja': '今',
   };
   static const _nowUpper = {
-    'en': 'Now', 'bg': 'Сега', 'de': 'Jetzt', 'fr': 'Maintenant',
+    'en': 'Now', 'nl': 'Nu', 'uk': 'Зараз', 'bg': 'Сега', 'de': 'Jetzt', 'fr': 'Maintenant',
     'it': 'Ora', 'el': 'Τώρα', 'es': 'Ahora', 'pt': 'Agora',
     'ru': 'Сейчас', 'tr': 'Şimdi', 'ja': '今',
   };
   static const _nextUp = {
-    'en': 'Next', 'bg': 'Следва', 'de': 'Als Nächstes', 'fr': 'À suivre',
+    'en': 'Next', 'nl': 'Volgende', 'uk': 'Далі', 'bg': 'Следва', 'de': 'Als Nächstes', 'fr': 'À suivre',
     'it': 'Prossima', 'el': 'Επόμενο', 'es': 'Siguiente', 'pt': 'A seguir',
     'ru': 'Далее', 'tr': 'Sıradaki', 'ja': '次',
   };
   // Кратък индикатор за седмицата в хедъра (студент + начало на семестъра).
   static const _weekWord = {
-    'en': 'week', 'bg': 'седмица', 'de': 'Woche', 'fr': 'semaine',
+    'en': 'week', 'nl': 'week', 'uk': 'тиждень', 'bg': 'седмица', 'de': 'Woche', 'fr': 'semaine',
     'it': 'settimana', 'el': 'εβδομάδα', 'es': 'semana', 'pt': 'semana',
     'ru': 'неделя', 'tr': 'hafta', 'ja': '週',
   };
   static const _evenParen = {
-    'en': 'even', 'bg': 'четна', 'de': 'gerade', 'fr': 'paire', 'it': 'pari',
+    'en': 'even', 'nl': 'even', 'uk': 'парний', 'bg': 'четна', 'de': 'gerade', 'fr': 'paire', 'it': 'pari',
     'el': 'ζυγή', 'es': 'par', 'pt': 'par', 'ru': 'чёт.', 'tr': 'çift', 'ja': '偶',
   };
   static const _oddParen = {
-    'en': 'odd', 'bg': 'нечетна', 'de': 'ungerade', 'fr': 'impaire',
+    'en': 'odd', 'nl': 'oneven', 'uk': 'непарний', 'bg': 'нечетна', 'de': 'ungerade', 'fr': 'impaire',
     'it': 'dispari', 'el': 'μονή', 'es': 'impar', 'pt': 'ímpar', 'ru': 'нечёт.',
     'tr': 'tek', 'ja': '奇',
   };
 
   static const _dayNames = {
-    'en': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    'en': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], 'nl': ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'], 'uk': ['Понеділок', 'Вівторок', 'Середа', 'Четвер', "П'ятниця", 'Субота', 'Неділя'],
     'bg': ['Понеделник', 'Вторник', 'Сряда', 'Четвъртък', 'Петък', 'Събота', 'Неделя'],
     'de': ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'],
     'fr': ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],

@@ -317,7 +317,7 @@ class GroupService {
     // Лендингът — официалният домейн на Taskify.
     const landing = 'https://taskify1969.com';
     final templates = <String, String>{
-      'en': "Join the list '$groupName' in Taskify with code: $code\n$landing",
+      'en': "Join the list '$groupName' in Taskify with code: $code\n$landing", 'nl': 'Word lid van de lijst \'$groupName\' in Taskify met code: $code\n$landing', 'uk': 'Приєднайтесь до списку «$groupName» у Taskify за кодом: $code\n$landing',
       'bg': "Присъедини се към списъка '$groupName' в Taskify с код: $code\n$landing",
       'de': "Tritt der Liste '$groupName' in Taskify bei mit Code: $code\n$landing",
       'fr': "Rejoins la liste '$groupName' dans Taskify avec le code : $code\n$landing",

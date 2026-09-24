@@ -101,7 +101,7 @@ class DocumentsService {
 
   String _title(String lang) {
     const m = {
-      'en': 'Renewal reminder', 'bg': 'Напомняне за подновяване',
+      'en': 'Renewal reminder', 'nl': 'Verlengingsherinnering', 'uk': 'Нагадування про поновлення', 'bg': 'Напомняне за подновяване',
       'de': 'Erinnerung zur Verlängerung', 'fr': 'Rappel de renouvellement',
       'it': 'Promemoria di rinnovo', 'el': 'Υπενθύμιση ανανέωσης',
       'es': 'Recordatorio de renovación', 'pt': 'Lembrete de renovação',
@@ -114,7 +114,7 @@ class DocumentsService {
   String _body(ExpiringDocument doc, int days, String lang) {
     final name = documentTypeName(doc.type, lang, label: doc.label);
     const tpl = {
-      'en': '{name} expires in {days} days — time to renew 🔔',
+      'en': '{name} expires in {days} days — time to renew 🔔', 'nl': '{name} verloopt over {days} dagen — tijd om te verlengen 🔔', 'uk': '{name} спливає через {days} днів — час поновити 🔔',
       'bg': '{name} изтича след {days} дни — време е за подновяване 🔔',
       'de': '{name} läuft in {days} Tagen ab — Zeit zu verlängern 🔔',
       'fr': '{name} expire dans {days} jours — pense à renouveler 🔔',
@@ -148,7 +148,7 @@ String documentTypeName(String type, String lang, {String? label}) {
 
 String _otherName(String lang) {
   const m = {
-    'en': 'Document', 'bg': 'Документ', 'de': 'Dokument', 'fr': 'Document',
+    'en': 'Document', 'nl': 'Document', 'uk': 'Документ', 'bg': 'Документ', 'de': 'Dokument', 'fr': 'Document',
     'it': 'Documento', 'el': 'Έγγραφο', 'es': 'Documento', 'pt': 'Documento',
     'ru': 'Документ', 'tr': 'Belge', 'ja': '書類',
   };
@@ -158,37 +158,37 @@ String _otherName(String lang) {
 /// Имена на типовете документи на 10 езика.
 const Map<String, Map<String, String>> _typeNames = {
   'vignette': {
-    'en': 'Vignette', 'bg': 'Винетка', 'de': 'Vignette', 'fr': 'Vignette',
+    'en': 'Vignette', 'nl': 'Vignet', 'uk': 'Віньєтка', 'bg': 'Винетка', 'de': 'Vignette', 'fr': 'Vignette',
     'it': 'Vignetta', 'el': 'Βινιέτα', 'es': 'Viñeta', 'pt': 'Vinheta',
     'ru': 'Виньетка', 'tr': 'Vinyet', 'ja': '高速道路ステッカー',
   },
   'insurance': {
-    'en': 'Car insurance', 'bg': 'Гражданска отговорност',
+    'en': 'Car insurance', 'nl': 'Autoverzekering', 'uk': 'Автострахування', 'bg': 'Гражданска отговорност',
     'de': 'Kfz-Haftpflicht', 'fr': 'Assurance auto',
     'it': 'Assicurazione auto', 'el': 'Ασφάλεια αυτοκινήτου',
     'es': 'Seguro del coche', 'pt': 'Seguro do carro',
     'ru': 'Автостраховка', 'tr': 'Trafik sigortası', 'ja': '自動車保険',
   },
   'inspection': {
-    'en': 'Vehicle inspection', 'bg': 'Технически преглед',
+    'en': 'Vehicle inspection', 'nl': 'Voertuigkeuring', 'uk': 'Техогляд', 'bg': 'Технически преглед',
     'de': 'Hauptuntersuchung', 'fr': 'Contrôle technique',
     'it': 'Revisione auto', 'el': 'Τεχνικός έλεγχος (ΚΤΕΟ)',
     'es': 'Inspección técnica (ITV)', 'pt': 'Inspeção do veículo',
     'ru': 'Техосмотр', 'tr': 'Araç muayenesi', 'ja': '車検',
   },
   'id_card': {
-    'en': 'ID card', 'bg': 'Лична карта', 'de': 'Personalausweis',
+    'en': 'ID card', 'nl': 'Identiteitskaart', 'uk': 'Посвідчення особи', 'bg': 'Лична карта', 'de': 'Personalausweis',
     'fr': "Carte d'identité", 'it': "Carta d'identità",
     'el': 'Ταυτότητα', 'es': 'DNI', 'pt': 'Cartão de cidadão',
     'ru': 'Удостоверение личности', 'tr': 'Kimlik kartı', 'ja': '身分証明書',
   },
   'passport': {
-    'en': 'Passport', 'bg': 'Паспорт', 'de': 'Reisepass', 'fr': 'Passeport',
+    'en': 'Passport', 'nl': 'Paspoort', 'uk': 'Паспорт', 'bg': 'Паспорт', 'de': 'Reisepass', 'fr': 'Passeport',
     'it': 'Passaporto', 'el': 'Διαβατήριο', 'es': 'Pasaporte',
     'pt': 'Passaporte', 'ru': 'Паспорт', 'tr': 'Pasaport', 'ja': 'パスポート',
   },
   'license': {
-    'en': "Driver's license", 'bg': 'Шофьорска книжка',
+    'en': "Driver's license", 'nl': 'Rijbewijs', 'uk': 'Посвідчення водія', 'bg': 'Шофьорска книжка',
     'de': 'Führerschein', 'fr': 'Permis de conduire',
     'it': 'Patente di guida', 'el': 'Δίπλωμα οδήγησης',
     'es': 'Carnet de conducir', 'pt': 'Carta de condução',

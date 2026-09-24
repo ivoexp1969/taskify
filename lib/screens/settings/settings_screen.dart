@@ -82,13 +82,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     String tr(Map<String, String> m) => m[lang] ?? m['en']!;
 
     const restoring = {
-      'en': 'Restoring…', 'bg': 'Възстановяване…', 'de': 'Wird wiederhergestellt…',
+      'en': 'Restoring…', 'nl': 'Herstellen…', 'uk': 'Відновлення…', 'bg': 'Възстановяване…', 'de': 'Wird wiederhergestellt…',
       'fr': 'Restauration…', 'it': 'Ripristino…', 'el': 'Επαναφορά…',
       'es': 'Restaurando…', 'pt': 'Restaurando…', 'ru': 'Восстановление…',
       'tr': 'Geri yükleniyor…', 'ja': '復元中…',
     };
     const success = {
-      'en': 'Purchases restored', 'bg': 'Покупките са възстановени',
+      'en': 'Purchases restored', 'nl': 'Aankopen hersteld', 'uk': 'Покупки відновлено', 'bg': 'Покупките са възстановени',
       'de': 'Käufe wiederhergestellt', 'fr': 'Achats restaurés',
       'it': 'Acquisti ripristinati', 'el': 'Οι αγορές επαναφέρθηκαν',
       'es': 'Compras restauradas', 'pt': 'Compras restauradas',
@@ -96,7 +96,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'ja': '購入を復元しました',
     };
     const none = {
-      'en': 'No purchases to restore', 'bg': 'Няма покупки за възстановяване',
+      'en': 'No purchases to restore', 'nl': 'Geen aankopen om te herstellen', 'uk': 'Немає покупок для відновлення', 'bg': 'Няма покупки за възстановяване',
       'de': 'Keine Käufe zum Wiederherstellen',
       'fr': 'Aucun achat à restaurer', 'it': 'Nessun acquisto da ripristinare',
       'el': 'Δεν υπάρχουν αγορές για επαναφορά',

@@ -46,48 +46,48 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
   static String _t(Map<String, String> m, String lang) => m[lang] ?? m['en']!;
 
   static const _title = {
-    'en': 'My schedule', 'bg': 'Моето разписание', 'de': 'Mein Stundenplan',
+    'en': 'My schedule', 'nl': 'Mijn rooster', 'uk': 'Мій розклад', 'bg': 'Моето разписание', 'de': 'Mein Stundenplan',
     'fr': 'Mon emploi du temps', 'it': 'Il mio orario', 'el': 'Το πρόγραμμά μου',
     'es': 'Mi horario', 'pt': 'O meu horário', 'ru': 'Моё расписание',
     'tr': 'Ders programım', 'ja': '時間割',
   };
   // Ученик — учебни срокове.
   static const _term1Pupil = {
-    'en': 'Term 1', 'bg': 'I срок', 'de': '1. Halbjahr', 'fr': '1er trimestre',
+    'en': 'Term 1', 'nl': 'Trimester 1', 'uk': 'Семестр 1', 'bg': 'I срок', 'de': '1. Halbjahr', 'fr': '1er trimestre',
     'it': '1° periodo', 'el': '1ο τρίμηνο', 'es': '1er trimestre',
     'pt': '1º período', 'ru': '1-й срок', 'tr': '1. dönem', 'ja': '前期',
   };
   static const _term2Pupil = {
-    'en': 'Term 2', 'bg': 'II срок', 'de': '2. Halbjahr', 'fr': '2e trimestre',
+    'en': 'Term 2', 'nl': 'Trimester 2', 'uk': 'Семестр 2', 'bg': 'II срок', 'de': '2. Halbjahr', 'fr': '2e trimestre',
     'it': '2° periodo', 'el': '2ο τρίμηνο', 'es': '2º trimestre',
     'pt': '2º período', 'ru': '2-й срок', 'tr': '2. dönem', 'ja': '後期',
   };
   // Студент — семестри.
   static const _term1Student = {
-    'en': 'Winter sem.', 'bg': 'Зимен семестър', 'de': 'Wintersemester',
+    'en': 'Winter sem.', 'nl': 'Wintersem.', 'uk': 'Зимовий сем.', 'bg': 'Зимен семестър', 'de': 'Wintersemester',
     'fr': 'Semestre d\'hiver', 'it': 'Sem. invernale', 'el': 'Χειμ. εξάμηνο',
     'es': 'Sem. de invierno', 'pt': 'Sem. de inverno', 'ru': 'Зимний семестр',
     'tr': 'Güz dönemi', 'ja': '冬学期',
   };
   static const _term2Student = {
-    'en': 'Summer sem.', 'bg': 'Летен семестър', 'de': 'Sommersemester',
+    'en': 'Summer sem.', 'nl': 'Zomersem.', 'uk': 'Літній сем.', 'bg': 'Летен семестър', 'de': 'Sommersemester',
     'fr': 'Semestre d\'été', 'it': 'Sem. estivo', 'el': 'Θεριν. εξάμηνο',
     'es': 'Sem. de verano', 'pt': 'Sem. de verão', 'ru': 'Летний семестр',
     'tr': 'Bahar dönemi', 'ja': '夏学期',
   };
   static const _deleteTip = {
-    'en': 'Delete', 'bg': 'Изтрий', 'de': 'Löschen', 'fr': 'Supprimer',
+    'en': 'Delete', 'nl': 'Verwijderen', 'uk': 'Видалити', 'bg': 'Изтрий', 'de': 'Löschen', 'fr': 'Supprimer',
     'it': 'Elimina', 'el': 'Διαγραφή', 'es': 'Eliminar', 'pt': 'Eliminar',
     'ru': 'Удалить', 'tr': 'Sil', 'ja': '削除',
   };
   static const _addLesson = {
-    'en': 'Add class', 'bg': 'Добави час', 'de': 'Stunde hinzufügen',
+    'en': 'Add class', 'nl': 'Les toevoegen', 'uk': 'Додати заняття', 'bg': 'Добави час', 'de': 'Stunde hinzufügen',
     'fr': 'Ajouter un cours', 'it': 'Aggiungi lezione', 'el': 'Προσθήκη μαθήματος',
     'es': 'Añadir clase', 'pt': 'Adicionar aula', 'ru': 'Добавить занятие',
     'tr': 'Ders ekle', 'ja': '授業を追加',
   };
   static const _noLessonsDay = {
-    'en': 'No classes — tap to add.',
+    'en': 'No classes — tap to add.', 'nl': 'Geen lessen — tik om toe te voegen.', 'uk': 'Немає занять — торкніться, щоб додати.',
     'bg': 'Няма часове — натисни, за да добавиш.',
     'de': 'Keine Stunden – zum Hinzufügen tippen.',
     'fr': 'Aucun cours — appuie pour ajouter.',
@@ -101,14 +101,14 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
   };
   // Централно празно състояние (цялото разписание за срока е празно).
   static const _emptyTitle = {
-    'en': 'No classes yet', 'bg': 'Още нямаш въведени часове',
+    'en': 'No classes yet', 'nl': 'Nog geen lessen', 'uk': 'Ще немає занять', 'bg': 'Още нямаш въведени часове',
     'de': 'Noch keine Stunden', 'fr': 'Aucun cours pour l\'instant',
     'it': 'Ancora nessuna lezione', 'el': 'Δεν υπάρχουν μαθήματα ακόμη',
     'es': 'Aún no hay clases', 'pt': 'Ainda não há aulas',
     'ru': 'Пока нет занятий', 'tr': 'Henüz ders yok', 'ja': 'まだ授業がありません',
   };
   static const _addFirst = {
-    'en': 'Add your first class →', 'bg': 'Добави първия си час →',
+    'en': 'Add your first class →', 'nl': 'Voeg je eerste les toe →', 'uk': 'Додайте перше заняття →', 'bg': 'Добави първия си час →',
     'de': 'Erste Stunde hinzufügen →', 'fr': 'Ajoute ton premier cours →',
     'it': 'Aggiungi la prima lezione →', 'el': 'Πρόσθεσε το πρώτο μάθημα →',
     'es': 'Añade tu primera clase →', 'pt': 'Adiciona a tua primeira aula →',
@@ -117,21 +117,21 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
   };
   // Индикатор за текущата седмица (студент + зададено начало на семестъра).
   static const _thisWeekEven = {
-    'en': 'This week is even', 'bg': 'Тази седмица е четна',
+    'en': 'This week is even', 'nl': 'Deze week is even', 'uk': 'Цей тиждень парний', 'bg': 'Тази седмица е четна',
     'de': 'Diese Woche ist gerade', 'fr': 'Cette semaine est paire',
     'it': 'Questa settimana è pari', 'el': 'Αυτή η εβδομάδα είναι ζυγή',
     'es': 'Esta semana es par', 'pt': 'Esta semana é par',
     'ru': 'Эта неделя чётная', 'tr': 'Bu hafta çift', 'ja': '今週は偶数週',
   };
   static const _thisWeekOdd = {
-    'en': 'This week is odd', 'bg': 'Тази седмица е нечетна',
+    'en': 'This week is odd', 'nl': 'Deze week is oneven', 'uk': 'Цей тиждень непарний', 'bg': 'Тази седмица е нечетна',
     'de': 'Diese Woche ist ungerade', 'fr': 'Cette semaine est impaire',
     'it': 'Questa settimana è dispari', 'el': 'Αυτή η εβδομάδα είναι μονή',
     'es': 'Esta semana es impar', 'pt': 'Esta semana é ímpar',
     'ru': 'Эта неделя нечётная', 'tr': 'Bu hafta tek', 'ja': '今週は奇数週',
   };
   static const _weekNo = {
-    'en': 'week {n} of the semester', 'bg': 'седмица {n} от началото на семестъра',
+    'en': 'week {n} of the semester', 'nl': 'week {n} van het semester', 'uk': 'тиждень {n} семестру', 'bg': 'седмица {n} от началото на семестъра',
     'de': 'Woche {n} des Semesters', 'fr': 'semaine {n} du semestre',
     'it': 'settimana {n} del semestre', 'el': 'εβδομάδα {n} του εξαμήνου',
     'es': 'semana {n} del semestre', 'pt': 'semana {n} do semestre',
@@ -139,7 +139,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
     'ja': '学期の第{n}週',
   };
   static const _setSemesterStart = {
-    'en': 'Set semester start →', 'bg': 'Задай начало на семестъра →',
+    'en': 'Set semester start →', 'nl': 'Begin semester instellen →', 'uk': 'Встановити початок семестру →', 'bg': 'Задай начало на семестъра →',
     'de': 'Semesterbeginn festlegen →', 'fr': 'Définir le début du semestre →',
     'it': 'Imposta inizio semestre →', 'el': 'Όρισε έναρξη εξαμήνου →',
     'es': 'Definir inicio de semestre →', 'pt': 'Definir início do semestre →',
@@ -148,33 +148,33 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
   };
   // Филтър на изгледа (студент).
   static const _viewAll = {
-    'en': 'All', 'bg': 'Всички', 'de': 'Alle', 'fr': 'Toutes', 'it': 'Tutte',
+    'en': 'All', 'nl': 'Alle', 'uk': 'Усі', 'bg': 'Всички', 'de': 'Alle', 'fr': 'Toutes', 'it': 'Tutte',
     'el': 'Όλα', 'es': 'Todas', 'pt': 'Todas', 'ru': 'Все', 'tr': 'Tümü',
     'ja': 'すべて',
   };
   static const _viewEven = {
-    'en': 'Even', 'bg': 'Четна', 'de': 'Gerade', 'fr': 'Paire', 'it': 'Pari',
+    'en': 'Even', 'nl': 'Even', 'uk': 'Парний', 'bg': 'Четна', 'de': 'Gerade', 'fr': 'Paire', 'it': 'Pari',
     'el': 'Ζυγή', 'es': 'Par', 'pt': 'Par', 'ru': 'Чётная', 'tr': 'Çift',
     'ja': '偶数',
   };
   static const _viewOdd = {
-    'en': 'Odd', 'bg': 'Нечетна', 'de': 'Ungerade', 'fr': 'Impaire',
+    'en': 'Odd', 'nl': 'Oneven', 'uk': 'Непарний', 'bg': 'Нечетна', 'de': 'Ungerade', 'fr': 'Impaire',
     'it': 'Dispari', 'el': 'Μονή', 'es': 'Impar', 'pt': 'Ímpar',
     'ru': 'Нечётная', 'tr': 'Tek', 'ja': '奇数',
   };
   // Кратки етикети за седмичния шаблон на слота (badge в списъка).
   static const _evenBadge = {
-    'en': 'even', 'bg': 'четна', 'de': 'gerade', 'fr': 'paire', 'it': 'pari',
+    'en': 'even', 'nl': 'even', 'uk': 'парний', 'bg': 'четна', 'de': 'gerade', 'fr': 'paire', 'it': 'pari',
     'el': 'ζυγή', 'es': 'par', 'pt': 'par', 'ru': 'чёт.', 'tr': 'çift', 'ja': '偶',
   };
   static const _oddBadge = {
-    'en': 'odd', 'bg': 'нечетна', 'de': 'ungerade', 'fr': 'impaire',
+    'en': 'odd', 'nl': 'oneven', 'uk': 'непарний', 'bg': 'нечетна', 'de': 'ungerade', 'fr': 'impaire',
     'it': 'dispari', 'el': 'μονή', 'es': 'impar', 'pt': 'ímpar', 'ru': 'нечёт.',
     'tr': 'tek', 'ja': '奇',
   };
 
   static const _dayNames = {
-    'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], 'nl': ['ma', 'di', 'wo', 'do', 'vr', 'za', 'zo'], 'uk': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
     'bg': ['Понеделник', 'Вторник', 'Сряда', 'Четвъртък', 'Петък', 'Събота', 'Неделя'],
     'de': ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
     'fr': ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
@@ -602,51 +602,51 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
   final bool isStudent = UniversityService().enabled;
 
   const subjectLabel = {
-    'en': 'Subject', 'bg': 'Предмет', 'de': 'Fach', 'fr': 'Matière',
+    'en': 'Subject', 'nl': 'Vak', 'uk': 'Предмет', 'bg': 'Предмет', 'de': 'Fach', 'fr': 'Matière',
     'it': 'Materia', 'el': 'Μάθημα', 'es': 'Asignatura', 'pt': 'Disciplina',
     'ru': 'Предмет', 'tr': 'Ders', 'ja': '科目',
   };
   const locationLabel = {
-    'en': 'Location (optional)', 'bg': 'Място (по избор)', 'de': 'Ort (optional)',
+    'en': 'Location (optional)', 'nl': 'Locatie (optioneel)', 'uk': 'Місце (необов\'язково)', 'bg': 'Място (по избор)', 'de': 'Ort (optional)',
     'fr': 'Lieu (facultatif)', 'it': 'Luogo (facoltativo)', 'el': 'Τόπος (προαιρετικό)',
     'es': 'Lugar (opcional)', 'pt': 'Local (opcional)', 'ru': 'Место (необязательно)',
     'tr': 'Yer (isteğe bağlı)', 'ja': '場所（任意）',
   };
   const dayLabel = {
-    'en': 'Day', 'bg': 'Ден', 'de': 'Tag', 'fr': 'Jour', 'it': 'Giorno',
+    'en': 'Day', 'nl': 'Dag', 'uk': 'День', 'bg': 'Ден', 'de': 'Tag', 'fr': 'Jour', 'it': 'Giorno',
     'el': 'Ημέρα', 'es': 'Día', 'pt': 'Dia', 'ru': 'День', 'tr': 'Gün', 'ja': '曜日',
   };
   const fromLbl = {
-    'en': 'From', 'bg': 'От', 'de': 'Von', 'fr': 'De', 'it': 'Da', 'el': 'Από',
+    'en': 'From', 'nl': 'Van', 'uk': 'Від', 'bg': 'От', 'de': 'Von', 'fr': 'De', 'it': 'Da', 'el': 'Από',
     'es': 'Desde', 'pt': 'De', 'ru': 'С', 'tr': 'Başlangıç', 'ja': '開始',
   };
   const toLbl = {
-    'en': 'To', 'bg': 'До', 'de': 'Bis', 'fr': 'À', 'it': 'A', 'el': 'Έως',
+    'en': 'To', 'nl': 'Naar', 'uk': 'До', 'bg': 'До', 'de': 'Bis', 'fr': 'À', 'it': 'A', 'el': 'Έως',
     'es': 'Hasta', 'pt': 'Até', 'ru': 'До', 'tr': 'Bitiş', 'ja': '終了',
   };
   // За студенти „урокът" е упражнение/семинар (различно от лекция).
   const exerciseLbl = {
-    'en': 'Exercise', 'bg': 'Упражнение', 'de': 'Übung', 'fr': 'Exercices',
+    'en': 'Exercise', 'nl': 'Oefening', 'uk': 'Вправа', 'bg': 'Упражнение', 'de': 'Übung', 'fr': 'Exercices',
     'it': 'Esercitazione', 'el': 'Άσκηση', 'es': 'Práctica', 'pt': 'Prática',
     'ru': 'Практика', 'tr': 'Uygulama', 'ja': '演習',
   };
   const lectureLbl = {
-    'en': 'Lecture', 'bg': 'Лекция', 'de': 'Vorlesung', 'fr': 'Cours magistral',
+    'en': 'Lecture', 'nl': 'College', 'uk': 'Лекція', 'bg': 'Лекция', 'de': 'Vorlesung', 'fr': 'Cours magistral',
     'it': 'Lezione univ.', 'el': 'Διάλεξη', 'es': 'Clase magistral', 'pt': 'Aula teórica',
     'ru': 'Лекция', 'tr': 'Ders (üniv.)', 'ja': '講義',
   };
   const cancel = {
-    'en': 'Cancel', 'bg': 'Отказ', 'de': 'Abbrechen', 'fr': 'Annuler', 'it': 'Annulla',
+    'en': 'Cancel', 'nl': 'Annuleren', 'uk': 'Скасувати', 'bg': 'Отказ', 'de': 'Abbrechen', 'fr': 'Annuler', 'it': 'Annulla',
     'el': 'Άκυρο', 'es': 'Cancelar', 'pt': 'Cancelar', 'ru': 'Отмена', 'tr': 'İptal',
     'ja': 'キャンセル',
   };
   const save = {
-    'en': 'Save', 'bg': 'Запази', 'de': 'Speichern', 'fr': 'Enregistrer', 'it': 'Salva',
+    'en': 'Save', 'nl': 'Opslaan', 'uk': 'Зберегти', 'bg': 'Запази', 'de': 'Speichern', 'fr': 'Enregistrer', 'it': 'Salva',
     'el': 'Αποθήκευση', 'es': 'Guardar', 'pt': 'Guardar', 'ru': 'Сохранить', 'tr': 'Kaydet',
     'ja': '保存',
   };
   const badRange = {
-    'en': 'End time must be after start time.',
+    'en': 'End time must be after start time.', 'nl': 'De eindtijd moet na de begintijd liggen.', 'uk': 'Час завершення має бути пізніше за час початку.',
     'bg': 'Крайният час трябва да е след началния.',
     'de': 'Die Endzeit muss nach der Startzeit liegen.',
     'fr': 'L\'heure de fin doit être après le début.',
@@ -660,7 +660,7 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
   };
   // {0} = предмет/тип, {1} = от–до на конфликтния слот
   const overlapMsg = {
-    'en': 'Overlaps with {0} ({1}).',
+    'en': 'Overlaps with {0} ({1}).', 'nl': 'Overlapt met {0} ({1}).', 'uk': 'Збігається з {0} ({1}).',
     'bg': 'Припокрива се с {0} ({1}).',
     'de': 'Überschneidet sich mit {0} ({1}).',
     'fr': 'Chevauche {0} ({1}).',
@@ -673,36 +673,36 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
     'ja': '{0}（{1}）と重複しています。',
   };
   const busyFallback = {
-    'en': 'another slot', 'bg': 'друг час', 'de': 'einem anderen Termin',
+    'en': 'another slot', 'nl': 'een ander tijdslot', 'uk': 'інший час', 'bg': 'друг час', 'de': 'einem anderen Termin',
     'fr': 'un autre créneau', 'it': 'un altro slot', 'el': 'άλλη ώρα',
     'es': 'otro horario', 'pt': 'outro horário', 'ru': 'другим слотом',
     'tr': 'başka bir ders', 'ja': '別の予定',
   };
   const repeatLabel = {
-    'en': 'Repeats', 'bg': 'Повтаряне', 'de': 'Wiederholung', 'fr': 'Répétition',
+    'en': 'Repeats', 'nl': 'Herhaalt', 'uk': 'Повторюється', 'bg': 'Повтаряне', 'de': 'Wiederholung', 'fr': 'Répétition',
     'it': 'Ripetizione', 'el': 'Επανάληψη', 'es': 'Repetición', 'pt': 'Repetição',
     'ru': 'Повтор', 'tr': 'Tekrar', 'ja': '繰り返し',
   };
   const everyWeek = {
-    'en': 'Every week', 'bg': 'Всяка седмица', 'de': 'Jede Woche',
+    'en': 'Every week', 'nl': 'Elke week', 'uk': 'Щотижня', 'bg': 'Всяка седмица', 'de': 'Jede Woche',
     'fr': 'Chaque semaine', 'it': 'Ogni settimana', 'el': 'Κάθε εβδομάδα',
     'es': 'Cada semana', 'pt': 'Todas as semanas', 'ru': 'Каждую неделю',
     'tr': 'Her hafta', 'ja': '毎週',
   };
   const evenWeek = {
-    'en': 'Even week', 'bg': 'Четна седмица', 'de': 'Gerade Woche',
+    'en': 'Even week', 'nl': 'Even week', 'uk': 'Парний тиждень', 'bg': 'Четна седмица', 'de': 'Gerade Woche',
     'fr': 'Semaine paire', 'it': 'Settimana pari', 'el': 'Ζυγή εβδομάδα',
     'es': 'Semana par', 'pt': 'Semana par', 'ru': 'Чётная неделя',
     'tr': 'Çift hafta', 'ja': '偶数週',
   };
   const oddWeek = {
-    'en': 'Odd week', 'bg': 'Нечетна седмица', 'de': 'Ungerade Woche',
+    'en': 'Odd week', 'nl': 'Oneven week', 'uk': 'Непарний тиждень', 'bg': 'Нечетна седмица', 'de': 'Ungerade Woche',
     'fr': 'Semaine impaire', 'it': 'Settimana dispari', 'el': 'Μονή εβδομάδα',
     'es': 'Semana impar', 'pt': 'Semana ímpar', 'ru': 'Нечётная неделя',
     'tr': 'Tek hafta', 'ja': '奇数週',
   };
   const evenHelp = {
-    'en': 'Shows only in even weeks from the semester start.',
+    'en': 'Shows only in even weeks from the semester start.', 'nl': 'Verschijnt alleen in even weken vanaf het begin van het semester.', 'uk': 'Показується лише в парні тижні від початку семестру.',
     'bg': 'Показва се само в четните седмици от началото на семестъра.',
     'de': 'Nur in geraden Wochen ab Semesterbeginn.',
     'fr': 'Affiché uniquement les semaines paires depuis le début du semestre.',
@@ -715,7 +715,7 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
     'ja': '学期開始からの偶数週にのみ表示されます。',
   };
   const oddHelp = {
-    'en': 'Shows only in odd weeks from the semester start.',
+    'en': 'Shows only in odd weeks from the semester start.', 'nl': 'Verschijnt alleen in oneven weken vanaf het begin van het semester.', 'uk': 'Показується лише в непарні тижні від початку семестру.',
     'bg': 'Показва се само в нечетните седмици от началото на семестъра.',
     'de': 'Nur in ungeraden Wochen ab Semesterbeginn.',
     'fr': 'Affiché uniquement les semaines impaires depuis le début du semestre.',
@@ -728,7 +728,7 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
     'ja': '学期開始からの奇数週にのみ表示されます。',
   };
   const colorLabel = {
-    'en': 'Color', 'bg': 'Цвят', 'de': 'Farbe', 'fr': 'Couleur', 'it': 'Colore',
+    'en': 'Color', 'nl': 'Kleur', 'uk': 'Колір', 'bg': 'Цвят', 'de': 'Farbe', 'fr': 'Couleur', 'it': 'Colore',
     'el': 'Χρώμα', 'es': 'Color', 'pt': 'Cor', 'ru': 'Цвет', 'tr': 'Renk',
     'ja': '色',
   };
