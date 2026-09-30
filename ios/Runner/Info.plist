@@ -88,6 +88,16 @@
 				<string>com.googleusercontent.apps.929046134968-g21i568en2jccqqvlkj4e2reqks9kuij</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.ivoexp.taskify</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>taskify</string>
+			</array>
+		</dict>
 	</array>
 
 	<!-- Background modes за нотификации -->
