@@ -180,6 +180,14 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **★taskify:// URL scheme → v1.0.66(76) (Mac, 2026-09-30, подадено за App Store review):** добавен
+  втори `CFBundleURLTypes` dict със схема `taskify` в `ios/Runner/Info.plist` (до Google Sign-In), за да
+  може **Навици** да засича Taskify на iOS (`canLaunchUrl('taskify://')`) и да показва „Отвори" вместо
+  „Изтегли". Само iOS — на Android Навици вече засича през `installed_apps`. iOS 1.0.66(76) качен +
+  подаден за review (commit `e91dd7f`). **ОСТАВА за PC: Android релийз до 1.0.66** (`git pull` → `flutter
+  clean` → `flutter build appbundle --release` → `tools/play_upload.py`) — вкл. nl+uk езиците от 1.0.64/65,
+  които още не са в Play (live е 1.0.62). Play notes ≤500. Схемата няма Android ефект (детекцията там е
+  вградена), но версията носи nl+uk + дребните подобрения.
 - **★Кръстосана промоция „Навици" в Taskify — секция „Още от 1969" (PC, 2026-09-21, БЕЗ app bump, НЕ
   качено, само тествано на Note 9):** нова секция НАЙ-ДОЛУ в Настройки (над `AboutSection`) за cross-promo
   на другото приложение на 1969 — „Навици" (`com.ivoexp.habits` Android / App Store id `6806278691` iOS).
