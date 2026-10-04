@@ -20,6 +20,7 @@ import 'sections/settings_group.dart';
 import 'sections/cloud_sync_section.dart';
 import 'sections/go_pro_card.dart';
 import 'sections/profile_card.dart';
+import '../profile/profile_screen.dart';
 import 'sections/appearance_section.dart';
 import 'sections/about_section.dart';
 import 'sections/holidays_tile.dart';
@@ -37,6 +38,25 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  // Visible "School / Student mode" entry (otherwise the toggle is buried under
+  // the Profile card). Taps through to ProfileScreen — the existing chooser.
+  static const _studentModeTitle = {
+    'en': 'School / Student mode', 'nl': 'School- / Studentmodus', 'uk': 'Шкільний / Студентський режим',
+    'bg': 'Училищен / Студентски режим', 'de': 'Schul- / Studentenmodus', 'fr': 'Mode école / étudiant',
+    'it': 'Modalità scuola / studente', 'el': 'Λειτουργία σχολείου / φοιτητή', 'es': 'Modo escolar / estudiante',
+    'pt': 'Modo escolar / estudante', 'ru': 'Школьный / студенческий режим', 'tr': 'Okul / üniversite modu',
+    'ja': '学校／学生モード',
+  };
+  static const _studentModeSubtitle = {
+    'en': 'Vacation countdown, schedule, exams', 'nl': 'Vakantie-aftelklok, rooster, examens',
+    'uk': 'Відлік до канікул, розклад, іспити', 'bg': 'Брояч до ваканция, разписание, изпити',
+    'de': 'Ferien-Countdown, Stundenplan, Prüfungen', 'fr': 'Compte à rebours des vacances, emploi du temps, examens',
+    'it': 'Conto alla rovescia vacanze, orario, esami', 'el': 'Αντίστροφη μέτρηση διακοπών, πρόγραμμα, εξετάσεις',
+    'es': 'Cuenta atrás de vacaciones, horario, exámenes', 'pt': 'Contagem para férias, horário, exames',
+    'ru': 'Отсчёт до каникул, расписание, экзамены', 'tr': 'Tatil sayacı, ders programı, sınavlar',
+    'ja': '休みまでのカウントダウン、時間割、試験',
+  };
+
   final _authService = AuthService();
   final _viewPreference = TaskViewPreference();
   final _morningBriefingService = MorningBriefingService();
@@ -298,6 +318,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
               await _loadProfilePhoto(); // снимката/името може да са сменени
               if (mounted) setState(() {});
             },
+          ),
+          const SizedBox(height: 8),
+
+          // ── Видим вход към Училищен/Студентски режим (иначе заровен под
+          // Профил картата) → отваря ProfileScreen, където е самият избор. ──
+          Card(
+            elevation: 0,
+            margin: EdgeInsets.zero,
+            child: ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7B2FF7).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.school_rounded, color: Color(0xFF7B2FF7)),
+              ),
+              title: Text(_studentModeTitle[currentLocale.languageCode] ??
+                  _studentModeTitle['en']!),
+              subtitle: Text(
+                _studentModeSubtitle[currentLocale.languageCode] ??
+                    _studentModeSubtitle['en']!,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                );
+                if (mounted) setState(() {});
+              },
+            ),
           ),
           const SizedBox(height: 16),
 

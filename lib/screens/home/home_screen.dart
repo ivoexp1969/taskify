@@ -277,28 +277,32 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       'ja': '学校モード 🎒',
     };
     const body = {
-      'en': 'Want a countdown to the next school vacation right on your home ', 'nl': 'Wil je een aftelklok naar de volgende schoolvakantie op je beginscherm ', 'uk': 'Хочете відлік до наступних канікул прямо на головному екрані '
-          'screen? Turn on School mode in Settings → Bulgaria and pick your grade.',
+      'en': 'Want a countdown to the next school vacation right on your home '
+          'screen? Turn on School mode in Settings → Profile and choose Pupil or Student.',
+      'nl': 'Wil je een aftelklok naar de volgende schoolvakantie op je '
+          'beginscherm? Zet de Schoolmodus aan via Instellingen → Profiel en kies Leerling of Student.',
+      'uk': 'Хочете відлік до наступних канікул прямо на головному екрані? '
+          'Увімкніть Шкільний режим у Налаштування → Профіль і виберіть Учня або Студента.',
       'bg': 'Искаш ли обратно броене до следващата ваканция направо на началния '
-          'екран? Включи Училищен режим от Настройки → България и избери класа си.',
+          'екран? Включи Училищен режим от Настройки → Профил и избери Ученик или Студент.',
       'de': 'Möchtest du einen Countdown bis zu den nächsten Ferien auf dem '
-          'Startbildschirm? Aktiviere den Schulmodus in Einstellungen → Bulgarien.',
+          'Startbildschirm? Aktiviere den Schulmodus in Einstellungen → Profil und wähle Schüler oder Student.',
       'fr': 'Envie d\'un compte à rebours des prochaines vacances sur l\'accueil ? '
-          'Active le Mode école dans Réglages → Bulgarie et choisis ta classe.',
+          'Active le Mode école dans Réglages → Profil et choisis Élève ou Étudiant.',
       'it': 'Vuoi un conto alla rovescia per le prossime vacanze in home? '
-          'Attiva la Modalità scuola in Impostazioni → Bulgaria e scegli la classe.',
+          'Attiva la Modalità scuola in Impostazioni → Profilo e scegli Alunno o Studente.',
       'el': 'Θέλεις αντίστροφη μέτρηση για τις επόμενες διακοπές στην αρχική; '
-          'Ενεργοποίησε τη Λειτουργία σχολείου στις Ρυθμίσεις → Βουλγαρία.',
+          'Ενεργοποίησε τη Λειτουργία σχολείου στις Ρυθμίσεις → Προφίλ και διάλεξε Μαθητή ή Φοιτητή.',
       'es': '¿Quieres una cuenta atrás para las próximas vacaciones en el inicio? '
-          'Activa el Modo escolar en Ajustes → Bulgaria y elige tu grado.',
+          'Activa el Modo escolar en Ajustes → Perfil y elige Alumno o Estudiante.',
       'pt': 'Queres uma contagem para as próximas férias no ecrã inicial? '
-          'Ativa o Modo escolar em Definições → Bulgária e escolhe o teu ano.',
+          'Ativa o Modo escolar em Definições → Perfil e escolhe Aluno ou Estudante.',
       'ru': 'Хочешь обратный отсчёт до ближайших каникул прямо на главном экране? '
-          'Включи Школьный режим в Настройки → Болгария и выбери класс.',
+          'Включи Школьный режим в Настройки → Профиль и выбери Ученика или Студента.',
       'tr': 'Ana ekranda bir sonraki tatile geri sayım ister misin? '
-          'Ayarlar → Bulgaristan\'dan Okul modunu aç ve sınıfını seç.',
+          'Ayarlar → Profil\'den Okul modunu aç ve Öğrenci ya da Üniversite seç.',
       'ja': '次の休みまでのカウントダウンをホーム画面に表示しませんか？'
-          '設定 → ブルガリア で学校モードをオンにして学年を選びましょう。',
+          '設定 → プロフィール で学校モードをオンにして、生徒か大学生を選びましょう。',
     };
     const later = {
       'en': 'Later', 'nl': 'Later', 'uk': 'Пізніше', 'bg': 'По-късно', 'de': 'Später', 'fr': 'Plus tard',

@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/localization.dart';
 import '../../services/analytics_service.dart';
 import '../home/home_screen.dart';
+import '../profile/profile_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -12,6 +13,14 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
+  // Optional, unobtrusive nudge shown ONLY on the final "Get started" page and
+  // ONLY for Bulgarian users — School mode is BG-centric (vacations / НВО / ДЗИ
+  // are Bulgaria-only), so there's nothing to offer non-BG users. Taps through
+  // to the existing ProfileScreen chooser; skipping it (just pressing "Get
+  // started") changes nothing.
+  static const _studentHintBg =
+      '🎓 Ученик или студент? Включи училищен режим →';
+
   final _controller = PageController();
   int _currentPage = 0;
   static const int _totalPages = 6;
@@ -135,6 +144,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     }),
                   ),
                   const SizedBox(height: 24),
+                  // Optional School-mode nudge — last page only, BG users only.
+                  if (isLastPage && t.lang == 'bg') ...[
+                    TextButton(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) => const ProfileScreen()),
+                      ),
+                      child: Text(
+                        _studentHintBg,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                  ],
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
