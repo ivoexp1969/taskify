@@ -5,11 +5,18 @@
 „имен ден днес". Всяка страница: уникален title/description, canonical, OG, JSON-LD
 (FAQ), вътрешни връзки, CTA към стора. Изход: ~/Desktop/taskify_nameday_seo/imen-den/
 
+Индексируеми (index + sitemap): TOP_NAMES (150 имена) + всички дати + 12 месеца
+(/mesec/{месец}/) + /podvizhni/ + хъба. Останалите имена: noindex,follow, извън sitemap-а.
+lastmod идва от tools/nameday_seo_lastmod.json (хеш на съдържанието) — комитвай го след run.
+
 ДЕПЛОЙ (сайтът е Direct Upload на Cloudflare Pages, източник на PC):
-  копирай папката `imen-den/` в източника на сайта (Desktop/taskify-site-deploy/)
-  → `npx wrangler pages deploy . --project-name=taskify`
+  1. python tools/nameday_seo.py            (комитни tools/nameday_seo_lastmod.json)
+  2. python tools/nameday_seo.py --root-sitemap <taskify-site-deploy>/sitemap.xml [--fix]
+     → главният sitemap НЕ трябва да съдържа noindex имената (--fix ги маха, пази .bak)
+  3. копирай папката `imen-den/` в източника на сайта (Desktop/taskify-site-deploy/)
+     → `npx wrangler pages deploy . --project-name=taskify`
 """
-import os, json, datetime, re, html
+import os, json, datetime, re, html, hashlib, argparse
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(REPO, "assets/data/bg_name_days.json")
@@ -91,14 +98,21 @@ padding:30px 22px;text-align:center;box-shadow:0 4px 18px rgba(74,40,170,.08);tr
 .choice .emo{font-size:3em;display:block;margin-bottom:8px}
 .choice .t{font-size:1.3em;font-weight:800;color:var(--pd)}
 .choice .d{color:#6b6685;font-size:.95em;margin-top:6px}
+.pnav{display:flex;justify-content:space-between;gap:12px;margin:22px 0;font-weight:600}
+.dlinks{margin:10px 0;font-weight:600}
+.upcoming{margin:8px 0 8px 20px}.upcoming li{margin:4px 0}
+.card h2{margin-top:0}
 """
 
 
 OG_IMAGE = "https://taskify1969.com/assets/og-image.png"
 
 
-def page(title, desc, canonical, body, jsonld=None):
+def page(title, desc, canonical, body, jsonld=None, indexable=True):
     # jsonld може да е един dict или списък от dict-ове (напр. FAQPage + BreadcrumbList).
+    # indexable=False → noindex,follow (редките имена: файлът съществува, линковете пренасят
+    # тежест, но страницата не се индексира и НЕ влиза в sitemap-а).
+    robots = "index,follow" if indexable else "noindex,follow"
     blocks = [] if jsonld is None else (jsonld if isinstance(jsonld, list) else [jsonld])
     ld = "".join(f'<script type="application/ld+json">{json.dumps(b, ensure_ascii=False)}</script>'
                  for b in blocks)
@@ -110,7 +124,7 @@ def page(title, desc, canonical, body, jsonld=None):
 <meta property="og:type" content="website"><meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(desc)}"><meta property="og:url" content="{canonical}">
 <meta property="og:image" content="{OG_IMAGE}"><meta property="og:locale" content="bg_BG">
-<meta property="og:site_name" content="Taskify"><meta name="robots" content="index,follow">
+<meta property="og:site_name" content="Taskify"><meta name="robots" content="{robots}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{esc(title)}"><meta name="twitter:description" content="{esc(desc)}">
 <meta name="twitter:image" content="{OG_IMAGE}">
@@ -291,142 +305,303 @@ def write(path, content):
     open(path, "w", encoding="utf-8").write(content)
 
 
-def main():
-    data = json.load(open(DATA, encoding="utf-8"))
-    year = datetime.date.today().year
+# ---- Топ 150 популярни имена → само те от имената са индексируеми (index + sitemap) ----
+# Ръчен списък (в dataset-а няма поле за популярност; Search Console още няма данни).
+# Популярни пълни форми, ТОЧНО както са в bg_name_days.json. Останалите ~550 имена имат
+# собствени страници, но с noindex,follow и извън sitemap-а (тънко съдържание сваля
+# приоритета на цялата секция в Google). Генераторът гърми, ако име липсва в данните.
+TOP_NAMES = (
+    # мъжки (69)
+    "Георги Иван Димитър Петър Христо Николай Тодор Стефан Йордан Васил Атанас Александър "
+    "Стоян Никола Мартин Красимир Пламен Валентин Илия Борис Даниел Емил Любомир Асен "
+    "Владимир Симеон Цветан Веселин Калоян Ивайло Виктор Марин Константин Костадин Павел "
+    "Благой Методи Трифон Андрей Лазар Спас Теодор Радослав Светослав Огнян Райко Митко "
+    "Захари Евгени Филип Матей Самуил Яни Йоан Мирослав Антон Гергин Петко Иво Сашо Румен "
+    "Милен Добромир Наум Харалампи Елин Богдан Добрин Динко "
+    # женски (72)
+    "Мария Иванка Елена Йорданка Виолета Даниела Цветанка Валентина Галина Надежда Анна "
+    "Петя Гергана Теодора Николета Габриела Виктория Александра София Екатерина Стефка "
+    "Снежана Красимира Емилия Кристина Антоанета Милена Татяна Златка Ивелина Надка Светла "
+    "Райна Магдалена Ирина Марина Невена Ваня Ива Йоана Никол Стефани Михаела Симона Деница "
+    "Боряна Цветелина Вяра Любов Василка Тодорка Димитрина Петранка Христина Анастасия "
+    "Албена Таня Яна Евгения Катерина Ангелина Калина Борислава Илияна Доротея Марта "
+    "Маргарита Миглена Мира Камелия Цвета Зоя "
+    # добавени до 150 (9)
+    "Светлана Силвия Румяна Ралица Биляна Ивана Радостина Боян Тихомир"
+).split()
 
-    # индекс: име -> {dates:[(label, url, sortkey)], feast}
-    name_dates = {}   # name -> list of (label, mmdd_or_movablekey, feast, date_obj|None)
-    date_entries = []  # (date_obj, mmdd, names, feast) за fixed
-    for r in data["fixed"]:
+# lastmod по хеш на съдържанието: датата се мени САМО при реална промяна на страницата.
+# Файлът е в git → PC и Mac дават един и същ резултат. (Google игнорира lastmod, който
+# се мени при всяко регенериране.)
+LASTMOD_FILE = os.path.join(REPO, "tools", "nameday_seo_lastmod.json")
+
+
+def nav_html(prev, nxt):
+    """Навигация ← предишна / следваща → (prev/nxt = (url, label) или None)."""
+    a = f'<a href="{prev[0]}" rel="prev">← {esc(prev[1])}</a>' if prev else '<span></span>'
+    b = f'<a href="{nxt[0]}" rel="next">{esc(nxt[1])} →</a>' if nxt else '<span></span>'
+    return f'<div class="pnav">{a}{b}</div>'
+
+
+def crumb_ld(items):
+    return {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+        {"@type": "ListItem", "position": i + 1, "name": nm, "item": u}
+        for i, (nm, u) in enumerate(items)]}
+
+
+def build(today):
+    """Генерира всички страници. Връща {url: (relpath, html, indexable)}."""
+    data = json.load(open(DATA, encoding="utf-8"))
+    year = today.year
+
+    missing = [n for n in TOP_NAMES if not any(n in r["names"] for r in data["fixed"] + data["movable"])]
+    if missing or len(set(TOP_NAMES)) != len(TOP_NAMES):
+        raise SystemExit(f"TOP_NAMES: липсват в данните {missing} или има дубликати")
+    top = set(TOP_NAMES)
+
+    name_dates = {}    # име -> [(етикет, url на дата/подвижни, празник, date)]
+    date_entries = []  # (date, mmdd, names, feast) — фиксирани, сортирани по mmdd
+    for r in sorted(data["fixed"], key=lambda r: r["date"]):
         mm, dd = map(int, r["date"].split("-"))
         d = datetime.date(year, mm, dd)
         date_entries.append((d, r["date"], r["names"], r.get("feast")))
         for n in r["names"]:
             name_dates.setdefault(n, []).append(
                 (f"{dd} {MONTHS[mm]}", f"{BASE}/data/{r['date']}/", r.get("feast"), d))
-    for r in data["movable"]:
+    movables = []      # (offset, feast, names, date тази година, date догодина)
+    for r in sorted(data["movable"], key=lambda r: r["offset"]):
         d = orthodox_easter(year) + datetime.timedelta(days=r["offset"])
+        d2 = orthodox_easter(year + 1) + datetime.timedelta(days=r["offset"])
+        movables.append((r["offset"], r.get("feast"), r["names"], d, d2))
         for n in r["names"]:
             name_dates.setdefault(n, []).append(
-                (f"{d.day} {MONTHS[d.month]} ({year} г.)", None, r.get("feast"), d))
+                (f"{d.day} {MONTHS[d.month]} ({year} г.)", f"{BASE}/podvizhni/", r.get("feast"), d))
 
-    # уникални slug-ове
     slugs = {}
     for n in sorted(name_dates):
         s = slug(n); base = s; i = 2
         while s in slugs.values(): s = f"{base}-{i}"; i += 1
         slugs[n] = s
 
-    pages = 0
+    def nlink(x):
+        return f'<a href="{BASE}/ime/{slugs[x]}/">{esc(x)}</a>'
+
+    def month_url(m):
+        return f"{BASE}/mesec/{slug(MONTHS[m])}/"
+
+    out = {}
+
+    def add(url, html_, indexable=True):
+        rel = url[len(BASE):].strip("/")
+        out[url] = (os.path.join(rel, "index.html") if rel else "index.html", html_, indexable)
+
     # ---- Страници по ИМЕ ----
     for n, dates in sorted(name_dates.items()):
-        s = slugs[n]
-        url = f"{BASE}/ime/{s}/"
+        url = f"{BASE}/ime/{slugs[n]}/"
         labels = ", ".join(sorted({d[0] for d in dates}))
         feast = next((d[2] for d in dates if d[2]), None)
         title = f"Кога е имен ден на {n}? — {labels} | Taskify"
         desc = f"{n} празнува имен ден на {labels}." + (f" Празник: {feast}." if feast else "") + \
                f" Виж кой друг празнува и си сложи напомняне в Taskify."
+        movable = any(d[1] == f"{BASE}/podvizhni/" for d in dates)
+        # Реални линкове към страницата на всяка дата (подвижните → /podvizhni/).
+        seen, date_links = set(), []
+        for lab, durl, fe, dobj in sorted(dates, key=lambda d: (d[3].month, d[3].day)):
+            if durl in seen: continue
+            seen.add(durl)
+            if durl.endswith("/podvizhni/"):
+                date_links.append(f'<a href="{durl}">Виж всички подвижни имени дни →</a>')
+            else:
+                date_links.append(f'<a href="{durl}">Виж всички, които празнуват на {esc(lab)} →</a>')
+        # Имена на същата/същите дати (обединено за всички фиксирани дати на името).
         same = []
-        movable = any(d[1] is None for d in dates)  # плаващ празник (обвързан с Великден)
         for lab, durl, fe, dobj in dates:
-            if durl:
-                # имена на същата дата
-                for de in date_entries:
-                    if de[1] == durl.rstrip("/").split("/")[-1]:
-                        same = [(x, slugs.get(x)) for x in de[2] if x != n and x in slugs]
-        # За плаващите празници датата се мени всяка година → казваме го изрично,
-        # за да не изглежда {year} г. като фиксирана дата (виж РИСК 2).
+            for de in date_entries:
+                if durl == f"{BASE}/data/{de[1]}/":
+                    same += [x for x in de[2] if x != n and x not in same]
         movable_note = (f'<p><em>Това е <strong>подвижен празник</strong> — датата се определя спрямо '
                         f'Великден и се мени всяка година. Показаната дата е за {year} г.</em></p>') if movable else ''
         body = f"""<div class="crumbs"><a href="{BASE}/">Именник</a> › {esc(n)}</div>
 <h1>Кога е имен ден на {esc(n)}?</h1>
 <p class="lead">{esc(n)} празнува имен ден на:</p>
 <div><span class="date">{esc(labels)}</span></div>
+<p class="dlinks">{'<br>'.join(date_links)}</p>
 {movable_note}
 {f'<p>Църковен празник: <strong>{esc(feast)}</strong>.</p>' if feast else ''}
 {meaning_block(n)}
 {card_section(n)}
 {CTA_BLOCK}
-{('<h2>На същата дата празнуват и</h2><div class="grid">'+''.join(f'<a href="{BASE}/ime/{sl}/">{esc(x)}</a>' for x,sl in same[:40])+'</div>') if same else ''}
+{('<h2>На същата дата празнуват и</h2><div class="grid">'+''.join(nlink(x) for x in same[:40])+'</div>') if same else ''}
 <h2>Не пропускай нито един имен ден</h2>
 <p>Taskify е българското приложение за задачи, което помни всички имени дни, официалните
 празници и ти напомня навреме — за да честитиш на близките си. Пиши задачите на естествен
 език, а AI ги разпознава. Работи на iPhone и Android.</p>"""
         faq = [{
-            "@type":"Question","name":f"Кога е имен ден на {n}?",
-            "acceptedAnswer":{"@type":"Answer","text":f"{n} празнува имен ден на {labels}." + (f" Църковен празник: {feast}." if feast else "")}}]
+            "@type": "Question", "name": f"Кога е имен ден на {n}?",
+            "acceptedAnswer": {"@type": "Answer", "text": f"{n} празнува имен ден на {labels}." + (f" Църковен празник: {feast}." if feast else "")}}]
         if n in MEANINGS:
-            faq.append({"@type":"Question","name":f"Какво означава името {n}?",
-                        "acceptedAnswer":{"@type":"Answer","text":MEANINGS[n]}})
-        crumb = {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
-            {"@type":"ListItem","position":1,"name":"Именник","item":f"{BASE}/"},
-            {"@type":"ListItem","position":2,"name":n,"item":url}]}
-        ld = [{"@context":"https://schema.org","@type":"FAQPage","mainEntity":faq}, crumb]
-        write(os.path.join(OUT, "ime", s, "index.html"),
-              page(title, desc, url, body, ld)); pages += 1
+            faq.append({"@type": "Question", "name": f"Какво означава името {n}?",
+                        "acceptedAnswer": {"@type": "Answer", "text": MEANINGS[n]}})
+        ld = [{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": faq},
+              crumb_ld([("Именник", f"{BASE}/"), (n, url)])]
+        add(url, page(title, desc, url, body, ld, indexable=n in top), indexable=n in top)
 
-    # ---- Страници по ДАТА ----
-    for d, mmdd, names, feast in date_entries:
+    # ---- Страници по ДАТА (с ← предишен / следващ → , кръгово 31.12 → 1.01) ----
+    for i, (d, mmdd, names, feast) in enumerate(date_entries):
         url = f"{BASE}/data/{mmdd}/"
         lab = f"{d.day} {MONTHS[d.month]}"
+        pd_, nd_ = date_entries[i - 1], date_entries[(i + 1) % len(date_entries)]
+        nav = nav_html((f"{BASE}/data/{pd_[1]}/", f"{pd_[0].day} {MONTHS[pd_[0].month]}"),
+                       (f"{BASE}/data/{nd_[1]}/", f"{nd_[0].day} {MONTHS[nd_[0].month]}"))
         title = f"Кой има имен ден на {lab}? {(feast+' — ') if feast else ''}Taskify"
         desc = f"На {lab} имен ден празнуват: {', '.join(names)}." + (f" Празник: {feast}." if feast else "")
-        body = f"""<div class="crumbs"><a href="{BASE}/">Именник</a> › {esc(lab)}</div>
+        body = f"""<div class="crumbs"><a href="{BASE}/">Именник</a> › <a href="{month_url(d.month)}">{MONTHS[d.month].capitalize()}</a> › {esc(lab)}</div>
 <h1>Кой празнува имен ден на {esc(lab)}?{(' — '+esc(feast)) if feast else ''}</h1>
-<div class="names">{''.join(f'<a href="{BASE}/ime/{slugs[x]}/">{esc(x)}</a>' for x in names)}</div>
+<div class="names">{''.join(nlink(x) for x in names)}</div>
+{nav}
 {CTA_BLOCK}
-<p>Taskify ти напомня за всеки имен ден и официален празник — безплатно, на български.</p>"""
-        crumb = {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
-            {"@type":"ListItem","position":1,"name":"Именник","item":f"{BASE}/"},
-            {"@type":"ListItem","position":2,"name":lab,"item":url}]}
-        write(os.path.join(OUT, "data", mmdd, "index.html"),
-              page(title, desc, url, body, crumb)); pages += 1
+<p>Taskify ти напомня за всеки имен ден и официален празник — безплатно, на български.</p>
+<p><a href="{month_url(d.month)}">Всички имени дни през {MONTHS[d.month]} →</a></p>"""
+        ld = crumb_ld([("Именник", f"{BASE}/"), (MONTHS[d.month].capitalize(), month_url(d.month)), (lab, url)])
+        add(url, page(title, desc, url, body, ld))
+
+    # ---- 12 МЕСЕЧНИ подхъба /mesec/{месец}/ ----
+    by_month = {}
+    for e in date_entries:
+        by_month.setdefault(e[0].month, []).append(e)
+    for m in range(1, 13):
+        url = month_url(m)
+        mn = MONTHS[m]
+        blocks = "".join(
+            f'<div class="card"><h2><a href="{BASE}/data/{mmdd}/">{d.day} {mn}{(" — "+esc(fe)) if fe else ""}</a></h2>'
+            f'<div class="names">{"".join(nlink(x) for x in names)}</div></div>'
+            for d, mmdd, names, fe in by_month.get(m, []))
+        pm, nm = (m - 2) % 12 + 1, m % 12 + 1
+        nav = nav_html((month_url(pm), MONTHS[pm].capitalize()), (month_url(nm), MONTHS[nm].capitalize()))
+        cnt = sum(len(e[2]) for e in by_month.get(m, []))
+        title = f"Имени дни през {mn} — кой празнува и кога | Taskify"
+        desc = (f"Всички имени дни през {mn}: {len(by_month.get(m, []))} дати и {cnt} имена с празниците им. "
+                f"Taskify ти напомня навреме.")
+        body = f"""<div class="crumbs"><a href="{BASE}/">Именник</a> › {mn.capitalize()}</div>
+<h1>Имени дни през {mn}</h1>
+<p class="lead">Кой празнува имен ден през {mn} — по дати, с църковните празници.</p>
+{blocks or '<p>През този месец няма имени дни по календара.</p>'}
+{nav}
+{CTA_BLOCK}"""
+        ld = crumb_ld([("Именник", f"{BASE}/"), (mn.capitalize(), url)])
+        add(url, page(title, desc, url, body, ld))
+
+    # ---- /podvizhni/ — 6-те подвижни празника (спрямо православния Великден) ----
+    url = f"{BASE}/podvizhni/"
+    blocks = "".join(
+        f'<div class="card"><h2>{esc(fe or "")}</h2>'
+        f'<p>{d.day} {MONTHS[d.month]} {year} г. · {d2.day} {MONTHS[d2.month]} {year + 1} г.</p>'
+        f'<div class="names">{"".join(nlink(x) for x in names)}</div></div>'
+        for off, fe, names, d, d2 in movables)
+    body = f"""<div class="crumbs"><a href="{BASE}/">Именник</a> › Подвижни празници</div>
+<h1>Подвижни имени дни — {year} и {year + 1} г.</h1>
+<p class="lead">Тези празници се определят спрямо православния Великден, затова датата им се мени всяка година.</p>
+{blocks}
+{CTA_BLOCK}"""
+    add(url, page(f"Подвижни имени дни {year} — Цветница, Лазаровден, Спасовден | Taskify",
+                  f"Кога са подвижните имени дни през {year} и {year + 1} г.: Тодоровден, Лазаровден, "
+                  f"Цветница, Великден, Спасовден и Всички български светии — и кой празнува.",
+                  url, body, crumb_ld([("Именник", f"{BASE}/"), ("Подвижни празници", url)])))
 
     # ---- HUB /imen-den/ ----
-    all_names = sorted(name_dates)
-    name_links = "".join(f'<a href="{BASE}/ime/{slugs[n]}/">{esc(n)}</a>' for n in all_names)
-    months_html = ""
-    by_month = {}
-    for d, mmdd, names, feast in sorted(date_entries):
-        by_month.setdefault(d.month, []).append((d, mmdd, feast))
-    for m in range(1, 13):
-        if m not in by_month: continue
-        days = "".join(f'<a href="{BASE}/data/{mm}/">{dd.day}{(" "+fe) if fe else ""}</a>'
-                       for dd, mm, fe in by_month[m])
-        months_html += f"<h2>{MONTHS[m].capitalize()}</h2><div class='grid'>{days}</div>"
-    # JS „днес"
+    # Статичен блок „Предстоящи имени дни" (следващите 10 дати от деня на генериране) —
+    # реални <a> за Google; JS „днес" отгоре е само за посетителите.
+    upcoming = sorted(date_entries, key=lambda e: (e[1] < today.strftime("%m-%d"), e[1]))[:10]
+    up_html = "".join(
+        f'<li><a href="{BASE}/data/{mmdd}/">{d.day} {MONTHS[d.month]}{(" — "+esc(fe)) if fe else ""}</a>: '
+        f'{", ".join(esc(x) for x in names[:6])}{"…" if len(names) > 6 else ""}</li>'
+        for d, mmdd, names, fe in upcoming)
+    months_html = "".join(f'<a href="{month_url(m)}">{MONTHS[m].capitalize()}</a>' for m in range(1, 13))
+    top_html = "".join(nlink(n) for n in sorted(top))
     today_map = {mmdd: names for d, mmdd, names, fe in date_entries}
     hub_body = f"""<h1>Български именник — кой има имен ден днес?</h1>
-<p class="lead" id="today">Зареждане…</p>
+<p class="lead" id="today">Разгледай имените дни по месеци, дати или име.</p>
+<h2>Предстоящи имени дни</h2><ul class="upcoming">{up_html}</ul>
 {card_section('')}
 {CTA_BLOCK}
-<h2>Търси по име</h2><div class="grid">{name_links}</div>
-<h2>По дата</h2>{months_html}
+<h2>По месеци</h2><div class="grid">{months_html}</div>
+<p><a href="{BASE}/podvizhni/">Подвижни имени дни (Цветница, Лазаровден, Спасовден…) →</a></p>
+<h2>Популярни имена</h2><div class="grid">{top_html}</div>
 <script>
 const M=["", "януари","февруари","март","април","май","юни","юли","август","септември","октомври","ноември","декември"];
 const T={json.dumps(today_map, ensure_ascii=False)};
 const n=new Date();const k=String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
 const el=document.getElementById('today');
 if(T[k]){{el.innerHTML='🎉 Днес, '+n.getDate()+' '+M[n.getMonth()+1]+', имен ден празнуват: <strong>'+T[k].join(', ')+'</strong>. Честито!';}}
-else{{el.textContent='Днес няма голям имен ден по календара. Разгледай по име или дата по-долу.';}}
+else{{el.textContent='Днес няма голям имен ден по календара. Разгледай по месец, дата или име по-долу.';}}
 </script>"""
-    write(os.path.join(OUT, "index.html"),
-          page("Български именник — имени дни по име и дата | Taskify",
-               "Кой има имен ден днес? Търси имен ден по име или дата. Пълен български именник с празници. Taskify ти напомня навреме.",
-               f"{BASE}/", hub_body)); pages += 1
+    add(f"{BASE}/", page("Български именник — имени дни по име и дата | Taskify",
+                         "Кой има имен ден днес? Търси имен ден по име или дата. Пълен български именник с празници. Taskify ти напомня навреме.",
+                         f"{BASE}/", hub_body))
+    return out
 
-    # ---- sitemap ----
-    urls = [f"{BASE}/"] + [f"{BASE}/ime/{slugs[n]}/" for n in all_names] + \
-           [f"{BASE}/data/{mmdd}/" for _, mmdd, _, _ in date_entries]
-    today = datetime.date.today().isoformat()
+
+def stamp_lastmod(out, today):
+    """lastmod по SHA-256 на съдържанието; пази стария, ако страницата не е променена."""
+    try:
+        old = json.load(open(LASTMOD_FILE, encoding="utf-8"))
+    except FileNotFoundError:
+        old = {}
+    new = {}
+    for url, (rel, html_, idx) in out.items():
+        if not idx: continue
+        h = hashlib.sha256(html_.encode("utf-8")).hexdigest()[:16]
+        prev = old.get(url)
+        new[url] = prev if prev and prev["h"] == h else {"h": h, "d": today.isoformat()}
+    with open(LASTMOD_FILE, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(dict(sorted(new.items())), f, ensure_ascii=False, indent=1)
+        f.write("\n")
+    return new
+
+
+def check_root_sitemap(path, out, fix):
+    """Главният sitemap на сайта НЕ трябва да съдържа noindex страници от именника."""
+    sm = open(path, encoding="utf-8").read()
+    blocks = re.findall(r"<url>.*?</url>\s*", sm, flags=re.S)
+    bad = [b for b in blocks
+           if (m := re.search(r"<loc>\s*(\S+?)\s*</loc>", b)) and m.group(1) in out and not out[m.group(1)][2]]
+    ours = [b for b in blocks if BASE in b]
+    print(f"Главен sitemap: {len(blocks)} URL-а, от тях {len(ours)} от /imen-den/, noindex сред тях: {len(bad)}")
+    if bad and fix:
+        open(path + ".bak", "w", encoding="utf-8").write(sm)
+        for b in bad:
+            sm = sm.replace(b, "", 1)
+        open(path, "w", encoding="utf-8").write(sm)
+        print(f"Махнати {len(bad)} noindex URL-а (резервно копие: {path}.bak)")
+    elif bad:
+        print("Пусни отново с --fix, за да ги махнеш.")
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--root-sitemap", help="път до ГЛАВНИЯ sitemap.xml на сайта за проверка")
+    ap.add_argument("--fix", action="store_true", help="махни noindex URL-ите от главния sitemap")
+    args = ap.parse_args()
+
+    today = datetime.date.today()
+    out = build(today)
+    if args.root_sitemap:
+        check_root_sitemap(args.root_sitemap, out, args.fix)
+        return
+    lm = stamp_lastmod(out, today)
+    for url, (rel, html_, idx) in out.items():
+        write(os.path.join(OUT, rel), html_)
+
+    # sitemap: САМО индексируемите (топ имена + дати + месеци + подвижни + хъб)
+    urls = [u for u, v in out.items() if v[2]]
     sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    sm += "".join(f"<url><loc>{u}</loc><lastmod>{today}</lastmod></url>\n" for u in urls) + "</urlset>\n"
+    sm += "".join(f"<url><loc>{u}</loc><lastmod>{lm[u]['d']}</lastmod></url>\n" for u in urls) + "</urlset>\n"
     write(os.path.join(OUT, "sitemap.xml"), sm)
 
+    n_name = sum(1 for u in out if "/ime/" in u)
     print(f"OUT: {OUT}")
-    print(f"Страници: {pages}  (по име: {len(all_names)}, по дата: {len(date_entries)}, hub: 1)")
+    print(f"Страници: {len(out)}  (по име: {n_name}, от тях индексируеми: {sum(1 for u, v in out.items() if '/ime/' in u and v[2])}, "
+          f"noindex: {sum(1 for v in out.values() if not v[2])})")
     print(f"Sitemap: {len(urls)} URL-а")
 
 

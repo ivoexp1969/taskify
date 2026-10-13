@@ -180,6 +180,11 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **Именник SEO изчистване (Cloud, 2026-10-13, само `tools/nameday_seo.py`, НЕ деплойнато):** 150 индексируеми
+  имена (`TOP_NAMES`) + 120 дати + 12 месеца (`/mesec/`) + `/podvizhni/` + хъб = 284 в sitemap; 550 редки имена
+  `noindex,follow` извън sitemap; реални линкове име→дата, дата ←→, статичен „Предстоящи“ в хъба; lastmod по хеш
+  (`tools/nameday_seo_lastmod.json`). ОСТАВА за PC: `--root-sitemap` проверка на главния sitemap + деплой (виж DEVLOG).
+  **⏳ ВАЖЕН TODO:** dataset-ът няма Кирил/Михаил/Ангел/Росица/Десислава… — засяга и приложението (виж DEVLOG).
 - **★taskify:// URL scheme → v1.0.66(76) (Mac, 2026-09-30, подадено за App Store review):** добавен
   втори `CFBundleURLTypes` dict със схема `taskify` в `ios/Runner/Info.plist` (до Google Sign-In), за да
   може **Навици** да засича Taskify на iOS (`canLaunchUrl('taskify://')`) и да показва „Отвори" вместо
