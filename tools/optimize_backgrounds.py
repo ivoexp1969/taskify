@@ -15,7 +15,7 @@ from PIL import Image, ImageOps
 CW, CH = 1080, 1350          # платното на картичката
 QUALITY = 82                 # начално JPG качество (сваля се адаптивно)
 TARGET_KB = 250              # таван на размера → сваля качеството докато се събере
-MAX = 8                      # максимум фонове (ротацията в кода е bg-01..bg-08)
+MAX = 30                     # максимум фонове (генераторът зарежда bg-01..bg-30)
 
 SRC = os.path.expanduser(sys.argv[1] if len(sys.argv) > 1 else "~/Desktop/nameday_bg_src")
 OUT = os.path.expanduser(sys.argv[2] if len(sys.argv) > 2 else "~/Desktop/nameday_bg_out")

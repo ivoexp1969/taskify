@@ -1,0 +1,18 @@
+{
+  "_note": "Кредити за фоновете на имен-ден картичките (taskify1969.com/imen-den/backgrounds/). bg-01..bg-18 са от Unsplash (Unsplash License, без задължителна атрибуция) — виж README.txt; тук са изброени новите bg-19..bg-30 от Pexels. Pexels License: свободна употреба, без задължителна атрибуция; кредитите се пазят като добра практика и за проследимост.",
+  "license_url": "https://www.pexels.com/license/",
+  "backgrounds": [
+    { "file": "bg-19.jpg", "theme": "candle",       "url": "https://www.pexels.com/photo/15365476/", "author": "Esra Erdem",            "license": "Pexels License" },
+    { "file": "bg-20.jpg", "theme": "candle",       "url": "https://www.pexels.com/photo/289756/",   "author": "Hakan Erenler",          "license": "Pexels License" },
+    { "file": "bg-21.jpg", "theme": "candle",       "url": "https://www.pexels.com/photo/7233184/",  "author": "Artem Podrez",           "license": "Pexels License" },
+    { "file": "bg-22.jpg", "theme": "bokeh/lights", "url": "https://www.pexels.com/photo/10495041/", "author": "Vlad Ioan",              "license": "Pexels License" },
+    { "file": "bg-23.jpg", "theme": "bokeh/lights", "url": "https://www.pexels.com/photo/19969578/", "author": "Masood Aslami",          "license": "Pexels License" },
+    { "file": "bg-24.jpg", "theme": "bokeh/lights", "url": "https://www.pexels.com/photo/754194/",   "author": "Dzenina Lukac",          "license": "Pexels License" },
+    { "file": "bg-25.jpg", "theme": "autumn leaves","url": "https://www.pexels.com/photo/10635405/", "author": "Mak_ jp",                "license": "Pexels License" },
+    { "file": "bg-26.jpg", "theme": "autumn leaves","url": "https://www.pexels.com/photo/6656658/",  "author": "Ella Wei",               "license": "Pexels License" },
+    { "file": "bg-27.jpg", "theme": "snow/winter",  "url": "https://www.pexels.com/photo/11037055/", "author": "Aleksandr Gorlov",       "license": "Pexels License" },
+    { "file": "bg-28.jpg", "theme": "snow/winter",  "url": "https://www.pexels.com/photo/29498267/", "author": "Lorenzo Alessio Messina","license": "Pexels License" },
+    { "file": "bg-29.jpg", "theme": "fir/pinecones","url": "https://www.pexels.com/photo/12841134/", "author": "Magda Ehlers",           "license": "Pexels License" },
+    { "file": "bg-30.jpg", "theme": "cozy texture", "url": "https://www.pexels.com/photo/6757412/",  "author": "Karola G.",              "license": "Pexels License" }
+  ]
+}

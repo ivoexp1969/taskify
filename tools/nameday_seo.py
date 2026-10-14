@@ -232,11 +232,11 @@ CARD_HTML = """
  var W=1080,H=1350;
  // Реални снимки-фонове (локални, същия домейн → без CORS tainting при toBlob).
  // Само наличните се ползват; при 0 заредени → fallback към градиента.
- var FILES=[];for(var k=1;k<=18;k++){FILES.push('bg-'+(k<10?'0':'')+k);}
+ var FILES=[];for(var k=1;k<=30;k++){FILES.push('bg-'+(k<10?'0':'')+k);}
  var imgs=[],slots=[],bgIx=-1;
  function selectBg(ix){bgIx=ix;draw();
    for(var i=0;i<slots.length;i++){slots[i].el.className=(slots[i].ix===ix)?'cg-th sel':'cg-th';}}
- FILES.forEach(function(n){var im=new Image();
+ FILES.forEach(function(n){var im=new Image();im._bg=parseInt(n.slice(3),10);
    im.onload=function(){
      var ix=imgs.length;imgs.push(im);
      // миниатюра за избор
@@ -251,6 +251,16 @@ CARD_HTML = """
  function hash(s){var h=0;for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))&0x7fffffff;}return h;}
  function cover(im){var s=Math.max(W/im.width,H/im.height);var nw=im.width*s,nh=im.height*s;ctx.drawImage(im,(W-nw)/2,(H-nh)/2,nw,nh);}
  function grad(){var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#6A3DE8');g.addColorStop(1,'#4A28AA');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+ // ── Орнамент вместо емоджи: малък златен глиф според темата на избрания фон ──
+ var ORN=__ORNMAP__,GOLD='#FFD23F';
+ function ornFor(){var b=(imgs.length&&bgIx>=0&&imgs[bgIx])?imgs[bgIx]._bg:0;return ORN[b]||'star';}
+ function oStar(cx,cy,R){ctx.beginPath();for(var i=0;i<10;i++){var a=-Math.PI/2+i*Math.PI/5,r=(i%2===0)?R:R*0.42,x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);if(i)ctx.lineTo(x,y);else ctx.moveTo(x,y);}ctx.closePath();ctx.fill();}
+ function oSnow(cx,cy,R){ctx.lineWidth=4;for(var k=0;k<6;k++){var a=k*Math.PI/3;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a));ctx.stroke();var fb=[[0.55,0.28],[0.78,0.2]];for(var j=0;j<2;j++){var bx=cx+R*fb[j][0]*Math.cos(a),by=cy+R*fb[j][0]*Math.sin(a);for(var s=-1;s<=1;s+=2){var a2=a+s*Math.PI/4;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx+R*fb[j][1]*Math.cos(a2),by+R*fb[j][1]*Math.sin(a2));ctx.stroke();}}}}
+ function oLeaf(cx,cy,R){var i,s,w;ctx.beginPath();for(i=0;i<=24;i++){s=-1+2*i/24;w=R*0.52*(1-s*s);if(i)ctx.lineTo(cx-w,cy+s*R);else ctx.moveTo(cx-w,cy+s*R);}for(i=0;i<=24;i++){s=1-2*i/24;w=R*0.52*(1-s*s);ctx.lineTo(cx+w,cy+s*R);}ctx.closePath();ctx.fill();ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(cx,cy-R*0.9);ctx.lineTo(cx,cy+R*0.9);ctx.stroke();}
+ function oFlower(cx,cy,R){for(var k=0;k<5;k++){var a=-Math.PI/2+k*2*Math.PI/5,px=cx+R*0.5*Math.cos(a),py=cy+R*0.5*Math.sin(a);ctx.beginPath();ctx.arc(px,py,R*0.42,0,2*Math.PI);ctx.fill();}ctx.save();ctx.fillStyle='#B48C1E';ctx.beginPath();ctx.arc(cx,cy,R*0.2,0,2*Math.PI);ctx.fill();ctx.restore();}
+ function oFlame(cx,cy,R){var i,t,x,y;ctx.beginPath();for(i=0;i<=30;i++){t=i/30*Math.PI;x=cx+R*0.5*Math.sin(t)*(0.6+0.4*Math.sin(t));y=cy-R*Math.cos(t);if(i)ctx.lineTo(x,y);else ctx.moveTo(x,y);}for(i=0;i<=30;i++){t=Math.PI-i/30*Math.PI;x=cx-R*0.5*Math.sin(t)*(0.6+0.4*Math.sin(t));y=cy-R*Math.cos(t);ctx.lineTo(x,y);}ctx.closePath();ctx.fill();}
+ function oNeutral(cx,cy,R){ctx.beginPath();ctx.moveTo(cx,cy-R*0.5);ctx.lineTo(cx+R*0.5,cy);ctx.lineTo(cx,cy+R*0.5);ctx.lineTo(cx-R*0.5,cy);ctx.closePath();ctx.fill();ctx.lineWidth=3;for(var s=-1;s<=1;s+=2){ctx.beginPath();ctx.moveTo(cx+s*R*0.6,cy);ctx.lineTo(cx+s*R*1.1,cy);ctx.stroke();ctx.beginPath();ctx.arc(cx+s*R*1.25,cy,5,0,2*Math.PI);ctx.fill();}}
+ function drawOrn(cx,cy,R){var ty=ornFor();ctx.save();ctx.fillStyle=GOLD;ctx.strokeStyle=GOLD;ctx.lineJoin='round';ctx.lineCap='round';if(ty==='star')oStar(cx,cy,R);else if(ty==='snow')oSnow(cx,cy,R);else if(ty==='leaf')oLeaf(cx,cy,R);else if(ty==='flower')oFlower(cx,cy,R);else if(ty==='flame')oFlame(cx,cy,R);else oNeutral(cx,cy,R);ctx.restore();}
  function draw(){
   var name=(inp.value||'').trim()||'Име';
   var r=hash(name)||1;
@@ -268,7 +278,7 @@ CARD_HTML = """
   // Текст: бял, със сянка + тъмен контур → четим на всякаква снимка.
   ctx.save();
   ctx.shadowColor='rgba(0,0,0,0.75)';ctx.shadowBlur=22;ctx.lineJoin='round';
-  ctx.font='130px "Segoe UI Emoji","Apple Color Emoji",sans-serif';ctx.fillStyle='#fff';ctx.fillText(EMO,W/2,300);
+  drawOrn(W/2,238,58);
   ctx.font='700 50px sans-serif';ctx.fillStyle='#FFD23F';ctx.fillText(TITLE,W/2,430);
   var fs=158;
   do{fs-=4;ctx.font='800 '+fs+'px sans-serif';}while(ctx.measureText(name).width>W-220&&fs>44);
@@ -296,8 +306,22 @@ CARD_HTML = """
 """
 
 
+# Фон (bg-01..30) → тема на орнамента върху картичката (вариант „тематичен орнамент").
+# flower=цвят, star=звезда, flame=пламък, snow=снежинка, leaf=листо, neutral=неутрален ромб.
+ORN_THEME = {
+    1: "flower", 2: "flower", 3: "neutral", 4: "flower", 5: "star", 6: "snow",
+    7: "flower", 8: "flower", 9: "flower", 10: "flower", 11: "neutral", 12: "neutral",
+    13: "neutral", 14: "neutral", 15: "flower", 16: "flower", 17: "star", 18: "neutral",
+    19: "flame", 20: "flame", 21: "flame", 22: "star", 23: "star", 24: "star",
+    25: "leaf", 26: "leaf", 27: "snow", 28: "snow", 29: "snow", 30: "neutral",
+}
+ORN_MAP_JSON = json.dumps(ORN_THEME, ensure_ascii=False)
+
+
 def card_section(prefill, occ="nameday"):
-    return CARD_HTML.replace("__PREFILL__", esc(prefill)).replace("__DEFAULTOCC__", occ)
+    return (CARD_HTML.replace("__PREFILL__", esc(prefill))
+            .replace("__DEFAULTOCC__", occ)
+            .replace("__ORNMAP__", ORN_MAP_JSON))
 
 
 def write(path, content):
