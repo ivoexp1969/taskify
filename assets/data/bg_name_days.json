@@ -3,6 +3,7 @@
   "source": "Wikipedia 'Имен ден' (CC BY-SA 4.0)",
   "source_url": "https://bg.wikipedia.org/wiki/Имен_ден",
   "note": "Movable feasts are offsets in days from Orthodox Easter. Attribution required under CC BY-SA when distributed.",
+  "manual_additions": "Contains manual additions beyond the Wikipedia source, cross-checked against the Bulgarian Orthodox church calendar: Кирил + feast on 05-11; Михаил, Ангел on 11-08 (Архангеловден); Станислав, Станислава on 12-27 (Стефановден).",
   "fixed_count": 120,
   "movable_count": 6
  },
@@ -548,13 +549,15 @@
   {
    "date": "05-11",
    "names": [
+    "Кирил",
     "Киро",
     "Кирчо",
     "Кирилка",
     "Методи",
     "Методия",
     "Методийка"
-   ]
+   ],
+   "feast": "Св. св. Кирил и Методий"
   },
   {
    "date": "05-12",
@@ -1128,6 +1131,7 @@
   {
    "date": "11-08",
    "names": [
+    "Ангел",
     "Ангелина",
     "Ангелинка",
     "Емил",
@@ -1143,6 +1147,7 @@
     "Милен",
     "Милена",
     "Михаела",
+    "Михаил",
     "Михо",
     "Мишел",
     "Момчил",
@@ -1350,7 +1355,9 @@
     "Стойне",
     "Стоил",
     "Стоимен",
-    "Станимир"
+    "Станимир",
+    "Станислав",
+    "Станислава"
    ],
    "feast": "Стефановден"
   }
