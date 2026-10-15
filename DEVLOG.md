@@ -6,6 +6,21 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-10-15 · Cloud — Именник: призиви към Taskify + UTM + насочване по устройство (commit 1b9b969, ★НЕ деплойнато★)
+Само `tools/nameday_seo.py` (+ `nameday_seo_lastmod.json`); приложението НЕ е пипано.
+- Текстове: дата/месец/хъб/подвижни → „Всяка сутрин в 8:00 Taskify ти казва кой има имен ден — а в календара
+  виждаш кои от твоите контакти празнуват…“; име → „Имаш познат {Име}? Taskify ще ти напомни на {дата} сутринта.“
+  + ред под датата; под всеки „Безплатно 14 дни · Android и iPhone“. (Честно спрямо кода: нотификацията изброява
+  имената на деня, контактите са само в Календар; функциите са Premium/trial.)
+- Play: `&referrer=utm_source%3Dimen-den%26utm_medium%3Dweb%26utm_campaign%3D<ime|data|mesec|podvizhni|hub>`;
+  App Store: обикновен линк, `APPSTORE_PT = ""` → при попълване добавя `pt/ct=imen-den-<тип>`.
+- Зелен бутон: Android → Play, iPhone/iPad → App Store, компютър → двата бутона (само show/hide, без redirect;
+  без JS се виждат всички). „Сподели“/„Копирай линк“ → canonical на текущата стр. + `utm_source=share&utm_medium=card`.
+- Проверено: 288 индексируеми; линкове/UTM на име/дата/хъб; Chromium с Android/iPhone/iPad/desktop UA.
+- ★ДЕПЛОЙ (PC):★ `git pull` → `python tools\nameday_seo.py` → копирай `imen-den/` → `npx wrangler pages deploy .
+  --project-name=taskify` → `npx wrangler pages deployment list --project-name=taskify` (Environment=Production)
+  → провери /imen-den/ime/mihail/ за „Имаш познат Михаил“ + `referrer=utm_source%3Dimen-den` → комитни lastmod.
+
 ## 2026-10-13 · Cloud — Именник SEO: изчистване (150 индексируеми имена) + вътрешни линкове (само генератор, НЕ деплойнато)
 Диагноза: 821 шаблонни стр., ~660 почти-дубликати → Google „открита, не индексирана" 3 мес. (12 от 838 индексирани).
 Промени само в `tools/nameday_seo.py` (+ нов `tools/nameday_seo_lastmod.json`):
