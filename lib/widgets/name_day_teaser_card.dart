@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../services/pro_service.dart';
 import '../services/name_days_service.dart';
 import '../services/contact_name_index.dart';
+import '../services/analytics_service.dart';
 import '../screens/paywall/paywall_screen.dart';
 import '../utils/localization.dart';
 
@@ -55,10 +56,13 @@ class _NameDayTeaserCardState extends State<NameDayTeaserCard> {
       'el': 'Επαφές ονομαστικής', 'es': 'Contactos de onomástica', 'pt': 'Contactos do dia do nome',
       'ru': 'Контакты именин', 'tr': 'İsim günü kişileri', 'ja': '聖名祝日の連絡先',
     };
+    AnalyticsService().logLockedFeatureTap('contacts');
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) =>
-            PaywallScreen(featureName: feature[lang] ?? feature['en']!),
+        builder: (_) => PaywallScreen(
+          featureName: feature[lang] ?? feature['en']!,
+          source: 'contacts',
+        ),
       ),
     );
   }

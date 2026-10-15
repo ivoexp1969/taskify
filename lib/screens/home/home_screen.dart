@@ -640,6 +640,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         context,
         isFeatureAvailable: false,
         featureName: calendarName[lang] ?? calendarName['en']!,
+        source: 'calendar',
       );
 
       if (!upgraded) return;

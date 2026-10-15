@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../utils/debug_overrides.dart';
+import 'analytics_service.dart';
 
 // Условен import - stub за web, реален пакет за mobile
 import 'purchases_stub.dart' if (dart.library.io) 'package:purchases_flutter/purchases_flutter.dart';
@@ -232,6 +233,7 @@ class ProService extends ChangeNotifier {
       _logProSource();
       _lastNotifiedPro = isPro;
       _armExpiryTimer();
+      _updateAnalyticsProps();
       notifyListeners();
     } catch (e) {
       debugPrint('ProService init error: $e');
@@ -247,6 +249,7 @@ class ProService extends ChangeNotifier {
       _logProSource();
       _lastNotifiedPro = isPro;
       _armExpiryTimer();
+      _updateAnalyticsProps();
       notifyListeners();
     }
   }
@@ -280,11 +283,37 @@ class ProService extends ChangeNotifier {
   /// Уведомява слушателите САМО ако изведеният Pro статус наистина се е сменил
   /// (пести ненужни rebuild-и при resume).
   void _notifyProChange() {
+    _updateAnalyticsProps();
     final p = isPro;
     if (_lastNotifiedPro != p) {
       _lastNotifiedPro = p;
       notifyListeners();
     }
+  }
+
+  /// Обновява user property `pro_state` + логва еднократно `trial_end`.
+  void _updateAnalyticsProps() {
+    if (kIsWeb) return;
+    final state = _isPro
+        ? 'paid'
+        : _promoActive
+            ? 'promo'
+            : _trialActive
+                ? 'trial'
+                : 'free';
+    AnalyticsService().setProState(state);
+    _maybeLogTrialEnd();
+  }
+
+  /// Логва `trial_end` веднъж, щом trial-ът е изтекъл. `converted` = платец ли е.
+  Future<void> _maybeLogTrialEnd() async {
+    if (kIsWeb || _trialEndDate == null || _trialActive) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getBool('trial_end_logged') ?? false) return;
+      await prefs.setBool('trial_end_logged', true);
+      AnalyticsService().logTrialEnd(converted: _isPro);
+    } catch (_) {}
   }
 
   /// Извиква се при връщане на фокус към приложението (resume). Понеже trial/промо
@@ -363,6 +392,7 @@ class ProService extends ChangeNotifier {
         final now = DateTime.now();
         await prefs.setString('trial_start_date', now.toIso8601String());
         _trialEndDate = now.add(const Duration(days: trialPeriodDays));
+        AnalyticsService().logTrialStart();
         debugPrint('Trial started, ends: $_trialEndDate');
       } else {
         final trialStart = DateTime.parse(trialStartStr);

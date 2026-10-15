@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/pro_service.dart';
+import '../../services/analytics_service.dart';
 import '../../utils/localization.dart';
 
 // Условен import за Package тип
@@ -97,8 +98,9 @@ int? _introDays(IntroductoryPrice intro) {
 
 class PaywallScreen extends StatefulWidget {
   final String? featureName;
+  final String? source; // откъде е отворен (contacts/calendar/settings/…) — за analytics
 
-  const PaywallScreen({super.key, this.featureName});
+  const PaywallScreen({super.key, this.featureName, this.source});
 
   @override
   State<PaywallScreen> createState() => _PaywallScreenState();
@@ -174,12 +176,17 @@ class _PaywallScreenState extends State<PaywallScreen> {
       }
       
       if (mounted) {
+        final def = _defaultPackage(packages);
         setState(() {
           _packages = packages;
-          _selectedPackage = _defaultPackage(packages);
+          _selectedPackage = def;
           _yearlySavings = _computeYearlySavings(packages);
           _isLoading = false;
         });
+        AnalyticsService().logPaywallView(
+          source: widget.source ?? widget.featureName,
+          defaultPkg: def?.identifier,
+        );
       }
     } catch (e) {
       debugPrint('Load offerings error: $e');
@@ -196,9 +203,15 @@ class _PaywallScreenState extends State<PaywallScreen> {
     if (kIsWeb) return;
     
     setState(() => _isPurchasing = true);
+    AnalyticsService().logPurchaseStart(package.identifier);
 
     try {
       final success = await _proService.purchasePackage(package);
+      if (success) {
+        AnalyticsService().logPurchaseSuccess(package.identifier);
+      } else {
+        AnalyticsService().logPurchaseFail(package.identifier, reason: 'not_pro');
+      }
       if (mounted) {
         if (success) {
           Navigator.of(context).pop(true);
@@ -211,6 +224,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
         }
       }
     } catch (e) {
+      AnalyticsService()
+          .logPurchaseFail(package.identifier, reason: 'exception');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${_pt('error', _lang)}: $e'), backgroundColor: Colors.red),
@@ -265,6 +280,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
     try {
       final success = await _proService.restorePurchases();
+      AnalyticsService().logRestore(success: success);
       if (mounted) {
         if (success) {
           Navigator.of(context).pop(true);
@@ -284,6 +300,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
         }
       }
     } catch (e) {
+      AnalyticsService().logRestore(success: false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${_pt('error', _lang)}: $e'), backgroundColor: Colors.red),
@@ -523,8 +540,12 @@ class _PaywallScreenState extends State<PaywallScreen> {
                               lang: lang,
                               onTap: _isPurchasing
                                   ? null
-                                  : () => setState(
-                                      () => _selectedPackage = package),
+                                  : () {
+                                      setState(
+                                          () => _selectedPackage = package);
+                                      AnalyticsService()
+                                          .logPaywallSelect(package.identifier);
+                                    },
                             )),
                         const SizedBox(height: 8),
                         // Единствен бутон за покупка на ИЗБРАНИЯ план.
@@ -818,9 +839,12 @@ class _PackageCard extends StatelessWidget {
   }
 }
 
-Future<bool> showPaywallIfNeeded(BuildContext context, {required bool isFeatureAvailable, String? featureName}) async {
+Future<bool> showPaywallIfNeeded(BuildContext context,
+    {required bool isFeatureAvailable, String? featureName, String? source}) async {
   if (isFeatureAvailable) return true;
-  final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => PaywallScreen(featureName: featureName)));
+  AnalyticsService().logLockedFeatureTap(source ?? featureName ?? 'unknown');
+  final result = await Navigator.of(context).push<bool>(MaterialPageRoute(
+      builder: (_) =>
+          PaywallScreen(featureName: featureName, source: source ?? featureName)));
   return result == true;
 }

@@ -209,6 +209,56 @@ class AnalyticsService {
     }
   }
 
+  // ── Монетизация (trial / paywall / покупки) ─────────────────────────────
+
+  /// Стартиран trial (веднъж, при първото пускане).
+  Future<void> logTrialStart() => _log('trial_start');
+
+  /// Край на trial. [converted] = станал ли е платец.
+  Future<void> logTrialEnd({required bool converted}) =>
+      _log('trial_end', {'converted': converted});
+
+  /// Отворен paywall. [source] = откъде (contacts/calendar/settings/…);
+  /// [defaultPkg] = планът, избран по подразбиране (обикновено lifetime).
+  Future<void> logPaywallView({String? source, String? defaultPkg}) =>
+      _log('paywall_view', {
+        'source': source ?? 'unknown',
+        'default_pkg': defaultPkg ?? 'none',
+      });
+
+  /// Избран план в paywall-а (radio).
+  Future<void> logPaywallSelect(String package) =>
+      _log('paywall_select', {'package': package});
+
+  Future<void> logPurchaseStart(String package) =>
+      _log('purchase_start', {'package': package});
+
+  Future<void> logPurchaseSuccess(String package) =>
+      _log('purchase_success', {'package': package});
+
+  Future<void> logPurchaseFail(String package, {String? reason}) =>
+      _log('purchase_fail', {
+        'package': package,
+        if (reason != null) 'reason': reason,
+      });
+
+  Future<void> logRestore({required bool success}) =>
+      _log('restore', {'success': success});
+
+  /// Тап върху заключена Pro функция. [source] = коя (contacts/calendar/…).
+  Future<void> logLockedFeatureTap(String source) =>
+      _log('locked_feature_tap', {'source': source});
+
+  /// User property `pro_state` ∈ {paid, promo, trial, free}.
+  Future<void> setProState(String state) async {
+    if (!_enabled) return;
+    try {
+      await _fa!.setUserProperty(name: 'pro_state', value: state);
+    } catch (e) {
+      debugPrint('Analytics setProState failed: $e');
+    }
+  }
+
   // ── Кръстосана промоция („Още от 1969") ────────────────────────────────
 
   /// Показана секция/карта. [surface] ∈ {simple_link, bonus_card}.
