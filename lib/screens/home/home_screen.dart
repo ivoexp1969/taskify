@@ -13,6 +13,7 @@ import '../../widgets/gift_cta.dart';
 import '../../widgets/whats_new_dialog.dart';
 import '../../services/pro_service.dart';
 import '../../services/name_days_service.dart';
+import '../../services/update_prompt_service.dart';
 import '../../services/holidays_service.dart';
 import '../../services/school_calendar_service.dart';
 import '../../services/university_service.dart';
@@ -97,6 +98,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!mounted) return;
     await WhatsNewDialog.maybeShow(
         context, LanguageScope.of(context).locale.languageCode);
+    // Подкана за обновяване — след „Какво ново", ненатрапчиво, не блокира.
+    if (!mounted) return;
+    await UpdatePromptService.instance
+        .maybePrompt(context, LanguageScope.of(context).locale.languageCode);
   }
 
   /// Бутонът „+" на Android widget-а отваря редактора за нова задача.
