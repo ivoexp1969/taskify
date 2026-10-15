@@ -600,11 +600,21 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
   // Седмичният шаблон (четна/нечетна) е реалност за студенти → показва се само
   // в режим Студент; учениците виждат опростен диалог.
   final bool isStudent = UniversityService().enabled;
+  // Вече-въведените предмети → чипове за бърз избор (вместо да се пишат наново).
+  // Снимка при отваряне на диалога; новият предмет влиза в списъка при следващо
+  // отваряне (идва от _slots след запис).
+  final List<String> subjectSuggestions = svc.distinctSubjects;
 
   const subjectLabel = {
     'en': 'Subject', 'nl': 'Vak', 'uk': 'Предмет', 'bg': 'Предмет', 'de': 'Fach', 'fr': 'Matière',
     'it': 'Materia', 'el': 'Μάθημα', 'es': 'Asignatura', 'pt': 'Disciplina',
     'ru': 'Предмет', 'tr': 'Ders', 'ja': '科目',
+  };
+  const recentSubjectsLabel = {
+    'en': 'Recent subjects', 'nl': 'Recente vakken', 'uk': 'Нещодавні предмети', 'bg': 'Предишни предмети', 'de': 'Letzte Fächer',
+    'fr': 'Matières récentes', 'it': 'Materie recenti', 'el': 'Πρόσφατα μαθήματα',
+    'es': 'Asignaturas recientes', 'pt': 'Disciplinas recentes', 'ru': 'Недавние предметы',
+    'tr': 'Son dersler', 'ja': '最近の科目',
   };
   const locationLabel = {
     'en': 'Location (optional)', 'nl': 'Locatie (optioneel)', 'uk': 'Місце (необов\'язково)', 'bg': 'Място (по избор)', 'de': 'Ort (optional)',
@@ -810,6 +820,35 @@ Future<ScheduleSlotResult?> showScheduleSlotDialog(
                     }
                   },
                 ),
+                // Чипове с вече-въведените предмети → тап попълва полето (и
+                // предлага запомнения цвят). Полето остава свободно за нов предмет.
+                // Няма въведени още → без чипове (чисто, както преди).
+                if (subjectSuggestions.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(t(recentSubjectsLabel),
+                      style: Theme.of(ctx).textTheme.labelMedium),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      for (final subj in subjectSuggestions)
+                        ChoiceChip(
+                          label: Text(subj),
+                          selected: subjectCtrl.text.trim() == subj,
+                          onSelected: (_) => setD(() {
+                            subjectCtrl.text = subj;
+                            subjectCtrl.selection = TextSelection.collapsed(
+                                offset: subj.length);
+                            // Преизползвай съществуващата цветова памет (не дублирай).
+                            if (!colorTouched) {
+                              colorValue = svc.colorForSubject(subj);
+                            }
+                          }),
+                        ),
+                    ],
+                  ),
+                ],
                 // Тип на часа само за студенти (упражнение/лекция). При
                 // учениците няма разлика — просто „час" (kind остава lesson).
                 if (isStudent) ...[

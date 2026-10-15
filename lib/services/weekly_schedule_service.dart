@@ -18,11 +18,18 @@ class WeeklyScheduleService {
 
   static const String _pref = 'weekly_schedule';
   static const String _prefTerm = 'weekly_schedule_term';
+  // Отделен „речник" с всички някога въвеждани предмети. Расте и ОЦЕЛЯВА при
+  // триене на слотове → веднъж въведен предмет остава като чип в „Добави час".
+  // Чисто локален помощник (не се синхронизира); посява се от слотовете.
+  static const String _prefSubjects = 'weekly_schedule_subjects';
 
   /// Бумва се при всяка промяна на разписа (вкл. смяна на текущия срок).
   static final ValueNotifier<int> revision = ValueNotifier<int>(0);
 
   List<ScheduleSlot> _slots = const [];
+  // Всички някога въвеждани предмети (display форма), дедупликирани без оглед на
+  // регистъра, в реда на първо въвеждане. Триенето на слот НЕ ги маха.
+  final List<String> _knownSubjects = [];
   bool _loaded = false;
 
   /// Текущо избран срок/семестър (1 или 2). Разписанието се въвежда и показва
@@ -45,6 +52,12 @@ class WeeklyScheduleService {
     final prefs = await SharedPreferences.getInstance();
     _parse(prefs.getString(_pref));
     _currentTerm = (prefs.getInt(_prefTerm) == 2) ? 2 : 1;
+    _loadSubjects(prefs.getString(_prefSubjects));
+    // Миграция/посев: вече съществуващите предмети в слотовете влизат в речника
+    // (за хора, които вече имат разписание отпреди тази функция).
+    if (_rememberSubjects(_slots.map((s) => s.subject))) {
+      await _saveSubjects(prefs);
+    }
     _loaded = true;
     // Опресни евентуалните слушатели (напр. лентата на календара), заредени
     // преди края на асинхронния load.
@@ -70,6 +83,39 @@ class WeeklyScheduleService {
       debugPrint('WeeklyScheduleService: parse failed → $e');
     }
     _slots = const [];
+  }
+
+  void _loadSubjects(String? raw) {
+    _knownSubjects.clear();
+    if (raw == null) return;
+    try {
+      final l = json.decode(raw);
+      if (l is List) _rememberSubjects(l.whereType<String>());
+    } catch (e) {
+      debugPrint('WeeklyScheduleService: subjects parse failed → $e');
+    }
+  }
+
+  /// Добавя име(на) към речника с предмети (trim, без празни, дедупликация без
+  /// оглед на регистъра — пази първото изписване). Връща true, ако е добавено
+  /// поне едно ново.
+  bool _rememberSubjects(Iterable<String> names) {
+    final seen = {for (final s in _knownSubjects) s.toLowerCase()};
+    var changed = false;
+    for (final raw in names) {
+      final name = raw.trim();
+      if (name.isEmpty) continue;
+      if (seen.add(name.toLowerCase())) {
+        _knownSubjects.add(name);
+        changed = true;
+      }
+    }
+    return changed;
+  }
+
+  Future<void> _saveSubjects([SharedPreferences? prefs]) async {
+    final p = prefs ?? await SharedPreferences.getInstance();
+    await p.setString(_prefSubjects, json.encode(_knownSubjects));
   }
 
   /// Всички слотове (несортирани).
@@ -116,6 +162,26 @@ class WeeklyScheduleService {
     return null;
   }
 
+  /// Всички някога въвеждани предмети — за чиповете за бърз избор в „Добави час".
+  /// Идва от растящия речник [_knownSubjects], затова предмет ОСТАВА тук дори след
+  /// като часът му е изтрит. Подредба: най-ползваните в текущите слотове първи,
+  /// после останалите азбучно (дедупликация без оглед на регистъра).
+  List<String> get distinctSubjects {
+    final counts = <String, int>{};
+    for (final s in _slots) {
+      final key = s.subject.trim().toLowerCase();
+      if (key.isEmpty) continue;
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+    final list = List<String>.from(_knownSubjects);
+    list.sort((a, b) {
+      final byFreq = (counts[b.toLowerCase()] ?? 0)
+          .compareTo(counts[a.toLowerCase()] ?? 0);
+      return byFreq != 0 ? byFreq : a.toLowerCase().compareTo(b.toLowerCase());
+    });
+    return list;
+  }
+
   bool get isEmpty => _slots.isEmpty;
 
   /// Връща първия съществуващ слот, който се припокрива по време с [candidate]
@@ -138,6 +204,10 @@ class WeeklyScheduleService {
       next.add(slot);
     }
     _slots = next;
+    // Запомни предмета завинаги (расте речникът, оцелява при триене на слота).
+    if (_rememberSubjects([slot.subject])) {
+      await _saveSubjects();
+    }
     await _persist();
   }
 
@@ -199,6 +269,11 @@ class WeeklyScheduleService {
     await prefs.setString(
         _pref, json.encode(_slots.map((s) => s.toJson()).toList()));
     await prefs.setInt(_prefTerm, _currentTerm);
+    // Посей речника и от синкнатите слотове (предметите остават локално, дори
+    // ако по-късно съответният слот бъде изтрит на друго устройство).
+    if (_rememberSubjects(_slots.map((s) => s.subject))) {
+      await _saveSubjects(prefs);
+    }
     revision.value++;
   }
 }
