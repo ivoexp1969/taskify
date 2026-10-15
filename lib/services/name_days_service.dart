@@ -15,6 +15,30 @@ class NameDay {
   const NameDay({required this.feast, required this.names});
 }
 
+/// „и още N" за списъка с контакти (локализирано, 13 ез.).
+const _andMore = {
+  'en': 'and {n} more', 'nl': 'en nog {n}', 'uk': 'і ще {n}',
+  'bg': 'и още {n}',
+  'de': 'und {n} weitere',
+  'fr': 'et {n} de plus',
+  'it': 'e altri {n}',
+  'el': 'και {n} ακόμη',
+  'es': 'y {n} más',
+  'pt': 'e mais {n}',
+  'ru': 'и ещё {n}',
+  'tr': 've {n} kişi daha', 'ja': 'ほか{n}人',
+};
+
+/// До 3 имена на контакти + „и още N" (ако са повече).
+String _contactsSummary(List<ContactMatch> contacts, String lang) {
+  final names = contacts.map((c) => c.name).toList();
+  if (names.length <= 3) return names.join(', ');
+  final shown = names.take(3).join(', ');
+  final more = names.length - 3;
+  final tail = (_andMore[lang] ?? _andMore['en']!).replaceAll('{n}', '$more');
+  return '$shown $tail';
+}
+
 /// Зарежда българските именни дни от вградения dataset
 /// (assets/data/bg_name_days.json) и ги предоставя по дата.
 ///
@@ -187,9 +211,24 @@ class NameDaysService {
       'ru': 'Сегодня празднуют {names} — {n} ваших контактов тоже 🔒',
       'tr': 'Bugün {names} kutluyor — kişilerinden {n} kişi de 🔒', 'ja': '今日は{names}がお祝い — 連絡先{n}人も 🔒',
     };
+    // Pro потребител + контакти → показваме имената на контактите (до 3 + „и
+    // още N"). Работи и на Android, и на iOS (on-device индекс).
+    const bodyProContactsTpl = {
+      'en': 'Name day for {contacts} — send your wishes? 🎉', 'nl': 'Naamdag voor {contacts} — je wensen sturen? 🎉', 'uk': 'Іменини у {contacts} — надіслати побажання? 🎉',
+      'bg': 'Имен ден имат {contacts} — да честитиш? 🎉',
+      'de': 'Namenstag für {contacts} — gratulierst du? 🎉',
+      'fr': 'Fête du prénom pour {contacts} — un petit mot ? 🎉',
+      'it': 'Onomastico per {contacts} — fai gli auguri? 🎉',
+      'el': 'Ονομαστική εορτή για {contacts} — να ευχηθείς; 🎉',
+      'es': 'Santo de {contacts} — ¿felicitas? 🎉',
+      'pt': 'Dia do nome de {contacts} — parabeniza? 🎉',
+      'ru': 'Именины у {contacts} — поздравишь? 🎉',
+      'tr': '{contacts} isim gününü kutluyor — tebrik eder misin? 🎉', 'ja': '{contacts}が聖名祝日です — お祝いを送りますか？🎉',
+    };
     final t = title[lang] ?? title['en']!;
     final tpl = bodyTpl[lang] ?? bodyTpl['en']!;
     final freeLockedTpl = bodyFreeLockedTpl[lang] ?? bodyFreeLockedTpl['en']!;
+    final proContactsTpl = bodyProContactsTpl[lang] ?? bodyProContactsTpl['en']!;
 
     // Pro статус + индекс на контактите определят текста.
     final isPro = ProService().isPro;
@@ -210,19 +249,22 @@ class NameDaysService {
       if (fireAt.isBefore(now)) continue; // днес, ако часът е минал — пропусни
 
       final names = nameDay.names.join(', ');
-      final contacts = contactsEnabled
+      final List<ContactMatch> contacts = contactsEnabled
           ? ContactNameIndex().contactsForNames(nameDay.names)
-          : const [];
+          : const <ContactMatch>[];
 
       String body;
-      if (!isPro && contacts.isNotEmpty) {
+      if (isPro && contacts.isNotEmpty) {
+        // Pro + контакти → имената на контактите (до 3 + „и още N").
+        body = proContactsTpl.replaceAll(
+            '{contacts}', _contactsSummary(contacts, lang));
+      } else if (!isPro && contacts.isNotEmpty) {
         // Безплатен + контакти → имената на деня + брой контакти с катинар.
         body = freeLockedTpl
             .replaceAll('{names}', names)
             .replaceAll('{n}', '${contacts.length}');
       } else {
-        // Pro текстът с имената на контактите се добавя отделно (Задача 5);
-        // дотогава и при липса на контакти — базовият текст.
+        // Без разрешение/без контакти (вкл. Pro) → досегашният базов текст.
         body = tpl.replaceAll('{names}', names);
       }
 
