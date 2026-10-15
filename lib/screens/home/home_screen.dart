@@ -375,6 +375,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!_proService.isInitialized) return;
 
     final prefs = await SharedPreferences.getInstance();
+    final trialStartStr = prefs.getString('trial_start_date');
+    final trialStart =
+        trialStartStr != null ? DateTime.tryParse(trialStartStr) : null;
 
     // Кой е „стар" потребител, който току-що губи Pro?
     //  (а) бивш ПЛАТЕЦ: кешът казваше Pro, RC потвърди неактивен, ИЛИ
@@ -382,18 +385,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     //      НЕ е Pro (нито платец, нито промо, нито активен trial).
     // Брандновите потребители са в активен trial → isPro=true → не са допустими.
     bool eligible = _proService.wasDowngradedFromCache;
-    if (!eligible && !_proService.isPro) {
-      final trialStartStr = prefs.getString('trial_start_date');
-      if (trialStartStr != null) {
-        final end = DateTime.tryParse(trialStartStr)
-            ?.add(const Duration(days: trialPeriodDays));
-        if (end != null && DateTime.now().isAfter(end)) {
-          eligible = true;
-        }
-      }
+    if (!eligible && !_proService.isPro && trialStart != null) {
+      final end = trialStart.add(const Duration(days: trialPeriodDays));
+      if (DateTime.now().isAfter(end)) eligible = true;
     }
     if (!eligible) return;
     _downgradeChecked = true;
+
+    // „7 дни Pro подарък" САМО за ранните потребители — първа инсталация ПРЕДИ
+    // 1.0.49 (пусната 10.07.2026). trial_start_date се записва при първото
+    // пускане изобщо → надежден прокси за датата на инсталация. Новите (и по-
+    // късните) инсталации НЕ получават подарък.
+    final giftEligible =
+        trialStart != null && trialStart.isBefore(DateTime(2026, 7, 10));
 
     if (prefs.getBool('downgrade_dialog_shown') ?? false) {
       _proService.clearDowngradeFlag();
@@ -516,16 +520,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Text(tr(dPro),
                     style: const TextStyle(
                         fontSize: 13, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
+                if (giftEligible) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(tr(dGift),
+                        style: const TextStyle(fontSize: 13)),
                   ),
-                  child: Text(tr(dGift),
-                      style: const TextStyle(fontSize: 13)),
-                ),
+                ],
               ],
             ),
           ),
@@ -543,17 +549,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               },
               child: Text(tr(bGetPro)),
             ),
-            FilledButton(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                await _proService.grantEarlySupporterGrace(7);
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(tr(giftSnack))),
-                );
-              },
-              child: Text(tr(bAcceptGift)),
-            ),
+            if (giftEligible)
+              FilledButton(
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  await _proService.grantEarlySupporterGrace(7);
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(tr(giftSnack))),
+                  );
+                },
+                child: Text(tr(bAcceptGift)),
+              ),
           ],
         ),
       );

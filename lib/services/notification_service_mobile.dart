@@ -557,17 +557,18 @@ class NotificationService {
         'ru': '⏰ Пробный период Pro заканчивается через 3 дня',
         'tr': '⏰ Pro deneme süresi 3 gün sonra sona eriyor', 'ja': '⏰ Proトライアルは3日後に終了',
       };
+      // Честно: НИЩО не се трие. Остават задачите; заключват се Pro функциите.
       const bodies = {
-        'en': 'Upgrade now to keep all your tasks, reminders and calendar sync.', 'nl': 'Upgrade nu om al je taken, herinneringen en agendasynchronisatie te behouden.', 'uk': 'Оновіть зараз, щоб зберегти всі завдання, нагадування та синхронізацію календаря.',
-        'bg': 'Надстрой сега, за да запазиш задачите, напомнянията и синхронизацията.',
-        'de': 'Jetzt upgraden, um Aufgaben, Erinnerungen und Kalender zu behalten.',
-        'fr': 'Mettez à niveau pour conserver vos tâches, rappels et la synchronisation.',
-        'it': 'Aggiorna ora per mantenere attività, promemoria e sincronizzazione.',
-        'el': 'Αναβαθμίστε τώρα για να διατηρήσετε εργασίες, υπενθυμίσεις και συγχρονισμό.',
-        'es': 'Actualiza ahora para mantener tareas, recordatorios y sincronización.',
-        'pt': 'Atualize agora para manter suas tarefas, lembretes e sincronização.',
-        'ru': 'Обновитесь, чтобы сохранить задачи, напоминания и синхронизацию.',
-        'tr': 'Görevlerinizi, hatırlatıcılarınızı ve senkronizasyonu korumak için yükseltin.', 'ja': '今すぐアップグレードして、すべてのタスク、リマインダー、カレンダー同期を維持しましょう。',
+        'en': 'Your tasks stay — but Calendar, Statistics, AI and ad-free will lock. Keep Pro?', 'nl': 'Je taken blijven — maar Agenda, Statistieken, AI en advertentievrij worden vergrendeld. Pro houden?', 'uk': 'Твої завдання залишаться — але Календар, Статистика, AI і без реклами заблокуються. Залишити Pro?',
+        'bg': 'Задачите ти остават — но Календар, Статистика, AI и „без реклами" ще се заключат. Запази Pro?',
+        'de': 'Deine Aufgaben bleiben — aber Kalender, Statistik, KI und werbefrei werden gesperrt. Pro behalten?',
+        'fr': 'Tes tâches restent — mais Calendrier, Statistiques, IA et sans pub seront verrouillés. Garder Pro ?',
+        'it': 'Le tue attività restano — ma Calendario, Statistiche, IA e senza pubblicità si bloccheranno. Mantieni Pro?',
+        'el': 'Οι εργασίες σου μένουν — αλλά Ημερολόγιο, Στατιστικά, AI και χωρίς διαφημίσεις θα κλειδωθούν. Κράτα το Pro;',
+        'es': 'Tus tareas quedan — pero Calendario, Estadísticas, IA y sin anuncios se bloquearán. ¿Mantener Pro?',
+        'pt': 'As tuas tarefas ficam — mas Calendário, Estatísticas, IA e sem anúncios serão bloqueados. Manter Pro?',
+        'ru': 'Твои задачи останутся — но Календарь, Статистика, ИИ и «без рекламы» заблокируются. Оставить Pro?',
+        'tr': 'Görevlerin kalır — ama Takvim, İstatistikler, AI ve reklamsız kilitlenecek. Pro kalsın mı?', 'ja': 'タスクは残ります — ただしカレンダー・統計・AI・広告なしはロックされます。Proを継続しますか？',
       };
 
       await _initIfNeeded();
