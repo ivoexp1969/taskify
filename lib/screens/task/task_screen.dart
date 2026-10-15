@@ -44,6 +44,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import '../paywall/paywall_screen.dart';
 import '../../services/pro_service.dart';
 import 'sections/productivity_banner.dart';
+import '../../widgets/name_day_teaser_card.dart';
 import 'dialogs/date_picker_dialog.dart';
 import 'sections/task_editor_widgets.dart';
 import 'sections/task_list_tile.dart';
@@ -827,6 +828,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
             // ключова дата). Само при включен режим; сама се скрива иначе.
             // Тап → пълен списък с предстоящи събития. Реактивна.
             const StudyCountdownCard(),
+
+            // Заключен тийзър „Контакти с имен ден" — само за безплатен потребител
+            // и само в ден с имен ден. Тап → paywall. Сам се скрива иначе.
+            const NameDayTeaserCard(),
 
             // (Входът към Споделени списъци е в „Категория" избора — Пакет 3.)
 

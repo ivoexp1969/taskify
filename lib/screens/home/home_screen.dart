@@ -12,6 +12,7 @@ import '../../widgets/banner_ad_widget.dart';
 import '../../widgets/gift_cta.dart';
 import '../../widgets/whats_new_dialog.dart';
 import '../../services/pro_service.dart';
+import '../../services/name_days_service.dart';
 import '../../services/holidays_service.dart';
 import '../../services/school_calendar_service.dart';
 import '../../services/university_service.dart';
@@ -353,6 +354,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       // Downgrade може да дойде по-късно през RC слушателя (мрежа) → проверяваме
       // и тук, не само при старта.
       _maybeShowDowngradeDialog();
+      // Текстът на именните нотификации зависи от Pro статуса (безплатен тийзър
+      // vs имената на контактите) → препланираме при всяка смяна на статуса.
+      if (!kIsWeb) {
+        NameDaysService().refreshNotificationsFromPrefs(
+            LanguageScope.of(context).locale.languageCode);
+      }
     }
   }
 

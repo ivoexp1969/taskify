@@ -4,6 +4,8 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/orthodox_easter.dart';
 import 'notification_service.dart';
+import 'pro_service.dart';
+import 'contact_name_index.dart';
 
 /// Един запис за имен ден: празник + имена, които празнуват.
 class NameDay {
@@ -170,8 +172,29 @@ class NameDaysService {
       'ru': 'Сегодня именины у {names} — поздравишь? 🎉',
       'tr': 'Bugün {names} isim gününü kutluyor — tebrik eder misin? 🎉', 'ja': '今日は{names}が聖名祝日です — お祝いを送りますか？🎉',
     };
+    // Безплатен потребител + има индекс на контактите → тийзър „N от контактите
+    // ти 🔒" (брой с катинар). Pro текстът с имената идва отделно (виж
+    // scheduleNotifications Pro-клона).
+    const bodyFreeLockedTpl = {
+      'en': '{names} celebrate today — {n} of your contacts too 🔒', 'nl': '{names} vieren vandaag — {n} van je contacten ook 🔒', 'uk': 'Сьогодні святкують {names} — {n} ваших контактів теж 🔒',
+      'bg': 'Днес празнуват {names} — {n} от контактите ти също 🔒',
+      'de': 'Heute feiern {names} — {n} deiner Kontakte auch 🔒',
+      'fr': "Aujourd'hui {names} fêtent — {n} de tes contacts aussi 🔒",
+      'it': 'Oggi festeggiano {names} — anche {n} dei tuoi contatti 🔒',
+      'el': 'Σήμερα γιορτάζουν {names} — {n} επαφές σου επίσης 🔒',
+      'es': 'Hoy celebran {names} — {n} de tus contactos también 🔒',
+      'pt': 'Hoje {names} celebram — {n} dos teus contactos também 🔒',
+      'ru': 'Сегодня празднуют {names} — {n} ваших контактов тоже 🔒',
+      'tr': 'Bugün {names} kutluyor — kişilerinden {n} kişi de 🔒', 'ja': '今日は{names}がお祝い — 連絡先{n}人も 🔒',
+    };
     final t = title[lang] ?? title['en']!;
     final tpl = bodyTpl[lang] ?? bodyTpl['en']!;
+    final freeLockedTpl = bodyFreeLockedTpl[lang] ?? bodyFreeLockedTpl['en']!;
+
+    // Pro статус + индекс на контактите определят текста.
+    final isPro = ProService().isPro;
+    final contactsEnabled = ContactNameIndex().isEnabled;
+    if (contactsEnabled) await ContactNameIndex().ensureLoaded();
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -187,10 +210,26 @@ class NameDaysService {
       if (fireAt.isBefore(now)) continue; // днес, ако часът е минал — пропусни
 
       final names = nameDay.names.join(', ');
+      final contacts = contactsEnabled
+          ? ContactNameIndex().contactsForNames(nameDay.names)
+          : const [];
+
+      String body;
+      if (!isPro && contacts.isNotEmpty) {
+        // Безплатен + контакти → имената на деня + брой контакти с катинар.
+        body = freeLockedTpl
+            .replaceAll('{names}', names)
+            .replaceAll('{n}', '${contacts.length}');
+      } else {
+        // Pro текстът с имената на контактите се добавя отделно (Задача 5);
+        // дотогава и при липса на контакти — базовият текст.
+        body = tpl.replaceAll('{names}', names);
+      }
+
       await NotificationService().scheduleNotification(
         id: _notifIdBase + scheduled,
         title: t,
-        body: tpl.replaceAll('{names}', names),
+        body: body,
         scheduledDate: fireAt,
       );
       scheduled++;
