@@ -31,6 +31,7 @@ import '../../widgets/pomodoro_timer_sheet.dart';
 import '../../widgets/gift_cta.dart';
 import '../../models/weekly_schedule.dart';
 import '../../services/weekly_schedule_service.dart';
+import '../../services/pro_service.dart';
 
 enum CalendarView { day, week, month }
 
@@ -2092,8 +2093,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     };
     final theme = Theme.of(context);
 
-    // Контакти с имен ден днес (само ако функцията е вкл.; on-device).
-    final contacts = ContactNameIndex().isEnabled
+    // Контакти с имен ден днес (само за Pro + ако функцията е вкл.; on-device).
+    final contacts = (ProService().isPro && ContactNameIndex().isEnabled)
         ? ContactNameIndex().contactsForNames(nameDay.names)
         : const <ContactMatch>[];
     const fromContacts = {

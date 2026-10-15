@@ -156,6 +156,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       SyncService().syncNow();
       PrefsSyncService().syncNow();
+      // Trial/промо се смятат при четене → при връщане пресмятаме наново спрямо
+      // текущата дата (ако е изтекъл, докато app-ът е бил на заден план).
+      _proService.onAppResumed();
       if (!kIsWeb) {
         _consumeWidgetAction(); // „+" от widget-а, докато app-ът върви
         WidgetService.syncFromWidget(); // отметки от widget-а (iOS чек-бутон)

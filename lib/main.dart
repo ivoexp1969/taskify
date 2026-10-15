@@ -163,6 +163,15 @@ Future<void> main() async {
     // Локалният контекст в widget-а зависи от Pro статуса → пресинхронизираме
     // след като ProService знае истината (стартовият update мина преди това).
     if (!kIsWeb) WidgetService.updateWidget();
+    // Сутрешните нотификации за именни дни зависят от Pro статуса (безплатните
+    // получават базовия текст + брой контакти; Pro — имената на контактите) →
+    // (пре)насрочваме СЛЕД като ProService знае истината, не преди това.
+    if (!kIsWeb) {
+      SharedPreferences.getInstance().then((p) {
+        NameDaysService()
+            .refreshNotificationsFromPrefs(p.getString('app_language') ?? 'en');
+      });
+    }
   });
   AdService().initialize();
 
@@ -194,12 +203,10 @@ Future<void> main() async {
   final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
   await languageController.loadSavedLocale(systemLocale);
 
-  // Пренасрочи сутрешните нотификации за именни дни напред (локални данни,
-  // offline, не брои към AI лимита). Уважава toggle-а от настройките.
+  // Именните дни се (пре)насрочват СЛЕД като ProService се инициализира (виж
+  // горе, в `ProService().initialize().then`), защото текстът зависи от Pro
+  // статуса. Тук оставяме само независимите от Pro зареждания.
   if (!kIsWeb) {
-    NameDaysService()
-        .refreshNotificationsFromPrefs(languageController.locale.languageCode);
-
     // Официални празници (Nager.Date) — offline-first, зарежда само ако е вкл.
     HolidaysService().loadEnabled().then((enabled) {
       if (enabled) HolidaysService().loadForCurrentYears();

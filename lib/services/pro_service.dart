@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../utils/debug_overrides.dart';
 
 // Условен import - stub за web, реален пакет за mobile
 import 'purchases_stub.dart' if (dart.library.io) 'package:purchases_flutter/purchases_flutter.dart';
@@ -68,6 +72,34 @@ const String productIdMonthly = 'premium_monthly:monthly';
 const String productIdYearly = 'premium_yearly:yearly';
 const String productIdLifetime = 'premium_lifetime';
 
+/// Чиста (без странични ефекти) решаваща функция: Pro ли е потребителят СПРЯМО
+/// подадения момент `now`? Държи цялата логика на едно място, за да е покрита с
+/// unit тестове БЕЗ нужда от native RevenueCat/Firebase инициализация.
+///
+/// НИКОГА не заключва при: активен entitlement / офлайн платец (`paidOrCached`),
+/// lifetime покупка или lifetime промо (`promoType == 'lifetime'`), активно
+/// промо за дни, активен trial. Заключва само когато ВСИЧКИ причини са отпаднали
+/// (изтекъл trial/промо и без платен статус).
+@visibleForTesting
+bool proActive({
+  required bool paidOrCached,
+  DateTime? trialEnd,
+  String? promoType, // 'lifetime' | 'days' | null
+  DateTime? promoEnd,
+  required DateTime now,
+  bool forceTrialExpired = false,
+}) {
+  if (paidOrCached) return true; // платец / офлайн платец (кеш) / активен entitlement
+  if (promoType == 'lifetime') return true; // lifetime промо = завинаги
+  if (promoType == 'days' && promoEnd != null && now.isBefore(promoEnd)) {
+    return true; // активно промо за дни
+  }
+  if (!forceTrialExpired && trialEnd != null && now.isBefore(trialEnd)) {
+    return true; // активен trial
+  }
+  return false;
+}
+
 class ProService extends ChangeNotifier {
   ProService._internal();
 
@@ -77,8 +109,8 @@ class ProService extends ChangeNotifier {
   bool _isPro = false;
   bool _isInitialized = false;
   bool _isInitializing = false;
-  bool _isTrial = false;
-  bool _isPromoCode = false;
+  // Тип промо, изведен от записаните данни: 'lifetime' | 'days' | null.
+  String? _promoType;
   bool _promoListenerAttached = false;
   // true когато кешът е казвал Pro, но RevenueCat потвърди неактивен статус →
   // ползва се за еднократния „преходен" диалог към старите потребители.
@@ -87,12 +119,41 @@ class ProService extends ChangeNotifier {
   DateTime? _trialEndDate;
   DateTime? _promoEndDate;
   String? _appliedPromoCode;
+  // Следи следващото изтичане (trial/промо-дни) и уведомява UI в момента, в който
+  // статусът падне на free, дори докато приложението е отворено.
+  Timer? _expiryTimer;
+  bool? _lastNotifiedPro;
 
-  bool get isPro => kIsWeb ? true : (_isPro || _isTrial || _isPromoCode);
+  /// Текущият момент (с евентуален debug override; в release = DateTime.now()).
+  DateTime _now() => DebugOverrides.now();
+
+  /// Активен trial СПРЯМО текущата дата (смята се при четене, не при init).
+  bool get _trialActive =>
+      !DebugOverrides.forceTrialExpired &&
+      _trialEndDate != null &&
+      _now().isBefore(_trialEndDate!);
+
+  /// Активно промо СПРЯМО текущата дата (lifetime = винаги активно).
+  bool get _promoActive =>
+      _promoType == 'lifetime' ||
+      (_promoType == 'days' &&
+          _promoEndDate != null &&
+          _now().isBefore(_promoEndDate!));
+
+  bool get isPro => kIsWeb
+      ? true
+      : proActive(
+          paidOrCached: _isPro,
+          trialEnd: _trialEndDate,
+          promoType: _promoType,
+          promoEnd: _promoEndDate,
+          now: _now(),
+          forceTrialExpired: DebugOverrides.forceTrialExpired,
+        );
   bool get isPaid => _isPro;
   bool get isInitialized => _isInitialized;
-  bool get isTrial => kIsWeb ? false : _isTrial;
-  bool get isPromoCode => kIsWeb ? false : _isPromoCode;
+  bool get isTrial => kIsWeb ? false : _trialActive;
+  bool get isPromoCode => kIsWeb ? false : _promoActive;
   bool get wasDowngradedFromCache => _wasDowngradedFromCache;
   void clearDowngradeFlag() {
     _wasDowngradedFromCache = false;
@@ -101,10 +162,10 @@ class ProService extends ChangeNotifier {
   DateTime? get trialEndDate => _trialEndDate;
   DateTime? get promoEndDate => _promoEndDate;
   int get trialDaysLeft => _trialEndDate != null
-      ? _trialEndDate!.difference(DateTime.now()).inDays
+      ? _trialEndDate!.difference(_now()).inDays
       : 0;
   int get promoDaysLeft => _promoEndDate != null
-      ? _promoEndDate!.difference(DateTime.now()).inDays
+      ? _promoEndDate!.difference(_now()).inDays
       : 0;
 
   /// Инициализира ProService
@@ -145,7 +206,7 @@ class ProService extends ChangeNotifier {
         _updateProStatus(customerInfo);
         // Detected downgrade: кешът казваше Pro, RC потвърди неактивен → маркирай
         // за еднократния преходен диалог (само ако няма друга валидна Pro причина).
-        if (cachedIsPro && !_isPro && !_isTrial && !_isPromoCode) {
+        if (cachedIsPro && !_isPro && !_trialActive && !_promoActive) {
           _wasDowngradedFromCache = true;
           debugPrint('ProService: downgrade detected (cache=Pro, RC=inactive)');
         }
@@ -169,6 +230,8 @@ class ProService extends ChangeNotifier {
       _isInitialized = true;
       _isInitializing = false;
       _logProSource();
+      _lastNotifiedPro = isPro;
+      _armExpiryTimer();
       notifyListeners();
     } catch (e) {
       debugPrint('ProService init error: $e');
@@ -182,8 +245,69 @@ class ProService extends ChangeNotifier {
       _isInitialized = true;
       _isInitializing = false;
       _logProSource();
+      _lastNotifiedPro = isPro;
+      _armExpiryTimer();
       notifyListeners();
     }
+  }
+
+  /// (Пре)насрочва вътрешния таймер за следващото изтичане (trial или промо-дни),
+  /// така че UI да падне на free точно когато изтече, без да чака рестарт/resume.
+  void _armExpiryTimer() {
+    _expiryTimer?.cancel();
+    if (kIsWeb) return;
+    // Платец или lifetime промо → няма изтичане за следене.
+    if (_isPro || _promoType == 'lifetime') return;
+    final now = _now();
+    DateTime? next;
+    if (_trialEndDate != null && _trialEndDate!.isAfter(now)) {
+      next = _trialEndDate;
+    }
+    if (_promoType == 'days' &&
+        _promoEndDate != null &&
+        _promoEndDate!.isAfter(now) &&
+        (next == null || _promoEndDate!.isBefore(next))) {
+      next = _promoEndDate;
+    }
+    if (next == null) return;
+    final d = next.difference(now) + const Duration(seconds: 1);
+    _expiryTimer = Timer(d, () {
+      _notifyProChange(); // изтекло → UI се превключва
+      _armExpiryTimer(); // следващото изтичане (ако има промо след trial и т.н.)
+    });
+  }
+
+  /// Уведомява слушателите САМО ако изведеният Pro статус наистина се е сменил
+  /// (пести ненужни rebuild-и при resume).
+  void _notifyProChange() {
+    final p = isPro;
+    if (_lastNotifiedPro != p) {
+      _lastNotifiedPro = p;
+      notifyListeners();
+    }
+  }
+
+  /// Извиква се при връщане на фокус към приложението (resume). Понеже trial/промо
+  /// се смятат при четене, тук само пресмятаме наново спрямо текущата дата и
+  /// (пре)насрочваме таймера; уведомяваме, ако статусът се е сменил.
+  void onAppResumed() {
+    if (kIsWeb) return;
+    _armExpiryTimer();
+    _notifyProChange();
+  }
+
+  /// Само за тестове: задава вътрешното състояние без native инициализация.
+  @visibleForTesting
+  void debugSetState({
+    bool? paid,
+    DateTime? trialEnd,
+    String? promoType,
+    DateTime? promoEnd,
+  }) {
+    if (paid != null) _isPro = paid;
+    _trialEndDate = trialEnd;
+    _promoType = promoType;
+    _promoEndDate = promoEnd;
   }
 
   /// Взима CustomerInfo с до 3 опита (backoff 1s, 2s между опитите). Връща null
@@ -216,13 +340,13 @@ class ProService extends ChangeNotifier {
   void _logProSource() {
     final String src = _isPro
         ? 'entitlement'
-        : _isPromoCode
+        : _promoActive
             ? 'promo'
-            : _isTrial
+            : _trialActive
                 ? 'trial'
                 : 'none';
     debugPrint('ProService: isPro=$isPro source=$src '
-        '(paid=$_isPro trial=$_isTrial promo=$_isPromoCode)');
+        '(paid=$_isPro trial=$_trialActive promo=$_promoActive)');
   }
 
   /// Проверява и стартира trial период
@@ -234,26 +358,21 @@ class ProService extends ChangeNotifier {
       final trialStartStr = prefs.getString('trial_start_date');
 
       if (trialStartStr == null) {
+        // Началото на trial се закотвя към реалния календар (НЕ към debug now),
+        // за да не променя трайно записа при симулация.
         final now = DateTime.now();
         await prefs.setString('trial_start_date', now.toIso8601String());
         _trialEndDate = now.add(const Duration(days: trialPeriodDays));
-        _isTrial = true;
         debugPrint('Trial started, ends: $_trialEndDate');
       } else {
         final trialStart = DateTime.parse(trialStartStr);
         _trialEndDate = trialStart.add(const Duration(days: trialPeriodDays));
-
-        if (DateTime.now().isBefore(_trialEndDate!)) {
-          _isTrial = true;
-          debugPrint('Trial active, days left: $trialDaysLeft');
-        } else {
-          _isTrial = false;
-          debugPrint('Trial expired');
-        }
+        // Активността се смята при ЧЕТЕНЕ (getter `_trialActive`) спрямо датата —
+        // тук само изчисляваме крайната дата.
+        debugPrint('Trial end: $_trialEndDate (active=$_trialActive)');
       }
     } catch (e) {
       debugPrint('Trial check error: $e');
-      _isTrial = false;
     }
   }
 
@@ -268,23 +387,21 @@ class ProService extends ChangeNotifier {
       _appliedPromoCode = prefs.getString('applied_promo_code');
 
       if (promoType == 'lifetime') {
-        _isPromoCode = true;
+        _promoType = 'lifetime';
         _promoEndDate = null;
         debugPrint('Lifetime promo active');
       } else if (promoEndStr != null) {
+        _promoType = 'days';
         _promoEndDate = DateTime.parse(promoEndStr);
-
-        if (DateTime.now().isBefore(_promoEndDate!)) {
-          _isPromoCode = true;
-          debugPrint('Promo active, days left: $promoDaysLeft');
-        } else {
-          _isPromoCode = false;
-          debugPrint('Promo expired');
-        }
+        // Активността се смята при ЧЕТЕНЕ (getter `_promoActive`) спрямо датата.
+        debugPrint('Days promo end: $_promoEndDate (active=$_promoActive)');
+      } else {
+        _promoType = null;
+        _promoEndDate = null;
       }
     } catch (e) {
       debugPrint('Promo check error: $e');
-      _isPromoCode = false;
+      _promoType = null;
     }
   }
 
@@ -296,7 +413,7 @@ class ProService extends ChangeNotifier {
   /// Lifetime има приоритет; иначе взимаме days-промото с НАЙ-ДАЛЕЧНА валидна дата.
   Future<void> _restoreAccountPromo() async {
     if (kIsWeb) return;
-    if (_isPromoCode) return; // вече активен локално → няма нужда
+    if (_promoActive) return; // вече активен локално → няма нужда
 
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid;
@@ -321,10 +438,11 @@ class ProService extends ChangeNotifier {
           await prefs.setString('applied_promo_code', doc.id);
           await prefs.setString('promo_type', 'lifetime');
           await prefs.remove('promo_end_date');
-          _isPromoCode = true;
+          _promoType = 'lifetime';
           _promoEndDate = null;
           _appliedPromoCode = doc.id;
-          notifyListeners();
+          _armExpiryTimer();
+          _notifyProChange();
           debugPrint('Account lifetime promo restored: ${doc.id}');
           return;
         } else if (type == 'days') {
@@ -346,10 +464,11 @@ class ProService extends ChangeNotifier {
         await prefs.setString('applied_promo_code', bestDaysCode);
         await prefs.setString('promo_type', 'days');
         await prefs.setString('promo_end_date', bestDaysEnd.toIso8601String());
-        _isPromoCode = true;
+        _promoType = 'days';
         _promoEndDate = bestDaysEnd;
         _appliedPromoCode = bestDaysCode;
-        notifyListeners();
+        _armExpiryTimer();
+        _notifyProChange();
         debugPrint('Account days promo restored: $bestDaysCode until $bestDaysEnd');
       }
     } catch (e) {
@@ -418,10 +537,11 @@ class ProService extends ChangeNotifier {
           await prefs.setString('applied_promo_code', codeUpper);
           await prefs.setString('promo_type', 'lifetime');
           await prefs.remove('promo_end_date');
-          _isPromoCode = true;
+          _promoType = 'lifetime';
           _promoEndDate = null;
           _appliedPromoCode = codeUpper;
-          notifyListeners();
+          _armExpiryTimer();
+          _notifyProChange();
           return (success: true, message: _pm('proReactivated', lang));
         }
         // days-type: ако още е валиден (по записаната крайна дата) → възстанови го,
@@ -433,10 +553,11 @@ class ProService extends ChangeNotifier {
             await prefs.setString('applied_promo_code', codeUpper);
             await prefs.setString('promo_type', 'days');
             await prefs.setString('promo_end_date', end.toIso8601String());
-            _isPromoCode = true;
+            _promoType = 'days';
             _promoEndDate = end;
             _appliedPromoCode = codeUpper;
-            notifyListeners();
+            _armExpiryTimer();
+            _notifyProChange();
             return (success: true, message: _pm('proReactivated', lang));
           }
         }
@@ -450,13 +571,13 @@ class ProService extends ChangeNotifier {
       await prefs.setString('promo_type', type);
 
       if (type == 'lifetime') {
-        _isPromoCode = true;
+        _promoType = 'lifetime';
         _promoEndDate = null;
         await prefs.remove('promo_end_date');
       } else if (type == 'days' && days > 0) {
         daysEndDate = DateTime.now().add(Duration(days: days));
+        _promoType = 'days';
         _promoEndDate = daysEndDate;
-        _isPromoCode = true;
         await prefs.setString('promo_end_date', daysEndDate.toIso8601String());
       }
 
@@ -470,7 +591,8 @@ class ProService extends ChangeNotifier {
           'redemptions.$userId': Timestamp.fromDate(daysEndDate),
       });
 
-      notifyListeners();
+      _armExpiryTimer();
+      _notifyProChange();
 
       if (type == 'lifetime') {
         return (success: true, message: _pm('proLifetime', lang));
@@ -496,11 +618,12 @@ class ProService extends ChangeNotifier {
       await prefs.setString('applied_promo_code', 'EARLY_SUPPORTER');
       await prefs.setString('promo_type', 'days');
       await prefs.setString('promo_end_date', end.toIso8601String());
-      _isPromoCode = true;
+      _promoType = 'days';
       _promoEndDate = end;
       _appliedPromoCode = 'EARLY_SUPPORTER';
       _wasDowngradedFromCache = false;
-      notifyListeners();
+      _armExpiryTimer();
+      _notifyProChange();
       debugPrint('ProService: early-supporter grace granted for $days days');
     } catch (e) {
       debugPrint('ProService grace grant error: $e');
@@ -523,7 +646,7 @@ class ProService extends ChangeNotifier {
 
     // Слушателят се върна с неактивен статус, след като кешът е дал Pro при старт
     // (мрежов проблем при init) → маркирай за преходния диалог.
-    if (wasPro && !_isPro && !_isTrial && !_isPromoCode) {
+    if (wasPro && !_isPro && !_trialActive && !_promoActive) {
       _wasDowngradedFromCache = true;
       debugPrint('ProService: downgrade detected via listener (was Pro, now inactive)');
     }
@@ -531,7 +654,8 @@ class ProService extends ChangeNotifier {
     _saveToCache();
 
     if (wasPro != _isPro) {
-      notifyListeners();
+      _armExpiryTimer();
+      _notifyProChange();
     }
   }
 
@@ -659,11 +783,11 @@ class ProService extends ChangeNotifier {
     }
     if (_isPro) {
       return _pm('proPaid', lang);
-    } else if (_isPromoCode && _promoEndDate == null) {
+    } else if (_promoActive && _promoType == 'lifetime') {
       return _pm('proPromoLifetime', lang);
-    } else if (_isPromoCode && _promoEndDate != null) {
+    } else if (_promoActive) {
       return _proPromoDays(promoDaysLeft, lang);
-    } else if (_isTrial) {
+    } else if (_trialActive) {
       return _proTrialDays(trialDaysLeft, lang);
     } else {
       return _pm('free', lang);
