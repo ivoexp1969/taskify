@@ -39,7 +39,8 @@ const _p = {
   'yearly': {'en': 'Yearly', 'nl': 'Jaarlijks', 'uk': 'Щороку', 'bg': 'Годишен', 'de': 'Jährlich', 'fr': 'Annuel', 'it': 'Annuale', 'el': 'Ετήσιο', 'es': 'Anual', 'pt': 'Anual', 'ru': 'Годовой', 'tr': 'Yıllık', 'ja': '毎年'},
   'monthly': {'en': 'Monthly', 'nl': 'Maandelijks', 'uk': 'Щомісяця', 'bg': 'Месечен', 'de': 'Monatlich', 'fr': 'Mensuel', 'it': 'Mensile', 'el': 'Μηνιαίο', 'es': 'Mensual', 'pt': 'Mensal', 'ru': 'Месячный', 'tr': 'Aylık', 'ja': '毎月'},
   'oneTime': {'en': 'One-time payment', 'nl': 'Eenmalige betaling', 'uk': 'Одноразовий платіж', 'bg': 'Еднократно плащане', 'de': 'Einmalzahlung', 'fr': 'Paiement unique', 'it': 'Pagamento unico', 'el': 'Εφάπαξ πληρωμή', 'es': 'Pago único', 'pt': 'Pagamento único', 'ru': 'Единоразовый платёж', 'tr': 'Tek seferlik ödeme', 'ja': '1回限りの支払い'},
-  'save50': {'en': 'Save 50%', 'nl': 'Bespaar 50%', 'uk': 'Заощадьте 50%', 'bg': 'Спестяваш 50%', 'de': '50% sparen', 'fr': 'Économisez 50%', 'it': 'Risparmia il 50%', 'el': 'Εξοικονομήστε 50%', 'es': 'Ahorra 50%', 'pt': 'Economize 50%', 'ru': 'Скидка 50%', 'tr': '%50 tasarruf', 'ja': '50%お得'},
+  // Динамична отстъпка: N се заменя с реалния процент (от цените на стора).
+  'saveN': {'en': 'Save N%', 'nl': 'Bespaar N%', 'uk': 'Заощадьте N%', 'bg': 'Спестяваш N%', 'de': 'N% sparen', 'fr': 'Économisez N%', 'it': 'Risparmia il N%', 'el': 'Εξοικονομήστε N%', 'es': 'Ahorra N%', 'pt': 'Economize N%', 'ru': 'Скидка N%', 'tr': '%N tasarruf', 'ja': 'N%お得'},
   'cancelAnytime': {'en': 'Cancel anytime', 'nl': 'Altijd opzegbaar', 'uk': 'Скасування будь-коли', 'bg': 'Отказ по всяко време', 'de': 'Jederzeit kündbar', 'fr': "Annulez à tout moment", 'it': 'Annulla in qualsiasi momento', 'el': 'Ακύρωση οποτεδήποτε', 'es': 'Cancela en cualquier momento', 'pt': 'Cancele a qualquer momento', 'ru': 'Отмена в любое время', 'tr': 'İstediğiniz zaman iptal edin', 'ja': 'いつでもキャンセル可能'},
   'popular': {'en': 'Popular', 'nl': 'Populair', 'uk': 'Популярне', 'bg': 'Популярен', 'de': 'Beliebt', 'fr': 'Populaire', 'it': 'Popolare', 'el': 'Δημοφιλές', 'es': 'Popular', 'pt': 'Popular', 'ru': 'Популярный', 'tr': 'Popüler', 'ja': '人気'},
   'bestValue': {'en': 'Best value', 'nl': 'Beste keuze', 'uk': 'Найвигідніше', 'bg': 'Най-изгоден', 'de': 'Bester Wert', 'fr': 'Meilleure offre', 'it': 'Miglior valore', 'el': 'Καλύτερη αξία', 'es': 'Mejor valor', 'pt': 'Melhor valor', 'ru': 'Выгоднее всего', 'tr': 'En avantajlı', 'ja': '最もお得'},
@@ -50,6 +51,13 @@ const _p = {
   'daysFree': {'en': 'N days free', 'nl': 'N dagen gratis', 'uk': 'N днів безкоштовно', 'bg': 'N дни безплатно', 'de': 'N Tage gratis', 'fr': 'N jours gratuits', 'it': 'N giorni gratis', 'el': 'N ημέρες δωρεάν', 'es': 'N días gratis', 'pt': 'N dias grátis', 'ru': 'N дней бесплатно', 'tr': 'N gün ücretsiz', 'ja': 'N日間無料'},
   'termsOfUse': {'en': 'Terms of Use', 'nl': 'Gebruiksvoorwaarden', 'uk': 'Умови використання', 'bg': 'Условия за ползване', 'de': 'Nutzungsbedingungen', 'fr': "Conditions d'utilisation", 'it': 'Termini di utilizzo', 'el': 'Όροι Χρήσης', 'es': 'Términos de uso', 'pt': 'Termos de uso', 'ru': 'Условия использования', 'tr': 'Kullanım Koşulları', 'ja': '利用規約'},
   'privacyPolicy': {'en': 'Privacy Policy', 'nl': 'Privacybeleid', 'uk': 'Політика конфіденційності', 'bg': 'Политика за поверителност', 'de': 'Datenschutzerklärung', 'fr': 'Politique de confidentialité', 'it': 'Informativa sulla privacy', 'el': 'Πολιτική Απορρήτου', 'es': 'Política de Privacidad', 'pt': 'Política de Privacidade', 'ru': 'Политика конфиденциальности', 'tr': 'Gizlilik Politikası', 'ja': 'プライバシーポリシー'},
+  'widget': {'en': 'Home screen widget', 'nl': 'Widget op startscherm', 'uk': 'Віджет на головному екрані', 'bg': 'Джаджа на началния екран', 'de': 'Startbildschirm-Widget', 'fr': "Widget d'écran d'accueil", 'it': 'Widget schermata home', 'el': 'Widget αρχικής οθόνης', 'es': 'Widget de pantalla de inicio', 'pt': 'Widget do ecrã inicial', 'ru': 'Виджет на главном экране', 'tr': 'Ana ekran widget\'ı', 'ja': 'ホーム画面ウィジェット'},
+  'nameDaysContacts': {'en': 'Name days + your contacts', 'nl': 'Naamdagen + je contacten', 'uk': 'Іменини + ваші контакти', 'bg': 'Имени дни + твоите контакти', 'de': 'Namenstage + deine Kontakte', 'fr': 'Fêtes des prénoms + tes contacts', 'it': 'Onomastici + i tuoi contatti', 'el': 'Ονομαστικές εορτές + οι επαφές σου', 'es': 'Onomásticas + tus contactos', 'pt': 'Dias do nome + os teus contactos', 'ru': 'Именины + ваши контакты', 'tr': 'İsim günleri + kişilerin', 'ja': '聖名祝日＋連絡先'},
+  'sharedLists': {'en': 'Shared lists', 'nl': 'Gedeelde lijsten', 'uk': 'Спільні списки', 'bg': 'Споделени списъци', 'de': 'Geteilte Listen', 'fr': 'Listes partagées', 'it': 'Liste condivise', 'el': 'Κοινές λίστες', 'es': 'Listas compartidas', 'pt': 'Listas partilhadas', 'ru': 'Общие списки', 'tr': 'Paylaşılan listeler', 'ja': '共有リスト'},
+  // Бутон „Продължи — {цена}"; {price} се замества с priceString на избрания план.
+  'continueWith': {'en': 'Continue — {price}', 'nl': 'Doorgaan — {price}', 'uk': 'Продовжити — {price}', 'bg': 'Продължи — {price}', 'de': 'Weiter — {price}', 'fr': 'Continuer — {price}', 'it': 'Continua — {price}', 'el': 'Συνέχεια — {price}', 'es': 'Continuar — {price}', 'pt': 'Continuar — {price}', 'ru': 'Продолжить — {price}', 'tr': 'Devam — {price}', 'ja': '続ける — {price}'},
+  // Хедър, когато paywall-ът е отворен за конкретна заключена функция.
+  'unlockFeature': {'en': 'Unlock {feature}', 'nl': '{feature} ontgrendelen', 'uk': 'Розблокувати {feature}', 'bg': 'Отключи {feature}', 'de': '{feature} freischalten', 'fr': 'Débloquer {feature}', 'it': 'Sblocca {feature}', 'el': 'Ξεκλείδωμα {feature}', 'es': 'Desbloquear {feature}', 'pt': 'Desbloquear {feature}', 'ru': 'Открыть {feature}', 'tr': '{feature} kilidini aç', 'ja': '{feature}を解除'},
 };
 
 String _pt(String key, String lang) => _p[key]?[lang] ?? _p[key]?['en'] ?? '';
@@ -57,6 +65,18 @@ String _pt(String key, String lang) => _p[key]?[lang] ?? _p[key]?['en'] ?? '';
 /// „N дни безплатно" с реалния брой дни (от offering-а).
 String _daysFree(int days, String lang) =>
     _pt('daysFree', lang).replaceAll('N', '$days');
+
+/// „Спестяваш N%" с реален процент (сметнат от цените на стора).
+String _saveN(int percent, String lang) =>
+    _pt('saveN', lang).replaceAll('N', '$percent');
+
+/// „Продължи — {цена}".
+String _continueWith(String price, String lang) =>
+    _pt('continueWith', lang).replaceAll('{price}', price);
+
+/// „Отключи {функция}".
+String _unlockFeature(String feature, String lang) =>
+    _pt('unlockFeature', lang).replaceAll('{feature}', feature);
 
 /// ФАЗА 3.3: превръща intro периода в брой ДНИ (за trial badge). Връща null при
 /// неизвестна единица.
@@ -88,10 +108,38 @@ class _PaywallScreenState extends State<PaywallScreen> {
   final ProService _proService = ProService();
   final TextEditingController _promoController = TextEditingController();
   List<Package> _packages = [];
+  Package? _selectedPackage; // избраният план (Lifetime по подразбиране)
+  int? _yearlySavings; // % отстъпка на годишния спрямо 12× месечния (ако е смятаемо)
   bool _isLoading = true;
   bool _isPurchasing = false;
   bool _isApplyingPromo = false;
   String? _error;
+
+  /// Планът по подразбиране при отваряне = Lifetime (иначе първият наличен).
+  Package? _defaultPackage(List<Package> pkgs) {
+    for (final p in pkgs) {
+      if (p.identifier.toLowerCase().contains('lifetime')) return p;
+    }
+    return pkgs.isNotEmpty ? pkgs.first : null;
+  }
+
+  /// Реална отстъпка на годишния спрямо 12× месечния (закръглено). null ако някоя
+  /// цена липсва/е 0 или няма спестяване → тогава не показваме твърд процент.
+  int? _computeYearlySavings(List<Package> pkgs) {
+    Package? monthly, yearly;
+    for (final p in pkgs) {
+      final id = p.identifier.toLowerCase();
+      if (id.contains('monthly')) monthly = p;
+      if (id.contains('annual') || id.contains('yearly')) yearly = p;
+    }
+    if (monthly == null || yearly == null) return null;
+    final m = monthly.storeProduct.price;
+    final y = yearly.storeProduct.price;
+    if (m <= 0 || y <= 0) return null;
+    final pct = (1 - (y / (m * 12))) * 100;
+    if (pct <= 0) return null;
+    return pct.round();
+  }
 
   @override
   void initState() {
@@ -128,6 +176,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
       if (mounted) {
         setState(() {
           _packages = packages;
+          _selectedPackage = _defaultPackage(packages);
+          _yearlySavings = _computeYearlySavings(packages);
           _isLoading = false;
         });
       }
@@ -337,7 +387,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        _pt('getAccess', lang),
+                        widget.featureName != null
+                            ? _unlockFeature(widget.featureName!, lang)
+                            : _pt('getAccess', lang),
                         style: theme.textTheme.bodyLarge?.copyWith(
                           color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
@@ -425,17 +477,19 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
                       // ФАЗА 3.5: ред на ползите — 1) Без реклами, 2) Неограничен
                       // AI, 3) останалите съществуващи.
+                      // ФАЗА 3.5 / 1.0.67: само РЕАЛНО Pro функции. „Повтарящи се
+                      // задачи" и „Гласов вход" са БЕЗПЛАТНИ (FreeLimits) → махнати.
                       _FeatureItem(icon: Icons.block_rounded, title: _pt('noAds', lang), highlight: true),
                       _FeatureItem(icon: Icons.auto_awesome_rounded, title: _pt('unlimitedAi', lang), highlight: true),
                       _FeatureItem(icon: Icons.all_inclusive, title: _pt('unlimited', lang)),
                       _FeatureItem(icon: Icons.category_rounded, title: _pt('customCat', lang)),
                       _FeatureItem(icon: Icons.notifications_active_rounded, title: _pt('multiRemind', lang)),
-                      _FeatureItem(icon: Icons.repeat_rounded, title: _pt('recurring', lang)),
                       _FeatureItem(icon: Icons.calendar_month_rounded, title: _pt('calView', lang)),
                       _FeatureItem(icon: Icons.bar_chart_rounded, title: _pt('stats', lang)),
                       _FeatureItem(icon: Icons.cloud_sync_rounded, title: _pt('cloudSync', lang)),
-                      const _FeatureItem(icon: Icons.widgets_rounded, title: 'Home screen widget'),
-                      _FeatureItem(icon: Icons.mic_rounded, title: _pt('voiceInput', lang)),
+                      _FeatureItem(icon: Icons.widgets_rounded, title: _pt('widget', lang)),
+                      _FeatureItem(icon: Icons.celebration_rounded, title: _pt('nameDaysContacts', lang)),
+                      _FeatureItem(icon: Icons.group_rounded, title: _pt('sharedLists', lang)),
                       _FeatureItem(icon: Icons.palette_rounded, title: _pt('allThemes', lang)),
 
                       const SizedBox(height: 24),
@@ -460,20 +514,54 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             ],
                           ),
                         )
-                      else
+                      else ...[
+                        // Радио-избор: тап само ИЗБИРА плана (не купува веднага).
                         ..._packages.map((package) => _PackageCard(
-                          package: package,
-                          onTap: _isPurchasing ? null : () => _purchasePackage(package),
-                          lang: lang,
-                        )),
-
-                      if (_isPurchasing)
-                        const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(16),
-                            child: CircularProgressIndicator(),
+                              package: package,
+                              selected: identical(package, _selectedPackage),
+                              savingsPercent: _yearlySavings,
+                              lang: lang,
+                              onTap: _isPurchasing
+                                  ? null
+                                  : () => setState(
+                                      () => _selectedPackage = package),
+                            )),
+                        const SizedBox(height: 8),
+                        // Единствен бутон за покупка на ИЗБРАНИЯ план.
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton(
+                            onPressed:
+                                (_isPurchasing || _selectedPackage == null)
+                                    ? null
+                                    : () => _purchasePackage(_selectedPackage!),
+                            style: FilledButton.styleFrom(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: _isPurchasing
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2, color: Colors.white),
+                                  )
+                                : Text(
+                                    _continueWith(
+                                        _selectedPackage
+                                                ?.storeProduct.priceString ??
+                                            '',
+                                        lang),
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                  ),
                           ),
                         ),
+                      ],
 
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -546,30 +634,44 @@ class _FeatureItem extends StatelessWidget {
 
 class _PackageCard extends StatelessWidget {
   final Package package;
+  final bool selected;
+  final int? savingsPercent;
   final VoidCallback? onTap;
   final String lang;
 
-  const _PackageCard({required this.package, required this.onTap, required this.lang});
+  const _PackageCard({
+    required this.package,
+    required this.selected,
+    required this.savingsPercent,
+    required this.onTap,
+    required this.lang,
+  });
+
+  bool get _isLifetime => package.identifier.toLowerCase().contains('lifetime');
+  bool get _isYearly {
+    final id = package.identifier.toLowerCase();
+    return id.contains('annual') || id.contains('yearly');
+  }
+
+  bool get _isMonthly => package.identifier.toLowerCase().contains('monthly');
 
   String _getPackageTitle() {
-    final identifier = package.identifier.toLowerCase();
-    if (identifier.contains('lifetime')) return _pt('lifetime', lang);
-    if (identifier.contains('annual') || identifier.contains('yearly')) return _pt('yearly', lang);
-    if (identifier.contains('monthly')) return _pt('monthly', lang);
+    if (_isLifetime) return _pt('lifetime', lang);
+    if (_isYearly) return _pt('yearly', lang);
+    if (_isMonthly) return _pt('monthly', lang);
     return package.storeProduct.title;
   }
 
   String _getPackageSubtitle() {
-    final identifier = package.identifier.toLowerCase();
-    if (identifier.contains('lifetime')) return _pt('oneTime', lang);
-    if (identifier.contains('annual') || identifier.contains('yearly')) return _pt('save50', lang);
-    if (identifier.contains('monthly')) return _pt('cancelAnytime', lang);
+    if (_isLifetime) return _pt('oneTime', lang);
+    if (_isYearly) {
+      // Реална отстъпка, ако е смятаема; иначе неутрален текст (без твърд „50%").
+      return savingsPercent != null
+          ? _saveN(savingsPercent!, lang)
+          : _pt('cancelAnytime', lang);
+    }
+    if (_isMonthly) return _pt('cancelAnytime', lang);
     return package.storeProduct.description;
-  }
-
-  bool get _isYearly {
-    final id = package.identifier.toLowerCase();
-    return id.contains('annual') || id.contains('yearly');
   }
 
   /// ФАЗА 3.2: месечна равностойност на годишния — ДИНАМИЧНО (price/12) с
@@ -598,12 +700,12 @@ class _PackageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accent = _isYearly; // годишният план = визуален акцент
-    final monthlyEq = accent ? _monthlyEquivalent() : null;
-    final trial = accent ? _trialLabel() : null;
+    final accent = selected; // избраният план = визуален акцент
+    final monthlyEq = _monthlyEquivalent();
+    final trial = _trialLabel();
 
     return Container(
-      margin: EdgeInsets.only(bottom: accent ? 16 : 12),
+      margin: const EdgeInsets.only(bottom: 12),
       child: Material(
         color: accent
             ? theme.colorScheme.primary.withValues(alpha: 0.10)
@@ -613,7 +715,7 @@ class _PackageCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(18),
           child: Container(
-            padding: EdgeInsets.all(accent ? 20 : 16),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
@@ -623,111 +725,88 @@ class _PackageCard extends StatelessWidget {
                 width: accent ? 2.5 : 1,
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                if (accent) ...[
-                  Row(
+                Icon(
+                  accent
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                  color: accent
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.star_rounded,
-                                size: 13, color: theme.colorScheme.onPrimary),
-                            const SizedBox(width: 4),
-                            Text(
-                              _pt('bestValue', lang),
-                              style: TextStyle(
-                                fontSize: 11,
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              _getPackageTitle(),
+                              style: const TextStyle(
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.onPrimary,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                      if (trial != null) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.bolt_rounded, size: 13, color: Colors.green),
-                              const SizedBox(width: 4),
-                              Text(
+                          if (trial != null) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
                                 trial,
                                 style: const TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.green,
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                ],
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _getPackageTitle(),
-                            style: TextStyle(
-                              fontSize: accent ? 20 : 18,
-                              fontWeight: FontWeight.bold,
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _getPackageSubtitle(),
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                            ),
-                          ),
+                          ],
                         ],
                       ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          package.storeProduct.priceString,
-                          style: TextStyle(
-                            fontSize: accent ? 24 : 20,
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.primary,
-                          ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _getPackageSubtitle(),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color:
+                              theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
-                        if (monthlyEq != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            monthlyEq,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                            ),
-                          ),
-                        ],
-                      ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      package.storeProduct.priceString,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
+                    if (monthlyEq != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        monthlyEq,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ],
@@ -741,6 +820,7 @@ class _PackageCard extends StatelessWidget {
 
 Future<bool> showPaywallIfNeeded(BuildContext context, {required bool isFeatureAvailable, String? featureName}) async {
   if (isFeatureAvailable) return true;
-  final result = await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (_) => const PaywallScreen(featureName: null)));
+  final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => PaywallScreen(featureName: featureName)));
   return result == true;
 }

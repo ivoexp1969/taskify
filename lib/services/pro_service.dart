@@ -699,10 +699,10 @@ class ProService extends ChangeNotifier {
       debugPrint('Found offering: ${currentOffering.identifier}');
       debugPrint('Packages: ${currentOffering.availablePackages.length}');
       
-      // Сортираме: Monthly, Yearly, Lifetime
+      // Сортираме: Lifetime, Yearly, Monthly (редът, в който ги показва paywall-ът).
       final packages = List<Package>.from(currentOffering.availablePackages);
       packages.sort((a, b) {
-        final order = {'monthly': 0, 'annual': 1, 'yearly': 1, 'lifetime': 2};
+        final order = {'lifetime': 0, 'annual': 1, 'yearly': 1, 'monthly': 2};
         final aOrder = order.entries
             .firstWhere((e) => a.identifier.toLowerCase().contains(e.key), 
                         orElse: () => const MapEntry('', 3))
