@@ -10,55 +10,30 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// ★ПРИ ВСЕКИ РЕЛИЙЗ★ (преди `flutter build appbundle` / Xcode archive):
 ///   1) вдигни [_build] на новия versionCode от `pubspec.yaml`;
-///   2) подмени [_items] с точките за новата версия (11 езика).
+///   2) подмени [_items] с точките за новата версия (поне BG + EN; останалите
+///      езици падат на EN).
 ///
 /// Нови инсталации НЕ го виждат (те виждат welcome диалога).
 class WhatsNewDialog {
   /// Билдът, за който са точките по-долу (= `pubspec.yaml` build number).
-  static const int _build = 73;
+  static const int _build = 77;
 
   static const String _prefKey = 'whats_new_seen_build';
 
-  /// Точките за текущата версия, по език.
+  /// Точките за текущата версия. BG + EN; всички останали езици падат на EN
+  /// (`_items[lang] ?? _items['en']`).
   static const Map<String, List<String>> _items = {
     'bg': [
-      '🌍 Taskify вече говори нидерландски и украински! Смени езика от Настройки → Език.',
+      '🔒 По-честно Pro: пробният период и промо кодовете се зачитат точно до деня на изтичане — нищо не се губи, задачите ти остават.',
+      '💎 Нов екран за Pro: избери план (Завинаги / Годишен / Месечен) с ясна цена и един бутон.',
+      '🎂 Имени дни: разбери кои от контактите ти празнуват днес — направо в известието.',
+      '🔔 По-ясни известия + ненатрапчива подкана за обновяване.',
     ],
     'en': [
-      '🌍 Taskify now speaks Dutch and Ukrainian! Change it in Settings → Language.',
-    ],
-    'nl': [
-      '🌍 Taskify spreekt nu Nederlands en Oekraïens! Wijzig het bij Instellingen → Taal.',
-    ],
-    'uk': [
-      '🌍 Taskify тепер розмовляє нідерландською та українською! Змініть у Налаштування → Мова.',
-    ],
-    'de': [
-      '🌍 Taskify spricht jetzt Niederländisch und Ukrainisch! Ändere es in Einstellungen → Sprache.',
-    ],
-    'fr': [
-      '🌍 Taskify parle désormais néerlandais et ukrainien ! Changez-le dans Réglages → Langue.',
-    ],
-    'it': [
-      '🌍 Taskify ora parla olandese e ucraino! Cambia lingua in Impostazioni → Lingua.',
-    ],
-    'el': [
-      '🌍 Το Taskify μιλάει τώρα ολλανδικά και ουκρανικά! Άλλαξέ το στις Ρυθμίσεις → Γλώσσα.',
-    ],
-    'es': [
-      '🌍 ¡Taskify ahora habla neerlandés y ucraniano! Cámbialo en Ajustes → Idioma.',
-    ],
-    'pt': [
-      '🌍 O Taskify agora fala holandês e ucraniano! Altere em Configurações → Idioma.',
-    ],
-    'ru': [
-      '🌍 Taskify теперь говорит на нидерландском и украинском! Измените в Настройках → Язык.',
-    ],
-    'tr': [
-      '🌍 Taskify artık Felemenkçe ve Ukraynaca konuşuyor! Ayarlar → Dil bölümünden değiştir.',
-    ],
-    'ja': [
-      '🌍 Taskify がオランダ語とウクライナ語に対応しました！設定 → 言語 で変更できます。',
+      '🔒 Fairer Pro: your trial and promo codes now count exactly until their expiry day — nothing is lost, your tasks stay.',
+      '💎 New Pro screen: pick a plan (Lifetime / Yearly / Monthly) with a clear price and a single button.',
+      '🎂 Name days: see which of your contacts are celebrating today — right in the notification.',
+      '🔔 Clearer notifications + a non-intrusive update prompt.',
     ],
   };
 
