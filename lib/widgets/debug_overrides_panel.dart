@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/pro_service.dart';
 import '../services/name_days_service.dart';
@@ -60,10 +61,32 @@ class _DebugOverridesPanelState extends State<DebugOverridesPanel> {
           SwitchListTile(
             dense: true,
             title: const Text('Симулирай изтекъл trial'),
-            subtitle: const Text('Приложението се държи като безплатно'),
+            subtitle: const Text(
+                'Записва trial_start преди 15 дни + нулира диалога (персистентно) '
+                '→ рестартирай, за да видиш новия диалог'),
             value: DebugOverrides.forceTrialExpired,
-            onChanged: (v) {
-              DebugOverrides.forceTrialExpired = v;
+            onChanged: (v) async {
+              final prefs = await SharedPreferences.getInstance();
+              if (v) {
+                // Персистентно: trial наистина изтекъл (по дата) → оцелява рестарт,
+                // така че и startup диалогът да се задейства; нулираме и one-time
+                // флаговете, за да се покаже отново.
+                await prefs.setString(
+                    'trial_start_date',
+                    DateTime.now()
+                        .subtract(const Duration(days: 15))
+                        .toIso8601String());
+                await prefs.remove('downgrade_dialog_shown');
+                await prefs.remove('trial_end_logged');
+                await prefs.setBool('is_pro', false);
+              } else {
+                // Връщаме нов 14-дневен trial.
+                await prefs.setString(
+                    'trial_start_date', DateTime.now().toIso8601String());
+                await prefs.remove('downgrade_dialog_shown');
+              }
+              DebugOverrides.forceTrialExpired = v; // мигновен live ефект
+              if (!mounted) return;
               _refresh();
             },
           ),
@@ -77,6 +100,22 @@ class _DebugOverridesPanelState extends State<DebugOverridesPanel> {
             onChanged: (v) {
               DebugOverrides.fakeNow = v ? _nov8 : null;
               _refresh();
+            },
+          ),
+          ListTile(
+            dense: true,
+            leading: const Icon(Icons.notifications_active_rounded,
+                color: Colors.deepOrange),
+            title: const Text('Изпрати нотификацията за имен ден сега'),
+            subtitle: const Text('След ~2 сек, със същия Pro-aware текст'),
+            onTap: () async {
+              final lang = Localizations.localeOf(context).languageCode;
+              final messenger = ScaffoldMessenger.of(context);
+              await NameDaysService().debugSendNow(lang: lang);
+              messenger.showSnackBar(
+                const SnackBar(
+                    content: Text('Нотификацията ще се появи след ~2 сек')),
+              );
             },
           ),
           const SizedBox(height: 4),
