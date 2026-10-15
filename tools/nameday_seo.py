@@ -24,6 +24,9 @@ OUT = os.path.expanduser("~/Desktop/taskify_nameday_seo/imen-den")
 BASE = "https://taskify1969.com/imen-den"
 APP_STORE = "https://apps.apple.com/app/id6768345070"
 PLAY = "https://play.google.com/store/apps/details?id=com.ivoexp.taskify"
+# App Store campaign provider token (App Store Connect → App Analytics → Sources → Campaigns →
+# „Generate a Campaign Link"). Празен → обикновен линк без pt/ct.
+APPSTORE_PT = ""
 MONTHS = ["", "януари", "февруари", "март", "април", "май", "юни", "юли",
           "август", "септември", "октомври", "ноември", "декември"]
 
@@ -102,6 +105,12 @@ padding:30px 22px;text-align:center;box-shadow:0 4px 18px rgba(74,40,170,.08);tr
 .dlinks{margin:10px 0;font-weight:600}
 .upcoming{margin:8px 0 8px 20px}.upcoming li{margin:4px 0}
 .card h2{margin-top:0}
+.cta-box{background:#fff;border:2px solid var(--g);border-radius:16px;padding:20px;margin:22px 0;text-align:center}
+.cta-box .cta{margin:12px 0 6px}.cta-text{font-weight:600;color:#1a1730}
+.cta-sub{font-size:.9em;color:#6b6685;margin-top:8px}
+.cta-line{background:#eefaf5;border-radius:12px;padding:10px 14px;margin:12px 0;font-weight:600}
+html[data-dev=android] .cta-box .stores,html[data-dev=ios] .cta-box .stores{display:none}
+html[data-dev=desktop] .cta-auto{display:none}
 """
 
 
@@ -129,7 +138,7 @@ def page(title, desc, canonical, body, jsonld=None, indexable=True):
 <meta name="twitter:title" content="{esc(title)}"><meta name="twitter:description" content="{esc(desc)}">
 <meta name="twitter:image" content="{OG_IMAGE}">
 <style>{CSS}</style>{ld}</head><body>
-<header><div class="brand">Taskify</div></header><div class="wrap">{body}</div>
+<header><div class="brand">Taskify</div></header><div class="wrap">{body}</div>{DEVICE_JS if 'cta-auto' in body else ''}
 <footer>Направено с любов от <a href="https://taskify1969.com">Taskify</a> —
 българското приложение за задачи с имени дни, празници и напомняния.<br>
 Данни: Уикипедия „Имен ден" (CC BY-SA 4.0).</footer></body></html>"""
@@ -138,7 +147,53 @@ def page(title, desc, canonical, body, jsonld=None, indexable=True):
 CTA_BLOCK = f"""
 <a class="cta" href="https://taskify1969.com">Свали Taskify — напомня ти за всеки имен ден</a>
 <div class="stores"><a href="{APP_STORE}">App Store</a><a href="{PLAY}">Google Play</a></div>
-"""
+"""  # стар общ блок — ползва го само birthday_cards.py (/rozhden-den/, /kartichki/)
+
+
+# ---- Призив към Taskify по тип страница (ime / data / mesec / podvizhni / hub) ----
+CTA_MAIN = ("Всяка сутрин в 8:00 Taskify ти казва кой има имен ден — а в календара виждаш кои от "
+            "твоите контакти празнуват и им честитиш с едно докосване.")
+CTA_SUB = "Безплатно 14 дни · Android и iPhone"
+
+
+def play_url(kind):
+    return (f"{PLAY}&referrer=utm_source%3Dimen-den%26utm_medium%3Dweb%26utm_campaign%3D{kind}")
+
+
+def appstore_url(kind):
+    if not APPSTORE_PT:
+        return APP_STORE
+    return (f"https://apps.apple.com/app/apple-store/id6768345070"
+            f"?pt={APPSTORE_PT}&ct=imen-den-{kind}&mt=8")
+
+
+def join_bg(items):
+    items = list(items)
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " и " + items[-1]
+
+
+def cta_block(kind, text=CTA_MAIN, anchor=False):
+    """Вграден призив (без изскачащ прозорец). Насочване по устройство само чрез
+    показване/скриване (DEVICE_JS + CSS): Android → Play, iPhone → App Store, компютър → и двата.
+    Без JS (вкл. Googlebot) се виждат всички бутони."""
+    pu, iu = esc(play_url(kind)), esc(appstore_url(kind))
+    aid = ' id="vzemi-taskify"' if anchor else ''
+    return f"""<div class="cta-box"{aid}>
+<p class="cta-text">{esc(text)}</p>
+<a class="cta cta-auto" href="{pu}" data-play="{pu}" data-ios="{iu}">Свали Taskify безплатно</a>
+<div class="stores"><a class="st-ios" href="{iu}">App Store</a><a class="st-play" href="{pu}">Google Play</a></div>
+<p class="cta-sub">{esc(CTA_SUB)}</p>
+</div>"""
+
+
+# Определя устройството и сочи зеления бутон към правилния магазин (без пренасочване).
+DEVICE_JS = """<script>(function(){var u=navigator.userAgent||'';
+var ios=/iPhone|iPad|iPod/.test(u)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+var d=ios?'ios':(/Android/i.test(u)?'android':'desktop');
+document.documentElement.setAttribute('data-dev',d);
+var a=document.querySelectorAll('.cta-auto');for(var i=0;i<a.length;i++){
+if(d==='ios'){a[i].href=a[i].getAttribute('data-ios');}else if(d==='android'){a[i].href=a[i].getAttribute('data-play');}}
+})();</script>"""
 
 
 # ---- Оригинален текст за значението/произхода на популярните имена ----
@@ -224,6 +279,12 @@ CARD_HTML = """
    var _t=_p.get('type');if(_t==='birthday'){OCC='birthday';}else if(_t==='nameday'){OCC='nameday';}}catch(e){}
  var TITLE=(OCC==='birthday')?'ЧЕСТИТ РОЖДЕН ДЕН':'ЧЕСТИТ ИМЕН ДЕН';
  var EMO=(OCC==='birthday')?'🎂':'🎉';
+ var KIND='__KIND__';
+ function shareUrl(){var c=document.querySelector('link[rel=canonical]');
+  var base=c?c.href:('https://taskify1969.com'+location.pathname);
+  var q='utm_source=share&utm_medium=card&utm_campaign='+encodeURIComponent(KIND);
+  try{var sp=new URLSearchParams(location.search);['name','type'].forEach(function(k){var v=sp.get(k);if(v){q=k+'='+encodeURIComponent(v)+'&'+q;}});}catch(e){}
+  return base+(base.indexOf('?')<0?'?':'&')+q;}
  // Синхронизирай видимото заглавие + покажи възрастта само за рожден ден.
  if(OCC==='birthday'){ageEl.style.display='';
    var _h2=document.getElementById('cgH2'),_pp=document.getElementById('cgP');
@@ -297,9 +358,9 @@ CARD_HTML = """
  function fname(){return SLUG+'-'+((inp.value||'ime').trim().toLowerCase().replace(/[^a-zа-я0-9]+/gi,'-')||'ime')+'.png';}
  inp.addEventListener('input',draw);ageEl.addEventListener('input',draw);
  document.getElementById('cgDown').addEventListener('click',function(){cv.toBlob(function(b){var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname();a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1500);});});
- document.getElementById('cgShare').addEventListener('click',function(){cv.toBlob(function(b){var f=new File([b],fname(),{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:WISH,text:WISH+'! '+EMO+' taskify1969.com'}).catch(function(){});}else{var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname();a.click();}});});
+ document.getElementById('cgShare').addEventListener('click',function(){cv.toBlob(function(b){var f=new File([b],fname(),{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:WISH,text:WISH+'! '+EMO+' '+(KIND?shareUrl():'taskify1969.com')}).catch(function(){});}else{var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname();a.click();}});});
  var cp=document.getElementById('cgCopy');
- cp.addEventListener('click',function(){var u=location.href;function ok(){var t=cp.textContent;cp.textContent='Копирано ✓';setTimeout(function(){cp.textContent=t;},1600);}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(u).then(ok,function(){window.prompt('Копирай линка:',u);});}else{window.prompt('Копирай линка:',u);}});
+ cp.addEventListener('click',function(){var u=KIND?shareUrl():location.href;function ok(){var t=cp.textContent;cp.textContent='Копирано ✓';setTimeout(function(){cp.textContent=t;},1600);}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(u).then(ok,function(){window.prompt('Копирай линка:',u);});}else{window.prompt('Копирай линка:',u);}});
  draw();
 })();
 </script>
@@ -318,8 +379,10 @@ ORN_THEME = {
 ORN_MAP_JSON = json.dumps(ORN_THEME, ensure_ascii=False)
 
 
-def card_section(prefill, occ="nameday"):
-    return (CARD_HTML.replace("__PREFILL__", esc(prefill))
+def card_section(prefill, occ="nameday", kind=""):
+    # kind ≠ "" → „Сподели"/„Копирай линк" дават адреса на ТЕКУЩАТА страница + UTM (imen-den);
+    # kind == "" → старото поведение (birthday_cards.py).
+    return (CARD_HTML.replace("__PREFILL__", esc(prefill)).replace("__KIND__", kind)
             .replace("__DEFAULTOCC__", occ)
             .replace("__ORNMAP__", ORN_MAP_JSON))
 
@@ -443,6 +506,8 @@ def build(today):
             for de in date_entries:
                 if durl == f"{BASE}/data/{de[1]}/":
                     same += [x for x in de[2] if x != n and x not in same]
+        when = join_bg(sorted({d[0] for d in dates}, key=lambda lab: next(
+            (x[3].month, x[3].day) for x in dates if x[0] == lab)))
         movable_note = (f'<p><em>Това е <strong>подвижен празник</strong> — датата се определя спрямо '
                         f'Великден и се мени всяка година. Показаната дата е за {year} г.</em></p>') if movable else ''
         body = f"""<div class="crumbs"><a href="{BASE}/">Именник</a> › {esc(n)}</div>
@@ -450,11 +515,12 @@ def build(today):
 <p class="lead">{esc(n)} празнува имен ден на:</p>
 <div><span class="date">{esc(labels)}</span></div>
 <p class="dlinks">{'<br>'.join(date_links)}</p>
+<p class="cta-line">📲 Taskify ще ти напомни на {esc(when)} сутринта. <a href="#vzemi-taskify">Свали безплатно ↓</a></p>
 {movable_note}
 {f'<p>Църковен празник: <strong>{esc(feast)}</strong>.</p>' if feast else ''}
 {meaning_block(n)}
-{card_section(n)}
-{CTA_BLOCK}
+{card_section(n, kind="ime")}
+{cta_block("ime", f"Имаш познат {n}? Taskify ще ти напомни на {when} сутринта.", anchor=True)}
 {('<h2>На същата дата празнуват и</h2><div class="grid">'+''.join(nlink(x) for x in same[:40])+'</div>') if same else ''}
 <h2>Не пропускай нито един имен ден</h2>
 <p>Taskify е българското приложение за задачи, което помни всички имени дни, официалните
@@ -482,8 +548,8 @@ def build(today):
         body = f"""<div class="crumbs"><a href="{BASE}/">Именник</a> › <a href="{month_url(d.month)}">{MONTHS[d.month].capitalize()}</a> › {esc(lab)}</div>
 <h1>Кой празнува имен ден на {esc(lab)}?{(' — '+esc(feast)) if feast else ''}</h1>
 <div class="names">{''.join(nlink(x) for x in names)}</div>
+{cta_block("data")}
 {nav}
-{CTA_BLOCK}
 <p>Taskify ти напомня за всеки имен ден и официален празник — безплатно, на български.</p>
 <p><a href="{month_url(d.month)}">Всички имени дни през {MONTHS[d.month]} →</a></p>"""
         ld = crumb_ld([("Именник", f"{BASE}/"), (MONTHS[d.month].capitalize(), month_url(d.month)), (lab, url)])
@@ -496,10 +562,11 @@ def build(today):
     for m in range(1, 13):
         url = month_url(m)
         mn = MONTHS[m]
-        blocks = "".join(
+        cards = [
             f'<div class="card"><h2><a href="{BASE}/data/{mmdd}/">{d.day} {mn}{(" — "+esc(fe)) if fe else ""}</a></h2>'
             f'<div class="names">{"".join(nlink(x) for x in names)}</div></div>'
-            for d, mmdd, names, fe in by_month.get(m, []))
+            for d, mmdd, names, fe in by_month.get(m, [])]
+        blocks = "".join(cards[:3]) + (cta_block("mesec") + "".join(cards[3:]) if len(cards) > 3 else "")
         pm, nm = (m - 2) % 12 + 1, m % 12 + 1
         nav = nav_html((month_url(pm), MONTHS[pm].capitalize()), (month_url(nm), MONTHS[nm].capitalize()))
         cnt = sum(len(e[2]) for e in by_month.get(m, []))
@@ -511,22 +578,23 @@ def build(today):
 <p class="lead">Кой празнува имен ден през {mn} — по дати, с църковните празници.</p>
 {blocks or '<p>През този месец няма имени дни по календара.</p>'}
 {nav}
-{CTA_BLOCK}"""
+{cta_block("mesec")}"""
         ld = crumb_ld([("Именник", f"{BASE}/"), (mn.capitalize(), url)])
         add(url, page(title, desc, url, body, ld))
 
     # ---- /podvizhni/ — 6-те подвижни празника (спрямо православния Великден) ----
     url = f"{BASE}/podvizhni/"
-    blocks = "".join(
+    cards = [
         f'<div class="card"><h2>{esc(fe or "")}</h2>'
         f'<p>{d.day} {MONTHS[d.month]} {year} г. · {d2.day} {MONTHS[d2.month]} {year + 1} г.</p>'
         f'<div class="names">{"".join(nlink(x) for x in names)}</div></div>'
-        for off, fe, names, d, d2 in movables)
+        for off, fe, names, d, d2 in movables]
+    blocks = "".join(cards[:3]) + (cta_block("podvizhni") + "".join(cards[3:]) if len(cards) > 3 else "")
     body = f"""<div class="crumbs"><a href="{BASE}/">Именник</a> › Подвижни празници</div>
 <h1>Подвижни имени дни — {year} и {year + 1} г.</h1>
 <p class="lead">Тези празници се определят спрямо православния Великден, затова датата им се мени всяка година.</p>
 {blocks}
-{CTA_BLOCK}"""
+{cta_block("podvizhni")}"""
     add(url, page(f"Подвижни имени дни {year} — Цветница, Лазаровден, Спасовден | Taskify",
                   f"Кога са подвижните имени дни през {year} и {year + 1} г.: Тодоровден, Лазаровден, "
                   f"Цветница, Великден, Спасовден и Всички български светии — и кой празнува.",
@@ -546,8 +614,8 @@ def build(today):
     hub_body = f"""<h1>Български именник — кой има имен ден днес?</h1>
 <p class="lead" id="today">Разгледай имените дни по месеци, дати или име.</p>
 <h2>Предстоящи имени дни</h2><ul class="upcoming">{up_html}</ul>
-{card_section('')}
-{CTA_BLOCK}
+{cta_block("hub")}
+{card_section('', kind="hub")}
 <h2>По месеци</h2><div class="grid">{months_html}</div>
 <p><a href="{BASE}/podvizhni/">Подвижни имени дни (Цветница, Лазаровден, Спасовден…) →</a></p>
 <h2>Популярни имена</h2><div class="grid">{top_html}</div>
