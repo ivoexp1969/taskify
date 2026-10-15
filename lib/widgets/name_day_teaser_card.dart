@@ -7,6 +7,7 @@ import '../services/contact_name_index.dart';
 import '../services/analytics_service.dart';
 import '../screens/paywall/paywall_screen.dart';
 import '../utils/localization.dart';
+import '../utils/debug_overrides.dart';
 
 /// Заключена, но ВИДИМА карта в таб „Задачи" — показва се САМО на безплатен
 /// потребител и САМО в ден с имен ден. Тийзър към Pro функцията „Контакти с имен
@@ -72,7 +73,7 @@ class _NameDayTeaserCardState extends State<NameDayTeaserCard> {
     // Само за безплатен потребител (не web, не Pro).
     if (kIsWeb || _pro.isPro) return const SizedBox.shrink();
 
-    final today = DateTime.now();
+    final today = DebugOverrides.now();
     final nameDay = NameDaysService().forDate(today);
     if (nameDay == null || nameDay.names.isEmpty) {
       return const SizedBox.shrink();

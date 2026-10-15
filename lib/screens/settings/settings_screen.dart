@@ -7,6 +7,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../models/task.dart';
 import '../../widgets/more_from_1969_section.dart';
+import '../../widgets/debug_overrides_panel.dart';
 import '../../utils/localization.dart';
 import '../../services/auth_service.dart';
 import '../../services/group_service.dart';
@@ -544,6 +545,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             MoreFrom1969Section(
               currentTaskCount: Hive.box<Task>('tasks').length,
             ),
+
+          // ★ВРЕМЕНЕН★ развоен панел — виждан само в debug билд (release = празно).
+          const DebugOverridesPanel(),
 
           // „За приложението" — най-долу.
           const AboutSection(),
