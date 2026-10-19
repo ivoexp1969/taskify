@@ -7,3 +7,5 @@ NSCalendarsFullAccessUsageDescription = "Taskify се нуждае от пъле
 NSPhotoLibraryUsageDescription = "Taskify се нуждае от достъп до библиотеката ви със снимки, за да импортира файлове.";
 NSPhotoLibraryAddUsageDescription = "Taskify се нуждае от разрешение, за да запазва експортираните файлове в библиотеката ви със снимки.";
 NSUserTrackingUsageDescription = "Taskify използва рекламни идентификатори, за да ви показва подходящи реклами и да измерва тяхната ефективност.";
+
+NSContactsUsageDescription = "Taskify чете контактите ви само на това устройство, за да показва кои от тях имат имен ден днес. Контактите ви никога не напускат телефона и не се качват никъде.";

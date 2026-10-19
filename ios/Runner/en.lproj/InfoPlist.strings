@@ -7,3 +7,5 @@ NSCalendarsFullAccessUsageDescription = "Taskify needs full calendar access to s
 NSPhotoLibraryUsageDescription = "Taskify needs access to your photo library to import files.";
 NSPhotoLibraryAddUsageDescription = "Taskify needs permission to save exported files to your photo library.";
 NSUserTrackingUsageDescription = "Taskify uses advertising identifiers to show you relevant ads and measure their effectiveness.";
+
+NSContactsUsageDescription = "Taskify reads your contacts only on this device to show which of them have a name day today. Your contacts never leave your phone and are never uploaded.";
