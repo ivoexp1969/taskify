@@ -147,13 +147,16 @@ class _TodayScheduleCardState extends State<TodayScheduleCard> {
   Widget build(BuildContext context) {
     final lang = LanguageScope.of(context).locale.languageCode;
     return AnimatedBuilder(
-      animation: WeeklyScheduleService.revision,
+      animation: scheduleVisibilityListenable,
       builder: (context, _) {
         final theme = Theme.of(context);
         final now = DateTime.now();
         final weekday = now.weekday; // 1..7
         final nowMin = now.hour * 60 + now.minute;
 
+        // Режим Ученик/Студент изключен → без часове (данните се пазят). Единна
+        // логика с календара чрез [scheduleVisible].
+        if (!scheduleVisible) return const SizedBox.shrink();
         // Изцяло празно разписание → скрий картата (таб „Обучение" вече показва
         // отделна карта „Моето разписание" — да не дублираме подканата).
         if (_svc.isEmpty) return const SizedBox.shrink();

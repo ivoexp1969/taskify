@@ -2021,8 +2021,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
   /// Показва се само ако има слотове за деня; иначе нищо.
   Widget _buildScheduleStrip(BuildContext context) {
     return AnimatedBuilder(
-      animation: WeeklyScheduleService.revision,
+      // Слуша и разписа, и вкл./изкл. на режима — за да изчезне веднага при
+      // изключване на Ученик/Студент.
+      animation: scheduleVisibilityListenable,
       builder: (context, _) {
+        // При изключен режим Ученик/Студент — не показваме часове (данните стоят).
+        if (!scheduleVisible) return const SizedBox.shrink();
         final slots = WeeklyScheduleService().forDay(_selectedDay.weekday);
         if (slots.isEmpty) return const SizedBox.shrink();
         return Padding(

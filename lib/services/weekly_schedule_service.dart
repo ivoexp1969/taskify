@@ -6,6 +6,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/weekly_schedule.dart';
 import '../utils/uuid.dart';
 import 'prefs_sync_service.dart';
+import 'school_calendar_service.dart';
+import 'university_service.dart';
+
+/// ЕДИНСТВЕНИЯТ източник на истината дали часовете от седмичния разпис трябва да
+/// се показват изобщо: само когато е включен режим Ученик (SchoolCalendarService)
+/// ИЛИ Студент (UniversityService). Ползва се навсякъде (календар, карти), за да
+/// няма дублирана логика — при изключен режим часовете се скриват навсякъде.
+/// (Данните НЕ се трият; само се скриват.)
+bool get scheduleVisible =>
+    SchoolCalendarService().enabled || UniversityService().enabled;
+
+/// Listenable, който се бумва и при промяна на разписа, и при вкл./изкл. на
+/// режима — за да се пререндерират реактивно екраните, които показват часове.
+final Listenable scheduleVisibilityListenable = Listenable.merge([
+  WeeklyScheduleService.revision,
+  SchoolCalendarService.enabledNotifier,
+  UniversityService.enabledNotifier,
+]);
 
 /// Съхранява седмичния разпис (Режими Уча) в SharedPreferences като JSON списък.
 /// Чист Dart, реактивен чрез [revision] (календарът/екранът се обновяват без
