@@ -50,6 +50,29 @@ flutter build appbundle --release
 без този диалог новите функции остават неоткрити.
 
 ## Current Version
+**v1.0.68+78 (2026-10-24) — ★Android ЖИВА в Google Play Production 100%★ (качено 10-24 от PC чрез
+`tools/play_upload.py --status completed`, vc78, заменя чакащия 1.0.67(77) — минава на свеж Google
+преглед, но носи schedule fix-а). Това качване донесе ДВЕ неща наведнъж: (А) schedule bugfix-а на Mac
+и (Б) целия 1.0.67 релийз, който дотогава беше само на клон `release-1.0.67` (вече в `main` — 16 commit-а
+ff). **(А) Schedule fix (Mac, commit `7dcd380`):** при изключен режим Ученик/Студент часовете от
+седмичния разпис вече изчезват НАВСЯКЪДЕ (Календар `_buildScheduleStrip` + `today_schedule_card`) — нов
+единен `scheduleVisible` getter в `weekly_schedule_service.dart`
+(`SchoolCalendarService().enabled || UniversityService().enabled`) + `scheduleVisibilityListenable`
+(merge на `revision` + двата `enabledNotifier`); ★данните НЕ се трият, само се скриват★. Преди бъгът:
+Календарът продължаваше да показва разписанието при изключени режими. **Mac също (`ae016f6`):** iOS
+deployment target 13/14→15.0 (Apple изисква ≥15 от април 2027; затваря altool warning 90068) +
+локализиран bg/en `NSContactsUsageDescription`; bump→1.0.68+78 (`19f0e77`). **(Б) 1.0.67 (вече живо):**
+read-time Pro статус (смята се при четене спрямо датата + Timer + resume), честен диалог при изтичане на
+trial, redesign paywall (Lifetime/Год/Мес radio + 1 бутон), заключен имен-ден тийзър, Pro-aware имен-ден
+нотификации, update prompt, analytics за trial/paywall/покупки. **PC (10-24):** `git checkout main` +
+`pull --rebase`, `analyze` 0 грешки (190 info/warning pre-existing), `flutter clean`→AAB (60.1MB, merged
+manifest потвърди USE_FULL_SCREEN_INTENT + targetSdk 36)+APK (75MB). Note 9 (USB `27ca624d…`):
+деинсталиран debug→release APK (signature mismatch), старт без краш (онбординг рендерира, logcat чист —
+само pre-existing UMP/AdMob consent warning). Play notes ≤500 → BG(490)+EN(336). ★whats_new `_build`=77
+оставен — живата Android беше 1.0.62, при ъпдейт всеки вижда 1.0.67 функциите; schedule fix е дребна
+поправка (Mac също не пипна whats_new за iOS).★ **Чист cross-platform Dart.** ⚠️ОСТАВА за Иво: реална
+покупка на internal testing + ★iOS 1.0.68 билд на Mac★ (schedule fix е чист Dart, bump 1.0.68+78 вече в
+main → Mac само `git pull`→`pod install`→archive). ПРЕДИШНО:**
 **v1.0.60+70 (2026-09-18) — ★Android release: targetSdk 36★. `flutter clean`→AAB (59.9MB,
 `build/app/outputs/bundle/release/app-release.aab`); merged manifest потвърди targetSdk=36 реално в
 билда (затваря Play API изискването до 01.11.2026), vc70, USE_FULL_SCREEN_INTENT пази. Качен **DRAFT
