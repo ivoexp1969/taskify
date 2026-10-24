@@ -134,8 +134,11 @@ def cmd_push(args):
     base = _base_dir()
     if not os.path.isdir(base):
         sys.exit("No local metadata dir: %s (run `pull` first)" % base)
+    # A locale folder is one that actually holds listing texts (title.txt).
+    # This skips auxiliary dirs like `screenshots_generated`.
     locales = sorted(d for d in os.listdir(base)
-                     if os.path.isdir(os.path.join(base, d)))
+                     if os.path.isdir(os.path.join(base, d))
+                     and os.path.isfile(os.path.join(base, d, "title.txt")))
     if not locales:
         sys.exit("No locale folders under %s" % base)
 
