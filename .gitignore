@@ -68,3 +68,8 @@ verify-user.mjs
 node_modules/
 package.json
 package-lock.json
+
+# Audit raw cache (large source HTML — reproducible via fetch_sources.py)
+audit/raw/
+audit/__pycache__/
+audit/_old_dataset.json
