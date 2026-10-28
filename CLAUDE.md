@@ -50,7 +50,11 @@ flutter build appbundle --release
 без този диалог новите функции остават неоткрити.
 
 ## Current Version
-**v1.0.69+79 (2026-10-28) — ★качен на INTERNAL TESTING (vc79), чака Production★.** Единствена промяна =
+**v1.0.69+79 (2026-10-28) — ★Android ЖИВА в Google Play Production 100% (vc79)★.** Качен internal→промотиран
+Production 100% (`play_promote.py --version-code 79 --track production --status completed`, edit 00641173366831547045;
+потвърдено през Play API: production=1.0.69/vc79/completed/100%). Production release notes BG+EN (имен-ден). ⚠️ vc79
+е билднат с whats_new `_build`=77 → НЯМА „Какво ново" диалог за 1.0.69 (тихо, като 1.0.68); точката „Разширен
+именник" ще влезе в whats_new на 1.0.70 (нов build, където реално ще се покаже). Единствена промяна =
 разширен `assets/data/bg_name_days.json` (одит 2026-10-28: +14 дати, +250 имена от kik-info+imenden, Тодоровден
 +6 подвижен, Връбан→Върбан; виж Recent Work). **НЯМА код промяна** — Pomodoro СЪЩЕСТВУВА
 (`lib/widgets/pomodoro_timer_sheet.dart`, реален 25-мин таймер), затова onboarding НЕ е пипан. Последен vc в Play
