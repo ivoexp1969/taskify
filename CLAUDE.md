@@ -50,6 +50,16 @@ flutter build appbundle --release
 без този диалог новите функции остават неоткрити.
 
 ## Current Version
+**v1.0.69+79 (2026-10-28) — ★качен на INTERNAL TESTING (vc79), чака Production★.** Единствена промяна =
+разширен `assets/data/bg_name_days.json` (одит 2026-10-28: +14 дати, +250 имена от kik-info+imenden, Тодоровден
++6 подвижен, Връбан→Върбан; виж Recent Work). **НЯМА код промяна** — Pomodoro СЪЩЕСТВУВА
+(`lib/widgets/pomodoro_timer_sheet.dart`, реален 25-мин таймер), затова onboarding НЕ е пипан. Последен vc в Play
+беше 78 (Play API) → bump 1.0.68+78→1.0.69+79. **PC (10-28):** `git pull` (up-to-date), `flutter clean`→AAB
+60.1MB (merged manifest: USE_FULL_SCREEN_INTENT + targetSdk 36 потвърдени), качен чрез
+`tools/play_upload.py --track internal --status completed` (vc79, edit 12990734086423800959). ⚠️ „Какво ново"
+диалог НЕ е пипан (само dataset) — **ПРЕДИ Production: вдигни whats_new `_build`=79 + точка „Разширен именник".**
+★iOS 1.0.68(78) подадена в App Store на 2026-10-21 (Mac).★ ⏳ОСТАВА за Иво: Production rollout след потвърждение
+(`play_promote.py --version-code 79 --status completed` или `play_upload.py --track production`). ПРЕДИШНО:
 **v1.0.68+78 (2026-10-24) — ★Android ЖИВА в Google Play Production 100%★ (качено 10-24 от PC чрез
 `tools/play_upload.py --status completed`, vc78, заменя чакащия 1.0.67(77) — минава на свеж Google
 преглед, но носи schedule fix-а). Това качване донесе ДВЕ неща наведнъж: (А) schedule bugfix-а на Mac
@@ -203,6 +213,17 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **★v1.0.69+79 — само разширеният именник → качен на Internal testing (PC, 2026-10-28)★:** `git pull`
+  (up-to-date). Поискана промяна беше „нов `bg_name_days.json` + махни Pomodoro от onboarding АКО не съществува" —
+  проверих кода: **Pomodoro СЪЩЕСТВУВА** (`pomodoro_timer_sheet.dart`, истински 25-мин таймер, старт от
+  `task_list_tile`/`task_card_styles`), затова **onboarding НЕ е пипан**. Dataset-ът вече беше в main (commit
+  `48bcfc8`). Последен versionCode в Play = 78 (питан през androidpublisher API) → bump pubspec 1.0.68+78→
+  **1.0.69+79**. `flutter clean`→AAB 60.1MB; merged manifest потвърди **USE_FULL_SCREEN_INTENT + targetSdk 36**;
+  качен `play_upload.py --track internal --status completed` (vc79). Play notes BG+EN. ⚠️ whats_new `_build` НЕ е
+  пипан (само dataset) — **ПРЕДИ Production вдигни `_build`=79 + „Разширен именник"**. ОСТАВА: Production след „ок".
+  Попътен анализ (само четене, нищо не е пипано): Play Vitals 90 дни = 0 сривове/ANR; Firebase BQ export е
+  ИЗКЛЮЧЕН (няма datasets) → retention/app_remove не са достъпни от PC; Taskify има **13 езика** (не 11 — +nl+uk),
+  само `dayName()/dayShort()` нямат `ja`; личните задачи НЯМАТ действие „сподели в група" (виж DEVLOG плановете).
 - **★Именник ОДИТ + деплой на сайта (PC, 2026-10-28)★:** одит на `assets/data/bg_name_days.json` срещу 2
   НЕзависими източника — **kik-info.com** (12 мес. 2026 + 5 за 2027) + **imenden.eu** (целогодишна, данните във
   вграден JS `DB={"DD-MM":…}`); трети за кръстосване = **bg.wikipedia „Имен ден"** (★КРЪГОВ — JSON е изведен от
