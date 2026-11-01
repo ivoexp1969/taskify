@@ -39,6 +39,24 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   Firebase uid (Android ↔ iOS ↔ web). ⚠️ **Миграция:** RevenueCat **слива** анонимния купувач към уид-а при
   първия `logIn` (alias) — провери да няма загуба/двойно броене за съществуващите анонимни купувачи; тествай с
   реален тестов акаунт. Това е и **основата за web по Pro статуса на акаунта** (виж web TODO горе). Иво поиска за 1.0.71.
+- **📊 Analytics: фуния на paywall за спада на lifetime покупки — СЛЕД ~15.11.2026** (14 дни данни от 1.0.70).
+  Play Console: 3 реални `premium_lifetime` покупки (24.01/20.07/23.08.2026), после нито една — но paywall-ът
+  РАБОТИ (vc80 показва 3 плана, lifetime €11.99; виж диагностиката долу), значи спадът е конверсия/експозиция,
+  не бъг. Анализ (от ~15.11, когато има 14 дни 1.0.70 данни): фуния **`paywall_shown` → `paywall_view` →
+  `paywall_select` → `purchase_start` → `purchase_success`**, разбита **по `source`/reason И по пакет**
+  (lifetime/yearly/monthly). Цел: къде се губят (показване по време на trial? избор, но без start? lifetime vs
+  subs?). Иво поиска; изпълни след 15.11.2026.
+
+## 2026-11-01 · PC — Диагностика: `premium_lifetime` „PRODUCT_NOT_FOUND" е БЕЗОБИДЕН (vc80 verified)
+Разследване на `[Purchases] UnfetchedProduct{productId='premium_lifetime', productType='subs'} → PRODUCT_NOT_FOUND`
+в production logcat. **Заключение: НЕ е бъг — безобиден шум.** RevenueCat пробва продукта първо като **`subs`**
+(пада, логва го на INFO), после го тегли успешно като **`inapp`**. Доказано на Note 9 (release vc80 от Play,
+trial изтекъл чрез дата + тестовата покупка refund-ната): `getOfferings` → „Found offering: default" + **„Packages: 3"**;
+paywall-ът рендерира **и трите** плана — Завинаги **11,99 €** (избран), Годишен 9,49 €, Месечен 1,19 €. Кодът ползва
+само `Purchases.getOfferings()` (без `productCategory`); git потвърди, че RC ключ/product IDs/`purchases_flutter`
+(=10.8.0 от 08.08, преди последната успешна покупка)/offering fetch **не са пипани** 23.08→днес. Тестовата поръчка
+**GPA.3375-3899-3482-88571 refund+revoke-ната на 01.11** (за да се стигне paywall-ът на Pro устройство). ⚠️ НЕ
+преследвай „subs PRODUCT_NOT_FOUND" пак като бъг.
 
 ## 2026-11-01 · PC — 1.0.70+80 free-tier v2 → ★ЖИВА в Play Production 100% (vc80)★ (клон free-tier-v2)
 Тествано на Note 9 + качено Internal → промотирано Production 100% след „ок" на Иво.
