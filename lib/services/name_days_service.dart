@@ -59,18 +59,6 @@ const _ndBodyTpl = {
   'ru': 'Сегодня именины у {names} — поздравишь? 🎉',
   'tr': 'Bugün {names} isim gününü kutluyor — tebrik eder misin? 🎉', 'ja': '今日は{names}が聖名祝日です — お祝いを送りますか？🎉',
 };
-const _ndFreeLocked = {
-  'en': '{names} celebrate today — {n} of your contacts too 🔒', 'nl': '{names} vieren vandaag — {n} van je contacten ook 🔒', 'uk': 'Сьогодні святкують {names} — {n} ваших контактів теж 🔒',
-  'bg': 'Днес празнуват {names} — {n} от контактите ти също 🔒',
-  'de': 'Heute feiern {names} — {n} deiner Kontakte auch 🔒',
-  'fr': "Aujourd'hui {names} fêtent — {n} de tes contacts aussi 🔒",
-  'it': 'Oggi festeggiano {names} — anche {n} dei tuoi contatti 🔒',
-  'el': 'Σήμερα γιορτάζουν {names} — {n} επαφές σου επίσης 🔒',
-  'es': 'Hoy celebran {names} — {n} de tus contactos también 🔒',
-  'pt': 'Hoje {names} celebram — {n} dos teus contactos também 🔒',
-  'ru': 'Сегодня празднуют {names} — {n} ваших контактов тоже 🔒',
-  'tr': 'Bugün {names} kutluyor — kişilerinden {n} kişi de 🔒', 'ja': '今日は{names}がお祝い — 連絡先{n}人も 🔒',
-};
 const _ndProContacts = {
   'en': 'Name day for {contacts} — send your wishes? 🎉', 'nl': 'Naamdag voor {contacts} — je wensen sturen? 🎉', 'uk': 'Іменини у {contacts} — надіслати побажання? 🎉',
   'bg': 'Имен ден имат {contacts} — да честитиш? 🎉',
@@ -94,13 +82,11 @@ String _ndBodyFor({
   required List<ContactMatch> contacts,
 }) {
   final names = nameDay.names.join(', ');
-  if (isPro && contacts.isNotEmpty) {
+  // 1.0.70: контактите с имен ден са БЕЗПЛАТНИ (без катинар) — пълният текст с
+  // имената на контактите за ВСИЧКИ потребители (`isPro` вече не влияе тук).
+  if (contacts.isNotEmpty) {
     return (_ndProContacts[lang] ?? _ndProContacts['en']!)
         .replaceAll('{contacts}', _contactsSummary(contacts, lang));
-  } else if (!isPro && contacts.isNotEmpty) {
-    return (_ndFreeLocked[lang] ?? _ndFreeLocked['en']!)
-        .replaceAll('{names}', names)
-        .replaceAll('{n}', '${contacts.length}');
   }
   return (_ndBodyTpl[lang] ?? _ndBodyTpl['en']!).replaceAll('{names}', names);
 }
@@ -124,19 +110,49 @@ class NameDaysService {
   /// (екраните живеят в IndexedStack и не се пресъздават).
   static final ValueNotifier<bool> enabledNotifier = ValueNotifier<bool>(false);
 
+  static const String _prefEnabled = 'name_days_enabled';
+  // Ръчно изключване от потребителя: помни го, за да НЕ пускаме имен-ден
+  // пак тихо при връщане към BG („не сменяй тихо").
+  static const String _prefManualOff = 'name_days_manual_off';
+
   /// Зарежда запазената стойност на toggle-а в notifier-а.
   Future<bool> loadEnabled() async {
     final prefs = await SharedPreferences.getInstance();
-    final v = prefs.getBool('name_days_enabled') ?? false;
+    final v = prefs.getBool(_prefEnabled) ?? false;
     enabledNotifier.value = v;
     return v;
   }
 
   /// Записва стойността и обновява notifier-а (за мигновен UI отговор).
-  Future<void> setEnabled(bool value) async {
+  ///
+  /// [userInitiated] = true, когато промяната идва от ръчно действие на
+  /// потребителя (toggle в Настройки или избор „Изключи" в диалога при смяна
+  /// на държава). Тогава помним дали е ИЗКЛЮЧЕНО ръчно, за да не пуснем имен-ден
+  /// отново автоматично при връщане към България.
+  Future<void> setEnabled(bool value, {bool userInitiated = false}) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('name_days_enabled', value);
+    await prefs.setBool(_prefEnabled, value);
+    if (userInitiated) {
+      await prefs.setBool(_prefManualOff, !value);
+    }
     enabledNotifier.value = value;
+  }
+
+  /// Дали потребителят изрично е изключвал имен-ден (блокира авто-пускане).
+  Future<bool> isManuallyDisabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_prefManualOff) ?? false;
+  }
+
+  /// Еднократна първоначална стойност: имен-ден по подразбиране е ВКЛЮЧЕН само
+  /// за България. Прилага се САМО при нова инсталация (ключът още липсва), за да
+  /// не пипа тихо съществуващи потребители с друга държава.
+  Future<void> applyFirstRunDefault(String country) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey(_prefEnabled)) return; // съществуващ потребител
+    final bg = country.toUpperCase() == 'BG';
+    await prefs.setBool(_prefEnabled, bg);
+    enabledNotifier.value = bg;
   }
 
   // Фиксирани: ключ "MM-DD" → NameDay

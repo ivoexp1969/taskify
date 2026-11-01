@@ -90,6 +90,61 @@ class _DebugOverridesPanelState extends State<DebugOverridesPanel> {
               _refresh();
             },
           ),
+          // ★1.0.70★ Бързи бутони за визуален тест на trial банера по фази.
+          ListTile(
+            dense: true,
+            leading: const Icon(Icons.flag_circle_outlined,
+                color: Colors.deepOrange),
+            title: const Text('Trial: ден 1 (нов)'),
+            subtitle: const Text(
+                'trial_start = сега + нулира welcome/банер → рестартирай за welcome диалога'),
+            onTap: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString(
+                  'trial_start_date', DateTime.now().toIso8601String());
+              await prefs.remove('taskify_welcome_shown_v2');
+              await prefs.remove('downgrade_dialog_shown');
+              await prefs.remove('trial_banner_dismissed_date');
+              await prefs.setBool('is_pro', false);
+              DebugOverrides.forceTrialExpired = false;
+              if (!mounted) return;
+              _refresh();
+            },
+          ),
+          ListTile(
+            dense: true,
+            leading: const Icon(Icons.hourglass_bottom_rounded,
+                color: Colors.deepOrange),
+            title: const Text('Trial: ден 12 (последни дни → банер)'),
+            subtitle: const Text(
+                'trial_start = преди 12 дни → остават ~2 дни → trial банерът излиза'),
+            onTap: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString(
+                  'trial_start_date',
+                  DateTime.now()
+                      .subtract(const Duration(days: 12))
+                      .toIso8601String());
+              await prefs.remove('downgrade_dialog_shown');
+              await prefs.remove('trial_banner_dismissed_date');
+              await prefs.setBool('is_pro', false);
+              DebugOverrides.forceTrialExpired = false;
+              if (!mounted) return;
+              _refresh();
+            },
+          ),
+          SwitchListTile(
+            dense: true,
+            title: const Text('Симулирай Free (въпреки Pro/промо)'),
+            subtitle: const Text(
+                'isPro=false въпреки платец/промо (вкл. lifetime) — за тест на '
+                'free-tier преживяването без изход от акаунта'),
+            value: DebugOverrides.forceFree,
+            onChanged: (v) {
+              DebugOverrides.forceFree = v; // мигновен live ефект (debug-only)
+              _refresh();
+            },
+          ),
           SwitchListTile(
             dense: true,
             title: const Text('Симулирай дата 8 ноември'),

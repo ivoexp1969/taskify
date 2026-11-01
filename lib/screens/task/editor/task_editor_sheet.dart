@@ -54,6 +54,7 @@ class TaskEditorSheet extends StatefulWidget {
     required this.onRecurrenceDefaultChanged,
     required this.onClearCategoryFilter,
     required this.onChanged,
+    this.hideRecurrence = false,
   });
 
   final BuildContext parentContext;
@@ -72,6 +73,10 @@ class TaskEditorSheet extends StatefulWidget {
   final VoidCallback onClearCategoryFilter;
   final VoidCallback onChanged;
 
+  /// Скрива секцията „Повторение" и записва recurrence=null. Ползва се за
+  /// груповите (споделени) задачи, където повторението не се поддържа.
+  final bool hideRecurrence;
+
   /// Отваря редактора. Зарежда AI настройките (както преди — при всяко отваряне),
   /// после показва sheet-а и извиква [onChanged] след затваряне.
   static Future<void> show(
@@ -88,6 +93,7 @@ class TaskEditorSheet extends StatefulWidget {
     required ValueChanged<String> onRecurrenceDefaultChanged,
     required VoidCallback onClearCategoryFilter,
     required VoidCallback onChanged,
+    bool hideRecurrence = false,
   }) async {
     // Зареждаме AI настройките при всяко отваряне, за да са актуални
     final aiParsingEnabled = await AiUsageService.instance.isParsingEnabled();
@@ -113,6 +119,7 @@ class TaskEditorSheet extends StatefulWidget {
         onRecurrenceDefaultChanged: onRecurrenceDefaultChanged,
         onClearCategoryFilter: onClearCategoryFilter,
         onChanged: onChanged,
+        hideRecurrence: hideRecurrence,
       ),
     );
     onChanged();
@@ -157,7 +164,10 @@ class _TaskEditorSheetState extends State<TaskEditorSheet>
     }
     tempCategoryId = existing?.categoryId ?? widget.initialCategoryId;
     tempPriority = existing?.priority ?? widget.initialPriority;
-    tempRecurrence = existing?.recurrence ?? widget.initialRecurrence;
+    // Групите не поддържат повторение → винаги 'none' (recurrence се записва null).
+    tempRecurrence = widget.hideRecurrence
+        ? 'none'
+        : (existing?.recurrence ?? widget.initialRecurrence);
     tempReminders = List<String>.from(existing?.remindersList ?? []);
     tempSubtasks = existing?.subtasksList ?? [];
     tempNotes = existing?.notes ?? '';
@@ -268,7 +278,9 @@ class _TaskEditorSheetState extends State<TaskEditorSheet>
                     if (name.isNotEmpty) {
                       if (!ProService().canAddCategory(widget.categoryBox.length)) {
                         Navigator.pop(ctx);
-                        showPaywallIfNeeded(widget.parentContext, isFeatureAvailable: false);
+                        showPaywallIfNeeded(widget.parentContext,
+                            isFeatureAvailable: false,
+                            source: 'categories_limit');
                         return;
                       }
                       final id = DateTime.now().millisecondsSinceEpoch.toString();
@@ -1105,25 +1117,28 @@ class _TaskEditorSheetState extends State<TaskEditorSheet>
                           ),
                           const SizedBox(height: 24),
 
-                          // Секция: Повторение
-                          taskSectionLabel(t.repeat, Icons.repeat_rounded, theme),
-                          const SizedBox(height: 12),
-                          taskDropdownTile(
-                            value: tempRecurrence,
-                            items: {
-                              'none': t.noRepeat,
-                              'daily': t.daily,
-                              'weekly': t.weekly,
-                              'monthly': t.monthly,
-                              'yearly': t.yearly,
-                            },
-                            theme: theme,
-                            onChanged: (val) => setSheetState(() {
-                              tempRecurrence = val;
-                              widget.onRecurrenceDefaultChanged(val);
-                            }),
-                          ),
-                          const SizedBox(height: 24),
+                          // Секция: Повторение (скрита за групови задачи).
+                          if (!widget.hideRecurrence) ...[
+                            taskSectionLabel(
+                                t.repeat, Icons.repeat_rounded, theme),
+                            const SizedBox(height: 12),
+                            taskDropdownTile(
+                              value: tempRecurrence,
+                              items: {
+                                'none': t.noRepeat,
+                                'daily': t.daily,
+                                'weekly': t.weekly,
+                                'monthly': t.monthly,
+                                'yearly': t.yearly,
+                              },
+                              theme: theme,
+                              onChanged: (val) => setSheetState(() {
+                                tempRecurrence = val;
+                                widget.onRecurrenceDefaultChanged(val);
+                              }),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
 
                           // Секция: Напомняне
                           taskSectionLabel(
@@ -1517,7 +1532,7 @@ class _TaskEditorSheetState extends State<TaskEditorSheet>
                             // Paywall check — free limit 50 tasks
                             if (!ProService().canAddTask(taskBox.length)) {
                               Navigator.pop(innerContext);
-                              if (parentContext.mounted) showPaywallIfNeeded(parentContext, isFeatureAvailable: false);
+                              if (parentContext.mounted) showPaywallIfNeeded(parentContext, isFeatureAvailable: false, source: 'tasks_limit');
                               return;
                             }
                             // Auto-detect template от category

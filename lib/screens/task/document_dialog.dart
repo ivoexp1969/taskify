@@ -31,7 +31,7 @@ class DocumentDialog {
   /// Фаза 3: free потребители могат да следят до толкова документа; Pro е
   /// неограничено. Лимитът пази Pro стимула, а разгейтването отваря partner
   /// CTA-то „Поднови сега" към цялата база (Идея 1).
-  static const int freeLimit = 2;
+  static const int freeLimit = 3; // v1.0.70: до 3 активни документа безплатно (4-ти → paywall)
 
   /// Гарантира, че категорията „Документи" съществува (локализира се по id навсякъде).
   static Category ensureCategory(Box<Category> categoryBox) {
@@ -64,6 +64,7 @@ class DocumentDialog {
           context,
           isFeatureAvailable: false,
           featureName: AppText.of(context).documents,
+          source: 'documents_limit',
         );
         if (!upgraded) return;
       }

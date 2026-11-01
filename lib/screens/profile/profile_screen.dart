@@ -5,14 +5,18 @@ import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 import '../../services/auth_service.dart';
 import '../../services/group_service.dart';
+import '../../services/pro_service.dart';
 import '../../services/school_calendar_service.dart';
 import '../../services/university_service.dart';
 import '../../models/university.dart';
 import '../../utils/localization.dart';
 import '../auth/login_screen.dart';
 import '../modes/student_onboarding_screen.dart';
+import '../paywall/paywall_screen.dart';
 import '../settings/delete_account_flow.dart';
 
 /// Екран „Профил" (Пакет 2, Фаза 1) — извикан от картата „Профил" горе в
@@ -31,6 +35,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final _auth = AuthService();
+  final _pro = ProService();
   final _school = SchoolCalendarService();
   final _uni = UniversityService();
   String? _photoPath; // локална снимка на профила (по избор)
@@ -39,6 +44,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _loadPhoto();
+    _pro.addListener(_onProChanged);
+  }
+
+  @override
+  void dispose() {
+    _pro.removeListener(_onProChanged);
+    super.dispose();
+  }
+
+  void _onProChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _loadPhoto() async {
@@ -126,6 +142,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   };
 
   static String _t(Map<String, String> m, String lang) => m[lang] ?? m['en']!;
+
+  // ── Абонамент / Pro статус (1.0.70) ──
+  static const _subSection = {
+    'en': 'Subscription', 'nl': 'Abonnement', 'uk': 'Підписка', 'bg': 'Абонамент', 'de': 'Abo', 'fr': 'Abonnement',
+    'it': 'Abbonamento', 'el': 'Συνδρομή', 'es': 'Suscripción', 'pt': 'Subscrição',
+    'ru': 'Подписка', 'tr': 'Abonelik', 'ja': 'サブスクリプション',
+  };
+  static const _goPro = {
+    'en': 'Go Pro', 'nl': 'Pro worden', 'uk': 'Отримати Pro', 'bg': 'Стани Pro', 'de': 'Pro holen', 'fr': 'Passer à Pro',
+    'it': 'Passa a Pro', 'el': 'Απόκτησε Pro', 'es': 'Hazte Pro', 'pt': 'Torna-te Pro',
+    'ru': 'Стать Pro', 'tr': 'Pro ol', 'ja': 'Proになる',
+  };
 
   // ── Локализирани стрингове (нови за Профил) ──
   static const _titleProfile = {
@@ -355,6 +383,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           return ListView(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 32),
             children: [
+              if (!kIsWeb) ...[
+                _sectionLabel(theme, _t(_subSection, lang)),
+                _subscriptionCard(context, lang, theme),
+                const SizedBox(height: 20),
+              ],
               _sectionLabel(theme, t.account),
               _accountCard(context, t, user),
               const SizedBox(height: 20),
@@ -378,6 +411,63 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 fontWeight: FontWeight.w700,
                 color: theme.colorScheme.primary)),
       );
+
+  /// Карта „Абонамент" — статус (Pro / пробен / промо / безплатен) + оставащи
+  /// дни на пробния период, и бутон „Стани Pro" за не-Pro потребители.
+  Widget _subscriptionCard(BuildContext context, String lang, ThemeData theme) {
+    final isPro = _pro.isPro;
+    final isTrial = _pro.isTrial;
+    final isPromo = _pro.isPromoCode;
+    final status = _pro.getStatusText(lang);
+
+    // Подзаглавие „Остават N дни" — само когато има какво да изтича и СПРЯМО
+    // реалния източник на Pro (същата подредба като статуса), иначе трупаме trial
+    // дните върху lifetime/платец. Приоритет: платец > lifetime промо > промо-дни >
+    // trial. 1.0.70 fix: lifetime промо (`promoEndDate==null`) = „завинаги", без дни.
+    final t = AppText.of(context);
+    String? daysLine;
+    if (_pro.isPaid) {
+      daysLine = null; // реален абонамент → без „оставащи дни"
+    } else if (isPromo && _pro.promoEndDate == null) {
+      daysLine = null; // lifetime промо → завинаги
+    } else if (isPromo && _pro.promoEndDate != null) {
+      daysLine = t.daysRemaining(_pro.promoDaysLeft.clamp(0, 9999));
+    } else if (isTrial) {
+      daysLine = t.daysRemaining(_pro.trialDaysLeft.clamp(0, 9999));
+    }
+
+    return Card(
+      child: Column(
+        children: [
+          ListTile(
+            leading: Icon(
+              isPro ? Icons.workspace_premium_rounded : Icons.lock_open_rounded,
+              color: isPro ? Colors.amber.shade700 : theme.colorScheme.primary,
+            ),
+            title: Text(status,
+                style: const TextStyle(fontWeight: FontWeight.w600)),
+            subtitle: daysLine != null ? Text(daysLine) : null,
+          ),
+          if (!isPro) ...[
+            const Divider(height: 1),
+            ListTile(
+              leading: Icon(Icons.workspace_premium_rounded,
+                  color: theme.colorScheme.primary),
+              title: Text(_t(_goPro, lang),
+                  style: TextStyle(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w600)),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (_) => const PaywallScreen(source: 'profile')),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 
   Widget _accountCard(BuildContext context, AppText t, dynamic user) {
     final theme = Theme.of(context);

@@ -120,6 +120,7 @@ class AppearanceSection extends StatelessWidget {
                           context,
                           isFeatureAvailable: false,
                           featureName: t.cardStyleTicket,
+                          source: 'card_style_ticket',
                         );
                         if (!upgraded) return;
                       }

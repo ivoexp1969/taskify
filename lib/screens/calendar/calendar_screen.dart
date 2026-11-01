@@ -2097,8 +2097,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     };
     final theme = Theme.of(context);
 
-    // Контакти с имен ден днес (само за Pro + ако функцията е вкл.; on-device).
-    final contacts = (ProService().isPro && ContactNameIndex().isEnabled)
+    // Контакти с имен ден днес (БЕЗПЛАТНО от 1.0.70, ако функцията е вкл.; on-device).
+    final contacts = (ContactNameIndex().isEnabled)
         ? ContactNameIndex().contactsForNames(nameDay.names)
         : const <ContactMatch>[];
     const fromContacts = {

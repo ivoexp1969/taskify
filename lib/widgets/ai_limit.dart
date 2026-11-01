@@ -56,7 +56,9 @@ Future<void> showAiLimitSheet(BuildContext context) async {
                 onPressed: () {
                   Navigator.of(sheetCtx).pop();
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const PaywallScreen()),
+                    MaterialPageRoute(
+                        builder: (_) =>
+                            const PaywallScreen(source: 'ai_limit')),
                   );
                 },
                 icon: const Icon(Icons.workspace_premium_rounded),

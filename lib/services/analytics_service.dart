@@ -214,9 +214,10 @@ class AnalyticsService {
   /// Стартиран trial (веднъж, при първото пускане).
   Future<void> logTrialStart() => _log('trial_start');
 
-  /// Край на trial. [converted] = станал ли е платец.
+  /// Край на trial. [converted] = станал ли е платец. Firebase Analytics приема
+  /// само String/num за param стойност → пращаме 1/0 (не bool).
   Future<void> logTrialEnd({required bool converted}) =>
-      _log('trial_end', {'converted': converted});
+      _log('trial_end', {'converted': converted ? 1 : 0});
 
   /// Отворен paywall. [source] = откъде (contacts/calendar/settings/…);
   /// [defaultPkg] = планът, избран по подразбиране (обикновено lifetime).
@@ -248,6 +249,39 @@ class AnalyticsService {
   /// Тап върху заключена Pro функция. [source] = коя (contacts/calendar/…).
   Future<void> logLockedFeatureTap(String source) =>
       _log('locked_feature_tap', {'source': source});
+
+  // ── Trial банер + paywall причини + промо-вход (1.0.70) ──────────────────
+
+  /// Показан trial банер. [phase] ∈ {day1, last_days} (ден 1 / последните дни).
+  Future<void> logTrialBannerShown(String phase) =>
+      _log('trial_banner_shown', {'phase': phase});
+
+  /// Затворен trial банер (× за деня). [phase] както по-горе.
+  Future<void> logTrialBannerDismissed(String phase) =>
+      _log('trial_banner_dismissed', {'phase': phase});
+
+  /// Отворен paywall с конкретна причина. [reason] ∈
+  /// {documents_limit, tasks_limit, ai_limit, group_create, calendar,
+  ///  statistics, cloud_sync, widget, categories_limit, reminders_limit, …}.
+  Future<void> logPaywallShown(String reason) =>
+      _log('paywall_shown', {'reason': reason});
+
+  /// Поискан вход преди прилагане на промо код (анонимен/невлязъл потребител).
+  Future<void> logPromoLoginRequired() => _log('promo_login_required');
+
+  /// Входът след искане за промо код завърши успешно (вече може да приложи кода).
+  Future<void> logPromoLoginCompleted() => _log('promo_login_completed');
+
+  /// Успешно изкупен промо код. [type] ∈ {days, lifetime}, [days] = брой дни
+  /// (0 за lifetime), [source] = откъде е приложен (paywall, …).
+  Future<void> logPromoRedeemed(
+          {required String type, int days = 0, String source = 'paywall'}) =>
+      _log('promo_redeemed',
+          {'promo_type': type, 'days': days, 'source': source});
+
+  /// Промо код от тип „days" изтече → потребителят падна на free.
+  Future<void> logPromoExpired({String type = 'days'}) =>
+      _log('promo_expired', {'promo_type': type});
 
   /// User property `pro_state` ∈ {paid, promo, trial, free}.
   Future<void> setProState(String state) async {

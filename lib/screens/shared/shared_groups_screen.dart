@@ -47,6 +47,7 @@ class _SharedGroupsScreenState extends State<SharedGroupsScreen> {
         context,
         isFeatureAvailable: false,
         featureName: t.sharedTab,
+        source: 'group_create',
       );
       if (!upgraded) return;
     }

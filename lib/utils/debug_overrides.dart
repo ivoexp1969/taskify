@@ -11,6 +11,7 @@ class DebugOverrides {
 
   static DateTime? _fakeNow;
   static bool _forceTrialExpired = false;
+  static bool _forceFree = false;
 
   /// Текущият момент с приложен override. В release = `DateTime.now()`.
   static DateTime now() =>
@@ -18,6 +19,10 @@ class DebugOverrides {
 
   /// true → trial се смята за изтекъл независимо от записаната начална дата.
   static bool get forceTrialExpired => kDebugMode && _forceTrialExpired;
+
+  /// true → `ProService.isPro` връща false ВЪПРЕКИ платец/промо (вкл. lifetime).
+  /// За ръчен тест на free-tier преживяването без изход от акаунта. Release = false.
+  static bool get forceFree => kDebugMode && _forceFree;
 
   /// Фалшивото „днес" (или null, ако не е зададено). В release винаги null.
   static DateTime? get fakeNow => kDebugMode ? _fakeNow : null;
@@ -30,7 +35,11 @@ class DebugOverrides {
     if (kDebugMode) _forceTrialExpired = value;
   }
 
+  static set forceFree(bool value) {
+    if (kDebugMode) _forceFree = value;
+  }
+
   /// Има ли изобщо активен override (за видим индикатор в debug UI).
   static bool get isActive =>
-      kDebugMode && (_fakeNow != null || _forceTrialExpired);
+      kDebugMode && (_fakeNow != null || _forceTrialExpired || _forceFree);
 }

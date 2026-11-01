@@ -547,6 +547,7 @@ class AppText {
       'pt': ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
       'ru': ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
       'tr': ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'],
+      'ja': ['月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日'],
     };
     return (days[lang] ?? days['en']!)[index];
   }
@@ -564,6 +565,7 @@ class AppText {
       'pt': ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
       'ru': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
       'tr': ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
+      'ja': ['月', '火', '水', '木', '金', '土', '日'],
     };
     return (days[lang] ?? days['en']!)[index];
   }
@@ -582,31 +584,95 @@ class AppText {
   });
 
   // ==================== TRIAL / PRO ====================
-  String trialDaysLeft(int days) => _t({
-    'en': 'Trial: $days days left', 'nl': 'Proef: nog $days dagen', 'uk': 'Пробний: залишилось $days днів',
-    'bg': 'Пробен период: $days дни',
-    'de': 'Testversion: $days Tage übrig',
-    'fr': 'Essai: $days jours restants',
-    'it': 'Prova: $days giorni rimasti',
-    'el': 'Δοκιμή: $days ημέρες',
-    'es': 'Prueba: $days días restantes',
-    'pt': 'Teste: $days dias restantes',
-    'ru': 'Пробный период: $days дней',
-    'tr': 'Deneme: $days gün kaldı', 'ja': 'トライアル: 残り$days日',
-  });
 
-  String promoDaysLeft(int days) => _t({
-    'en': 'Promo: $days days left', 'nl': 'Promo: nog $days dagen', 'uk': 'Промо: залишилось $days днів',
-    'bg': 'Промо код: $days дни',
-    'de': 'Promo: $days Tage übrig',
-    'fr': 'Promo: $days jours restants',
-    'it': 'Promo: $days giorni rimasti',
-    'el': 'Promo: $days ημέρες',
-    'es': 'Promo: $days días restantes',
-    'pt': 'Promo: $days dias restantes',
-    'ru': 'Промо: $days дней',
-    'tr': 'Promo: $days gün kaldı', 'ja': 'プロモ: 残り$days日',
-  });
+  /// Славянски плурал (ru/uk): one / few (2–4) / many.
+  String _slavicDay(int n, String one, String few, String many) {
+    final m10 = n % 10, m100 = n % 100;
+    if (m10 == 1 && m100 != 11) return one;
+    if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
+    return many;
+  }
+
+  /// Правилна форма на думата „ден" за броя [n] на текущия език.
+  String dayNoun(int n) {
+    switch (lang) {
+      case 'bg': return n == 1 ? 'ден' : 'дни';
+      case 'de': return n == 1 ? 'Tag' : 'Tage';
+      case 'nl': return n == 1 ? 'dag' : 'dagen';
+      case 'fr': return n <= 1 ? 'jour' : 'jours';
+      case 'it': return n == 1 ? 'giorno' : 'giorni';
+      case 'el': return n == 1 ? 'ημέρα' : 'ημέρες';
+      case 'es': return n == 1 ? 'día' : 'días';
+      case 'pt': return n == 1 ? 'dia' : 'dias';
+      case 'tr': return 'gün';
+      case 'ja': return '日';
+      case 'ru': return _slavicDay(n, 'день', 'дня', 'дней');
+      case 'uk': return _slavicDay(n, 'день', 'дні', 'днів');
+      case 'en':
+      default: return n == 1 ? 'day' : 'days';
+    }
+  }
+
+  String trialDaysLeft(int days) {
+    final d = dayNoun(days);
+    switch (lang) {
+      case 'bg': return 'Пробен период: $days $d';
+      case 'de': return 'Testversion: $days $d übrig';
+      case 'nl': return 'Proef: nog $days $d';
+      case 'fr': return 'Essai : $days $d restant${days > 1 ? 's' : ''}';
+      case 'it': return 'Prova: $days $d rimast${days == 1 ? 'o' : 'i'}';
+      case 'el': return 'Δοκιμή: $days $d';
+      case 'es': return 'Prueba: $days $d restante${days == 1 ? '' : 's'}';
+      case 'pt': return 'Teste: $days $d restante${days == 1 ? '' : 's'}';
+      case 'ru': return 'Пробный период: осталось $days $d';
+      case 'uk': return 'Пробний: залишилось $days $d';
+      case 'tr': return 'Deneme: $days gün kaldı';
+      case 'ja': return 'トライアル: 残り$days日';
+      case 'en':
+      default: return 'Trial: $days $d left';
+    }
+  }
+
+  String promoDaysLeft(int days) {
+    final d = dayNoun(days);
+    switch (lang) {
+      case 'bg': return 'Промо код: $days $d';
+      case 'de': return 'Promo: $days $d übrig';
+      case 'nl': return 'Promo: nog $days $d';
+      case 'fr': return 'Promo : $days $d restant${days > 1 ? 's' : ''}';
+      case 'it': return 'Promo: $days $d rimast${days == 1 ? 'o' : 'i'}';
+      case 'el': return 'Promo: $days $d';
+      case 'es': return 'Promo: $days $d restante${days == 1 ? '' : 's'}';
+      case 'pt': return 'Promo: $days $d restante${days == 1 ? '' : 's'}';
+      case 'ru': return 'Промо: осталось $days $d';
+      case 'uk': return 'Промо: залишилось $days $d';
+      case 'tr': return 'Promo: $days gün kaldı';
+      case 'ja': return 'プロモ: 残り$days日';
+      case 'en':
+      default: return 'Promo: $days $d left';
+    }
+  }
+
+  /// Кратко „остават N дни" (за картата Абонамент в Профил) с правилен плурал.
+  String daysRemaining(int days) {
+    final d = dayNoun(days);
+    switch (lang) {
+      case 'bg': return days == 1 ? 'Остава 1 ден' : 'Остават $days дни';
+      case 'de': return days == 1 ? 'Noch 1 Tag' : 'Noch $days Tage';
+      case 'nl': return 'Nog $days $d';
+      case 'fr': return days <= 1 ? 'Reste 1 jour' : 'Restent $days jours';
+      case 'it': return days == 1 ? 'Rimane 1 giorno' : 'Rimangono $days giorni';
+      case 'el': return days == 1 ? 'Απομένει 1 ημέρα' : 'Απομένουν $days ημέρες';
+      case 'es': return days == 1 ? 'Queda 1 día' : 'Quedan $days días';
+      case 'pt': return days == 1 ? 'Falta 1 dia' : 'Faltam $days dias';
+      case 'ru': return 'Осталось $days $d';
+      case 'uk': return 'Залишилось $days $d';
+      case 'tr': return '$days gün kaldı';
+      case 'ja': return '残り$days日';
+      case 'en':
+      default: return days == 1 ? '1 day left' : '$days days left';
+    }
+  }
 
   String get upgrade => _t({
     'en': 'Upgrade', 'nl': 'Upgraden', 'uk': 'Оновити до Pro',

@@ -44,7 +44,6 @@ import 'package:speech_to_text/speech_to_text.dart';
 import '../paywall/paywall_screen.dart';
 import '../../services/pro_service.dart';
 import 'sections/productivity_banner.dart';
-import '../../widgets/name_day_teaser_card.dart';
 import 'dialogs/date_picker_dialog.dart';
 import 'sections/task_editor_widgets.dart';
 import 'sections/task_list_tile.dart';
@@ -73,10 +72,12 @@ class TaskEditorBridge {
   static Future<void> open({
     Task? existing,
     required Future<void> Function(Task draft) onSave,
+    bool hideRecurrence = false,
   }) async {
     final s = _current;
     if (s == null) return;
-    await s._openTaskDialog(existing: existing, onSave: onSave);
+    await s._openTaskDialog(
+        existing: existing, onSave: onSave, hideRecurrence: hideRecurrence);
   }
 
   /// ФАЗА 4: отваря СТАНДАРТНИЯ редактор за нова задача (self-managed запис,
@@ -625,7 +626,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
   }
 
 
-  Future<void> _openTaskDialog({Task? existing, Future<void> Function(Task draft)? onSave}) async {
+  Future<void> _openTaskDialog(
+      {Task? existing,
+      Future<void> Function(Task draft)? onSave,
+      bool hideRecurrence = false}) async {
     await TaskEditorSheet.show(
       context,
       existing: existing,
@@ -640,6 +644,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
       onRecurrenceDefaultChanged: (v) => _selectedRecurrence = v,
       onClearCategoryFilter: () => _categoryFilterId = null,
       onChanged: () { if (mounted) setState(() {}); },
+      hideRecurrence: hideRecurrence,
     );
   }
 
@@ -829,9 +834,10 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
             // Тап → пълен списък с предстоящи събития. Реактивна.
             const StudyCountdownCard(),
 
-            // Заключен тийзър „Контакти с имен ден" — само за безплатен потребител
-            // и само в ден с имен ден. Тап → paywall. Сам се скрива иначе.
-            const NameDayTeaserCard(),
+            // ★1.0.70★: „Имени дни + Контакти с имен ден" вече са БЕЗПЛАТНИ
+            // (план А) → заключеният Pro тийзър е махнат (не заключваме безплатна
+            // функция). Контактите с имен ден се показват директно в Календара.
+            // (NameDayTeaserCard е оставен в кода, но вече не се използва.)
 
             // (Входът към Споделени списъци е в „Категория" избора — Пакет 3.)
 

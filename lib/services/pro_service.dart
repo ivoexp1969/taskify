@@ -22,6 +22,8 @@ const _proMsg = {
   'proReactivated': {'en': 'Pro reactivated!', 'nl': 'Pro opnieuw geactiveerd!', 'uk': 'Pro знову активовано!', 'bg': 'Pro активиран отново!', 'de': 'Pro reaktiviert!', 'fr': 'Pro réactivé!', 'it': 'Pro riattivato!', 'el': 'Pro επανενεργοποιήθηκε!', 'es': '¡Pro reactivado!', 'pt': 'Pro reativado!', 'ru': 'Pro активирован повторно!', 'tr': 'Pro yeniden etkinleştirildi!', 'ja': 'Proを再有効化しました！'},
   'proLifetime': {'en': 'Congratulations! You have Pro forever!', 'nl': 'Gefeliciteerd! Je hebt Pro voor altijd!', 'uk': 'Вітаємо! У вас Pro назавжди!', 'bg': 'Поздравления! Имаш Pro завинаги!', 'de': 'Glückwunsch! Du hast Pro für immer!', 'fr': 'Félicitations! Vous avez Pro à vie!', 'it': 'Congratulazioni! Hai Pro per sempre!', 'el': 'Συγχαρητήρια! Έχετε Pro για πάντα!', 'es': '¡Felicidades! ¡Tienes Pro para siempre!', 'pt': 'Parabéns! Você tem Pro para sempre!', 'ru': 'Поздравляем! У вас Pro навсегда!', 'tr': 'Tebrikler! Sonsuza kadar Pro\'sunuz!', 'ja': 'おめでとうございます！Proを永久にご利用いただけます！'},
   'error': {'en': 'Error', 'nl': 'Fout', 'uk': 'Помилка', 'bg': 'Грешка', 'de': 'Fehler', 'fr': 'Erreur', 'it': 'Errore', 'el': 'Σφάλμα', 'es': 'Error', 'pt': 'Erro', 'ru': 'Ошибка', 'tr': 'Hata', 'ja': 'エラー'},
+  // Приятелско съобщение при неочаквана грешка — БЕЗ суров exception текст.
+  'genericError': {'en': 'Something went wrong. Check your connection and try again.', 'nl': 'Er ging iets mis. Controleer je verbinding en probeer opnieuw.', 'uk': 'Щось пішло не так. Перевірте з\'єднання та спробуйте ще раз.', 'bg': 'Нещо се обърка. Провери връзката и опитай пак.', 'de': 'Etwas ist schiefgelaufen. Prüfe deine Verbindung und versuche es erneut.', 'fr': 'Un problème est survenu. Vérifie ta connexion et réessaie.', 'it': 'Qualcosa è andato storto. Controlla la connessione e riprova.', 'el': 'Κάτι πήγε στραβά. Έλεγξε τη σύνδεσή σου και δοκίμασε ξανά.', 'es': 'Algo salió mal. Revisa tu conexión e inténtalo de nuevo.', 'pt': 'Algo correu mal. Verifica a tua ligação e tenta novamente.', 'ru': 'Что-то пошло не так. Проверь соединение и попробуй снова.', 'tr': 'Bir şeyler ters gitti. Bağlantını kontrol edip tekrar dene.', 'ja': '問題が発生しました。接続を確認してもう一度お試しください。'},
   'webVersion': {'en': 'Web version', 'nl': 'Webversie', 'uk': 'Веб-версія', 'bg': 'Web версия', 'de': 'Web-Version', 'fr': 'Version web', 'it': 'Versione web', 'el': 'Έκδοση web', 'es': 'Versión web', 'pt': 'Versão web', 'ru': 'Веб-версия', 'tr': 'Web sürümü', 'ja': 'ウェブ版'},
   'proPaid': {'en': 'Pro (paid)', 'nl': 'Pro (betaald)', 'uk': 'Pro (платно)', 'bg': 'Pro (платен)', 'de': 'Pro (bezahlt)', 'fr': 'Pro (payé)', 'it': 'Pro (pagato)', 'el': 'Pro (πληρωμένο)', 'es': 'Pro (pagado)', 'pt': 'Pro (pago)', 'ru': 'Pro (оплачено)', 'tr': 'Pro (ücretli)', 'ja': 'Pro（有料）'},
   'proPromoLifetime': {'en': 'Pro (promo - lifetime)', 'nl': 'Pro (promo - levenslang)', 'uk': 'Pro (промо - довічно)', 'bg': 'Pro (промо код - завинаги)', 'de': 'Pro (Promo - lebenslang)', 'fr': 'Pro (promo - à vie)', 'it': 'Pro (promo - a vita)', 'el': 'Pro (προσφορά - εφ\' όρου ζωής)', 'es': 'Pro (promo - de por vida)', 'pt': 'Pro (promo - vitalício)', 'ru': 'Pro (промо - навсегда)', 'tr': 'Pro (promosyon - ömür boyu)', 'ja': 'Pro（プロモ - 買い切り）'},
@@ -35,14 +37,42 @@ String _proForDays(int days, String lang) {
   return (m[lang] ?? m['en']!).replaceAll('DAYS', '$days');
 }
 
+/// Правилна форма на думата „ден" за броя [n] на езика [lang] (огледало на
+/// AppText.dayNoun — тук е нужна извън контекст на widget).
+String _dayWord(int n, String lang) {
+  int m10 = n % 10, m100 = n % 100;
+  switch (lang) {
+    case 'bg': return n == 1 ? 'ден' : 'дни';
+    case 'de': return n == 1 ? 'Tag' : 'Tage';
+    case 'nl': return n == 1 ? 'dag' : 'dagen';
+    case 'fr': return n == 1 ? 'jour' : 'jours';
+    case 'it': return n == 1 ? 'giorno' : 'giorni';
+    case 'el': return n == 1 ? 'ημέρα' : 'ημέρες';
+    case 'es': return n == 1 ? 'día' : 'días';
+    case 'pt': return n == 1 ? 'dia' : 'dias';
+    case 'tr': return 'gün';
+    case 'ja': return '日';
+    case 'ru':
+      if (m10 == 1 && m100 != 11) return 'день';
+      if (m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) return 'дня';
+      return 'дней';
+    case 'uk':
+      if (m10 == 1 && m100 != 11) return 'день';
+      if (m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) return 'дні';
+      return 'днів';
+    case 'en':
+    default: return n == 1 ? 'day' : 'days';
+  }
+}
+
 String _proPromoDays(int days, String lang) {
-  const m = {'en': 'Pro (promo - DAYS days)', 'nl': 'Pro (promo - DAYS dagen)', 'uk': 'Pro (промо - DAYS днів)', 'bg': 'Pro (промо код - DAYS дни)', 'de': 'Pro (Promo - DAYS Tage)', 'fr': 'Pro (promo - DAYS jours)', 'it': 'Pro (promo - DAYS giorni)', 'el': 'Pro (προσφορά - DAYS ημέρες)', 'es': 'Pro (promo - DAYS días)', 'pt': 'Pro (promo - DAYS dias)', 'ru': 'Pro (промо - DAYS дней)', 'tr': 'Pro (promosyon - DAYS gün)', 'ja': 'Pro（プロモ - DAYS日）'};
-  return (m[lang] ?? m['en']!).replaceAll('DAYS', '$days');
+  const m = {'en': 'Pro (promo - DAYS {D})', 'nl': 'Pro (promo - DAYS {D})', 'uk': 'Pro (промо - DAYS {D})', 'bg': 'Pro (промо код - DAYS {D})', 'de': 'Pro (Promo - DAYS {D})', 'fr': 'Pro (promo - DAYS {D})', 'it': 'Pro (promo - DAYS {D})', 'el': 'Pro (προσφορά - DAYS {D})', 'es': 'Pro (promo - DAYS {D})', 'pt': 'Pro (promo - DAYS {D})', 'ru': 'Pro (промо - DAYS {D})', 'tr': 'Pro (promosyon - DAYS {D})', 'ja': 'Pro（プロモ - DAYS{D}）'};
+  return (m[lang] ?? m['en']!).replaceAll('DAYS', '$days').replaceAll('{D}', _dayWord(days, lang));
 }
 
 String _proTrialDays(int days, String lang) {
-  const m = {'en': 'Pro (trial - DAYS days)', 'nl': 'Pro (proef - DAYS dagen)', 'uk': 'Pro (пробний - DAYS днів)', 'bg': 'Pro (пробен период - DAYS дни)', 'de': 'Pro (Test - DAYS Tage)', 'fr': 'Pro (essai - DAYS jours)', 'it': 'Pro (prova - DAYS giorni)', 'el': 'Pro (δοκιμή - DAYS ημέρες)', 'es': 'Pro (prueba - DAYS días)', 'pt': 'Pro (teste - DAYS dias)', 'ru': 'Pro (пробный - DAYS дней)', 'tr': 'Pro (deneme - DAYS gün)', 'ja': 'Pro（トライアル - DAYS日）'};
-  return (m[lang] ?? m['en']!).replaceAll('DAYS', '$days');
+  const m = {'en': 'Pro (trial - DAYS {D})', 'nl': 'Pro (proef - DAYS {D})', 'uk': 'Pro (пробний - DAYS {D})', 'bg': 'Pro (пробен период - DAYS {D})', 'de': 'Pro (Test - DAYS {D})', 'fr': 'Pro (essai - DAYS {D})', 'it': 'Pro (prova - DAYS {D})', 'el': 'Pro (δοκιμή - DAYS {D})', 'es': 'Pro (prueba - DAYS {D})', 'pt': 'Pro (teste - DAYS {D})', 'ru': 'Pro (пробный - DAYS {D})', 'tr': 'Pro (deneme - DAYS {D})', 'ja': 'Pro（トライアル - DAYS{D}）'};
+  return (m[lang] ?? m['en']!).replaceAll('DAYS', '$days').replaceAll('{D}', _dayWord(days, lang));
 }
 
 /// Лимити за безплатната версия
@@ -51,7 +81,7 @@ class FreeLimits {
   static const int maxCategories = 10;
   static const int maxRemindersPerTask = 3;
   static const bool canUseRecurrence = true;
-  static const bool canUseCalendar = false;
+  static const bool canUseCalendar = true; // v1.0.70: Календар (изглед) безплатен
   static const bool canUseStatistics = false;
   static const bool canUseCloudSync = false;
   static const bool canUseWidget = false;
@@ -141,16 +171,21 @@ class ProService extends ChangeNotifier {
           _promoEndDate != null &&
           _now().isBefore(_promoEndDate!));
 
-  bool get isPro => kIsWeb
-      ? true
-      : proActive(
-          paidOrCached: _isPro,
-          trialEnd: _trialEndDate,
-          promoType: _promoType,
-          promoEnd: _promoEndDate,
-          now: _now(),
-          forceTrialExpired: DebugOverrides.forceTrialExpired,
-        );
+  bool get isPro {
+    // DEBUG-ONLY: симулирай free въпреки платец/промо (вкл. lifetime), за ръчен
+    // тест на free-tier преживяването без изход от акаунта. В release връща false.
+    if (!kIsWeb && DebugOverrides.forceFree) return false;
+    return kIsWeb
+        ? true
+        : proActive(
+            paidOrCached: _isPro,
+            trialEnd: _trialEndDate,
+            promoType: _promoType,
+            promoEnd: _promoEndDate,
+            now: _now(),
+            forceTrialExpired: DebugOverrides.forceTrialExpired,
+          );
+  }
   bool get isPaid => _isPro;
   bool get isInitialized => _isInitialized;
   bool get isTrial => kIsWeb ? false : _trialActive;
@@ -168,6 +203,17 @@ class ProService extends ChangeNotifier {
   int get promoDaysLeft => _promoEndDate != null
       ? _promoEndDate!.difference(_now()).inDays
       : 0;
+
+  /// 1.0.70: промо-код от тип „days" е ИЗТЕКЪЛ (беше активен, вече не е) и няма
+  /// друг валиден Pro → home екранът показва еднократен „Промокодът ти изтече"
+  /// (с отделен флаг `promo_expired_dialog_shown`, нулиран при нов промо код).
+  bool get promoJustExpired =>
+      !kIsWeb &&
+      !isPro &&
+      _promoType == 'days' &&
+      _appliedPromoCode != null &&
+      _promoEndDate != null &&
+      !_now().isBefore(_promoEndDate!);
 
   /// Инициализира ProService
   Future<void> initialize() async {
@@ -449,6 +495,49 @@ class ProService extends ChangeNotifier {
       final userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId == null) return;
 
+      // 1.0.70: ПЪРВО огледалния документ (четим само от собственика) — не чете
+      // цялата колекция `promo_codes`. Старата list-заявка е fallback отдолу.
+      try {
+        final mine = await _accountPromoRef(userId).get();
+        if (mine.exists) {
+          final d = mine.data()!;
+          final type = d['type'];
+          final code = d['code'];
+          if (type == 'lifetime' && code is String) {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('applied_promo_code', code);
+            await prefs.setString('promo_type', 'lifetime');
+            await prefs.remove('promo_end_date');
+            _promoType = 'lifetime';
+            _promoEndDate = null;
+            _appliedPromoCode = code;
+            _armExpiryTimer();
+            _notifyProChange();
+            debugPrint('Account lifetime promo restored (mirror): $code');
+            return;
+          } else if (type == 'days' &&
+              code is String &&
+              d['expiresAt'] is Timestamp) {
+            final end = (d['expiresAt'] as Timestamp).toDate();
+            if (end.isAfter(DateTime.now())) {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('applied_promo_code', code);
+              await prefs.setString('promo_type', 'days');
+              await prefs.setString('promo_end_date', end.toIso8601String());
+              _promoType = 'days';
+              _promoEndDate = end;
+              _appliedPromoCode = code;
+              _armExpiryTimer();
+              _notifyProChange();
+              debugPrint('Account days promo restored (mirror): $code until $end');
+              return;
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Account promo mirror read failed (fallback to query): $e');
+      }
+
       final snap = await FirebaseFirestore.instance
           .collection('promo_codes')
           .where('usedBy', arrayContains: userId)
@@ -521,8 +610,36 @@ class ProService extends ChangeNotifier {
     }
   }
 
-  /// Прилага промо код (cloud_firestore временно изключен за iOS)
-  Future<({bool success, String message})> applyPromoCode(String code) async {
+  /// 1.0.70: промо-дните се ТРУПАТ върху вече наличен Pro, вместо да започват
+  /// от „сега". База за новия край = най-късното от: сега, края на активния
+  /// trial и текущия край на промо-дни. Така промо по време на trial дава
+  /// trial + дните, а втори код удължава след първия.
+  DateTime _promoStackBase() {
+    DateTime base = DateTime.now();
+    if (_trialEndDate != null && _trialEndDate!.isAfter(base)) {
+      base = _trialEndDate!;
+    }
+    if (_promoType == 'days' &&
+        _promoEndDate != null &&
+        _promoEndDate!.isAfter(base)) {
+      base = _promoEndDate!;
+    }
+    return base;
+  }
+
+  /// 1.0.70: нулира флага за екрана „Промокодът ти изтече", за да се покаже
+  /// ПАК при следващо изтичане (при нов/подновен промо код).
+  Future<void> _resetPromoExpiredFlag() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('promo_expired_dialog_shown');
+    } catch (_) {}
+  }
+
+  /// Прилага промо код (cloud_firestore временно изключен за iOS). [source] се
+  /// подава в analytics (`promo_redeemed`) — откъде е приложен кодът.
+  Future<({bool success, String message})> applyPromoCode(String code,
+      {String source = 'paywall'}) async {
     if (kIsWeb) {
       return (success: false, message: _pm('notAvailableWeb', 'en'));
     }
@@ -570,8 +687,10 @@ class ProService extends ChangeNotifier {
           _promoType = 'lifetime';
           _promoEndDate = null;
           _appliedPromoCode = codeUpper;
+          await _writeAccountPromoMirror(code: codeUpper, type: 'lifetime');
           _armExpiryTimer();
           _notifyProChange();
+          await _resetPromoExpiredFlag();
           return (success: true, message: _pm('proReactivated', lang));
         }
         // days-type: ако още е валиден (по записаната крайна дата) → възстанови го,
@@ -586,8 +705,11 @@ class ProService extends ChangeNotifier {
             _promoType = 'days';
             _promoEndDate = end;
             _appliedPromoCode = codeUpper;
+            await _writeAccountPromoMirror(
+                code: codeUpper, type: 'days', end: end);
             _armExpiryTimer();
             _notifyProChange();
+            await _resetPromoExpiredFlag();
             return (success: true, message: _pm('proReactivated', lang));
           }
         }
@@ -605,7 +727,9 @@ class ProService extends ChangeNotifier {
         _promoEndDate = null;
         await prefs.remove('promo_end_date');
       } else if (type == 'days' && days > 0) {
-        daysEndDate = DateTime.now().add(Duration(days: days));
+        // 1.0.70: ТРУПАНЕ — дните се добавят върху вече наличен Pro (trial/друго
+        // промо), а не от „сега". Базата е най-късната валидна дата.
+        daysEndDate = _promoStackBase().add(Duration(days: days));
         _promoType = 'days';
         _promoEndDate = daysEndDate;
         await prefs.setString('promo_end_date', daysEndDate.toIso8601String());
@@ -621,8 +745,18 @@ class ProService extends ChangeNotifier {
           'redemptions.$userId': Timestamp.fromDate(daysEndDate),
       });
 
+      // Огледало към акаунта (възстановяване без list на promo_codes).
+      await _writeAccountPromoMirror(
+          code: codeUpper, type: type, end: daysEndDate);
+
       _armExpiryTimer();
       _notifyProChange();
+
+      // 1.0.70: нов промо код → екранът „Промокодът ти изтече" да се покаже пак
+      // при следващо изтичане; + analytics за изкупуването.
+      await _resetPromoExpiredFlag();
+      AnalyticsService().logPromoRedeemed(
+          type: type, days: type == 'days' ? days : 0, source: source);
 
       if (type == 'lifetime') {
         return (success: true, message: _pm('proLifetime', lang));
@@ -631,9 +765,43 @@ class ProService extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Apply promo code error: $e');
-      final prefs = await SharedPreferences.getInstance();
-      final lang = prefs.getString('app_language') ?? 'en';
-      return (success: false, message: '${_pm('error', lang)}: $e');
+      String lang = 'en';
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        lang = prefs.getString('app_language') ?? 'en';
+      } catch (_) {}
+      // Човешко съобщение — НЕ показваме суровия exception на потребителя.
+      return (success: false, message: _pm('genericError', lang));
+    }
+  }
+
+  /// Документ-огледало, четим САМО от собственика (`users/{uid}/promo/current`,
+  /// покрит от правилото `users/{userId}/{subcollection=**}`). Пази промо-Pro към
+  /// АКАУНТА без да четем цялата колекция `promo_codes` (1.0.70 restore redesign).
+  DocumentReference<Map<String, dynamic>> _accountPromoRef(String uid) =>
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('promo')
+          .doc('current');
+
+  /// Записва огледалния документ при успешен промо код. [end] = null за lifetime.
+  Future<void> _writeAccountPromoMirror({
+    required String code,
+    required String type,
+    DateTime? end,
+  }) async {
+    try {
+      final u = FirebaseAuth.instance.currentUser;
+      if (u == null || u.isAnonymous) return; // само реални акаунти
+      await _accountPromoRef(u.uid).set({
+        'code': code,
+        'type': type,
+        'activatedAt': FieldValue.serverTimestamp(),
+        if (end != null) 'expiresAt': Timestamp.fromDate(end),
+      });
+    } catch (e) {
+      debugPrint('Write account promo mirror failed: $e');
     }
   }
 
@@ -654,6 +822,7 @@ class ProService extends ChangeNotifier {
       _wasDowngradedFromCache = false;
       _armExpiryTimer();
       _notifyProChange();
+      await _resetPromoExpiredFlag();
       debugPrint('ProService: early-supporter grace granted for $days days');
     } catch (e) {
       debugPrint('ProService grace grant error: $e');

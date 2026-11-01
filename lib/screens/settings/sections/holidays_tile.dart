@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../services/holidays_service.dart';
+import '../../../services/name_days_service.dart';
 
 /// Тайл „Официални празници" — включване + избор на държава. Изнесен 1:1 от
 /// [SettingsScreen] (`_buildHolidaysTile`). Тук е самостоятелен: чете/пише
@@ -60,6 +61,100 @@ class _HolidaysTileState extends State<HolidaysTile> {
       _holidaysEnabled = enabled;
       _holidaysCountry = HolidaysService().country;
     });
+  }
+
+  /// Имен-ден (само български dataset) следва избора на държава:
+  ///  • BG → друга държава, при включен имен-ден: еднократен въпрос
+  ///    „Да запазим ли българските имени дни?" [Запази] / [Изключи].
+  ///  • друга държава → BG: пуска имен-ден пак, АКО не е изключван ръчно.
+  Future<void> _handleNameDaysForCountryChange(
+      String oldCountry, String newCountry) async {
+    final nd = NameDaysService();
+    final wasBg = oldCountry.toUpperCase() == 'BG';
+    final isBg = newCountry.toUpperCase() == 'BG';
+    if (wasBg == isBg) return; // няма преход BG ↔ друга държава
+
+    if (wasBg && !isBg) {
+      // Напускаме България. Питаме само ако имен-ден е включен в момента.
+      final enabled = await nd.loadEnabled();
+      if (!enabled || !mounted) return;
+      final keep = await _askKeepNameDays();
+      if (keep == false) {
+        // Контекстно изключване (напускаме BG) — НЕ го броим за постоянен ръчен
+        // opt-out, за да се върнат имен-ден автоматично при обратно към BG.
+        // Само toggle-ът на самия превключвател е постоянно „изключено ръчно".
+        await nd.setEnabled(false, userInitiated: false);
+        await nd.cancelNotifications();
+      }
+      // keep == true (или затворен диалог) → остава включен.
+    } else {
+      // Връщаме се в България. Пускаме пак, ако не е изключван ръчно.
+      final manualOff = await nd.isManuallyDisabled();
+      final enabled = await nd.loadEnabled();
+      if (!manualOff && !enabled) {
+        await nd.setEnabled(true, userInitiated: false);
+        await nd.scheduleNotifications(lang: widget.lang);
+      }
+    }
+  }
+
+  /// Диалог при напускане на BG. Връща true=запази, false=изключи, null=отказ.
+  Future<bool?> _askKeepNameDays() async {
+    final lang = widget.lang;
+    const dTitle = {
+      'en': 'Bulgarian name days?', 'nl': 'Bulgaarse naamdagen?',
+      'uk': 'Болгарські іменини?', 'bg': 'Български имени дни?',
+      'de': 'Bulgarische Namenstage?', 'fr': 'Fêtes des prénoms bulgares ?',
+      'it': 'Onomastici bulgari?', 'el': 'Βουλγαρικές ονομαστικές εορτές;',
+      'es': '¿Onomásticas búlgaras?', 'pt': 'Dias do nome búlgaros?',
+      'ru': 'Болгарские именины?', 'tr': 'Bulgarca isim günleri?',
+      'ja': 'ブルガリアの聖名祝日？',
+    };
+    const dBody = {
+      'en': 'You changed country. Keep Bulgarian name days in the calendar?',
+      'nl': 'Je hebt van land gewisseld. Bulgaarse naamdagen in de agenda houden?',
+      'uk': 'Ви змінили країну. Залишити болгарські іменини в календарі?',
+      'bg': 'Смени държавата. Да запазим ли българските имени дни в календара?',
+      'de': 'Du hast das Land gewechselt. Bulgarische Namenstage im Kalender behalten?',
+      'fr': 'Tu as changé de pays. Garder les fêtes des prénoms bulgares dans le calendrier ?',
+      'it': 'Hai cambiato paese. Mantenere gli onomastici bulgari nel calendario?',
+      'el': 'Άλλαξες χώρα. Να κρατήσουμε τις βουλγαρικές ονομαστικές εορτές στο ημερολόγιο;',
+      'es': 'Cambiaste de país. ¿Mantener las onomásticas búlgaras en el calendario?',
+      'pt': 'Mudaste de país. Manter os dias do nome búlgaros no calendário?',
+      'ru': 'Вы сменили страну. Оставить болгарские именины в календаре?',
+      'tr': 'Ülkeyi değiştirdin. Bulgarca isim günleri takvimde kalsın mı?',
+      'ja': '国を変更しました。カレンダーにブルガリアの聖名祝日を残しますか？',
+    };
+    const dKeep = {
+      'en': 'Keep', 'nl': 'Behouden', 'uk': 'Залишити', 'bg': 'Запази',
+      'de': 'Behalten', 'fr': 'Garder', 'it': 'Mantieni', 'el': 'Διατήρηση',
+      'es': 'Mantener', 'pt': 'Manter', 'ru': 'Оставить', 'tr': 'Kalsın',
+      'ja': '残す',
+    };
+    const dDisable = {
+      'en': 'Disable', 'nl': 'Uitschakelen', 'uk': 'Вимкнути', 'bg': 'Изключи',
+      'de': 'Deaktivieren', 'fr': 'Désactiver', 'it': 'Disattiva',
+      'el': 'Απενεργοποίηση', 'es': 'Desactivar', 'pt': 'Desativar',
+      'ru': 'Отключить', 'tr': 'Kapat', 'ja': '無効にする',
+    };
+    String tr(Map<String, String> m) => m[lang] ?? m['en']!;
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr(dTitle)),
+        content: Text(tr(dBody)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(tr(dDisable)),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(tr(dKeep)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -159,10 +254,13 @@ class _HolidaysTileState extends State<HolidaysTile> {
                           .toList(),
                       onChanged: (code) async {
                         if (code == null) return;
+                        final previous = _holidaysCountry;
                         setState(() => _holidaysCountry = code);
                         await HolidaysService().setCountry(code);
                         await HolidaysService().loadForCurrentYears();
                         // loadForCurrentYears bump-ва revision → календарът се обновява.
+                        // Имен-ден (само български dataset) следва държавата.
+                        await _handleNameDaysForCountryChange(previous, code);
                       },
                     ),
                   ),

@@ -22,18 +22,19 @@ class GoProCard extends StatelessWidget {
       'es': 'Hazte Pro', 'pt': 'Seja Pro', 'ru': 'Стать Pro',
       'tr': 'Pro\'ya geç', 'ja': 'Taskify Pro にアップグレード',
     };
+    // ★1.0.70★ Календарът вече е безплатен → акцент върху реалните Pro функции.
     const subtitle = {
-      'en': 'Calendar, AI, cloud sync, no ads and more', 'nl': 'Agenda, AI, cloudsync, geen advertenties en meer', 'uk': 'Календар, AI, хмарна синхронізація, без реклами та інше',
-      'bg': 'Календар, AI, облак, без реклами и още',
-      'de': 'Kalender, KI, Cloud-Sync, keine Werbung und mehr',
-      'fr': 'Calendrier, IA, sync cloud, sans pubs et plus',
-      'it': 'Calendario, IA, sync cloud, niente pubblicità e altro',
-      'el': 'Ημερολόγιο, AI, συγχρονισμός cloud, χωρίς διαφημίσεις και άλλα',
-      'es': 'Calendario, IA, sync en la nube, sin anuncios y más',
-      'pt': 'Calendário, IA, sync na nuvem, sem anúncios e mais',
-      'ru': 'Календарь, ИИ, облако, без рекламы и другое',
-      'tr': 'Takvim, AI, bulut senkronizasyonu, reklamsız ve daha fazlası',
-      'ja': 'カレンダー、AI、クラウド同期、広告なしなど',
+      'en': 'Unlimited AI, statistics, cloud sync, no ads and more', 'nl': 'Onbeperkte AI, statistieken, cloudsync, geen advertenties en meer', 'uk': 'Необмежений AI, статистика, хмарна синхронізація, без реклами та інше',
+      'bg': 'Неограничен AI, статистика, облак, без реклами и още',
+      'de': 'Unbegrenzte KI, Statistik, Cloud-Sync, keine Werbung und mehr',
+      'fr': 'IA illimitée, statistiques, sync cloud, sans pubs et plus',
+      'it': 'IA illimitata, statistiche, sync cloud, niente pubblicità e altro',
+      'el': 'Απεριόριστη AI, στατιστικά, συγχρονισμός cloud, χωρίς διαφημίσεις και άλλα',
+      'es': 'IA ilimitada, estadísticas, sync en la nube, sin anuncios y más',
+      'pt': 'IA ilimitada, estatísticas, sync na nuvem, sem anúncios e mais',
+      'ru': 'Безлимитный ИИ, статистика, облако, без рекламы и другое',
+      'tr': 'Sınırsız AI, istatistikler, bulut senkronizasyonu, reklamsız ve daha fazlası',
+      'ja': '無制限のAI、統計、クラウド同期、広告なしなど',
     };
     const getButton = {
       'en': 'Get Pro', 'nl': 'Pro nemen', 'uk': 'Отримати Pro', 'bg': 'Вземи Pro', 'de': 'Pro holen',

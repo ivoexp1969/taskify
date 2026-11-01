@@ -20,6 +20,8 @@ import '../../services/university_service.dart';
 import '../../services/sync_service.dart';
 import '../../services/prefs_sync_service.dart';
 import '../../services/widget_service.dart';
+import '../../services/analytics_service.dart';
+import '../../utils/debug_overrides.dart';
 import '../paywall/paywall_screen.dart';
 
 /// Етикет за таб „Обучение" (11 езика) — обединява Ученик + Студент; неутрален,
@@ -28,6 +30,67 @@ const Map<String, String> _studyLabel = {
   'en': 'Learning', 'nl': 'Leren', 'uk': 'Навчання', 'bg': 'Обучение', 'de': 'Bildung', 'fr': 'Éducation',
   'it': 'Istruzione', 'el': 'Εκπαίδευση', 'es': 'Educación', 'pt': 'Educação',
   'ru': 'Обучение', 'tr': 'Eğitim', 'ja': '学び',
+};
+
+// ★1.0.70★ Споделени между преходните диалози (изтекъл trial / изтекъл промо код):
+// списъкът „безплатно" vs „Pro" + двата бутона. Един източник, 13 езика.
+const Map<String, String> _kFreeList = {
+  'en': 'Free: Calendar, up to 3 documents, name days + contacts, joining shared lists, up to 50 tasks, 10 categories, recurring tasks, voice input, themes & languages.', 'nl': 'Gratis: Agenda, tot 3 documenten, naamdagen + contacten, deelnemen aan gedeelde lijsten, tot 50 taken, 10 categorieën, terugkerende taken, spraakinvoer, thema\'s & talen.', 'uk': 'Безкоштовно: Календар, до 3 документів, іменини + контакти, приєднання до спільних списків, до 50 завдань, 10 категорій, повторювані завдання, голосове введення, теми та мови.',
+  'bg': 'Безплатно: Календар, до 3 документа, имени дни + контакти, присъединяване към споделени списъци, до 50 задачи, 10 категории, повтарящи се задачи, гласово въвеждане, теми и езици.',
+  'de': 'Kostenlos: Kalender, bis zu 3 Dokumente, Namenstage + Kontakte, geteilten Listen beitreten, bis zu 50 Aufgaben, 10 Kategorien, wiederkehrende Aufgaben, Spracheingabe, Themes & Sprachen.',
+  'fr': 'Gratuit : Calendrier, jusqu\'à 3 documents, fêtes des prénoms + contacts, rejoindre des listes partagées, jusqu\'à 50 tâches, 10 catégories, tâches récurrentes, saisie vocale, thèmes et langues.',
+  'it': 'Gratis: Calendario, fino a 3 documenti, onomastici + contatti, unirsi a liste condivise, fino a 50 attività, 10 categorie, attività ricorrenti, input vocale, temi e lingue.',
+  'el': 'Δωρεάν: Ημερολόγιο, έως 3 έγγραφα, ονομαστικές + επαφές, συμμετοχή σε κοινές λίστες, έως 50 εργασίες, 10 κατηγορίες, επαναλαμβανόμενες εργασίες, φωνητική εισαγωγή, θέματα & γλώσσες.',
+  'es': 'Gratis: Calendario, hasta 3 documentos, onomásticas + contactos, unirte a listas compartidas, hasta 50 tareas, 10 categorías, tareas recurrentes, entrada de voz, temas e idiomas.',
+  'pt': 'Grátis: Calendário, até 3 documentos, dias do nome + contactos, juntar-te a listas partilhadas, até 50 tarefas, 10 categorias, tarefas recorrentes, entrada de voz, temas e idiomas.',
+  'ru': 'Бесплатно: Календарь, до 3 документов, именины + контакты, присоединение к общим спискам, до 50 задач, 10 категорий, повторяющиеся задачи, голосовой ввод, темы и языки.',
+  'tr': 'Ücretsiz: Takvim, en fazla 3 belge, isim günleri + kişiler, paylaşılan listelere katılma, en fazla 50 görev, 10 kategori, yinelenen görevler, sesli giriş, temalar ve diller.',
+  'ja': '無料: カレンダー、最大3件のドキュメント、聖名祝日＋連絡先、共有リストへの参加、最大50タスク・10カテゴリ、繰り返しタスク、音声入力、テーマと言語。',
+};
+const Map<String, String> _kProList = {
+  'en': 'Pro unlocks: unlimited tasks, unlimited AI, Statistics, cloud sync, widgets, creating shared lists — and removes ads.', 'nl': 'Pro ontgrendelt: onbeperkte taken, onbeperkte AI, Statistieken, cloudsync, widgets, gedeelde lijsten maken — en verwijdert advertenties.', 'uk': 'Pro відкриває: необмежені завдання, необмежений AI, Статистику, хмарну синхронізацію, віджети, створення спільних списків — і прибирає рекламу.',
+  'bg': 'Pro отключва: неограничени задачи, неограничен AI, Статистика, облачна синхронизация, widgets, създаване на споделени списъци — и маха рекламите.',
+  'de': 'Pro schaltet frei: unbegrenzte Aufgaben, unbegrenzte KI, Statistik, Cloud-Sync, Widgets, geteilte Listen erstellen — und entfernt Werbung.',
+  'fr': 'Pro débloque : tâches illimitées, IA illimitée, Statistiques, sync cloud, widgets, création de listes partagées — et retire les pubs.',
+  'it': 'Pro sblocca: attività illimitate, IA illimitata, Statistiche, sync cloud, widget, creazione di liste condivise — e rimuove la pubblicità.',
+  'el': 'Το Pro ξεκλειδώνει: απεριόριστες εργασίες, απεριόριστη AI, Στατιστικά, cloud sync, widgets, δημιουργία κοινών λιστών — και αφαιρεί τις διαφημίσεις.',
+  'es': 'Pro desbloquea: tareas ilimitadas, IA ilimitada, Estadísticas, sync en la nube, widgets, crear listas compartidas — y quita los anuncios.',
+  'pt': 'Pro desbloqueia: tarefas ilimitadas, IA ilimitada, Estatísticas, sync na nuvem, widgets, criar listas partilhadas — e remove os anúncios.',
+  'ru': 'Pro открывает: безлимитные задачи, безлимитный ИИ, Статистику, облачную синхронизацию, виджеты, создание общих списков — и убирает рекламу.',
+  'tr': 'Pro açar: sınırsız görev, sınırsız AI, İstatistikler, bulut senkronizasyonu, widget\'lar, paylaşılan liste oluşturma — ve reklamları kaldırır.',
+  'ja': 'Proで解除: 無制限のタスク、無制限のAI、統計、クラウド同期、ウィジェット、共有リストの作成 — さらに広告も消えます。',
+};
+const Map<String, String> _kBtnContinueFree = {
+  'en': 'Continue free', 'nl': 'Gratis doorgaan', 'uk': 'Продовжити безкоштовно', 'bg': 'Продължи безплатно', 'de': 'Kostenlos weiter',
+  'fr': 'Continuer gratuit', 'it': 'Continua gratis', 'el': 'Συνέχεια δωρεάν',
+  'es': 'Seguir gratis', 'pt': 'Continuar grátis', 'ru': 'Продолжить бесплатно',
+  'tr': 'Ücretsiz devam', 'ja': '無料で続ける',
+};
+const Map<String, String> _kBtnGetPro = {
+  'en': 'Get Pro', 'nl': 'Pro nemen', 'uk': 'Отримати Pro', 'bg': 'Вземи Pro', 'de': 'Pro holen', 'fr': 'Obtenir Pro',
+  'it': 'Ottieni Pro', 'el': 'Απόκτηση Pro', 'es': 'Obtener Pro',
+  'pt': 'Obter Pro', 'ru': 'Получить Pro', 'tr': 'Pro al', 'ja': 'Proを入手',
+};
+// Заглавие + тяло за екрана „Промокодът ти изтече" (отделно от изтекъл trial).
+const Map<String, String> _kPromoExpiredTitle = {
+  'en': 'Your promo code expired', 'nl': 'Je promocode is verlopen', 'uk': 'Термін промокоду минув', 'bg': 'Промокодът ти изтече',
+  'de': 'Dein Promo-Code ist abgelaufen', 'fr': 'Ton code promo a expiré',
+  'it': 'Il tuo codice promo è scaduto', 'el': 'Ο προωθητικός κωδικός σου έληξε',
+  'es': 'Tu código promocional caducó', 'pt': 'O teu código promo expirou',
+  'ru': 'Твой промокод истёк', 'tr': 'Promosyon kodun sona erdi', 'ja': 'プロモコードの有効期限が切れました',
+};
+const Map<String, String> _kPromoExpiredBody = {
+  'en': 'Your promo Pro period has ended. Nothing is lost — all your tasks and categories stay. Here\'s what\'s free, and what Pro unlocks:', 'nl': 'Je promo Pro-periode is afgelopen. Er gaat niets verloren — al je taken en categorieën blijven. Dit is gratis, en dit ontgrendelt Pro:', 'uk': 'Твій промо Pro-період завершився. Нічого не втрачено — усі завдання та категорії залишаються. Ось що безкоштовно, а що відкриває Pro:',
+  'bg': 'Промо Pro периодът ти приключи. Нищо не се губи — всичките ти задачи и категории остават. Ето какво е безплатно и какво отключва Pro:',
+  'de': 'Dein Promo-Pro-Zeitraum ist vorbei. Nichts geht verloren — alle Aufgaben und Kategorien bleiben. Das ist kostenlos, das schaltet Pro frei:',
+  'fr': 'Ta période Pro promo est terminée. Rien n\'est perdu — toutes tes tâches et catégories restent. Voici ce qui est gratuit et ce que Pro débloque :',
+  'it': 'Il tuo periodo Pro promo è finito. Nulla è perso — tutte le tue attività e categorie restano. Ecco cosa è gratis e cosa sblocca Pro:',
+  'el': 'Η περίοδος Pro με προωθητικό κωδικό έληξε. Τίποτα δεν χάνεται — όλες οι εργασίες και κατηγορίες μένουν. Να τι είναι δωρεάν και τι ξεκλειδώνει το Pro:',
+  'es': 'Tu periodo Pro promocional ha terminado. No se pierde nada — todas tus tareas y categorías quedan. Esto es gratis y esto desbloquea Pro:',
+  'pt': 'O teu período Pro promo terminou. Nada se perde — todas as tuas tarefas e categorias ficam. Eis o que é grátis e o que o Pro desbloqueia:',
+  'ru': 'Твой промо Pro-период закончился. Ничего не потеряно — все задачи и категории остаются. Вот что бесплатно и что открывает Pro:',
+  'tr': 'Promosyon Pro dönemin bitti. Hiçbir şey kaybolmaz — tüm görevlerin ve kategorilerin kalıyor. İşte ücretsiz olanlar ve Pro\'nun açtıkları:',
+  'ja': 'プロモによるProの期間が終了しました。何も失われません — タスクとカテゴリはすべて残ります。無料の内容と、Proで解除される内容はこちら:',
 };
 
 class HomeScreen extends StatefulWidget {
@@ -42,6 +105,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final ProService _proService = ProService();
   bool _welcomeChecked = false;
   bool _downgradeChecked = false;
+  bool _promoExpiredChecked = false; // 1.0.70: екран „Промокодът ти изтече"
+
+  // ★1.0.70★ Стартов поток (welcome / downgrade / „Какво ново" / празници /
+  // училище) — СЕРИАЛИЗИРАН: диалозите се показват един след друг, за да НЕ се
+  // трупат на един старт.
+  bool _startupStarted = false;
+  bool _startupDone = false;
+  bool _dialogBusy = false;
+  // ★1.0.70★ При ПЪРВО пускане (нова инсталация) показваме МАКСИМУМ welcome.
+  // Празници + Училищен интро се отлагат за второто отваряне (не се трупат).
+  bool _firstLaunch = false;
+
+  // Trial банер (последните дни) — затваря се „за деня" (пази се датата).
+  bool _trialBannerDismissedToday = false;
+  bool _trialBannerShownLogged = false;
 
   /// Разделът „Документи" се показва на ВСИЧКИ (универсална функция; Pro gated).
   bool get _showDocuments => true;
@@ -74,34 +152,95 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     SchoolCalendarService.enabledNotifier.addListener(_onModesChanged);
     UniversityService.enabledNotifier.addListener(_onModesChanged);
     if (!kIsWeb) {
-      _initAndShowWelcome();
-      _maybeShowHolidaysPrompt();
-      _maybeShowSchoolIntro();
+      _loadTrialBannerDismissed();
+      // Единен, сериализиран стартов поток (виж [_runStartupFlow]).
+      _startStartup();
       // ФАЗА 4: cold-start routing на ден-3/ден-7 нотификация (app беше убит).
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _consumePendingConversionRoute());
       // Бутонът „+" в home-screen widget-а (студен старт).
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _consumeWidgetAction());
-      _maybeShowWhatsNew();
+    }
+  }
+
+  /// Ключ за „днес" (локална дата, с debug override) за затваряне на банера.
+  String _todayKey() {
+    final d = _trialNow();
+    return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  }
+
+  /// „Сега" с евентуален debug override — за да реагира банерът на симулираната
+  /// дата в dev билда (иначе = DateTime.now()).
+  DateTime _trialNow() => DebugOverrides.now();
+
+  Future<void> _loadTrialBannerDismissed() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final d = prefs.getString('trial_banner_dismissed_date');
+      if (d == _todayKey() && mounted) {
+        setState(() => _trialBannerDismissedToday = true);
+      }
+    } catch (_) {}
+  }
+
+  /// Стартира сериализирания поток веднъж (чака ProService да се init-не).
+  Future<void> _startStartup() async {
+    if (kIsWeb || _startupStarted) return;
+    _startupStarted = true;
+    // Брояч на пусканията → при ПЪРВО пускане (нова инсталация) показваме само welcome.
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final c = (prefs.getInt('app_launch_count') ?? 0) + 1;
+      await prefs.setInt('app_launch_count', c);
+      _firstLaunch = c == 1;
+    } catch (_) {}
+    if (!_proService.isInitialized) {
+      try {
+        await _proService.initialize();
+      } catch (_) {}
+    }
+    if (!mounted) return;
+    await _runStartupFlow();
+  }
+
+  /// Показва стартовите диалози ЕДИН СЛЕД ДРУГ (await между всеки), за да не се
+  /// трупат: 1) welcome (trial ден 1) ИЛИ преходен екран при изтекъл trial;
+  /// 2) „Какво ново" + подкана за обновяване; 3) празници (BG); 4) училищен интро.
+  Future<void> _runStartupFlow() async {
+    if (kIsWeb || _dialogBusy) return;
+    _dialogBusy = true;
+    try {
+      await _showTrialWelcome(); // no-op ако не е ден 1 / вече показан
+      if (!mounted) return;
+      // 1.0.70: изтекъл промо код има приоритет пред изтекъл-trial диалога —
+      // ако е показан, не трупаме и trial-диалога в същия старт.
+      final promoExpiredShown = await _maybeShowPromoExpiredDialog();
+      if (!mounted) return;
+      if (!promoExpiredShown) {
+        await _maybeShowDowngradeDialog(); // no-op ако не е eligible / вече показан
+        if (!mounted) return;
+      }
+      final lang = LanguageScope.of(context).locale.languageCode;
+      await WhatsNewDialog.maybeShow(context, lang);
+      if (!mounted) return;
+      await UpdatePromptService.instance.maybePrompt(context, lang);
+      if (!mounted) return;
+      // Празници + Училищен интро — НЕ при първо пускане (нова инсталация вижда
+      // само welcome); най-рано на второто отваряне.
+      if (!_firstLaunch) {
+        await _maybeShowHolidaysPrompt();
+        if (!mounted) return;
+        await _maybeShowSchoolIntro();
+      }
+    } finally {
+      _dialogBusy = false;
+      _startupDone = true;
     }
   }
 
   void _onModesChanged() {
     if (mounted) setState(() {});
-  }
-
-  /// „Какво ново" след ъпдейт — веднъж за всеки нов билд (не за нови инсталации).
-  Future<void> _maybeShowWhatsNew() async {
-    // Изчакваме welcome/preходните диалози да минат.
-    await Future.delayed(const Duration(seconds: 3));
-    if (!mounted) return;
-    await WhatsNewDialog.maybeShow(
-        context, LanguageScope.of(context).locale.languageCode);
-    // Подкана за обновяване — след „Какво ново", ненатрапчиво, не блокира.
-    if (!mounted) return;
-    await UpdatePromptService.instance
-        .maybePrompt(context, LanguageScope.of(context).locale.languageCode);
   }
 
   /// Бутонът „+" на Android widget-а отваря редактора за нова задача.
@@ -168,6 +307,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (!kIsWeb) {
         _consumeWidgetAction(); // „+" от widget-а, докато app-ът върви
         WidgetService.syncFromWidget(); // отметки от widget-а (iOS чек-бутон)
+        // Нов ден → trial банерът може пак да се покаже (датата на затваряне е друга).
+        _trialBannerDismissedToday = false;
+        _loadTrialBannerDismissed();
       }
     }
   }
@@ -175,8 +317,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// Еднократно, проактивно одобрение за официалните празници (само BG контекст,
   /// БЕЗ GPS — държавата идва от device locale). Топъл, личен тон.
   Future<void> _maybeShowHolidaysPrompt() async {
-    // Изчакваме да минат другите стартови диалози (welcome и т.н.).
-    await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
 
     final lang = LanguageScope.of(context).locale.languageCode;
@@ -255,7 +395,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// неоткрита. Показва се веднъж (`school_intro_shown`) и НЕ се стека с други
   /// диалози (проверява, че home маршрутът е най-отгоре).
   Future<void> _maybeShowSchoolIntro() async {
-    await Future.delayed(const Duration(seconds: 5));
     if (!mounted) return;
 
     final lang = LanguageScope.of(context).locale.languageCode;
@@ -350,32 +489,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _onProStatusChanged() {
-    if (mounted) {
-      setState(() {});
-      // Ако ProService е инициализиран и още не сме проверили welcome
-      if (!_welcomeChecked && _proService.isInitialized) {
-        _showTrialWelcome();
-      }
-      // Downgrade може да дойде по-късно през RC слушателя (мрежа) → проверяваме
-      // и тук, не само при старта.
-      _maybeShowDowngradeDialog();
-      // Текстът на именните нотификации зависи от Pro статуса (безплатен тийзър
-      // vs имената на контактите) → препланираме при всяка смяна на статуса.
-      if (!kIsWeb) {
-        NameDaysService().refreshNotificationsFromPrefs(
-            LanguageScope.of(context).locale.languageCode);
-      }
+    if (!mounted) return;
+    setState(() {});
+    // Стартовият поток тръгва веднъж, щом Pro се init-не (initState също го пуска;
+    // guard-нато с _startupStarted).
+    if (!_startupStarted && _proService.isInitialized && !kIsWeb) {
+      _startStartup();
+    } else if (_startupDone && !_dialogBusy) {
+      // Късна корекция от RC/изтичане (promo init е async чрез .then в main) →
+      // преходен диалог. Промо-изтекъл има приоритет пред trial-изтекъл; НЕ се
+      // трупа върху текущ стартов диалог.
+      _maybeShowLateTransition();
     }
-  }
-
-  /// Чака ProService да се инициализира, после показва welcome
-  Future<void> _initAndShowWelcome() async {
-    // Чакаме ProService да се инициализира (ако не е)
-    if (!_proService.isInitialized) {
-      await _proService.initialize();
+    // Текстът на именните нотификации зависи от Pro статуса → препланираме.
+    if (!kIsWeb) {
+      NameDaysService().refreshNotificationsFromPrefs(
+          LanguageScope.of(context).locale.languageCode);
     }
-    _showTrialWelcome();
-    _maybeShowDowngradeDialog();
   }
 
   /// ЧАСТ 3: еднократен, топъл преходен диалог за старите потребители, които са
@@ -419,8 +549,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _proService.clearDowngradeFlag();
     if (!mounted) return;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+    {
       final lang = LanguageScope.of(context).locale.languageCode;
       String tr(Map<String, String> m) => m[lang] ?? m['en']!;
 
@@ -450,32 +579,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         'tr': 'Ücretsiz deneme süren bitti. Hiçbir şey kaybolmaz — tüm görevlerin ve kategorilerin kalıyor. İşte ücretsiz olanlar ve Pro\'nun açtıkları:',
         'ja': '無料トライアルが終了しました。何も失われません — タスクとカテゴリはすべて残ります。無料の内容と、Proで解除される内容はこちら:',
       };
-      const dFree = {
-        'en': 'Free: up to 50 tasks & 10 categories, recurring tasks, voice input, themes & languages.', 'nl': 'Gratis: tot 50 taken & 10 categorieën, terugkerende taken, spraakinvoer, thema\'s & talen.', 'uk': 'Безкоштовно: до 50 завдань і 10 категорій, повторювані завдання, голосове введення, теми та мови.',
-        'bg': 'Безплатно: до 50 задачи и 10 категории, повтарящи се задачи, гласово въвеждане, теми и езици.',
-        'de': 'Kostenlos: bis zu 50 Aufgaben & 10 Kategorien, wiederkehrende Aufgaben, Spracheingabe, Themes & Sprachen.',
-        'fr': 'Gratuit : jusqu\'à 50 tâches et 10 catégories, tâches récurrentes, saisie vocale, thèmes et langues.',
-        'it': 'Gratis: fino a 50 attività e 10 categorie, attività ricorrenti, input vocale, temi e lingue.',
-        'el': 'Δωρεάν: έως 50 εργασίες & 10 κατηγορίες, επαναλαμβανόμενες εργασίες, φωνητική εισαγωγή, θέματα & γλώσσες.',
-        'es': 'Gratis: hasta 50 tareas y 10 categorías, tareas recurrentes, entrada de voz, temas e idiomas.',
-        'pt': 'Grátis: até 50 tarefas e 10 categorias, tarefas recorrentes, entrada de voz, temas e idiomas.',
-        'ru': 'Бесплатно: до 50 задач и 10 категорий, повторяющиеся задачи, голосовой ввод, темы и языки.',
-        'tr': 'Ücretsiz: en fazla 50 görev ve 10 kategori, yinelenen görevler, sesli giriş, temalar ve diller.',
-        'ja': '無料: 最大50タスク・10カテゴリ、繰り返しタスク、音声入力、テーマと言語。',
-      };
-      const dPro = {
-        'en': 'Pro unlocks: Calendar, Documents, Statistics, AI, cloud sync, widgets, shared lists, name days — and removes ads.', 'nl': 'Pro ontgrendelt: Agenda, Documenten, Statistieken, AI, cloudsync, widgets, gedeelde lijsten, naamdagen — en verwijdert advertenties.', 'uk': 'Pro відкриває: Календар, Документи, Статистику, AI, хмарну синхронізацію, віджети, спільні списки, іменини — і прибирає рекламу.',
-        'bg': 'Pro отключва: Календар, Документи, Статистика, AI, облак, widgets, споделени списъци, именни дни — и маха рекламите.',
-        'de': 'Pro schaltet frei: Kalender, Dokumente, Statistik, KI, Cloud-Sync, Widgets, geteilte Listen, Namenstage — und entfernt Werbung.',
-        'fr': 'Pro débloque : Calendrier, Documents, Statistiques, IA, sync cloud, widgets, listes partagées, fêtes des prénoms — et retire les pubs.',
-        'it': 'Pro sblocca: Calendario, Documenti, Statistiche, IA, sync cloud, widget, liste condivise, onomastici — e rimuove la pubblicità.',
-        'el': 'Το Pro ξεκλειδώνει: Ημερολόγιο, Έγγραφα, Στατιστικά, AI, cloud sync, widgets, κοινές λίστες, ονομαστικές εορτές — και αφαιρεί τις διαφημίσεις.',
-        'es': 'Pro desbloquea: Calendario, Documentos, Estadísticas, IA, sync en la nube, widgets, listas compartidas, onomásticas — y quita los anuncios.',
-        'pt': 'Pro desbloqueia: Calendário, Documentos, Estatísticas, IA, sync na nuvem, widgets, listas partilhadas, dias do nome — e remove os anúncios.',
-        'ru': 'Pro открывает: Календарь, Документы, Статистику, ИИ, облако, виджеты, общие списки, именины — и убирает рекламу.',
-        'tr': 'Pro açar: Takvim, Belgeler, İstatistikler, AI, bulut senkronizasyonu, widget\'lar, paylaşılan listeler, isim günleri — ve reklamları kaldırır.',
-        'ja': 'Proで解除: カレンダー、ドキュメント、統計、AI、クラウド同期、ウィジェット、共有リスト、聖名祝日 — さらに広告も消えます。',
-      };
+      // ★1.0.70★ Списъците free/Pro вече са изнесени на файлово ниво
+      // (`_kFreeList`/`_kProList`) и се ползват и от екрана „Промокодът ти изтече".
       const dGift = {
         'en': 'As a thank-you for your early support, here are 7 days of Pro on us. 💛', 'nl': 'Als dank voor je vroege steun krijg je 7 dagen Pro van ons. 💛', 'uk': 'На знак подяки за вашу ранню підтримку — 7 днів Pro від нас. 💛',
         'bg': 'Като благодарност за ранната ти подкрепа — 7 дни Pro от нас. 💛',
@@ -488,17 +593,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         'ru': 'В благодарность за раннюю поддержку — 7 дней Pro в подарок. 💛',
         'tr': 'Erken desteğin için teşekkür olarak, 7 gün Pro bizden. 💛',
         'ja': '早期からのご支援への感謝を込めて、7日間のProをプレゼントします。💛',
-      };
-      const bContinueFree = {
-        'en': 'Continue free', 'nl': 'Gratis doorgaan', 'uk': 'Продовжити безкоштовно', 'bg': 'Продължи безплатно', 'de': 'Kostenlos weiter',
-        'fr': 'Continuer gratuit', 'it': 'Continua gratis', 'el': 'Συνέχεια δωρεάν',
-        'es': 'Seguir gratis', 'pt': 'Continuar grátis', 'ru': 'Продолжить бесплатно',
-        'tr': 'Ücretsiz devam', 'ja': '無料で続ける',
-      };
-      const bGetPro = {
-        'en': 'Get Pro', 'nl': 'Pro nemen', 'uk': 'Отримати Pro', 'bg': 'Вземи Pro', 'de': 'Pro holen', 'fr': 'Obtenir Pro',
-        'it': 'Ottieni Pro', 'el': 'Απόκτηση Pro', 'es': 'Obtener Pro',
-        'pt': 'Obter Pro', 'ru': 'Получить Pro', 'tr': 'Pro al', 'ja': 'Proを入手',
       };
       const bAcceptGift = {
         'en': 'Accept 7 free days', 'nl': 'Accepteer 7 gratis dagen', 'uk': 'Отримати 7 безкоштовних днів', 'bg': 'Приеми 7 дни', 'de': '7 Tage annehmen',
@@ -515,7 +609,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         'ja': '7日間のProをお楽しみください！💛',
       };
 
-      showDialog(
+      await showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
           icon: const Icon(Icons.favorite_rounded, size: 40, color: Colors.pinkAccent),
@@ -527,9 +621,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               children: [
                 Text(tr(dBody)),
                 const SizedBox(height: 12),
-                Text(tr(dFree), style: const TextStyle(fontSize: 13)),
+                Text(tr(_kFreeList), style: const TextStyle(fontSize: 13)),
                 const SizedBox(height: 8),
-                Text(tr(dPro),
+                Text(tr(_kProList),
                     style: const TextStyle(
                         fontSize: 13, fontWeight: FontWeight.w600)),
                 if (giftEligible) ...[
@@ -550,7 +644,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text(tr(bContinueFree)),
+              child: Text(tr(_kBtnContinueFree)),
             ),
             TextButton(
               onPressed: () {
@@ -559,7 +653,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   MaterialPageRoute(builder: (_) => const PaywallScreen()),
                 );
               },
-              child: Text(tr(bGetPro)),
+              child: Text(tr(_kBtnGetPro)),
             ),
             if (giftEligible)
               FilledButton(
@@ -576,10 +670,81 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ],
         ),
       );
-    });
+    }
   }
 
-  void _showTrialWelcome() async {
+  /// 1.0.70: еднократен екран „Промокодът ти изтече" — показва се, когато промо
+  /// код от тип „days" е изтекъл и няма друг валиден Pro. Ползва ОТДЕЛЕН флаг
+  /// `promo_expired_dialog_shown` (нулиран при нов промо код →
+  /// `ProService._resetPromoExpiredFlag`), за да се покаже ПАК при следващо
+  /// изтичане. Връща true, ако е показан (тогава изтекъл-trial диалогът се пропуска).
+  /// Късен преход (след стартовия поток, напр. щом RC/изтичане коригира статуса):
+  /// показва промо-изтекъл диалог с приоритет, иначе trial-изтекъл.
+  Future<void> _maybeShowLateTransition() async {
+    final shown = await _maybeShowPromoExpiredDialog();
+    if (!shown && mounted) await _maybeShowDowngradeDialog();
+  }
+
+  Future<bool> _maybeShowPromoExpiredDialog() async {
+    if (_promoExpiredChecked || kIsWeb) return false;
+    if (!_proService.isInitialized) return false;
+    debugPrint('PROMO_EXP_CHECK init=${_proService.isInitialized} '
+        'justExpired=${_proService.promoJustExpired} isPro=${_proService.isPro}');
+    if (!_proService.promoJustExpired) return false;
+    _promoExpiredChecked = true;
+
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('promo_expired_dialog_shown') ?? false) return false;
+    await prefs.setBool('promo_expired_dialog_shown', true);
+    if (!mounted) return false;
+
+    AnalyticsService().logPromoExpired();
+
+    final lang = LanguageScope.of(context).locale.languageCode;
+    String tr(Map<String, String> m) => m[lang] ?? m['en']!;
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.local_offer_rounded,
+            size: 40, color: Colors.deepPurpleAccent),
+        title: Text(tr(_kPromoExpiredTitle)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(tr(_kPromoExpiredBody)),
+              const SizedBox(height: 12),
+              Text(tr(_kFreeList), style: const TextStyle(fontSize: 13)),
+              const SizedBox(height: 8),
+              Text(tr(_kProList),
+                  style: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w600)),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(tr(_kBtnContinueFree)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const PaywallScreen()),
+              );
+            },
+            child: Text(tr(_kBtnGetPro)),
+          ),
+        ],
+      ),
+    );
+    return true;
+  }
+
+  Future<void> _showTrialWelcome() async {
     if (_welcomeChecked) return;
     _welcomeChecked = true;
     
@@ -594,39 +759,38 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       return;
     }
     
-    // Показваме само ако е в trial и има поне 13 дни
+    // Показваме само ако е в trial и има поне 13 дни (ден 1 — еднократно).
     if (_proService.isTrial && _proService.trialDaysLeft >= 13) {
       // Маркираме като показан ПРЕДИ да покажем диалога
       await prefs.setBool('taskify_welcome_shown_v2', true);
+      // Нова инсталация → welcome поема; „Какво ново" не бива да изскача отгоре.
+      await WhatsNewDialog.markSeen();
       debugPrint('Welcome dialog will be shown, marked as shown');
-      
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        final languageController = LanguageScope.of(context);
-        final lang = languageController.locale.languageCode;
-        
-        const welcomeTitle = {'en': 'Welcome!', 'nl': 'Welkom!', 'uk': 'Ласкаво просимо!', 'bg': 'Добре дошъл!', 'de': 'Willkommen!', 'fr': 'Bienvenue!', 'it': 'Benvenuto!', 'el': 'Καλώς ήρθες!', 'es': '¡Bienvenido!', 'pt': 'Bem-vindo!', 'ru': 'Добро пожаловать!', 'tr': 'Hoş geldin!', 'ja': 'ようこそ！'};
-        const welcomeBody = {'en': 'You have 14 days free Pro access!\n\nTry all features and see how Taskify can help you be more productive.', 'nl': 'Je hebt 14 dagen gratis Pro-toegang!\n\nProbeer alle functies en ontdek hoe Taskify je productiever kan maken.', 'uk': 'У вас 14 днів безкоштовного доступу до Pro!\n\nСпробуйте всі функції та побачте, як Taskify допомагає бути продуктивнішими.', 'bg': 'Имаш 14 дни безплатен Pro достъп!\n\nИзползвай всички функции и виж как Taskify ще ти помогне да си по-продуктивен.', 'de': 'Du hast 14 Tage kostenlosen Pro-Zugang!\n\nProbiere alle Funktionen aus.', 'fr': 'Vous avez 14 jours d\'accès Pro gratuit!\n\nEssayez toutes les fonctionnalités.', 'it': 'Hai 14 giorni di accesso Pro gratuito!\n\nProva tutte le funzionalità.', 'el': 'Έχεις 14 ημέρες δωρεάν Pro πρόσβαση!\n\nΔοκίμασε όλες τις λειτουργίες.', 'es': '¡Tienes 14 días de acceso Pro gratis!\n\nPrueba todas las funciones.', 'pt': 'Você tem 14 dias de acesso Pro grátis!\n\nExperimente todos os recursos.', 'ru': 'У вас 14 дней бесплатного Pro доступа!\n\nПопробуйте все функции.', 'tr': '14 gün ücretsiz Pro erişiminiz var!\n\nTüm özellikleri deneyin.', 'ja': '14日間の無料Proアクセスがあります！\n\nすべての機能を試して、Taskifyがどれだけ生産性を高めるか体験してください。'};
-        const welcomeBtn = {'en': 'Awesome!', 'nl': 'Geweldig!', 'uk': 'Чудово!', 'bg': 'Страхотно!', 'de': 'Super!', 'fr': 'Génial!', 'it': 'Fantastico!', 'el': 'Τέλεια!', 'es': '¡Genial!', 'pt': 'Incrível!', 'ru': 'Отлично!', 'tr': 'Harika!', 'ja': '最高！'};
-        
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (ctx) => AlertDialog(
-            icon: const Icon(Icons.celebration_rounded, size: 48, color: Colors.amber),
-            title: Text(welcomeTitle[lang] ?? welcomeTitle['en']!),
-            content: Text(
-              welcomeBody[lang] ?? welcomeBody['en']!,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text(welcomeBtn[lang] ?? welcomeBtn['en']!),
-              ),
-            ],
+      if (!mounted) return;
+      final languageController = LanguageScope.of(context);
+      final lang = languageController.locale.languageCode;
+
+      const welcomeTitle = {'en': 'Welcome!', 'nl': 'Welkom!', 'uk': 'Ласкаво просимо!', 'bg': 'Добре дошъл!', 'de': 'Willkommen!', 'fr': 'Bienvenue!', 'it': 'Benvenuto!', 'el': 'Καλώς ήρθες!', 'es': '¡Bienvenido!', 'pt': 'Bem-vindo!', 'ru': 'Добро пожаловать!', 'tr': 'Hoş geldin!', 'ja': 'ようこそ！'};
+      const welcomeBody = {'en': 'You have 14 days free Pro access!\n\nTry all features and see how Taskify can help you be more productive.', 'nl': 'Je hebt 14 dagen gratis Pro-toegang!\n\nProbeer alle functies en ontdek hoe Taskify je productiever kan maken.', 'uk': 'У вас 14 днів безкоштовного доступу до Pro!\n\nСпробуйте всі функції та побачте, як Taskify допомагає бути продуктивнішими.', 'bg': 'Имаш 14 дни безплатен Pro достъп!\n\nИзползвай всички функции и виж как Taskify ще ти помогне да си по-продуктивен.', 'de': 'Du hast 14 Tage kostenlosen Pro-Zugang!\n\nProbiere alle Funktionen aus.', 'fr': 'Vous avez 14 jours d\'accès Pro gratuit!\n\nEssayez toutes les fonctionnalités.', 'it': 'Hai 14 giorni di accesso Pro gratuito!\n\nProva tutte le funzionalità.', 'el': 'Έχεις 14 ημέρες δωρεάν Pro πρόσβαση!\n\nΔοκίμασε όλες τις λειτουργίες.', 'es': '¡Tienes 14 días de acceso Pro gratis!\n\nPrueba todas las funciones.', 'pt': 'Você tem 14 dias de acesso Pro grátis!\n\nExperimente todos os recursos.', 'ru': 'У вас 14 дней бесплатного Pro доступа!\n\nПопробуйте все функции.', 'tr': '14 gün ücretsiz Pro erişiminiz var!\n\nTüm özellikleri deneyin.', 'ja': '14日間の無料Proアクセスがあります！\n\nすべての機能を試して、Taskifyがどれだけ生産性を高めるか体験してください。'};
+      const welcomeBtn = {'en': 'Awesome!', 'nl': 'Geweldig!', 'uk': 'Чудово!', 'bg': 'Страхотно!', 'de': 'Super!', 'fr': 'Génial!', 'it': 'Fantastico!', 'el': 'Τέλεια!', 'es': '¡Genial!', 'pt': 'Incrível!', 'ru': 'Отлично!', 'tr': 'Harika!', 'ja': '最高！'};
+
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => AlertDialog(
+          icon: const Icon(Icons.celebration_rounded, size: 48, color: Colors.amber),
+          title: Text(welcomeTitle[lang] ?? welcomeTitle['en']!),
+          content: Text(
+            welcomeBody[lang] ?? welcomeBody['en']!,
           ),
-        );
-      });
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(welcomeBtn[lang] ?? welcomeBtn['en']!),
+            ),
+          ],
+        ),
+      );
     }
   }
 
@@ -671,11 +835,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       body: SafeArea(
         child: Column(
           children: [
-            if (!kIsWeb && !_proService.isPaid && !_proService.isPromoCode && _proService.isTrial)
-              _buildProBanner(context)
-            // Не-trial, не-Pro → ненатрапчива постоянна лента към paywall.
-            else if (!kIsWeb && !_proService.isPro)
-              _buildGoProStrip(context),
+            // ★1.0.70★ Trial банерът се показва САМО в последните дни (≈ден 11–14)
+            // и се затваря „за деня". Ден 1 → welcome диалогът (еднократно).
+            // Постоянната „Стани Pro" лента е МАХНАТА (виж Профил за оставащите дни).
+            if (_showTrialBannerNow) _buildProBanner(context),
 
             Expanded(
               child: IndexedStack(
@@ -788,21 +951,44 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
+  /// Показва ли се trial банерът СЕГА? Само в последните ≈4 дни (ден 11–14 от
+  /// 14-дневния trial) и ако не е затворен за деня. Ден 1 се покрива от welcome
+  /// диалога, а дни 2–10 нямат банер (ненатрапчиво).
+  bool get _showTrialBannerNow {
+    if (kIsWeb || _proService.isPaid || _proService.isPromoCode) return false;
+    if (!_proService.isTrial) return false;
+    final left = _proService.trialDaysLeft;
+    if (left < 0 || left > 4) return false;
+    return !_trialBannerDismissedToday;
+  }
+
+  Future<void> _dismissTrialBanner() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('trial_banner_dismissed_date', _todayKey());
+    } catch (_) {}
+    if (mounted) setState(() => _trialBannerDismissedToday = true);
+    AnalyticsService().logTrialBannerDismissed('last_days');
+  }
+
   Widget _buildProBanner(BuildContext context) {
     final theme = Theme.of(context);
-    
-    final daysLeft = _proService.isTrial 
-        ? _proService.trialDaysLeft 
-        : _proService.promoDaysLeft;
-    
+    final daysLeft = _proService.trialDaysLeft;
     final isUrgent = daysLeft <= 3;
-    
+
+    // Логваме показването веднъж на сесия (phase = последни дни).
+    if (!_trialBannerShownLogged) {
+      _trialBannerShownLogged = true;
+      WidgetsBinding.instance.addPostFrameCallback(
+          (_) => AnalyticsService().logTrialBannerShown('last_days'));
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isUrgent 
+          colors: isUrgent
               ? [Colors.orange.shade600, Colors.red.shade600]
               : [theme.colorScheme.primary, theme.colorScheme.secondary],
         ),
@@ -817,9 +1003,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              _proService.isTrial
-                  ? AppText.of(context).trialDaysLeft(daysLeft)
-                  : AppText.of(context).promoDaysLeft(daysLeft),
+              AppText.of(context).trialDaysLeft(daysLeft),
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w500,
@@ -843,53 +1027,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               style: const TextStyle(color: Colors.white, fontSize: 12),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  /// Дискретна постоянна лента към paywall за не-Pro потребители без активен
-  /// trial (иначе нямат видим път до покупка след края на пробния период).
-  Widget _buildGoProStrip(BuildContext context) {
-    final theme = Theme.of(context);
-    final lang = LanguageScope.of(context).locale.languageCode;
-    const label = {
-      'en': 'Unlock Pro features', 'nl': 'Pro-functies ontgrendelen', 'uk': 'Відкрити Pro-функції', 'bg': 'Отключи Pro функциите',
-      'de': 'Pro-Funktionen freischalten', 'fr': 'Débloquer les fonctions Pro',
-      'it': 'Sblocca le funzioni Pro', 'el': 'Ξεκλείδωσε τις λειτουργίες Pro',
-      'es': 'Desbloquea las funciones Pro', 'pt': 'Desbloqueia as funções Pro',
-      'ru': 'Открой Pro-функции', 'tr': 'Pro özellikleri aç',
-      'ja': 'Pro機能をアンロック',
-    };
-    final color = theme.colorScheme.primary;
-    return Material(
-      color: color.withValues(alpha: 0.08),
-      child: InkWell(
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const PaywallScreen()),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            children: [
-              Icon(Icons.workspace_premium_rounded, size: 18, color: color),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label[lang] ?? label['en']!,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Icon(Icons.chevron_right, size: 18, color: color),
-            ],
+          // Затваряне „за деня" (× бутон) — банерът пак излиза на следващия ден.
+          IconButton(
+            onPressed: _dismissTrialBanner,
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            icon: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -337,6 +337,8 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
 
     await TaskEditorBridge.open(
       existing: draft,
+      // Групите не поддържат повторение → скриваме секцията и записваме null.
+      hideRecurrence: true,
       onSave: (task) async {
         final gt = GroupTask(
           id: existing?.id ?? '',
@@ -344,7 +346,7 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
           dueDate: task.dueDate,
           priority: task.priority,
           categoryName: nameForCatId(task.categoryId),
-          recurrence: task.recurrence,
+          recurrence: null,
           reminders: task.reminders,
           subtasks: task.subtasks,
           notes: task.notes,

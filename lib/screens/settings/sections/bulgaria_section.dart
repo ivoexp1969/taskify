@@ -7,8 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../utils/localization.dart';
 import '../../../services/name_days_service.dart';
 import '../../../services/contact_name_index.dart';
-import '../../../services/pro_service.dart';
-import '../../paywall/paywall_screen.dart';
 
 /// Секция „България" в Настройки (влива се в група „Език и регион").
 /// Показва се само в BG контекст (bg език или устройство с countryCode == BG).
@@ -28,7 +26,21 @@ class _BulgariaSectionState extends State<BulgariaSection> {
   @override
   void initState() {
     super.initState();
+    // Toggle-ът може да бъде сменен и отвън (при смяна на държава в
+    // „Официални празници") → слушаме notifier-а, за да е винаги актуален.
+    NameDaysService.enabledNotifier.addListener(_onEnabledChanged);
     _loadNameDaysSetting();
+  }
+
+  @override
+  void dispose() {
+    NameDaysService.enabledNotifier.removeListener(_onEnabledChanged);
+    super.dispose();
+  }
+
+  void _onEnabledChanged() {
+    if (!mounted) return;
+    setState(() => _nameDaysEnabled = NameDaysService.enabledNotifier.value);
   }
 
   Future<void> _loadNameDaysSetting() async {
@@ -58,10 +70,10 @@ class _BulgariaSectionState extends State<BulgariaSection> {
     final lang = LanguageScope.of(context).locale.languageCode;
 
     const nameDaysTitle = {
-      'en': 'Name days', 'nl': 'Naamdagen', 'uk': 'Іменини', 'bg': 'Именни дни', 'de': 'Namenstage',
-      'fr': 'Fêtes des prénoms', 'it': 'Onomastici', 'el': 'Ονομαστικές εορτές',
-      'es': 'Onomásticas', 'pt': 'Dias do nome', 'ru': 'Именины',
-      'tr': 'İsim günleri', 'ja': '聖名祝日',
+      'en': 'Bulgarian name days', 'nl': 'Bulgaarse naamdagen', 'uk': 'Болгарські іменини', 'bg': 'Имени дни (български)', 'de': 'Bulgarische Namenstage',
+      'fr': 'Fêtes des prénoms bulgares', 'it': 'Onomastici bulgari', 'el': 'Βουλγαρικές ονομαστικές εορτές',
+      'es': 'Onomásticas búlgaras', 'pt': 'Dias do nome búlgaros', 'ru': 'Болгарские именины',
+      'tr': 'Bulgarca isim günleri', 'ja': 'ブルガリアの聖名祝日',
     };
     const nameDaysSubtitle = {
       'en': 'Bulgarian name days in the calendar', 'nl': 'Bulgaarse naamdagen in de agenda', 'uk': 'Болгарські іменини в календарі',
@@ -139,7 +151,7 @@ class _BulgariaSectionState extends State<BulgariaSection> {
     };
 
     String tr(Map<String, String> m) => m[lang] ?? m['en']!;
-    final isPro = ProService().isPro;
+    // v1.0.70: имен-ден и „Контакти с имен ден" са БЕЗПЛАТНИ (без Pro гейт).
 
     // Пакет 2: връща само тайловете Именни дни / Контакти (без header + без
     // Училищен режим) — вливат се в група „Език и регион".
@@ -161,10 +173,6 @@ class _BulgariaSectionState extends State<BulgariaSection> {
             title: Row(
               children: [
                 Flexible(child: Text(tr(nameDaysTitle))),
-                if (!isPro) ...[
-                  const SizedBox(width: 6),
-                  Icon(Icons.lock, size: 14, color: theme.colorScheme.primary),
-                ],
               ],
             ),
             subtitle: Text(
@@ -176,17 +184,11 @@ class _BulgariaSectionState extends State<BulgariaSection> {
             ),
             value: _nameDaysEnabled,
             onChanged: (value) async {
-              if (value && !isPro) {
-                final upgraded = await showPaywallIfNeeded(
-                  context,
-                  isFeatureAvailable: false,
-                  featureName: tr(nameDaysTitle),
-                );
-                if (!upgraded) return;
-              }
               setState(() => _nameDaysEnabled = value);
               // Записва + обновява глобалния notifier (календарът реагира веднага).
-              await NameDaysService().setEnabled(value);
+              // userInitiated: помни ръчното изключване → при връщане към BG не
+              // пускаме имен-ден пак тихо.
+              await NameDaysService().setEnabled(value, userInitiated: true);
               // Сутрешни нотификации за имен ден (вкл./изкл.)
               if (value) {
                 await NameDaysService().scheduleNotifications(lang: lang);
@@ -216,11 +218,6 @@ class _BulgariaSectionState extends State<BulgariaSection> {
                   title: Row(
                     children: [
                       Flexible(child: Text(tr(contactsTitle))),
-                      if (!isPro) ...[
-                        const SizedBox(width: 6),
-                        Icon(Icons.lock,
-                            size: 14, color: theme.colorScheme.primary),
-                      ],
                     ],
                   ),
                   subtitle: Text(
@@ -233,14 +230,6 @@ class _BulgariaSectionState extends State<BulgariaSection> {
                   value: _contactsNameDayEnabled,
                   onChanged: (value) async {
                     if (value) {
-                      if (!isPro) {
-                        final upgraded = await showPaywallIfNeeded(
-                          context,
-                          isFeatureAvailable: false,
-                          featureName: tr(contactsTitle),
-                        );
-                        if (!upgraded) return;
-                      }
                       final granted =
                           await ContactNameIndex().requestPermission();
                       if (!granted) {

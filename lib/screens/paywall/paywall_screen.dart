@@ -5,7 +5,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/pro_service.dart';
 import '../../services/analytics_service.dart';
+import '../../services/auth_service.dart';
 import '../../utils/localization.dart';
+import '../auth/login_screen.dart';
 
 // Условен import за Package тип
 import '../../services/purchases_stub.dart' if (dart.library.io) 'package:purchases_flutter/purchases_flutter.dart';
@@ -59,6 +61,13 @@ const _p = {
   'continueWith': {'en': 'Continue — {price}', 'nl': 'Doorgaan — {price}', 'uk': 'Продовжити — {price}', 'bg': 'Продължи — {price}', 'de': 'Weiter — {price}', 'fr': 'Continuer — {price}', 'it': 'Continua — {price}', 'el': 'Συνέχεια — {price}', 'es': 'Continuar — {price}', 'pt': 'Continuar — {price}', 'ru': 'Продолжить — {price}', 'tr': 'Devam — {price}', 'ja': '続ける — {price}'},
   // Хедър, когато paywall-ът е отворен за конкретна заключена функция.
   'unlockFeature': {'en': 'Unlock {feature}', 'nl': '{feature} ontgrendelen', 'uk': 'Розблокувати {feature}', 'bg': 'Отключи {feature}', 'de': '{feature} freischalten', 'fr': 'Débloquer {feature}', 'it': 'Sblocca {feature}', 'el': 'Ξεκλείδωμα {feature}', 'es': 'Desbloquear {feature}', 'pt': 'Desbloquear {feature}', 'ru': 'Открыть {feature}', 'tr': '{feature} kilidini aç', 'ja': '{feature}を解除'},
+  // Промокод без вход — диалог (ти-форма).
+  'promoLoginTitle': {'en': 'Sign in to use a promo code', 'nl': 'Log in om een promocode te gebruiken', 'uk': 'Увійди, щоб скористатися промокодом', 'bg': 'Влез, за да използваш промо код', 'de': 'Melde dich an, um einen Promo-Code zu nutzen', 'fr': 'Connecte-toi pour utiliser un code promo', 'it': 'Accedi per usare un codice promo', 'el': 'Σύνδεσου για να χρησιμοποιήσεις κωδικό προσφοράς', 'es': 'Inicia sesión para usar un código promocional', 'pt': 'Entra para usar um código promocional', 'ru': 'Войди, чтобы использовать промокод', 'tr': 'Promosyon kodu kullanmak için giriş yap', 'ja': 'プロモコードを使うにはサインインしてください'},
+  'promoLoginBody': {'en': 'To use a promo code, sign in with your email and password. That way Pro stays tied to your account and won\'t be lost when you switch phones.', 'nl': 'Om een promocode te gebruiken, log je in met je e-mail en wachtwoord. Zo blijft Pro aan je account gekoppeld en gaat het niet verloren als je van telefoon wisselt.', 'uk': 'Щоб скористатися промокодом, увійди з поштою та паролем. Так Pro залишиться прив\'язаним до твого акаунта й не зникне при зміні телефона.', 'bg': 'За да използваш промокод, влез с имейл и парола. Така Premium остава към акаунта ти и не се губи при смяна на телефона.', 'de': 'Um einen Promo-Code zu nutzen, melde dich mit E-Mail und Passwort an. So bleibt Pro mit deinem Konto verknüpft und geht beim Telefonwechsel nicht verloren.', 'fr': 'Pour utiliser un code promo, connecte-toi avec ton e-mail et ton mot de passe. Ainsi Pro reste lié à ton compte et ne se perd pas si tu changes de téléphone.', 'it': 'Per usare un codice promo, accedi con email e password. Così il Pro resta legato al tuo account e non si perde quando cambi telefono.', 'el': 'Για να χρησιμοποιήσεις κωδικό προσφοράς, σύνδεσου με email και κωδικό. Έτσι το Pro μένει συνδεδεμένο με τον λογαριασμό σου και δεν χάνεται όταν αλλάζεις τηλέφωνο.', 'es': 'Para usar un código promocional, inicia sesión con tu correo y contraseña. Así Pro queda vinculado a tu cuenta y no se pierde al cambiar de teléfono.', 'pt': 'Para usar um código promocional, entra com o teu email e palavra-passe. Assim o Pro fica ligado à tua conta e não se perde ao mudar de telemóvel.', 'ru': 'Чтобы использовать промокод, войди с почтой и паролем. Так Pro останется привязанным к твоему аккаунту и не потеряется при смене телефона.', 'tr': 'Promosyon kodu kullanmak için e-posta ve şifrenle giriş yap. Böylece Pro hesabına bağlı kalır ve telefon değiştirdiğinde kaybolmaz.', 'ja': 'プロモコードを使うには、メールアドレスとパスワードでサインインしてください。そうすればProがアカウントに紐づき、機種変更しても失われません。'},
+  'promoLoginSignIn': {'en': 'Sign in', 'nl': 'Inloggen', 'uk': 'Увійти', 'bg': 'Вход', 'de': 'Anmelden', 'fr': 'Se connecter', 'it': 'Accedi', 'el': 'Σύνδεση', 'es': 'Iniciar sesión', 'pt': 'Entrar', 'ru': 'Войти', 'tr': 'Giriş yap', 'ja': 'サインイン'},
+  'cancel': {'en': 'Cancel', 'nl': 'Annuleren', 'uk': 'Скасувати', 'bg': 'Отказ', 'de': 'Abbrechen', 'fr': 'Annuler', 'it': 'Annulla', 'el': 'Άκυρο', 'es': 'Cancelar', 'pt': 'Cancelar', 'ru': 'Отмена', 'tr': 'İptal', 'ja': 'キャンセル'},
+  // Приятелска грешка — БЕЗ суров exception.
+  'genericError': {'en': 'Something went wrong. Check your connection and try again.', 'nl': 'Er ging iets mis. Controleer je verbinding en probeer opnieuw.', 'uk': 'Щось пішло не так. Перевірте з\'єднання та спробуйте ще раз.', 'bg': 'Нещо се обърка. Провери връзката и опитай пак.', 'de': 'Etwas ist schiefgelaufen. Prüfe deine Verbindung und versuche es erneut.', 'fr': 'Un problème est survenu. Vérifie ta connexion et réessaie.', 'it': 'Qualcosa è andato storto. Controlla la connessione e riprova.', 'el': 'Κάτι πήγε στραβά. Έλεγξε τη σύνδεσή σου και δοκίμασε ξανά.', 'es': 'Algo salió mal. Revisa tu conexión e inténtalo de nuevo.', 'pt': 'Algo correu mal. Verifica a tua ligação e tenta novamente.', 'ru': 'Что-то пошло не так. Проверь соединение и попробуй снова.', 'tr': 'Bir şeyler ters gitti. Bağlantını kontrol edip tekrar dene.', 'ja': '問題が発生しました。接続を確認してもう一度お試しください。'},
 };
 
 String _pt(String key, String lang) => _p[key]?[lang] ?? _p[key]?['en'] ?? '';
@@ -187,6 +196,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
           source: widget.source ?? widget.featureName,
           defaultPkg: def?.identifier,
         );
+        // 1.0.70: отделно събитие с причината за отваряне (reason = source).
+        AnalyticsService()
+            .logPaywallShown(widget.source ?? widget.featureName ?? 'unknown');
       }
     } catch (e) {
       debugPrint('Load offerings error: $e');
@@ -238,11 +250,51 @@ class _PaywallScreenState extends State<PaywallScreen> {
     }
   }
 
+  /// Диалог „влез, за да използваш промо код" (анонимен/невлязъл потребител).
+  /// Връща true ако потребителят избере „Вход".
+  Future<bool?> _showPromoLoginRequiredDialog() {
+    final lang = _lang;
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: Icon(Icons.lock_person_rounded,
+            size: 40, color: Theme.of(ctx).colorScheme.primary),
+        title: Text(_pt('promoLoginTitle', lang)),
+        content: Text(_pt('promoLoginBody', lang)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(_pt('cancel', lang)),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(_pt('promoLoginSignIn', lang)),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _applyPromoCode() async {
     if (kIsWeb) return;
-    
+
     final code = _promoController.text.trim();
     if (code.isEmpty) return;
+
+    // ПРОМОКОД БЕЗ ВХОД: анонимната сесия НЕ се брои за влязъл. Искаме имейл-вход
+    // ПРЕДИ заявката, за да е вързан Premium-ът към акаунта (не се губи при смяна
+    // на телефона). Кодът остава в полето (controller-ът го пази).
+    if (!AuthService().isLoggedIn) {
+      AnalyticsService().logPromoLoginRequired();
+      final goLogin = await _showPromoLoginRequiredDialog();
+      if (goLogin != true || !mounted) return; // Отказ
+      await Navigator.of(context).push<bool>(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+      if (!mounted) return;
+      if (!AuthService().isLoggedIn) return; // входът не завърши → пробвай пак
+      AnalyticsService().logPromoLoginCompleted();
+    }
 
     setState(() => _isApplyingPromo = true);
 
@@ -261,9 +313,13 @@ class _PaywallScreenState extends State<PaywallScreen> {
         }
       }
     } catch (e) {
+      debugPrint('Promo apply (paywall) error: $e');
       if (mounted) {
+        // Човешки текст — никакъв суров exception в SnackBar.
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${_pt('error', _lang)}: $e'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text(_pt('genericError', _lang)),
+              backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -496,16 +552,16 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       // AI, 3) останалите съществуващи.
                       // ФАЗА 3.5 / 1.0.67: само РЕАЛНО Pro функции. „Повтарящи се
                       // задачи" и „Гласов вход" са БЕЗПЛАТНИ (FreeLimits) → махнати.
+                      // ★1.0.70★: „Календарен изглед" и „Имени дни + контакти"
+                      // вече са БЕЗПЛАТНИ (план А) → махнати от Pro списъка.
                       _FeatureItem(icon: Icons.block_rounded, title: _pt('noAds', lang), highlight: true),
                       _FeatureItem(icon: Icons.auto_awesome_rounded, title: _pt('unlimitedAi', lang), highlight: true),
                       _FeatureItem(icon: Icons.all_inclusive, title: _pt('unlimited', lang)),
                       _FeatureItem(icon: Icons.category_rounded, title: _pt('customCat', lang)),
                       _FeatureItem(icon: Icons.notifications_active_rounded, title: _pt('multiRemind', lang)),
-                      _FeatureItem(icon: Icons.calendar_month_rounded, title: _pt('calView', lang)),
                       _FeatureItem(icon: Icons.bar_chart_rounded, title: _pt('stats', lang)),
                       _FeatureItem(icon: Icons.cloud_sync_rounded, title: _pt('cloudSync', lang)),
                       _FeatureItem(icon: Icons.widgets_rounded, title: _pt('widget', lang)),
-                      _FeatureItem(icon: Icons.celebration_rounded, title: _pt('nameDaysContacts', lang)),
                       _FeatureItem(icon: Icons.group_rounded, title: _pt('sharedLists', lang)),
                       _FeatureItem(icon: Icons.palette_rounded, title: _pt('allThemes', lang)),
 

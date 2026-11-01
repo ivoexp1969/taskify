@@ -147,6 +147,14 @@ Future<void> main() async {
         kind: 'gift_birthday');
   });
 
+  // Имен-ден по подразбиране: ВКЛ. само за България. Еднократно при нова
+  // инсталация (ако ключът още липсва) — съществуващи потребители с друга
+  // държава не се пипат тихо. Awaited, за да е готово преди (пре)насрочването
+  // на имен-ден нотификациите в ProService().initialize().then по-долу.
+  if (!kIsWeb) {
+    await NameDaysService().applyFirstRunDefault(HolidaysService.detectCountry());
+  }
+
   // Pro и Ad сервизи — fire-and-forget, не блокират UI
   // Trial notification се планира след като ProService завърши инициализацията
   ProService().initialize().then((_) {

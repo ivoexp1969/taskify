@@ -68,8 +68,15 @@ class AuthService {
   // Текущ потребител
   User? get currentUser => _auth.currentUser;
 
-  /// Името за показване (от Auth displayName). Празно ако не е зададено.
-  String get displayName => _auth.currentUser?.displayName ?? '';
+  /// Локален override на display name: FlutterFire `reload()` НЕ опреснява надеждно
+  /// `currentUser.displayName` веднага (появява се чак при следващ вход), затова
+  /// пазим въведеното локално за моментално отразяване в UI. Чисти се при logout.
+  String? _displayNameOverride;
+
+  /// Името за показване. Предпочита локалния override (моментално след редакция),
+  /// иначе Auth displayName. Празно ако не е зададено.
+  String get displayName =>
+      _displayNameOverride ?? (_auth.currentUser?.displayName ?? '');
 
   /// Задава име за показване (в Auth profile). Връща true при успех.
   Future<bool> updateDisplayName(String name) async {
@@ -78,6 +85,9 @@ class AuthService {
     try {
       await user.updateDisplayName(name.trim());
       await user.reload();
+      // reload() не отразява новото име веднага в cached currentUser → пазим го
+      // локално, за да се види моментално (без да се чака нов вход).
+      _displayNameOverride = name.trim();
       return true;
     } catch (e) {
       debugPrint('updateDisplayName failed: $e');
@@ -219,6 +229,7 @@ class AuthService {
   
   // Изход
   Future<void> logout() async {
+    _displayNameOverride = null; // да не изтича име към следващ акаунт
     await _clearCredentials();
     await _auth.signOut();
   }
