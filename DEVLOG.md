@@ -23,6 +23,21 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   Тоест Pro ползата от web се пренася на Free телефон през общия облак. План 1.0.71: web да смята Pro от акаунта
   (trial/промо/RevenueCat по uid), не безусловно true. Иво поиска за 1.0.71 (БЕЗ код промяна сега).
 
+## 2026-11-01 · PC — 1.0.70+80 free-tier v2 → ★ЖИВА в Play Production 100% (vc80)★ (клон free-tier-v2)
+Тествано на Note 9 + качено Internal → промотирано Production 100% след „ок" на Иво.
+- **т.1 тестове (Note 9, debug APK) ✅:** (а) display name се отразява МОМЕНТАЛНО след смяна (fix
+  `auth_service._displayNameOverride`, без повторен вход). (б) имен-ден нотификация от контакти = пълен текст
+  БЕЗ 🔒 при free (`_ndFreeLocked` изтрит; `_ndBodyFor` без isPro клон). Понеже акаунтът е Pro lifetime →
+  нов DEBUG-only `DebugOverrides.forceFree` (kDebugMode, short-circuit в `pro_service.isPro`) симулира free
+  без pm clear; тестван с временен контакт „Argir QA" (фонетичен матч с имен ден Аргир).
+- **т.2 (report-only, БЕЗ код):** web (`isPro=>kIsWeb?true`) + не-Pro-гейтнат `SyncService` → задачи от web се
+  пренасят на Free телефон през `users/{uid}/tasks`. План 1.0.71 (виж TODO горе).
+- **т.3 релийз:** Play API max vc=79 → bump 1.0.70+80 (whats_new `_build`=80). `flutter clean`→AAB 60.1MB
+  (manifest ✅ USE_FULL_SCREEN_INTENT + targetSdk 36). `play_upload.py` → Internal completed vc80 →
+  `play_promote.py` → **Production completed 100% vc80** (Play API потвърди). Notes BG+EN = whats_new точките.
+  5 WIP commit-а смачкани в 3 смислени (`2b20843` feat / `37e59a2` firestore rules ЕТАП 1 / `c220d1a` release);
+  `free-tier-v2` push-нат (БЕЗ merge в main). iOS 1.0.70 остава за Mac (чист Dart).
+
 ## 2026-10-30 · PC — 1.0.70 free-tier: промо трупане + „Промокодът ти изтече" екран + analytics (клон free-tier-v2)
 Промо-код подобрения (т.1–3 от заявката на Иво; т.4=часовник отложена горе):
 - **(1) Трупане:** нов `ProService._promoStackBase()` = `max(now, trialEnd, текущ promoEnd)`; промо-дните се добавят
