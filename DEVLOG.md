@@ -6,6 +6,34 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## TODO → 1.0.71 (отложено от 1.0.70)
+- **Промо-код изтичане = сървърно, не по часовника на телефона.** Сега изтичането се проверява клиентски
+  (`pro_service.dart` `applyPromoCode` → `DateTime.now().isAfter(expiresAt)`), а деплойнатите Firestore rules
+  НЕ проверяват `expiresAt` при redeem → назад-наместен часовник може да заобиколи изтичането, а и целият
+  промо-живот (redeem край = `DateTime.now().add(days)`) зависи от телефона. План: валидирай `expiresAt` в rules
+  (`request.time` при update) и/или смятай края сървърно (Cloud Function / `serverTimestamp`). Иво поиска за 1.0.71.
+- **Web да следва Pro статуса на акаунта, не „винаги Pro".** Днес на web `ProService.isPro => kIsWeb ? true`
+  (`pro_service.dart:174-175`; `isTrial`/`isPromoCode`/RevenueCat init всички се прескачат при `kIsWeb`). Облачната
+  синхронизация обаче НЕ е Pro-гейтната — `SyncService` пише в `users/{uid}/tasks` само ако потребителят е логнат
+  не-анонимен (`sync_service.dart:64-74` `_userId`/`_tasksRef`; `mergeWithCloud` връща `not-signed-in` иначе,
+  ред 142-144; качването е `_writeCloudTask`, ред 328/388/398/549). **Следствие (проверено, report-only за т.4):**
+  задача, създадена в web (където лимитите не важат, защото web=Pro), се записва в `users/{uid}/tasks` и мобилното
+  приложение на СЪЩИЯ акаунт я сваля през `mergeWithCloud` → `tasksRef.get()` (`sync_service.dart:167`) БЕЗ Pro/лимит
+  проверка на сваляне (`canAddTask` блокира само локално ДОБАВЯНЕ над лимита, `pro_service.dart:991-994`, не сваляне).
+  Тоест Pro ползата от web се пренася на Free телефон през общия облак. План 1.0.71: web да смята Pro от акаунта
+  (trial/промо/RevenueCat по uid), не безусловно true. Иво поиска за 1.0.71 (БЕЗ код промяна сега).
+
+## 2026-10-30 · PC — 1.0.70 free-tier: промо трупане + „Промокодът ти изтече" екран + analytics (клон free-tier-v2)
+Промо-код подобрения (т.1–3 от заявката на Иво; т.4=часовник отложена горе):
+- **(1) Трупане:** нов `ProService._promoStackBase()` = `max(now, trialEnd, текущ promoEnd)`; промо-дните се добавят
+  върху него (`pro_service.dart` редакция на `type=='days'` пътя), вместо от „сега" → промо по време на trial дава
+  trial + дните; втори код удължава след първия. Записва се и в mirror/`redemptions` (следва акаунта).
+- **(2) Екран „Промокодът ти изтече":** нов `home_screen._maybeShowPromoExpiredDialog` + getter `ProService.promoJustExpired`;
+  ОТДЕЛЕН флаг `promo_expired_dialog_shown` (не `downgrade_dialog_shown`), текст ×13 + същия списък free/Pro (изнесен
+  на файлово ниво `_kFreeList`/`_kProList`/бутони). Флагът се нулира при нов промо код (`_resetPromoExpiredFlag`
+  в redeem/reactivation/grace) → показва се пак при следващо изтичане. Приоритет пред изтекъл-trial диалога.
+- **(3) Analytics:** `promo_redeemed` (type, days, source) при redeem + `promo_expired` при показване на екрана.
+
 ## 2026-10-28 · PC — Именник ОДИТ на dataset-а + деплой на сайта (commit 48bcfc8 · сайтът ДЕПЛОЙНАТ)
 Одит на `assets/data/bg_name_days.json` срещу независими източници; после регенерация и деплой на сайта.
 - **Източници:** kik-info.com (12 мес. 2026 + мес. 03–07 за 2027, месечни страници) + imenden.eu (една целогодишна

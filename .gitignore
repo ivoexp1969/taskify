@@ -73,3 +73,6 @@ package-lock.json
 audit/raw/
 audit/__pycache__/
 audit/_old_dataset.json
+
+# Локален тест (пароли на тест акаунти) — НЕ в git
+.env

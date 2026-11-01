@@ -16,24 +16,77 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Нови инсталации НЕ го виждат (те виждат welcome диалога).
 class WhatsNewDialog {
   /// Билдът, за който са точките по-долу (= `pubspec.yaml` build number).
-  static const int _build = 77;
+  /// ★1.0.70 → versionCode 80★.
+  static const int _build = 80;
 
   static const String _prefKey = 'whats_new_seen_build';
 
-  /// Точките за текущата версия. BG + EN; всички останали езици падат на EN
-  /// (`_items[lang] ?? _items['en']`).
+  /// Точките за текущата версия (1.0.70), ×13 езика.
   static const Map<String, List<String>> _items = {
-    'bg': [
-      '🔒 По-честно Pro: пробният период и промо кодовете се зачитат точно до деня на изтичане — нищо не се губи, задачите ти остават.',
-      '💎 Нов екран за Pro: избери план (Завинаги / Годишен / Месечен) с ясна цена и един бутон.',
-      '🎂 Имени дни: разбери кои от контактите ти празнуват днес — направо в известието.',
-      '🔔 По-ясни известия + ненатрапчива подкана за обновяване.',
-    ],
     'en': [
-      '🔒 Fairer Pro: your trial and promo codes now count exactly until their expiry day — nothing is lost, your tasks stay.',
-      '💎 New Pro screen: pick a plan (Lifetime / Yearly / Monthly) with a clear price and a single button.',
-      '🎂 Name days: see which of your contacts are celebrating today — right in the notification.',
-      '🔔 Clearer notifications + a non-intrusive update prompt.',
+      '📅 Calendar and name days are now free.',
+      '📄 Track up to 3 documents for free.',
+      '🎂 Expanded Bulgarian name-day calendar — more names and dates.',
+    ],
+    'bg': [
+      '📅 Календарът и имените дни вече са безплатни.',
+      '📄 До 3 документа безплатно.',
+      '🎂 Разширен именник — още имена и дати.',
+    ],
+    'de': [
+      '📅 Kalender und Namenstage sind jetzt kostenlos.',
+      '📄 Verfolge bis zu 3 Dokumente kostenlos.',
+      '🎂 Erweiterter Namenstags-Kalender — mehr Namen und Daten.',
+    ],
+    'fr': [
+      '📅 Le calendrier et les fêtes des prénoms sont désormais gratuits.',
+      '📄 Suis jusqu\'à 3 documents gratuitement.',
+      '🎂 Calendrier des fêtes des prénoms enrichi — plus de noms et de dates.',
+    ],
+    'it': [
+      '📅 Calendario e onomastici ora sono gratuiti.',
+      '📄 Tieni traccia di un massimo di 3 documenti gratis.',
+      '🎂 Calendario degli onomastici ampliato — più nomi e date.',
+    ],
+    'el': [
+      '📅 Το ημερολόγιο και οι ονομαστικές εορτές είναι πλέον δωρεάν.',
+      '📄 Παρακολούθησε έως 3 έγγραφα δωρεάν.',
+      '🎂 Εμπλουτισμένο ημερολόγιο ονομαστικών εορτών — περισσότερα ονόματα και ημερομηνίες.',
+    ],
+    'es': [
+      '📅 El calendario y las onomásticas ahora son gratis.',
+      '📄 Controla hasta 3 documentos gratis.',
+      '🎂 Calendario de onomásticas ampliado — más nombres y fechas.',
+    ],
+    'pt': [
+      '📅 O calendário e os dias do nome agora são grátis.',
+      '📄 Acompanha até 3 documentos grátis.',
+      '🎂 Calendário de dias do nome ampliado — mais nomes e datas.',
+    ],
+    'ru': [
+      '📅 Календарь и именины теперь бесплатны.',
+      '📄 Отслеживай до 3 документов бесплатно.',
+      '🎂 Расширенный календарь именин — больше имён и дат.',
+    ],
+    'tr': [
+      '📅 Takvim ve isim günleri artık ücretsiz.',
+      '📄 3 belgeye kadar ücretsiz takip et.',
+      '🎂 Genişletilmiş isim günü takvimi — daha fazla isim ve tarih.',
+    ],
+    'nl': [
+      '📅 Agenda en naamdagen zijn nu gratis.',
+      '📄 Volg tot 3 documenten gratis.',
+      '🎂 Uitgebreide naamdagkalender — meer namen en datums.',
+    ],
+    'uk': [
+      '📅 Календар та іменини тепер безкоштовні.',
+      '📄 Відстежуй до 3 документів безкоштовно.',
+      '🎂 Розширений календар іменин — більше імен і дат.',
+    ],
+    'ja': [
+      '📅 カレンダーと聖名祝日が無料になりました。',
+      '📄 最大3件のドキュメントを無料で管理。',
+      '🎂 ブルガリアの聖名祝日カレンダーを拡充 — 名前と日付が増えました。',
     ],
   };
 
@@ -49,6 +102,16 @@ class WhatsNewDialog {
     'it': 'Ottimo!', 'el': 'Τέλεια!', 'es': '¡Genial!', 'pt': 'Ótimo!',
     'ru': 'Отлично!', 'tr': 'Harika!', 'ja': '了解！',
   };
+
+  /// Отбелязва текущия билд като „видян" БЕЗ да показва диалога. Ползва се при
+  /// нова инсталация (welcome диалогът поема) — така „Какво ново" не се трупа
+  /// отгоре на welcome на един старт.
+  static Future<void> markSeen() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_prefKey, _build);
+    } catch (_) {}
+  }
 
   /// Показва диалога веднъж за текущия билд. Безопасно при повторно извикване.
   static Future<void> maybeShow(BuildContext context, String lang) async {
