@@ -30,6 +30,15 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   при `currentUser == null` (или `isAnonymous`) да отваря `LoginScreen` вместо диалога за име; след успешен вход
   да се връща към редакцията на името (името е „как те виждат в споделени списъци" → иска реален акаунт).
   Иво поиска за 1.0.71.
+- **RevenueCat да е вързан за акаунта: `Purchases.logIn(firebaseUid)` при вход / `Purchases.logOut()` при изход.**
+  Днес `Purchases.configure(PurchasesConfiguration(rcKey))` е БЕЗ appUserID и НЯМА `logIn`/`logOut`
+  (`pro_service.dart:241`) → RC ползва анонимен `$RCAnonymousID` (app-local, сменя се само при pm clear/деинсталация).
+  Следствие: Premium не следва акаунта между устройства/платформи; на едно устройство Play ownership-ът се
+  ресинква към всеки нов анонимен appUserID (затова pm clear не маха Pro). План 1.0.71: `Purchases.logIn(uid)`
+  в `auth_service` при вход (и при вече-логнат старт) + `Purchases.logOut()` при изход → Premium вързан за
+  Firebase uid (Android ↔ iOS ↔ web). ⚠️ **Миграция:** RevenueCat **слива** анонимния купувач към уид-а при
+  първия `logIn` (alias) — провери да няма загуба/двойно броене за съществуващите анонимни купувачи; тествай с
+  реален тестов акаунт. Това е и **основата за web по Pro статуса на акаунта** (виж web TODO горе). Иво поиска за 1.0.71.
 
 ## 2026-11-01 · PC — 1.0.70+80 free-tier v2 → ★ЖИВА в Play Production 100% (vc80)★ (клон free-tier-v2)
 Тествано на Note 9 + качено Internal → промотирано Production 100% след „ок" на Иво.
