@@ -36,7 +36,13 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   (manifest ✅ USE_FULL_SCREEN_INTENT + targetSdk 36). `play_upload.py` → Internal completed vc80 →
   `play_promote.py` → **Production completed 100% vc80** (Play API потвърди). Notes BG+EN = whats_new точките.
   5 WIP commit-а смачкани в 3 смислени (`2b20843` feat / `37e59a2` firestore rules ЕТАП 1 / `c220d1a` release);
-  `free-tier-v2` push-нат (БЕЗ merge в main). iOS 1.0.70 остава за Mac (чист Dart).
+  `free-tier-v2` push-нат. iOS 1.0.70 остава за Mac (чист Dart).
+- **Merge + промо миграция (след „ок"):** `free-tier-v2` → `main` **fast-forward**, push (main=`5362296`); отсега
+  работим от main. **Промо mirror миграция ИЗПЪЛНЕНА:** `promo_mirror_migrate.cjs --execute` → **23** огледални
+  `users/{uid}/promo/current` записани; повторен dry-run = **0** (идемпотентно). → `_restoreAccountPromo` вече не
+  чете цялата `promo_codes`.
+- **Следва (условия от Иво):** сайт pricing ЧАКА iOS 1.0.70 да мине App Store review; rules ЕТАП 2 ~2 седм. след
+  като ДВЕТЕ платформи са на 1.0.70 (+ провери дела стари версии в Play преди това); web 1.0.71 (Pro по акаунт).
 
 ## 2026-10-30 · PC — 1.0.70 free-tier: промо трупане + „Промокодът ти изтече" екран + analytics (клон free-tier-v2)
 Промо-код подобрения (т.1–3 от заявката на Иво; т.4=часовник отложена горе):
