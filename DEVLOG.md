@@ -22,6 +22,14 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   проверка на сваляне (`canAddTask` блокира само локално ДОБАВЯНЕ над лимита, `pro_service.dart:991-994`, не сваляне).
   Тоест Pro ползата от web се пренася на Free телефон през общия облак. План 1.0.71: web да смята Pro от акаунта
   (trial/промо/RevenueCat по uid), не безусловно true. Иво поиска за 1.0.71 (БЕЗ код промяна сега).
+- **Display name „Добави име" без акаунт не се запазва → вариант (1).** На production release, нелогнат
+  (`currentUser == null` — анонимният вход `signInAnonymously` се вика само on-demand в `ensureAuthedForLogging`,
+  НЕ при старт), тап „Запази" на име → `auth_service.updateDisplayName` връща false тихо (`if (user == null)
+  return false`, ред 73) → override не се сетва → редът остава „Добави име" (възпроизведено на Note 9, vc80;
+  НЕ е 1.0.70 регресия — отпреди). **План 1.0.71 (вариант 1):** тап на „Добави име" в `profile_screen._editName`
+  при `currentUser == null` (или `isAnonymous`) да отваря `LoginScreen` вместо диалога за име; след успешен вход
+  да се връща към редакцията на името (името е „как те виждат в споделени списъци" → иска реален акаунт).
+  Иво поиска за 1.0.71.
 
 ## 2026-11-01 · PC — 1.0.70+80 free-tier v2 → ★ЖИВА в Play Production 100% (vc80)★ (клон free-tier-v2)
 Тествано на Note 9 + качено Internal → промотирано Production 100% след „ок" на Иво.
