@@ -27,10 +27,44 @@ service cloud.firestore {
       }
     }
 
-    // Промо кодове - четене за всички, update за логнати
+    // ─────────────────────────── ПРОМО КОДОВЕ ─────────────────────────
+    // Етап 1 (1.0.70): затягане БЕЗ да чупи старите версии.
+    //  • GET по точен код → отворен (старите клиенти четат кода директно).
+    //  • LIST → само влязъл НЕанонимен (временно — restore в старите версии
+    //    прави `where('usedBy', arrayContains: uid)`; новите четат огледалото
+    //    `users/{uid}/promo/current`). Етап 2 ще го забрани.
+    //  • UPDATE → само влязъл НЕанонимен, изкупуване САМО първи път (uid още НЕ е
+    //    в usedBy — повторното „харчене" се блокира), само полетата, които
+    //    applyPromoCode реално пише (usedCount/usedBy/redemptions), usedCount += 1,
+    //    в рамките на maxUses, добавя САМО собствения uid (без промяна на maxUses/
+    //    срок/тип). Клиентът (вкл. 1.0.69) пише само при първо изкупуване —
+    //    повторният опит минава през reactivation пътя БЕЗ запис.
+    //  • CREATE/DELETE → забранени (само от конзола/админ).
     match /promo_codes/{code} {
-      allow read: if true;
-      allow update: if request.auth != null;
+      function nonAnon() {
+        return request.auth != null
+            && request.auth.token.firebase.sign_in_provider != 'anonymous';
+      }
+
+      allow get: if true;
+      allow list: if nonAnon();
+
+      allow update: if nonAnon()
+        && !(request.auth.uid in resource.data.get('usedBy', []))
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['usedCount', 'usedBy', 'redemptions'])
+        && request.resource.data.usedCount == resource.data.get('usedCount', 0) + 1
+        && (!('maxUses' in resource.data)
+            || resource.data.maxUses == 0
+            || request.resource.data.usedCount <= resource.data.maxUses)
+        && (request.auth.uid in request.resource.data.usedBy)
+        && request.resource.data.usedBy.toSet()
+             .difference(resource.data.get('usedBy', []).toSet())
+             .hasOnly([request.auth.uid])
+        && resource.data.get('usedBy', []).toSet()
+             .difference(request.resource.data.usedBy.toSet()).size() == 0;
+
+      allow create, delete: if false;
     }
 
     // ─────────── ОФЕРТИ ЗА ПОДНОВЯВАНЕ (Идея 1 — монетизация) ──────────
