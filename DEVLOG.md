@@ -20,10 +20,18 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   (app-ът вече дава собствен 14-дн trial → без двоен).
 - ⚠️ **ASC API капан:** GET-овете на свежо-създадени ресурси флакат силно (equalizations/localizations връщат
   0 после 174/1 при retry) — прави retry. whatsNew в ASC **НЕ приема емоджи** (409 INVALID_CHARACTERS).
-- ⏳ **1.0.70 review — НЕЗАВЪРШЕНО:** версия 1.0.70 създадена (PREPARE_FOR_SUBMISSION, id 6b76e89a) + whatsNew
-  (en-US, EN+BG заедно, БЕЗ емоджи — Taskify листингът е само en-US), export compliance ОК, НО **build 80 attach
-  през API НЕ хваща** (PATCH relationship + inline PATCH → 200/204 но build остава None; reviewSubmissionItem →
-  409 „cannot be reviewed"). → Финалът (attach build 80 + Submit) да се направи в **ASC web UI** (2 клика).
+- ✅ **1.0.70 (build 80) ПОДАДЕНА за review = WAITING_FOR_REVIEW** (ver id 6b76e89a, rs id b710c0af, submitted
+  17:28). whatsNew en-US (EN+BG заедно, БЕЗ емоджи — Taskify листингът е само en-US; ASC отхвърля емоджи).
+  ★ИСТИНСКИЯТ блокаж беше **age rating**, не build-ът★: Apple премести age rating на **app-level**
+  (`/v1/appInfos/{id}/ageRatingDeclaration`, НЕ на appStoreVersion → там 404). Новите полета **`socialMedia`
+  + `socialMediaAgeRestricted` бяха неотговорени (None)** → „You must respond to the required age ratings
+  questions". ФИКС: PATCH `ageRatingDeclaration` на **редактируемата** appInfo (`socialMedia=False,
+  socialMediaAgeRestricted=False`; `userGeneratedContent` остава False — споделените списъци са частни,
+  само-по-покана между познати, без публичен профил/чат → не е публично UGC по Guideline 1.2). Живата
+  appInfo има 2-ра декларация — „not editable", не се пипа. ⚠️ Навици ги беше отговорил (и двете False) при
+  подаването на 30.10 → затова Навици мина, а Taskify блокира. ⚠️ ASC GET-овете флакаха цяло време
+  (appInfos/version връщат 0/None после данни при retry) — това заблуди, че build-ът не се закача (реално се
+  закачаше). ⚠️ Subs цени от 04.11 (виж по-долу); реклама=advertising:True.
 
 ## TODO → 1.0.71 (отложено от 1.0.70)
 - **Paywall: заглавията „Yearly"/„Monthly" се чупят на 2 реда („Yearl y") при голям шрифт (Dynamic Type).**
