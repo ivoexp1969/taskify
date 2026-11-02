@@ -6,6 +6,25 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-11-02 · Mac — iOS цени изравнени с Android/сайт + махнат intro trial (ASC API)
+Цените в App Store не съвпадаха с Android/сайта (Lifetime 22,99 / Yearly 17,99 / Monthly 1,99 € срещу
+11,99 / 9,49 / 1,19 €). Коригирано през ASC API (ключ R342BR6F85), база територия **DEU**:
+- **Lifetime** (IAP `premium_lifetime`): нов `inAppPurchasePriceSchedules` с `baseTerritory=DEU` + 1 manualPrice
+  (11,99 €), `startDate=null` → **веднага**; Apple **auto-изравни** всички ~175 територии (US $9.99, GB £9.99, TR 499.99₺).
+- **Monthly/Yearly** (subs): `POST /v1/subscriptionPrices` база DEU (1,19 / 9,49 €). ⚠️ Apple **забранява „днес"**
+  за subs — иска бъдеща дата ≥ +2 дни → **startDate=2026-11-04**. ⚠️⚠️ ASC **НЕ auto-изравнява subs** (за разлика
+  от IAP) → изравних **ръчно per територия**: fetch `subscriptionPricePoints/{base}/equalizations` (174 терит.) →
+  `POST subscriptionPrices` за всяка (OK=174+174+DEU=175 всяка). Проверено: US $0.99/$7.99, GB £0.99/£7.99,
+  TR 49.99/399.99₺, BG(евро)=целите.
+- **Махнат FREE_TRIAL (2 седмици) intro offer** от monthly+yearly — всички **175+175 DELETE, 0 останали**
+  (app-ът вече дава собствен 14-дн trial → без двоен).
+- ⚠️ **ASC API капан:** GET-овете на свежо-създадени ресурси флакат силно (equalizations/localizations връщат
+  0 после 174/1 при retry) — прави retry. whatsNew в ASC **НЕ приема емоджи** (409 INVALID_CHARACTERS).
+- ⏳ **1.0.70 review — НЕЗАВЪРШЕНО:** версия 1.0.70 създадена (PREPARE_FOR_SUBMISSION, id 6b76e89a) + whatsNew
+  (en-US, EN+BG заедно, БЕЗ емоджи — Taskify листингът е само en-US), export compliance ОК, НО **build 80 attach
+  през API НЕ хваща** (PATCH relationship + inline PATCH → 200/204 но build остава None; reviewSubmissionItem →
+  409 „cannot be reviewed"). → Финалът (attach build 80 + Submit) да се направи в **ASC web UI** (2 клика).
+
 ## TODO → 1.0.71 (отложено от 1.0.70)
 - **Paywall: заглавията „Yearly"/„Monthly" се чупят на 2 реда („Yearl y") при голям шрифт (Dynamic Type).**
   В `lib/screens/paywall/paywall_screen.dart` (`_PackageCard` build, ~ред 820-851) заглавието е `Flexible`
