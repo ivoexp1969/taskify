@@ -47,6 +47,22 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
   (lifetime/yearly/monthly). Цел: къде се губят (показване по време на trial? избор, но без start? lifetime vs
   subs?). Иво поиска; изпълни след 15.11.2026.
 
+## 2026-11-02 · Mac — iOS 1.0.70 (build 80) → TestFlight (вътрешни) + App Privacy verified
+iOS настигна Android (Play vc80 LIVE). `git reset --hard origin/main` (06ae904, pubspec 1.0.70+80; deployment
+target 15.0 вече в main → отхвърлих стара локална промяна). **iOS 1.0.69 ПРОПУСНАТ.** clean→pub get→pod install→
+`flutter build ipa --release --no-tree-shake-icons` → Taskify.ipa 1.0.70/80 (свеж) → altool **TestFlight UPLOAD
+SUCCEEDED** (build 80, Delivery 492e2dc6). ASC покупки: premium_lifetime (Non-Consumable) + monthly + yearly =
+и трите **APPROVED**. **App Privacy (fastlane download, com.ivoexp.taskify):** етикетът вече пълен за кода
+(Firebase Analytics е от Фаза 1; Taskify ползва **IDFA+ATT заради AdMob** → Device ID/Coarse Location tracking=yes;
+контакти on-device → не се събират → правилно липсват; `setUserId` няма) → **1.0.70 не добавя нов сбор → нищо за
+сливане/качване**. „Какво ново" (en-GB=BG, en-US=EN): календар/имена безплатни, до 3 документа, разширен именник.
+НЕ подадено за review — чака тест от TestFlight + „ок".
+
+**★КАПАН (ЛОКАЛНА настройка, за следващия iOS билд на Mac): `pod install` гръмна `Could not find 'ffi' (>= 1.15.0)`.**
+Причина: инсталиран fastlane през `brew` (за App Privacy) вдигна **brew ruby 4.0.9** и счупи gem средата на CocoaPods.
+**ФИКС (локален, НЕ пипа repo):** `/opt/homebrew/opt/ruby/bin/gem install ffi` → попада в `/opt/homebrew/lib/ruby/gems/4.0.0`
+(в GEM_PATH на cocoapods) → `pod install` минава. Алтернатива: `brew reinstall cocoapods`. (ffi-1.17.4 вече на тази машина.)
+
 ## 2026-11-01 · PC — Диагностика: `premium_lifetime` „PRODUCT_NOT_FOUND" е БЕЗОБИДЕН (vc80 verified)
 Разследване на `[Purchases] UnfetchedProduct{productId='premium_lifetime', productType='subs'} → PRODUCT_NOT_FOUND`
 в production logcat. **Заключение: НЕ е бъг — безобиден шум.** RevenueCat пробва продукта първо като **`subs`**
