@@ -7,6 +7,13 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 ---
 
 ## TODO → 1.0.71 (отложено от 1.0.70)
+- **Paywall: заглавията „Yearly"/„Monthly" се чупят на 2 реда („Yearl y") при голям шрифт (Dynamic Type).**
+  В `lib/screens/paywall/paywall_screen.dart` (`_PackageCard` build, ~ред 820-851) заглавието е `Flexible`
+  `Text` (fontSize 18 bold, без `maxLines`) в **един `Row` заедно с trial-бейджа** → при едър системен шрифт
+  наличната ширина се дели, title-ът се свива и се пренася mid-word. ФИКС: обвий title `Text` във
+  `FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft)` (свива, не пренася) + `maxLines: 1,
+  softWrap: false`; или смени title+badge `Row` → `Wrap` (бейджът пада отдолу вместо да стиска заглавието).
+  (Открито на Mac, 2026-11-02, при преглед на paywall за 1.0.70.)
 - **Промо-код изтичане = сървърно, не по часовника на телефона.** Сега изтичането се проверява клиентски
   (`pro_service.dart` `applyPromoCode` → `DateTime.now().isAfter(expiresAt)`), а деплойнатите Firestore rules
   НЕ проверяват `expiresAt` при redeem → назад-наместен часовник може да заобиколи изтичането, а и целият
