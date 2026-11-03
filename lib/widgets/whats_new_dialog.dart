@@ -16,77 +16,64 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Нови инсталации НЕ го виждат (те виждат welcome диалога).
 class WhatsNewDialog {
   /// Билдът, за който са точките по-долу (= `pubspec.yaml` build number).
-  /// ★1.0.70 → versionCode 80★.
-  static const int _build = 80;
+  /// ★1.0.71 → versionCode 81★.
+  static const int _build = 81;
 
   static const String _prefKey = 'whats_new_seen_build';
 
-  /// Точките за текущата версия (1.0.70), ×13 езика.
+  /// Точките за текущата версия (1.0.71), ×13 езика.
   static const Map<String, List<String>> _items = {
     'en': [
-      '📅 Calendar and name days are now free.',
-      '📄 Track up to 3 documents for free.',
-      '🎂 Expanded Bulgarian name-day calendar — more names and dates.',
+      '🆕 A fresh start screen helps you add your first task faster.',
+      '🔒 New setting: Anonymous statistics (you can turn it off anytime).',
     ],
     'bg': [
-      '📅 Календарът и имените дни вече са безплатни.',
-      '📄 До 3 документа безплатно.',
-      '🎂 Разширен именник — още имена и дати.',
+      '🆕 Нов начален екран за по-бързо създаване на първата задача.',
+      '🔒 Нова настройка „Анонимна статистика" (може да се изключи по всяко време).',
     ],
     'de': [
-      '📅 Kalender und Namenstage sind jetzt kostenlos.',
-      '📄 Verfolge bis zu 3 Dokumente kostenlos.',
-      '🎂 Erweiterter Namenstags-Kalender — mehr Namen und Daten.',
+      '🆕 Neuer Startbildschirm — füge deine erste Aufgabe schneller hinzu.',
+      '🔒 Neue Einstellung: Anonyme Statistik (jederzeit abschaltbar).',
     ],
     'fr': [
-      '📅 Le calendrier et les fêtes des prénoms sont désormais gratuits.',
-      '📄 Suis jusqu\'à 3 documents gratuitement.',
-      '🎂 Calendrier des fêtes des prénoms enrichi — plus de noms et de dates.',
+      '🆕 Nouvel écran d\'accueil pour ajouter ta première tâche plus vite.',
+      '🔒 Nouveau réglage : statistiques anonymes (désactivable à tout moment).',
     ],
     'it': [
-      '📅 Calendario e onomastici ora sono gratuiti.',
-      '📄 Tieni traccia di un massimo di 3 documenti gratis.',
-      '🎂 Calendario degli onomastici ampliato — più nomi e date.',
+      '🆕 Nuova schermata iniziale per aggiungere la prima attività più in fretta.',
+      '🔒 Nuova impostazione: statistiche anonime (disattivabile quando vuoi).',
     ],
     'el': [
-      '📅 Το ημερολόγιο και οι ονομαστικές εορτές είναι πλέον δωρεάν.',
-      '📄 Παρακολούθησε έως 3 έγγραφα δωρεάν.',
-      '🎂 Εμπλουτισμένο ημερολόγιο ονομαστικών εορτών — περισσότερα ονόματα και ημερομηνίες.',
+      '🆕 Νέα αρχική οθόνη για να προσθέσεις πιο γρήγορα την πρώτη σου εργασία.',
+      '🔒 Νέα ρύθμιση: Ανώνυμα στατιστικά (μπορείς να τα απενεργοποιήσεις όποτε θέλεις).',
     ],
     'es': [
-      '📅 El calendario y las onomásticas ahora son gratis.',
-      '📄 Controla hasta 3 documentos gratis.',
-      '🎂 Calendario de onomásticas ampliado — más nombres y fechas.',
+      '🆕 Nueva pantalla de inicio para añadir tu primera tarea más rápido.',
+      '🔒 Nuevo ajuste: estadísticas anónimas (puedes desactivarlo cuando quieras).',
     ],
     'pt': [
-      '📅 O calendário e os dias do nome agora são grátis.',
-      '📄 Acompanha até 3 documentos grátis.',
-      '🎂 Calendário de dias do nome ampliado — mais nomes e datas.',
+      '🆕 Nova tela inicial para adicionar a primeira tarefa mais rápido.',
+      '🔒 Nova configuração: estatísticas anônimas (pode desativar quando quiser).',
     ],
     'ru': [
-      '📅 Календарь и именины теперь бесплатны.',
-      '📄 Отслеживай до 3 документов бесплатно.',
-      '🎂 Расширенный календарь именин — больше имён и дат.',
+      '🆕 Новый начальный экран — добавь первую задачу быстрее.',
+      '🔒 Новая настройка: анонимная статистика (можно отключить в любой момент).',
     ],
     'tr': [
-      '📅 Takvim ve isim günleri artık ücretsiz.',
-      '📄 3 belgeye kadar ücretsiz takip et.',
-      '🎂 Genişletilmiş isim günü takvimi — daha fazla isim ve tarih.',
+      '🆕 İlk görevini daha hızlı eklemen için yeni başlangıç ekranı.',
+      '🔒 Yeni ayar: Anonim istatistikler (istediğin zaman kapatabilirsin).',
     ],
     'nl': [
-      '📅 Agenda en naamdagen zijn nu gratis.',
-      '📄 Volg tot 3 documenten gratis.',
-      '🎂 Uitgebreide naamdagkalender — meer namen en datums.',
+      '🆕 Nieuw startscherm om je eerste taak sneller toe te voegen.',
+      '🔒 Nieuwe instelling: anonieme statistieken (altijd uit te schakelen).',
     ],
     'uk': [
-      '📅 Календар та іменини тепер безкоштовні.',
-      '📄 Відстежуй до 3 документів безкоштовно.',
-      '🎂 Розширений календар іменин — більше імен і дат.',
+      '🆕 Новий початковий екран — додай перше завдання швидше.',
+      '🔒 Нове налаштування: анонімна статистика (можна вимкнути будь-коли).',
     ],
     'ja': [
-      '📅 カレンダーと聖名祝日が無料になりました。',
-      '📄 最大3件のドキュメントを無料で管理。',
-      '🎂 ブルガリアの聖名祝日カレンダーを拡充 — 名前と日付が増えました。',
+      '🆕 新しいホーム画面で最初のタスクをすばやく追加できます。',
+      '🔒 新しい設定：匿名の統計（いつでもオフにできます）。',
     ],
   };
 
