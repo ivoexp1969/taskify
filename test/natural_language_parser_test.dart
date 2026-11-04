@@ -125,6 +125,47 @@ void main() {
     });
   });
 
+  group('Отрицателни — числа, които НЕ са дати', () {
+    test('„Плати 10.05 лв за паркинг" → null (валута)', () {
+      expect(NaturalLanguageParser.parse('Плати 10.05 лв за паркинг', 'bg'), isNull);
+    });
+    test('„Купи 2.5 кг ябълки" → null (мярка)', () {
+      expect(NaturalLanguageParser.parse('Купи 2.5 кг ябълки', 'bg'), isNull);
+    });
+    test('„Резултат 3-1" → null (тире не е дата)', () {
+      expect(NaturalLanguageParser.parse('Резултат 3-1', 'bg'), isNull);
+    });
+    test('„Версия 1.0.70" → null (версия)', () {
+      expect(NaturalLanguageParser.parse('Версия 1.0.70', 'bg'), isNull);
+    });
+    test('„Телефон 0888 123 456" → null', () {
+      expect(NaturalLanguageParser.parse('Телефон 0888 123 456', 'bg'), isNull);
+    });
+    test('„Отстъпка 20%" → null', () {
+      expect(NaturalLanguageParser.parse('Отстъпка 20%', 'bg'), isNull);
+    });
+    test('„в 9 клас" → null (не е час в края)', () {
+      expect(NaturalLanguageParser.parse('запиши в 9 клас', 'bg'), isNull);
+    });
+
+    // „Стая 12.12" — по правилото (числова дата, щом няма валута/мярка/% наблизо)
+    // ТОВА се тълкува като дата. Документирано компромисно поведение.
+    test('„Стая 12.12" → дата (интенционално, виж доклада)', () {
+      expect(NaturalLanguageParser.parse('Стая 12.12', 'bg'), isNotNull);
+    });
+  });
+
+  group('Позитивни с предлог (проверка след стесняването)', () {
+    test('„на 12.12" → 12 декември', () {
+      expect(NaturalLanguageParser.parse('плати на 12.12', 'bg')?.date, _nextDateOf(12, 12));
+    });
+    test('„на 3 януари в 9" (час в края) → 3 ян 09:00', () {
+      final r = NaturalLanguageParser.parse('на 3 януари в 9', 'bg');
+      expect(r?.date, _nextDateOf(3, 1));
+      expect(r?.time, const TimeOfDay(hour: 9, minute: 0));
+    });
+  });
+
   group('Без дата → null (case 3: пазаруване не бива да става „утре")', () {
     test('„Да купя хляб, мляко и яйца" → null', () {
       final r = NaturalLanguageParser.parse('Да купя хляб, мляко и яйца', 'bg');

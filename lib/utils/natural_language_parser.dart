@@ -155,17 +155,18 @@ class NaturalLanguageParser {
         return TimeOfDay(hour: h, minute: m);
       }
     }
-    // 3) hour + unit suffix: „17ч", „9 часа", „9h", „9 uhr", „9時"
-    final short = RegExp(r'\b(\d{1,2})\s*(?:часа?|ч|uhr|h|saat|時)\b').firstMatch(lower);
+    // 3) hour + unit suffix: „17ч", „9 часа", „9h", „9 uhr", „9時".
+    //    Край чрез `(?!\p{L})` — ASCII `\b` не хваща след кирилско „ч".
+    final short = RegExp(r'\b(\d{1,2})\s*(?:часа?|ч|uhr|h|saat|時)(?!\p{L})', unicode: true).firstMatch(lower);
     if (short != null) {
       final h = int.tryParse(short.group(1)!);
       if (h != null && h <= 23) return TimeOfDay(hour: h, minute: 0);
     }
-    // 4) bare hour after preposition: „в 9", „at 9", „@9", „saat 9", „às 9"
-    //    (guarded so it never eats a numeric date like „12.12" or a „12:30".
-    //    `\b` is avoided before Cyrillic, where ASCII word-boundaries fail.)
+    // 4) bare hour after preposition — ТОЛКОВА в края на текста: „…в 9", „…at 9".
+    //    Иначе „в 9 клас"/„в 2 реда" биха станали часове. `\b` се избягва пред
+    //    кирилица (ASCII word-boundary не работи там).
     final prep = RegExp(
-      r'(?:^|[\s@])(?:в|at|à|às|um|alle|saat|στις)\s+(\d{1,2})(?![:.\d時])',
+      r'(?:^|[\s@])(?:в|at|à|às|um|alle|saat|στις)\s+(\d{1,2})\s*[.!?]?\s*$',
     ).firstMatch(lower);
     if (prep != null) {
       final h = int.tryParse(prep.group(1)!);
@@ -249,13 +250,20 @@ class NaturalLanguageParser {
       }
     }
 
-    // 3) Numeric day-first: „12.12", „12.12.2026", „12/12", „3-1"
-    final num = RegExp(r'\b(\d{1,2})[./-](\d{1,2})(?:[./-](\d{2,4}))?\b').firstMatch(lower);
+    // 3) Numeric day-first: „12.12", „12.12.2026", „12/12". Разделител само „."
+    //    или „/" — НЕ „-" (бърка се с резултати/диапазони: „3-1"). Отхвърля се,
+    //    ако веднага след числото има валута/мярка/процент („10.05 лв", „2.5 кг",
+    //    „20%") или ако пред него стои „версия/version/v" („Версия 1.0.70").
+    final num = RegExp(
+      r'\b(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?\b(?!\s*(?:кг|kg|мл|ml|см|cm|км|km|лв|лев|eur|usd|€|\$|%))',
+    ).firstMatch(lower);
     if (num != null) {
+      final before = lower.substring(0, num.start);
+      final isVersion = RegExp(r'(?:верси\w*|version|\bv)\s*$').hasMatch(before);
       final day = int.tryParse(num.group(1)!);
       final mo = int.tryParse(num.group(2)!);
       final yRaw = num.group(3) != null ? int.tryParse(num.group(3)!) : null;
-      if (day != null && mo != null && mo >= 1 && mo <= 12 && day >= 1 && day <= 31) {
+      if (!isVersion && day != null && mo != null && mo >= 1 && mo <= 12 && day >= 1 && day <= 31) {
         if (yRaw != null) {
           final year = yRaw < 100 ? 2000 + yRaw : yRaw;
           return DateTime(year, mo, day);
