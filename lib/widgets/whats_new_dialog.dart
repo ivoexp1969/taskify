@@ -25,54 +25,67 @@ class WhatsNewDialog {
   static const Map<String, List<String>> _items = {
     'en': [
       '🆕 A fresh start screen helps you add your first task faster.',
+      '📅 Smarter date recognition when adding a task (e.g. "12 December", "12.12").',
       '🔒 New setting: Anonymous statistics (you can turn it off anytime).',
     ],
     'bg': [
       '🆕 Нов начален екран за по-бързо създаване на първата задача.',
+      '📅 По-умно разпознаване на датата при добавяне (напр. „12 декември", „12.12").',
       '🔒 Нова настройка „Анонимна статистика" (може да се изключи по всяко време).',
     ],
     'de': [
       '🆕 Neuer Startbildschirm — füge deine erste Aufgabe schneller hinzu.',
+      '📅 Bessere Datumserkennung beim Hinzufügen (z. B. „12. Dezember", „12.12").',
       '🔒 Neue Einstellung: Anonyme Statistik (jederzeit abschaltbar).',
     ],
     'fr': [
       '🆕 Nouvel écran d\'accueil pour ajouter ta première tâche plus vite.',
+      '📅 Meilleure reconnaissance des dates à l\'ajout (ex. « 12 décembre », « 12.12 »).',
       '🔒 Nouveau réglage : statistiques anonymes (désactivable à tout moment).',
     ],
     'it': [
       '🆕 Nuova schermata iniziale per aggiungere la prima attività più in fretta.',
+      '📅 Riconoscimento delle date migliorato (es. "12 dicembre", "12.12").',
       '🔒 Nuova impostazione: statistiche anonime (disattivabile quando vuoi).',
     ],
     'el': [
       '🆕 Νέα αρχική οθόνη για να προσθέσεις πιο γρήγορα την πρώτη σου εργασία.',
+      '📅 Εξυπνότερη αναγνώριση ημερομηνίας κατά την προσθήκη (π.χ. «12 Δεκεμβρίου», «12.12»).',
       '🔒 Νέα ρύθμιση: Ανώνυμα στατιστικά (μπορείς να τα απενεργοποιήσεις όποτε θέλεις).',
     ],
     'es': [
       '🆕 Nueva pantalla de inicio para añadir tu primera tarea más rápido.',
+      '📅 Mejor reconocimiento de fechas al añadir (p. ej. "12 de diciembre", "12.12").',
       '🔒 Nuevo ajuste: estadísticas anónimas (puedes desactivarlo cuando quieras).',
     ],
     'pt': [
       '🆕 Nova tela inicial para adicionar a primeira tarefa mais rápido.',
+      '📅 Reconhecimento de datas mais inteligente ao adicionar (ex.: "12 de dezembro", "12.12").',
       '🔒 Nova configuração: estatísticas anônimas (pode desativar quando quiser).',
     ],
     'ru': [
       '🆕 Новый начальный экран — добавь первую задачу быстрее.',
+      '📅 Умное распознавание даты при добавлении (напр. «12 декабря», «12.12»).',
       '🔒 Новая настройка: анонимная статистика (можно отключить в любой момент).',
     ],
     'tr': [
       '🆕 İlk görevini daha hızlı eklemen için yeni başlangıç ekranı.',
+      '📅 Görev eklerken daha akıllı tarih tanıma (örn. "12 Aralık", "12.12").',
       '🔒 Yeni ayar: Anonim istatistikler (istediğin zaman kapatabilirsin).',
     ],
     'nl': [
       '🆕 Nieuw startscherm om je eerste taak sneller toe te voegen.',
+      '📅 Slimmere datumherkenning bij het toevoegen (bijv. "12 december", "12.12").',
       '🔒 Nieuwe instelling: anonieme statistieken (altijd uit te schakelen).',
     ],
     'uk': [
       '🆕 Новий початковий екран — додай перше завдання швидше.',
+      '📅 Розумніше розпізнавання дати під час додавання (напр. «12 грудня», «12.12»).',
       '🔒 Нове налаштування: анонімна статистика (можна вимкнути будь-коли).',
     ],
     'ja': [
       '🆕 新しいホーム画面で最初のタスクをすばやく追加できます。',
+      '📅 タスク追加時の日付認識が賢くなりました（例：「12月12日」「12.12」）。',
       '🔒 新しい設定：匿名の統計（いつでもオフにできます）。',
     ],
   };
