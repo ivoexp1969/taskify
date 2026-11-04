@@ -16,22 +16,8 @@ class NaturalLanguageParser {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    // ── Time detection (e.g. 15:30 / 15ч / 9h) ──
-    TimeOfDay? detectedTime;
-    final colonTime = RegExp(r'\b(\d{1,2}):(\d{2})\b').firstMatch(lower);
-    final shortTime = RegExp(r'\b(\d{1,2})\s*(?:часа?|ч|uhr|h)\b').firstMatch(lower);
-    if (colonTime != null) {
-      final h = int.tryParse(colonTime.group(1)!);
-      final m = int.tryParse(colonTime.group(2)!);
-      if (h != null && m != null && h <= 23 && m <= 59) {
-        detectedTime = TimeOfDay(hour: h, minute: m);
-      }
-    } else if (shortTime != null) {
-      final h = int.tryParse(shortTime.group(1)!);
-      if (h != null && h <= 23) {
-        detectedTime = TimeOfDay(hour: h, minute: 0);
-      }
-    }
+    // ── Time detection (15:30 / 5pm / 15ч / 9h / „в 9" / „at 9") ──
+    final detectedTime = _detectTime(lower);
 
     // ── Keyword maps ──
 
@@ -39,6 +25,7 @@ class NaturalLanguageParser {
     if (_matches(lower, const [
       'днес', 'today', 'heute', "aujourd'hui", 'oggi',
       'σήμερα', 'hoy', 'hoje', 'сегодня', 'bugün',
+      'vandaag', 'сьогодні',
     ])) {
       return NlpResult(date: today, time: detectedTime, label: _label(today, lang));
     }
@@ -125,12 +112,241 @@ class NaturalLanguageParser {
       }
     }
 
+    // ── Relative: „след N дни/седмици" / „in N days/weeks" (всички езици) ──
+    final rel = _detectRelative(lower, today);
+    if (rel != null) {
+      return NlpResult(date: rel, time: detectedTime, label: _label(rel, lang));
+    }
+
+    // ── Absolute date: „12 декември", „12 дек", „Dec 12", „12.12", „3/1" ──
+    final abs = _detectAbsoluteDate(lower, today);
+    if (abs != null) {
+      return NlpResult(date: abs, time: detectedTime, label: _label(abs, lang));
+    }
+
     // Time only → today
     if (detectedTime != null) {
       return NlpResult(date: today, time: detectedTime, label: _label(today, lang));
     }
 
     return null;
+  }
+
+  // ── Time ─────────────────────────────────────────────────────────────────
+  static TimeOfDay? _detectTime(String lower) {
+    // 1) 12-hour am/pm: „5pm", „5:30 pm", „12am"
+    final ampm = RegExp(r'\b(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)').firstMatch(lower);
+    if (ampm != null) {
+      var h = int.tryParse(ampm.group(1)!) ?? -1;
+      final m = ampm.group(2) != null ? (int.tryParse(ampm.group(2)!) ?? 0) : 0;
+      final pm = ampm.group(3)!.startsWith('p');
+      if (h >= 1 && h <= 12 && m <= 59) {
+        if (pm && h != 12) h += 12;
+        if (!pm && h == 12) h = 0;
+        return TimeOfDay(hour: h, minute: m);
+      }
+    }
+    // 2) 24-hour colon: „15:30"
+    final colon = RegExp(r'\b(\d{1,2}):(\d{2})\b').firstMatch(lower);
+    if (colon != null) {
+      final h = int.tryParse(colon.group(1)!);
+      final m = int.tryParse(colon.group(2)!);
+      if (h != null && m != null && h <= 23 && m <= 59) {
+        return TimeOfDay(hour: h, minute: m);
+      }
+    }
+    // 3) hour + unit suffix: „17ч", „9 часа", „9h", „9 uhr", „9時"
+    final short = RegExp(r'\b(\d{1,2})\s*(?:часа?|ч|uhr|h|saat|時)\b').firstMatch(lower);
+    if (short != null) {
+      final h = int.tryParse(short.group(1)!);
+      if (h != null && h <= 23) return TimeOfDay(hour: h, minute: 0);
+    }
+    // 4) bare hour after preposition: „в 9", „at 9", „@9", „saat 9", „às 9"
+    //    (guarded so it never eats a numeric date like „12.12" or a „12:30".
+    //    `\b` is avoided before Cyrillic, where ASCII word-boundaries fail.)
+    final prep = RegExp(
+      r'(?:^|[\s@])(?:в|at|à|às|um|alle|saat|στις)\s+(\d{1,2})(?![:.\d時])',
+    ).firstMatch(lower);
+    if (prep != null) {
+      final h = int.tryParse(prep.group(1)!);
+      if (h != null && h <= 23) return TimeOfDay(hour: h, minute: 0);
+    }
+    return null;
+  }
+
+  // ── Relative „in N days / weeks" ───────────────────────────────────────────
+  // The marker, the number and the unit must appear together, so a bare „2 дни"
+  // or a day-of-month is never mistaken for a relative offset. `\b` is avoided
+  // before Cyrillic/Greek (ASCII word-boundaries fail there).
+  static const _relPrefix =
+      r'(?:след|in|after|dans|tra|fra|σε|en|dentro de|em|daqui a|over|через|у)';
+  static const _dayWords =
+      r'(?:дни|дена|ден|days?|tage?n?|jours?|giorni?|giorno|μέρες|μέρα|ημέρες|ημέρα|d[ií]as?|dag(?:en)?|дн(?:я|ей|і|ів)?|gün)';
+  static const _weekWords =
+      r'(?:седмиц[аи]|weeks?|wochen?|semaines?|settiman[ae]|εβδομάδ[εα]ς?|semanas?|wek(?:en)?|недел[ьия]|тижн(?:і|ів)|hafta)';
+
+  static DateTime? _detectRelative(String lower, DateTime today) {
+    // Prefixed forms: „след 2 дни", „in 3 weeks", „через 5 дней".
+    final pd = RegExp('$_relPrefix\\s+(\\d{1,2})\\s*$_dayWords').firstMatch(lower);
+    if (pd != null) {
+      final n = int.tryParse(pd.group(1)!);
+      if (n != null && n >= 1 && n <= 366) return today.add(Duration(days: n));
+    }
+    final pw = RegExp('$_relPrefix\\s+(\\d{1,2})\\s*$_weekWords').firstMatch(lower);
+    if (pw != null) {
+      final n = int.tryParse(pw.group(1)!);
+      if (n != null && n >= 1 && n <= 52) return today.add(Duration(days: n * 7));
+    }
+    // Turkish suffix form: „2 gün sonra", „3 hafta sonra".
+    final td = RegExp(r'(\d{1,2})\s*gün\s+sonra').firstMatch(lower);
+    if (td != null) {
+      final n = int.tryParse(td.group(1)!);
+      if (n != null && n >= 1 && n <= 366) return today.add(Duration(days: n));
+    }
+    final tw = RegExp(r'(\d{1,2})\s*hafta\s+sonra').firstMatch(lower);
+    if (tw != null) {
+      final n = int.tryParse(tw.group(1)!);
+      if (n != null && n >= 1 && n <= 52) return today.add(Duration(days: n * 7));
+    }
+    return null;
+  }
+
+  // ── Absolute date (day + month name, or numeric) ───────────────────────────
+  static DateTime? _detectAbsoluteDate(String lower, DateTime today) {
+    // 1) Japanese: „12月12日" / „12月"
+    final ja = RegExp(r'(\d{1,2})\s*月\s*(?:(\d{1,2})\s*日)?').firstMatch(lower);
+    if (ja != null) {
+      final mo = int.tryParse(ja.group(1)!);
+      final day = ja.group(2) != null ? int.tryParse(ja.group(2)!) : 1;
+      if (mo != null && day != null) {
+        final dt = _makeFuture(today, day, mo);
+        if (dt != null) return dt;
+      }
+    }
+
+    // 2) Month-name forms (both orders) for the current language set.
+    final alt = _monthAlt();
+    if (alt.isNotEmpty) {
+      // day + month: „12 декември", „12 дек.", „3 януари"
+      final dm = RegExp('(\\d{1,2})\\s*\\.?\\s*($alt)').firstMatch(lower);
+      if (dm != null) {
+        final day = int.tryParse(dm.group(1)!);
+        final mo = _monthOf(dm.group(2)!);
+        if (day != null && mo != null) {
+          final dt = _makeFuture(today, day, mo);
+          if (dt != null) return dt;
+        }
+      }
+      // month + day: „Dec 12", „декември 12"
+      final md = RegExp('($alt)\\.?\\s+(\\d{1,2})').firstMatch(lower);
+      if (md != null) {
+        final mo = _monthOf(md.group(1)!);
+        final day = int.tryParse(md.group(2)!);
+        if (day != null && mo != null) {
+          final dt = _makeFuture(today, day, mo);
+          if (dt != null) return dt;
+        }
+      }
+    }
+
+    // 3) Numeric day-first: „12.12", „12.12.2026", „12/12", „3-1"
+    final num = RegExp(r'\b(\d{1,2})[./-](\d{1,2})(?:[./-](\d{2,4}))?\b').firstMatch(lower);
+    if (num != null) {
+      final day = int.tryParse(num.group(1)!);
+      final mo = int.tryParse(num.group(2)!);
+      final yRaw = num.group(3) != null ? int.tryParse(num.group(3)!) : null;
+      if (day != null && mo != null && mo >= 1 && mo <= 12 && day >= 1 && day <= 31) {
+        if (yRaw != null) {
+          final year = yRaw < 100 ? 2000 + yRaw : yRaw;
+          return DateTime(year, mo, day);
+        }
+        final dt = _makeFuture(today, day, mo);
+        if (dt != null) return dt;
+      }
+    }
+    return null;
+  }
+
+  /// Builds a date for [day]/[month] in the current year; if that day is before
+  /// today, rolls to next year (so „12 декември" is always the next occurrence).
+  static DateTime? _makeFuture(DateTime today, int day, int month) {
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+    var candidate = DateTime(today.year, month, day);
+    // Guard against overflow (e.g. 31 of a 30-day month → next month).
+    if (candidate.month != month || candidate.day != day) return null;
+    if (candidate.isBefore(today)) {
+      candidate = DateTime(today.year + 1, month, day);
+    }
+    return candidate;
+  }
+
+  // ── Month-name tables (full + abbreviations + common inflections) ──────────
+  // Index 0 = January … 11 = December. Variants are lowercase.
+  static const Map<int, List<String>> _months = <int, List<String>>{
+    1: ['january', 'januari', 'januar', 'janvier', 'gennaio', 'enero', 'janeiro',
+        'январь', 'января', 'янв', 'ocak', 'січень', 'січня', 'ιανουάριος',
+        'ιανουαρίου', 'ιαν', 'януари', 'яну', 'ян', 'jan'],
+    2: ['february', 'februari', 'februar', 'février', 'fevrier', 'febbraio',
+        'febrero', 'fevereiro', 'февраль', 'февраля', 'фев', 'şubat', 'subat',
+        'лютий', 'лютого', 'φεβρουάριος', 'φεβρουαρίου', 'февруари', 'феб', 'feb',
+        'fév', 'fev'],
+    3: ['march', 'maart', 'märz', 'marz', 'mars', 'marzo', 'março', 'marco',
+        'март', 'марта', 'mart', 'березень', 'березня', 'μάρτιος', 'μαρτίου',
+        'мар', 'mär', 'mar'],
+    4: ['april', 'avril', 'aprile', 'abril', 'апрель', 'апреля', 'nisan',
+        'квітень', 'квітня', 'απρίλιος', 'απριλίου', 'април', 'апр', 'abr', 'apr'],
+    5: ['may', 'mei', 'mai', 'maggio', 'mayo', 'maio', 'май', 'мая', 'mayıs',
+        'mayis', 'травень', 'травня', 'μάιος', 'μαΐου', 'май', 'mag', 'maj'],
+    6: ['june', 'juni', 'juin', 'giugno', 'junio', 'junho', 'июнь', 'июня',
+        'haziran', 'червень', 'червня', 'ιούνιος', 'ιουνίου', 'юни', 'jun',
+        'giu', 'jui'],
+    7: ['july', 'juli', 'juillet', 'luglio', 'julio', 'julho', 'июль', 'июля',
+        'temmuz', 'липень', 'липня', 'ιούλιος', 'ιουλίου', 'юли', 'jul', 'lug'],
+    8: ['august', 'augustus', 'auguste', 'août', 'aout', 'agosto', 'август',
+        'августа', 'ağustos', 'agustos', 'серпень', 'серпня', 'αύγουστος',
+        'αυγούστου', 'авг', 'aug', 'aoû', 'ago', 'ağu'],
+    9: ['september', 'septembre', 'settembre', 'septiembre', 'setembro',
+        'сентябрь', 'сентября', 'eylül', 'eylul', 'вересень', 'вересня',
+        'σεπτέμβριος', 'σεπτεμβρίου', 'септември', 'септ', 'сеп', 'set', 'sep'],
+    10: ['october', 'oktober', 'octobre', 'ottobre', 'octubre', 'outubro',
+         'октябрь', 'октября', 'ekim', 'жовтень', 'жовтня', 'οκτώβριος',
+         'οκτωβρίου', 'октомври', 'окт', 'ott', 'oct', 'okt'],
+    11: ['november', 'novembre', 'noviembre', 'novembro', 'ноябрь', 'ноября',
+         'kasım', 'kasim', 'листопад', 'листопада', 'νοέμβριος', 'νοεμβρίου',
+         'ноември', 'ноем', 'ное', 'nov'],
+    12: ['december', 'dezember', 'décembre', 'decembre', 'dicembre', 'diciembre',
+         'dezembro', 'декабрь', 'декабря', 'aralık', 'aralik', 'грудень',
+         'грудня', 'δεκέμβριος', 'δεκεμβρίου', 'декември', 'дек', 'déc', 'dez',
+         'dic', 'dec'],
+  };
+
+  // All month variants as one regex alternation, longest-first so that full
+  // names win over their own abbreviations (e.g. „декември" before „дек").
+  static String? _monthAltCache;
+  static Map<String, int>? _monthLookupCache;
+
+  static void _buildMonthIndex() {
+    final lookup = <String, int>{};
+    final all = <String>[];
+    _months.forEach((idx, variants) {
+      for (final v in variants) {
+        lookup[v] = idx;
+        all.add(v);
+      }
+    });
+    all.sort((a, b) => b.length.compareTo(a.length));
+    _monthAltCache = all.join('|');
+    _monthLookupCache = lookup;
+  }
+
+  static String _monthAlt() {
+    if (_monthAltCache == null) _buildMonthIndex();
+    return _monthAltCache!;
+  }
+
+  static int? _monthOf(String variant) {
+    if (_monthLookupCache == null) _buildMonthIndex();
+    return _monthLookupCache![variant.toLowerCase()];
   }
 
   static bool _matches(String lower, List<String> keywords) {
