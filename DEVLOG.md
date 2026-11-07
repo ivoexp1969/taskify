@@ -6,6 +6,55 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-11-05 · PC — Групов списък за пазаруване + „Премести в група" + групови напомняния (клон feature/group-shopping-1.0.72, WIP, чака визуален тест)
+Нова функция за 1.0.72 (клон `feature/group-shopping-1.0.72` от `main`; ★НЕ смесвана с 1.0.71★,
+която излиза преди това на 8.11). Планът е одобрен от Иво с решения. Имплементирано (код готов,
+analyze 0 нови, 106 теста ✅, 10/10 емулаторни rules теста ✅; чака визуален тест на 2 устройства):
+
+**(1) Списък за пазаруване в споделена група.** Продуктите се пазят като **MAP по id** върху
+документа на задачата (`items.<id>`), НЕ масив — за да merge-ват Firestore field-path update-ите
+(`items.<id>.checked`) едновременни отметки на РАЗЛИЧНИ продукти без overwrite. Нов `ShoppingItem`
+(`models/group.dart`) + полета `template`/`items`/`reminderSetBy`/`remindAll` на `GroupTask`. Нови
+item-операции в `GroupService` (`toggleItem`/`addItem`/`removeItem`/`clearCheckedItems`,
+`watchTask`). Нов екран `screens/shared/group_shopping_list_screen.dart` (real-time, „Купено от X"
+през `checkedBy`→`memberFor`, авто-завършване на задачата при всички отметнати, settings sheet с
+дата/час/напомняне+обхват). Офлайн отметка се опашква през вградената offline persistence.
+
+**(2) „Премести в група" (не копие).** Нов ред в long-press менюто на личната задача
+(`task_list_tile.dart`) → `widgets/move_to_group_sheet.dart`: избор на група + потвърждение (с
+предупреждение, че **повторението ще се махне**). ★Личната задача се трие (TombstoneService) САМО
+след СЪРВЪРНО потвърждение на записа в групата★: `GroupService.pingServerForGroup` (server-source
+read хвърля при офлайн) → ако офлайн → „Нужна е връзка с интернет", нищо не се пипа; иначе
+`addTask().timeout(15s)` и чак при успех cancel notif + tombstone. Shopping задача → продуктите
+мигрират в `items` map. Повторение → null.
+
+**(3) Групови напомняния (known issue — не звъняха).** Root cause: груповите задачи живеят само
+във Firestore, никога не минаваха през планиране, а в проекта **НЯМА FCM/сървърен push** → всички
+нотификации са локални. Fix: нов `services/group_reminder_scheduler.dart` — всяко устройство слуша
+своите групи и планира ЛОКАЛНО напомнянията, които го засягат. По подразбиране звъни само на
+`reminderSetBy` (този, който ги е задал); опция `remindAll` → на всички членове. Нови
+`NotificationService.scheduleGroupReminders`/`cancelIds` (детерминирани id-та `idBase^reminderType`
+→ без дубли при рестарт). Стартира се от `home_screen._startStartup`, преслушва при вход/изход.
+⚠️ Ограничение: устройство, което не е отваряло app-а, няма планирани напомняния.
+
+**(4) Гейтове — потвърдено БЕЗ промяна.** Създаване на група = Premium (`shared_groups_screen`);
+присъединяване = безплатно; `addTask`/item-операциите = без Pro проверка → добавяне/преместване в
+група, в която вече си член = безплатно. Съответства на изискването.
+
+**(5) Firestore правила + тестове.** Map-ът е поле на съществуващия task док → правилото
+`groups/{id}/tasks/{taskId}` (read/write за членове) вече го покрива, БЕЗ промяна на `firestore.rules`.
+Потвърдено с 10 емулаторни теста (`@firebase/rules-unit-testing`, firebase-tools@13 заради Java 17,
+scratchpad извън git): член отмята/добавя/трие продукт ✓, не-член denied ✓, член създава (move) ✓,
+не-член denied ✓.
+
+**★TODO (бъдеща задача, по изрично решение на Иво):** истински сървърен **push за групови
+напомняния през FCM** (firebase_messaging + Cloud Functions + ключове) — така напомнянето стига и до
+устройства, които не са отваряли app-а. Сегашният fix е само локален.★
+
+**ОСТАВА (след визуален тест на Иво на 2 устройства за едновременни отметки):** bump 1.0.70+80→
+1.0.72 + „Какво ново" `_build` + `release_notes/1.0.72.md`; commit+push; (iOS = само Mac билд — чист
+cross-platform Dart, без нови native deps). ⚠️ 1.0.71 (парсер + празен екран) излиза ПРЕДИ това.
+
 ## 2026-11-02 · Mac — iOS цени изравнени с Android/сайт + махнат intro trial (ASC API)
 Цените в App Store не съвпадаха с Android/сайта (Lifetime 22,99 / Yearly 17,99 / Monthly 1,99 € срещу
 11,99 / 9,49 / 1,19 €). Коригирано през ASC API (ключ R342BR6F85), база територия **DEU**:

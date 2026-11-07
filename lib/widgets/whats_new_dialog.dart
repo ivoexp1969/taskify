@@ -16,77 +16,77 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Нови инсталации НЕ го виждат (те виждат welcome диалога).
 class WhatsNewDialog {
   /// Билдът, за който са точките по-долу (= `pubspec.yaml` build number).
-  /// ★1.0.70 → versionCode 80★.
-  static const int _build = 80;
+  /// ★1.0.72 → versionCode 82★ (1.0.71 взема 81 на отделния клон).
+  static const int _build = 82;
 
   static const String _prefKey = 'whats_new_seen_build';
 
-  /// Точките за текущата версия (1.0.70), ×13 езика.
+  /// Точките за текущата версия (1.0.72 — споделено пазаруване), ×13 езика.
   static const Map<String, List<String>> _items = {
     'en': [
-      '📅 Calendar and name days are now free.',
-      '📄 Track up to 3 documents for free.',
-      '🎂 Expanded Bulgarian name-day calendar — more names and dates.',
+      '🛒 Shared shopping lists in groups — everyone sees check-offs live.',
+      '👪 "Move to group" — turn a personal list or task into a shared one.',
+      '🔔 Reminders for group tasks.',
     ],
     'bg': [
-      '📅 Календарът и имените дни вече са безплатни.',
-      '📄 До 3 документа безплатно.',
-      '🎂 Разширен именник — още имена и дати.',
+      '🛒 Споделен списък за пазаруване в групите — всеки член вижда отметките на живо.',
+      '👪 „Премести в група" — направи личен списък или задача споделена.',
+      '🔔 Напомняния за груповите задачи.',
     ],
     'de': [
-      '📅 Kalender und Namenstage sind jetzt kostenlos.',
-      '📄 Verfolge bis zu 3 Dokumente kostenlos.',
-      '🎂 Erweiterter Namenstags-Kalender — mehr Namen und Daten.',
+      '🛒 Gemeinsame Einkaufslisten in Gruppen — alle sehen Abhakungen live.',
+      '👪 „In Gruppe verschieben" — mach eine persönliche Liste oder Aufgabe geteilt.',
+      '🔔 Erinnerungen für Gruppenaufgaben.',
     ],
     'fr': [
-      '📅 Le calendrier et les fêtes des prénoms sont désormais gratuits.',
-      '📄 Suis jusqu\'à 3 documents gratuitement.',
-      '🎂 Calendrier des fêtes des prénoms enrichi — plus de noms et de dates.',
+      '🛒 Listes de courses partagées dans les groupes — tout le monde voit les cases cochées en direct.',
+      '👪 « Déplacer vers un groupe » — rends une liste ou une tâche personnelle partagée.',
+      '🔔 Rappels pour les tâches de groupe.',
     ],
     'it': [
-      '📅 Calendario e onomastici ora sono gratuiti.',
-      '📄 Tieni traccia di un massimo di 3 documenti gratis.',
-      '🎂 Calendario degli onomastici ampliato — più nomi e date.',
+      '🛒 Liste della spesa condivise nei gruppi — tutti vedono le spunte in tempo reale.',
+      '👪 «Sposta nel gruppo» — rendi condivisa una lista o un\'attività personale.',
+      '🔔 Promemoria per le attività di gruppo.',
     ],
     'el': [
-      '📅 Το ημερολόγιο και οι ονομαστικές εορτές είναι πλέον δωρεάν.',
-      '📄 Παρακολούθησε έως 3 έγγραφα δωρεάν.',
-      '🎂 Εμπλουτισμένο ημερολόγιο ονομαστικών εορτών — περισσότερα ονόματα και ημερομηνίες.',
+      '🛒 Κοινόχρηστες λίστες για ψώνια στις ομάδες — όλοι βλέπουν τα τσεκαρίσματα ζωντανά.',
+      '👪 «Μετακίνηση σε ομάδα» — κάνε μια προσωπική λίστα ή εργασία κοινόχρηστη.',
+      '🔔 Υπενθυμίσεις για τις εργασίες ομάδας.',
     ],
     'es': [
-      '📅 El calendario y las onomásticas ahora son gratis.',
-      '📄 Controla hasta 3 documentos gratis.',
-      '🎂 Calendario de onomásticas ampliado — más nombres y fechas.',
+      '🛒 Listas de la compra compartidas en los grupos — todos ven las marcas en tiempo real.',
+      '👪 «Mover al grupo» — convierte una lista o tarea personal en compartida.',
+      '🔔 Recordatorios para las tareas de grupo.',
     ],
     'pt': [
-      '📅 O calendário e os dias do nome agora são grátis.',
-      '📄 Acompanha até 3 documentos grátis.',
-      '🎂 Calendário de dias do nome ampliado — mais nomes e datas.',
+      '🛒 Listas de compras partilhadas nos grupos — todos veem as marcações em tempo real.',
+      '👪 «Mover para grupo» — torna partilhada uma lista ou tarefa pessoal.',
+      '🔔 Lembretes para as tarefas de grupo.',
     ],
     'ru': [
-      '📅 Календарь и именины теперь бесплатны.',
-      '📄 Отслеживай до 3 документов бесплатно.',
-      '🎂 Расширенный календарь именин — больше имён и дат.',
+      '🛒 Общие списки покупок в группах — все видят отметки в реальном времени.',
+      '👪 «Переместить в группу» — сделай личный список или задачу общими.',
+      '🔔 Напоминания для групповых задач.',
     ],
     'tr': [
-      '📅 Takvim ve isim günleri artık ücretsiz.',
-      '📄 3 belgeye kadar ücretsiz takip et.',
-      '🎂 Genişletilmiş isim günü takvimi — daha fazla isim ve tarih.',
+      '🛒 Gruplarda ortak alışveriş listeleri — herkes işaretlemeleri anında görür.',
+      '👪 "Gruba taşı" — kişisel bir listeyi veya görevi paylaşımlı yap.',
+      '🔔 Grup görevleri için hatırlatıcılar.',
     ],
     'nl': [
-      '📅 Agenda en naamdagen zijn nu gratis.',
-      '📄 Volg tot 3 documenten gratis.',
-      '🎂 Uitgebreide naamdagkalender — meer namen en datums.',
+      '🛒 Gedeelde boodschappenlijsten in groepen — iedereen ziet het afvinken live.',
+      '👪 "Naar groep verplaatsen" — maak een persoonlijke lijst of taak gedeeld.',
+      '🔔 Herinneringen voor groepstaken.',
     ],
     'uk': [
-      '📅 Календар та іменини тепер безкоштовні.',
-      '📄 Відстежуй до 3 документів безкоштовно.',
-      '🎂 Розширений календар іменин — більше імен і дат.',
+      '🛒 Спільні списки покупок у групах — усі бачать позначки в реальному часі.',
+      '👪 «Перемістити в групу» — зроби особистий список або завдання спільними.',
+      '🔔 Нагадування для групових завдань.',
     ],
     'ja': [
-      '📅 カレンダーと聖名祝日が無料になりました。',
-      '📄 最大3件のドキュメントを無料で管理。',
-      '🎂 ブルガリアの聖名祝日カレンダーを拡充 — 名前と日付が増えました。',
+      '🛒 グループで買い物リストを共有 — チェックがリアルタイムで全員に見えます。',
+      '👪 「グループに移動」— 個人のリストやタスクを共有できます。',
+      '🔔 グループタスクのリマインダー。',
     ],
   };
 

@@ -76,3 +76,7 @@ audit/_old_dataset.json
 
 # Локален тест (пароли на тест акаунти) — НЕ в git
 .env
+
+# Local Play Console install stats (analysis only, not shipped)
+/stats/
+/stats_raw/
