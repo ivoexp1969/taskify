@@ -4,6 +4,7 @@ import '../../models/task.dart';
 import '../../services/analytics_service.dart';
 import '../../utils/localization.dart';
 import '../../services/notification_service.dart';
+import '../../widgets/move_to_group_sheet.dart';
 import '../../widgets/reminder_selector.dart';
 
 class ShoppingListScreen extends StatefulWidget {
@@ -116,6 +117,19 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     _save();
   }
 
+  /// „Премести в група" — ВТОРИ вход (освен long-press на плочката): отваря се
+  /// отвътре в списъка, където потребителят естествено търси „сподели". Личната
+  /// задача се трие (tombstone) само след сървърно потвърждение (виж
+  /// MoveToGroupSheet) → при успех затваряме екрана.
+  Future<void> _moveToGroup() async {
+    await _save(); // подсигури, че последните промени са записани преди четене
+    if (!mounted) return;
+    // ВИНАГИ достъпно (1.0.71): ако не си влязъл → диалог „Влез, за да споделяш".
+    MoveToGroupSheet.start(context, widget.task, onMoved: () {
+      if (mounted) Navigator.of(context).maybePop();
+    });
+  }
+
   void _showSettings() {
     showModalBottomSheet(
       context: context,
@@ -171,6 +185,24 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
             icon: const Icon(Icons.tune_rounded),
             tooltip: t.editTask,
             onPressed: _showSettings,
+          ),
+          // „Сподели" (премести в група) — ВИНАГИ видимо (1.0.71).
+          PopupMenuButton<String>(
+            onSelected: (v) {
+              if (v == 'move') _moveToGroup();
+            },
+            itemBuilder: (ctx) => [
+              PopupMenuItem(
+                value: 'move',
+                child: Row(
+                  children: [
+                    const Icon(Icons.group_add_rounded, size: 20),
+                    const SizedBox(width: 12),
+                    Text(t.shareTask),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

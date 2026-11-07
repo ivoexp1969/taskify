@@ -15,6 +15,7 @@ import '../../../services/analytics_service.dart';
 import '../../../services/conversion_service.dart';
 import '../../../services/review_service.dart';
 import '../../../widgets/task_card_styles.dart';
+import '../../../widgets/move_to_group_sheet.dart';
 import '../../../widgets/pomodoro_timer_sheet.dart';
 import '../shopping_list_screen.dart';
 import '../birthday_dialog.dart';
@@ -354,6 +355,19 @@ class TaskListTile extends StatelessWidget {
                       onChanged();
                     },
                   ),
+                // „Сподели" (премести в група) — ВИНАГИ видимо (1.0.71): ако не си
+                // влязъл, тапът показва диалог „Влез, за да споделяш", не се крие.
+                ListTile(
+                  leading: const Icon(Icons.group_add_rounded),
+                  title: Text(t.shareTask),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    MoveToGroupSheet.start(context, task, onMoved: () {
+                      WidgetService.updateWidget();
+                      onChanged();
+                    });
+                  },
+                ),
                 ListTile(
                   leading: const Icon(Icons.delete_outline, color: Colors.red),
                   title: Text(
@@ -508,6 +522,11 @@ class TaskListTile extends StatelessWidget {
               await WidgetService.updateWidget();
               if (context.mounted) onChanged();
             },
+            // „Сподели" (премести в група) — бутон в разгънатата карта.
+            onShare: () => MoveToGroupSheet.start(context, task, onMoved: () {
+              WidgetService.updateWidget();
+              onChanged();
+            }),
             dateTimeStr: dateTimeStr,
             priorityText: priorityText,
             priorityColor: priorityColor,

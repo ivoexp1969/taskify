@@ -19,6 +19,7 @@ import '../../utils/category_colors.dart';
 import '../../services/notification_service.dart';
 import '../../widgets/reminder_selector.dart';
 import '../../services/widget_service.dart';
+import '../../widgets/move_to_group_sheet.dart';
 import '../../services/ad_service.dart';
 import '../../widgets/celebration_overlay.dart';
 import '../../widgets/study_countdown_card.dart';
@@ -645,6 +646,14 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
       onClearCategoryFilter: () => _categoryFilterId = null,
       onChanged: () { if (mounted) setState(() {}); },
       hideRecurrence: hideRecurrence,
+      // „Сподели" в header-а — само при редакция на съществуваща ЛИЧНА задача
+      // (onSave==null = нормалният Hive път; групите подават onSave).
+      onShare: (onSave == null && existing != null)
+          ? () => MoveToGroupSheet.start(context, existing, onMoved: () {
+                WidgetService.updateWidget();
+                if (mounted) setState(() {});
+              })
+          : null,
     );
   }
 

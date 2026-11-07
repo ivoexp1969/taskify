@@ -147,6 +147,9 @@ class ExpandableTaskCard extends StatelessWidget {
   /// Отбелязване на ЕДНА подзадача (по индекс) при разгъната карта. Ако е null,
   /// разгънатата карта показва само лентата с прогрес (без чекбоксове).
   final void Function(int index)? onToggleSubtask;
+  /// „Сподели" (премести в група) — показва се в разгънатата карта. null → скрит
+  /// (напр. груповите/календарните карти, които не са лични задачи).
+  final VoidCallback? onShare;
   final String dateTimeStr;
   final String priorityText;
   final Color priorityColor;
@@ -168,6 +171,7 @@ class ExpandableTaskCard extends StatelessWidget {
     this.onStartPomodoro,
     this.onBreakdown,
     this.onToggleSubtask,
+    this.onShare,
     required this.dateTimeStr,
     required this.priorityText,
     required this.priorityColor,
@@ -504,6 +508,21 @@ class ExpandableTaskCard extends StatelessWidget {
                                   ),
                                 ],
                               ),
+                              // „Сподели" (премести в група) — на отделен ред (пълна
+                              // ширина), за да не се реже текстът на 4 бутона в ред.
+                              if (onShare != null) ...[
+                                const SizedBox(height: 6),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: _ActionButton(
+                                    icon: Icons.group_add_rounded,
+                                    label: t.shareTask,
+                                    color: Colors.teal,
+                                    onTap: onShare!,
+                                    expand: true,
+                                  ),
+                                ),
+                              ],
                             ],
                           ],
                         ),
@@ -961,6 +980,7 @@ class TaskCardView extends StatelessWidget {
   final VoidCallback? onStartPomodoro;
   final VoidCallback? onBreakdown;
   final void Function(int index)? onToggleSubtask;
+  final VoidCallback? onShare;
   final String dateTimeStr;
   final String priorityText;
   final Color priorityColor;
@@ -982,6 +1002,7 @@ class TaskCardView extends StatelessWidget {
     this.onStartPomodoro,
     this.onBreakdown,
     this.onToggleSubtask,
+    this.onShare,
     required this.dateTimeStr,
     required this.priorityText,
     required this.priorityColor,
@@ -1003,6 +1024,7 @@ class TaskCardView extends StatelessWidget {
             onToggleExpand: onToggleExpand, onToggleComplete: onToggleComplete,
             onEdit: onEdit, onDelete: onDelete, onStartPomodoro: onStartPomodoro,
             onBreakdown: onBreakdown, onToggleSubtask: onToggleSubtask,
+            onShare: onShare,
             dateTimeStr: dateTimeStr,
             priorityText: priorityText, priorityColor: priorityColor,
             accentColor: accentColor, categoryName: categoryName,
@@ -1015,6 +1037,7 @@ class TaskCardView extends StatelessWidget {
           onToggleExpand: onToggleExpand, onToggleComplete: onToggleComplete,
           onEdit: onEdit, onDelete: onDelete, onStartPomodoro: onStartPomodoro,
           onBreakdown: onBreakdown, onToggleSubtask: onToggleSubtask,
+          onShare: onShare,
           dateTimeStr: dateTimeStr,
           priorityText: priorityText, priorityColor: priorityColor,
           accentColor: accentColor, categoryName: categoryName,
@@ -1043,6 +1066,7 @@ class TicketTaskCard extends StatefulWidget {
   final VoidCallback? onStartPomodoro;
   final VoidCallback? onBreakdown;
   final void Function(int index)? onToggleSubtask;
+  final VoidCallback? onShare;
   final String dateTimeStr;
   final String priorityText;
   final Color priorityColor;
@@ -1064,6 +1088,7 @@ class TicketTaskCard extends StatefulWidget {
     this.onStartPomodoro,
     this.onBreakdown,
     this.onToggleSubtask,
+    this.onShare,
     required this.dateTimeStr,
     required this.priorityText,
     required this.priorityColor,
@@ -1577,6 +1602,16 @@ class _TicketTaskCardState extends State<TicketTaskCard>
           ),
         ],
       ),
+      // „Сподели" (премести в група) — пълна ширина, отделен ред.
+      if (widget.onShare != null) ...[
+        const SizedBox(height: 6),
+        SizedBox(
+          width: double.infinity,
+          child: _ActionButton(
+            icon: Icons.group_add_rounded, label: t.shareTask,
+            color: Colors.teal, onTap: widget.onShare!, expand: true),
+        ),
+      ],
     ];
   }
 }

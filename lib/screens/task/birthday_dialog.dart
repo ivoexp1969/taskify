@@ -7,6 +7,7 @@ import '../../models/category.dart';
 import '../../utils/localization.dart';
 import '../../services/notification_service.dart';
 import '../../services/widget_service.dart';
+import '../../widgets/move_to_group_sheet.dart';
 import '../../widgets/reminder_selector.dart';
 
 class BirthdayDialog {
@@ -125,6 +126,14 @@ class BirthdayDialog {
                             ),
                           ),
                           const Spacer(),
+                          if (existing != null)
+                            MoveToGroupSheet.headerIconButton(
+                              sheetContext: ctx,
+                              outerContext: context,
+                              task: existing,
+                              color: accent,
+                              onMoved: () => WidgetService.updateWidget(),
+                            ),
                           IconButton(
                             icon: Icon(Icons.close, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
                             onPressed: () => Navigator.pop(ctx),

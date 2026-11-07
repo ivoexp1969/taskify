@@ -4,6 +4,7 @@ import '../../models/task.dart';
 import '../../services/analytics_service.dart';
 import '../../models/category.dart';
 import '../../utils/localization.dart';
+import '../../widgets/move_to_group_sheet.dart';
 import '../../services/notification_service.dart';
 import '../../services/widget_service.dart';
 import '../../widgets/reminder_selector.dart';
@@ -85,6 +86,13 @@ class WorkoutDialog {
                           style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600,
                             color: theme.colorScheme.onSurface)),
                         const Spacer(),
+                        if (existing != null)
+                          MoveToGroupSheet.headerIconButton(
+                            sheetContext: ctx,
+                            outerContext: context,
+                            task: existing,
+                            color: accent,
+                          ),
                         IconButton(icon: Icon(Icons.close, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
                           onPressed: () => Navigator.pop(ctx)),
                       ]),

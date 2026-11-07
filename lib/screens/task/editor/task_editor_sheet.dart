@@ -55,6 +55,7 @@ class TaskEditorSheet extends StatefulWidget {
     required this.onClearCategoryFilter,
     required this.onChanged,
     this.hideRecurrence = false,
+    this.onShare,
   });
 
   final BuildContext parentContext;
@@ -77,6 +78,10 @@ class TaskEditorSheet extends StatefulWidget {
   /// груповите (споделени) задачи, където повторението не се поддържа.
   final bool hideRecurrence;
 
+  /// „Сподели" (премести в група) — бутон в header-а, показва се САМО при
+  /// редакция на съществуваща ЛИЧНА задача (null за нова/групова).
+  final VoidCallback? onShare;
+
   /// Отваря редактора. Зарежда AI настройките (както преди — при всяко отваряне),
   /// после показва sheet-а и извиква [onChanged] след затваряне.
   static Future<void> show(
@@ -94,6 +99,7 @@ class TaskEditorSheet extends StatefulWidget {
     required VoidCallback onClearCategoryFilter,
     required VoidCallback onChanged,
     bool hideRecurrence = false,
+    VoidCallback? onShare,
   }) async {
     // Зареждаме AI настройките при всяко отваряне, за да са актуални
     final aiParsingEnabled = await AiUsageService.instance.isParsingEnabled();
@@ -120,6 +126,7 @@ class TaskEditorSheet extends StatefulWidget {
         onClearCategoryFilter: onClearCategoryFilter,
         onChanged: onChanged,
         hideRecurrence: hideRecurrence,
+        onShare: onShare,
       ),
     );
     onChanged();
@@ -533,6 +540,20 @@ class _TaskEditorSheetState extends State<TaskEditorSheet>
                           ),
                         ),
                         const Spacer(),
+                        // „Сподели" (премести в група) — само при редакция на
+                        // съществуваща лична задача (не за нова/групова).
+                        if (widget.existing != null && widget.onShare != null)
+                          IconButton(
+                            tooltip: t.shareTask,
+                            onPressed: () {
+                              Navigator.pop(innerContext);
+                              widget.onShare!();
+                            },
+                            icon: Icon(
+                              Icons.group_add_rounded,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
                         IconButton(
                           onPressed: () {
                             _titleController.clear();

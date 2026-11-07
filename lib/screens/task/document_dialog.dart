@@ -9,6 +9,7 @@ import '../../services/widget_service.dart';
 import '../../services/documents_service.dart';
 import '../../services/pro_service.dart';
 import '../../widgets/reminder_selector.dart';
+import '../../widgets/move_to_group_sheet.dart';
 import '../paywall/paywall_screen.dart';
 
 /// Диалог за документ с изтичащ срок. Документът се пази като обикновена [Task]
@@ -133,6 +134,13 @@ class DocumentDialog {
                         Text(existing != null ? t.editDocument : t.addDocument,
                           style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
                         const Spacer(),
+                        if (existing != null)
+                          MoveToGroupSheet.headerIconButton(
+                            sheetContext: ctx,
+                            outerContext: context,
+                            task: existing,
+                            color: accent,
+                          ),
                         IconButton(icon: Icon(Icons.close, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
                           onPressed: () => Navigator.pop(ctx)),
                       ]),
