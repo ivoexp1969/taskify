@@ -56,6 +56,8 @@ class TaskEditorSheet extends StatefulWidget {
     required this.onChanged,
     this.hideRecurrence = false,
     this.onShare,
+    this.initialTitle,
+    this.suggestReminder = false,
   });
 
   final BuildContext parentContext;
@@ -82,6 +84,14 @@ class TaskEditorSheet extends StatefulWidget {
   /// редакция на съществуваща ЛИЧНА задача (null за нова/групова).
   final VoidCallback? onShare;
 
+  /// Начално заглавие (при СЪЗДАВАНЕ) — попълва се от чиповете в празното
+  /// състояние. Игнорира се при редакция (existing != null).
+  final String? initialTitle;
+
+  /// Показва дискретна подсказка да се добави напомняне (само визуално, за
+  /// първата задача от празното състояние). Изчезва щом се добави напомняне.
+  final bool suggestReminder;
+
   /// Отваря редактора. Зарежда AI настройките (както преди — при всяко отваряне),
   /// после показва sheet-а и извиква [onChanged] след затваряне.
   static Future<void> show(
@@ -100,6 +110,8 @@ class TaskEditorSheet extends StatefulWidget {
     required VoidCallback onChanged,
     bool hideRecurrence = false,
     VoidCallback? onShare,
+    String? initialTitle,
+    bool suggestReminder = false,
   }) async {
     // Зареждаме AI настройките при всяко отваряне, за да са актуални
     final aiParsingEnabled = await AiUsageService.instance.isParsingEnabled();
@@ -127,6 +139,8 @@ class TaskEditorSheet extends StatefulWidget {
         onChanged: onChanged,
         hideRecurrence: hideRecurrence,
         onShare: onShare,
+        initialTitle: initialTitle,
+        suggestReminder: suggestReminder,
       ),
     );
     onChanged();
@@ -163,7 +177,8 @@ class _TaskEditorSheetState extends State<TaskEditorSheet>
       duration: const Duration(milliseconds: 800),
     );
     final existing = widget.existing;
-    _titleController = TextEditingController(text: existing?.title ?? '');
+    _titleController = TextEditingController(
+        text: existing?.title ?? widget.initialTitle ?? '');
     tempDueDate = existing?.dueDate ?? DateTime.now();
     if (existing != null &&
         (existing.dueDate.hour != 0 || existing.dueDate.minute != 0)) {
@@ -1168,6 +1183,17 @@ class _TaskEditorSheetState extends State<TaskEditorSheet>
                             theme,
                           ),
                           const SizedBox(height: 12),
+                          if (widget.suggestReminder && tempReminders.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: Text(
+                                t.firstTaskReminderHint,
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ),
                           ReminderSelector(
                             selectedReminders: tempReminders,
                             onChanged: (list) => setSheetState(() {

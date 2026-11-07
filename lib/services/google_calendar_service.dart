@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/task.dart';
 import '../utils/calendar_notes.dart';
+import 'analytics_service.dart';
 
 class GoogleCalendarService {
   static final GoogleCalendarService _instance = GoogleCalendarService._internal();
@@ -153,6 +154,7 @@ class GoogleCalendarService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('google_calendar_connected', true);
       connectionNotifier.value = true;
+      AnalyticsService().logCalendarConnected();
       return true;
     } catch (e) {
       debugPrint('Error connecting to Google Calendar: $e');

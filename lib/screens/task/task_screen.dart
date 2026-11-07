@@ -627,17 +627,42 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
   }
 
 
+  /// Категории по подразбиране за чиповете в празното състояние (по индекс).
+  /// Съответстват на `AppText.firstTaskSuggestions`: ток→Плащания, хляб→
+  /// Пазаруване, мама→Лични. НИКОГА „Документи".
+  static const List<String> _firstTaskChipCategories = [
+    'payment',
+    'shopping',
+    'personal',
+  ];
+
+  /// Връща [preferred], ако съществува; иначе неутрална категория (`personal`),
+  /// иначе първата НЕ-документна категория. НИКОГА не връща `documents`.
+  String _neutralCategory(String preferred) {
+    if (categoryBox.containsKey(preferred) && preferred != 'documents') {
+      return preferred;
+    }
+    if (categoryBox.containsKey('personal')) return 'personal';
+    for (final c in categoryBox.values) {
+      if (c.id != 'documents') return c.id;
+    }
+    return categoryBox.isEmpty ? '' : categoryBox.values.first.id;
+  }
+
   Future<void> _openTaskDialog(
       {Task? existing,
       Future<void> Function(Task draft)? onSave,
-      bool hideRecurrence = false}) async {
+      bool hideRecurrence = false,
+      String? initialTitle,
+      bool suggestReminder = false,
+      String? categoryId}) async {
     await TaskEditorSheet.show(
       context,
       existing: existing,
       onSave: onSave,
       taskBox: taskBox,
       categoryBox: categoryBox,
-      initialCategoryId: _selectedCategoryId,
+      initialCategoryId: categoryId ?? _selectedCategoryId,
       initialPriority: _selectedPriority,
       initialRecurrence: _selectedRecurrence,
       onCategoryDefaultChanged: (v) => _selectedCategoryId = v,
@@ -654,6 +679,92 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                 if (mounted) setState(() {});
               })
           : null,
+      initialTitle: initialTitle,
+      suggestReminder: suggestReminder,
+    );
+  }
+
+  /// Празно състояние на „Задачи": заглавие + текст + голям бутон „Създай
+  /// първата си задача" + 3 чипа с готови предложения. Чиповете и бутонът водят
+  /// ДИРЕКТНО към редактора (БЕЗ TaskTypeSelector) с подсказано напомняне.
+  Widget _buildEmptyState(AppText t, ThemeData theme) {
+    final suggestions = t.firstTaskSuggestions;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 48, 24, 24),
+      child: Column(
+        children: [
+          Container(
+            width: 88,
+            height: 88,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: 0.10),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.checklist_rounded,
+                size: 44, color: theme.colorScheme.primary),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            t.emptyTasksTitle,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleLarge
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            t.emptyTasksSubtitle,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () {
+                AnalyticsService().logEmptyStateCtaTap();
+                // Бутон без чип → неутрална категория (НЕ „Документи").
+                _openTaskDialog(
+                    suggestReminder: true,
+                    categoryId: _neutralCategory('personal'));
+              },
+              icon: const Icon(Icons.add_rounded),
+              label: Text(t.createFirstTask),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (int i = 0; i < suggestions.length; i++)
+                ActionChip(
+                  avatar: Icon(Icons.add,
+                      size: 16, color: theme.colorScheme.primary),
+                  label: Text(suggestions[i]),
+                  onPressed: () {
+                    AnalyticsService().logEmptyStateChipTap(i);
+                    final cat = i < _firstTaskChipCategories.length
+                        ? _neutralCategory(_firstTaskChipCategories[i])
+                        : _neutralCategory('personal');
+                    _openTaskDialog(
+                        initialTitle: suggestions[i],
+                        suggestReminder: true,
+                        categoryId: cat);
+                  },
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -946,16 +1057,7 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin, 
                       itemBuilder: (_, index) {
                         if (index == 0) return const SharedTasksSection();
                         if (items.isEmpty) {
-                          return const Padding(
-                            padding: EdgeInsets.only(top: 60),
-                            child: Center(
-                              child: Text(
-                                '—',
-                                style: TextStyle(
-                                    fontSize: 28, color: Colors.black26),
-                              ),
-                            ),
-                          );
+                          return _buildEmptyState(t, theme);
                         }
                         final item = items[index - 1];
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/analytics_service.dart';
 
 /// Widget за избор на множество напомняния
 class ReminderSelector extends StatelessWidget {
@@ -117,6 +118,8 @@ class ReminderSelector extends StatelessWidget {
       newList.remove(key);
     } else {
       newList.add(key);
+      // Еднократно `first_reminder_set` (флагът е вътре в услугата).
+      AnalyticsService().logReminderSet();
     }
     onChanged(newList);
   }

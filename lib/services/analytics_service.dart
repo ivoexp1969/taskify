@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/task.dart';
 
 /// Минимален, целенасочен Firebase Analytics слой.
@@ -24,6 +25,13 @@ class AnalyticsService {
   factory AnalyticsService() => _instance;
 
   static const String _boxName = 'analytics_flags';
+
+  /// SharedPreferences ключ за opt-out „Анонимна статистика" (default: ВКЛ.).
+  static const String _optOutKey = 'analytics_enabled';
+
+  /// Runtime състояние на събирането (чете се от [_optOutKey] при init).
+  bool _collectionEnabled = true;
+  bool get collectionEnabled => _collectionEnabled;
 
   FirebaseAnalytics? _fa;
 
@@ -50,9 +58,13 @@ class AnalyticsService {
       _fa = FirebaseAnalytics.instance;
       _observer = FirebaseAnalyticsObserver(analytics: _fa!);
       _box = await Hive.openBox(_boxName);
-      await _fa!.setAnalyticsCollectionEnabled(true);
+      // Opt-out „Анонимна статистика" — по подразбиране ВКЛ. (без регресия за
+      // съществуващи инсталации). Потребителят може да изключи от Настройки.
+      final prefs = await SharedPreferences.getInstance();
+      _collectionEnabled = prefs.getBool(_optOutKey) ?? true;
+      await _fa!.setAnalyticsCollectionEnabled(_collectionEnabled);
       _ready = true;
-      await _logFirstOpenAndRetention();
+      if (_collectionEnabled) await _logFirstOpenAndRetention();
     } catch (e) {
       // Тиха телеметрия — грешка тук не бива да чупи приложението.
       debugPrint('AnalyticsService init failed: $e');
@@ -60,7 +72,21 @@ class AnalyticsService {
     }
   }
 
-  bool get _enabled => _ready && !kIsWeb && _fa != null;
+  bool get _enabled => _ready && !kIsWeb && _fa != null && _collectionEnabled;
+
+  /// Включва/изключва цялото събиране на статистика (opt-out „Анонимна
+  /// статистика"). Персистира в SharedPreferences и веднага спира/пуска
+  /// Firebase колекцията. Викано от превключвателя в Настройки.
+  Future<void> setCollectionEnabled(bool enabled) async {
+    _collectionEnabled = enabled;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_optOutKey, enabled);
+      await _fa?.setAnalyticsCollectionEnabled(enabled);
+    } catch (e) {
+      debugPrint('Analytics setCollectionEnabled failed: $e');
+    }
+  }
 
   Future<void> _log(String name, [Map<String, Object>? params]) async {
     if (!_enabled) return;
@@ -314,4 +340,29 @@ class AnalyticsService {
   /// Dismiss на bonus картата (× бутон).
   Future<void> logCompanionAppDismissed(String targetApp) =>
       _log('companion_app_dismissed', {'target_app': targetApp});
+
+  // ── Активация: напомняне / календар / празно състояние (A + C) ──────────
+
+  /// Първо зададено напомняне (еднократно, флаг `first_reminder_logged`).
+  /// Викано от [ReminderSelector] при ДОБАВЯНЕ на опция (не при изчистване).
+  Future<void> logReminderSet() async {
+    if (!_enabled) return;
+    final box = _box;
+    if (box != null &&
+        (box.get('first_reminder_logged') as bool? ?? false) == false) {
+      await box.put('first_reminder_logged', true);
+      await _log('first_reminder_set');
+    }
+  }
+
+  /// Успешно свързан външен календар. [provider] ∈ {google, apple}.
+  Future<void> logCalendarConnected({String provider = 'google'}) =>
+      _log('calendar_connected', {'provider': provider});
+
+  /// Тап на бутона „Създай първата си задача" в празното състояние.
+  Future<void> logEmptyStateCtaTap() => _log('empty_state_cta_tap');
+
+  /// Тап на чип-предложение в празното състояние. [index] = позиция (БЕЗ текст).
+  Future<void> logEmptyStateChipTap(int index) =>
+      _log('empty_state_chip_tap', {'chip_index': index});
 }

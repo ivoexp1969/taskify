@@ -64,7 +64,16 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-4385157735120275~3416689103"/>
-        
+
+        <!-- Firebase Analytics: НЕ събирай рекламния идентификатор (AAID).
+             Прави вярна privacy декларацията „Анализите не ползват рекламен ID"
+             (от 1.0.71). iOS еквивалент — виж DEVLOG TODO за Mac
+             ($FirebaseAnalyticsWithoutAdIdSupport в ios/Podfile). AdMob рекламите
+             продължават да ползват рекламен ID отделно (privacy секция 6). -->
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
