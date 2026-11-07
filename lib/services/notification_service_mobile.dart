@@ -623,4 +623,65 @@ class NotificationService {
       debugPrint('NotificationService cancelNotification error: $e');
     }
   }
+
+  // ───────────── ГРУПОВИ НАПОМНЯНИЯ (v1.0.72, точка 3) ──────────────────────
+  // Груповите задачи живеят само във Firestore (без Hive) и НЯМА сървърен push
+  // (FCM е бъдеща задача — виж DEVLOG). Затова всяко устройство планира ЛОКАЛНО
+  // напомнянията за груповите задачи, които го засягат (reminderSetBy==me или
+  // remindAll). Id-тата са ДЕТЕРМИНИРАНИ (idBase ^ reminderType) → повторното
+  // планиране след рестарт замества същата нотификация, не дублира.
+
+  /// Планира напомнянията за ЕДНА групова задача. Връща планираните id-та (за
+  /// да може викащият да ги отмени при промяна/триене). `body` = име на групата.
+  Future<List<int>> scheduleGroupReminders({
+    required int idBase,
+    required String title,
+    required String body,
+    required DateTime dueDate,
+    required List<String> reminders,
+  }) async {
+    final ids = <int>[];
+    try {
+      await _initIfNeeded();
+      final prefs = await SharedPreferences.getInstance();
+      final lang = prefs.getString('app_language') ?? 'en';
+
+      for (final reminderType in reminders) {
+        final scheduled = _computeReminderTime(dueDate, reminderType);
+        if (scheduled == null) continue; // в миналото → пропусни
+
+        final id = (idBase ^ reminderType.hashCode) & 0x7FFFFFFF;
+        final label = _reminderLabel(reminderType, lang);
+        await prefs.setString('alarm_${id}_title', title);
+
+        final tzScheduled = tz.TZDateTime.from(scheduled, tz.local);
+        await _plugin.zonedSchedule(
+          id,
+          title,
+          body.isNotEmpty ? '$body • $label' : label,
+          tzScheduled,
+          _buildNotificationDetails(lang: lang),
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+        );
+        ids.add(id);
+      }
+    } catch (e) {
+      debugPrint('NotificationService scheduleGroupReminders error: $e');
+    }
+    return ids;
+  }
+
+  /// Отменя списък нотификации по id (за груповия scheduler).
+  Future<void> cancelIds(List<int> ids) async {
+    try {
+      await _initIfNeeded();
+      for (final id in ids) {
+        await _plugin.cancel(id);
+      }
+    } catch (e) {
+      debugPrint('NotificationService cancelIds error: $e');
+    }
+  }
 }

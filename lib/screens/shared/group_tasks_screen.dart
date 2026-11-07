@@ -19,6 +19,7 @@ import '../../utils/category_colors.dart';
 import '../../widgets/ai_limit.dart';
 import '../task/task_screen.dart';
 import 'group_invite_screen.dart';
+import 'group_shopping_list_screen.dart';
 
 /// Екран със задачите на ЕДНА споделена група. Real-time (Firestore snapshots):
 /// промените от другите членове идват на живо без ръчен рефреш.
@@ -33,6 +34,8 @@ class GroupTasksScreen extends StatefulWidget {
 class _GroupTasksScreenState extends State<GroupTasksScreen> {
   final GroupService _service = GroupService();
   final Set<String> _expanded = <String>{};
+  // Сгъната секция „Завършени (N)" — затворена по подразбиране (точка 1, 1.0.72).
+  bool _showCompleted = false;
 
   // Държим последно полученото състояние на групата (членове/owner) на живо.
   late Group _group = widget.group;
@@ -296,6 +299,69 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
     }
   }
 
+  /// „+" → избор какво се добавя: нормална задача или списък за пазаруване.
+  Future<void> _chooseAndAdd() async {
+    final t = AppText.of(context);
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(t.chooseTaskType,
+                    style: Theme.of(ctx).textTheme.titleMedium),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.checklist_rtl_rounded),
+              title: Text(t.taskTypeNormal),
+              onTap: () => Navigator.pop(ctx, 'task'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.shopping_cart_outlined),
+              title: Text(t.taskTypeShopping),
+              onTap: () => Navigator.pop(ctx, 'shopping'),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (choice == 'task') {
+      await _addOrEditTask();
+    } else if (choice == 'shopping') {
+      await _addShoppingList();
+    }
+  }
+
+  /// Създава празен споделен списък за пазаруване и отваря екрана му.
+  Future<void> _addShoppingList() async {
+    final t = AppText.of(context);
+    final now = DateTime.now();
+    final gt = GroupTask(
+      id: '',
+      title: t.taskTypeShopping,
+      dueDate: DateTime(now.year, now.month, now.day),
+      categoryName: null,
+      priority: 1,
+      template: 'shopping',
+    );
+    try {
+      final id = await _service.addTask(_group.id, gt);
+      if (!mounted) return;
+      await GroupShoppingListScreen.show(context, _group, id);
+    } on GroupException catch (e) {
+      await _showError(e);
+    } catch (_) {
+      await _showError(GroupException('generic'));
+    }
+  }
+
   Future<void> _addOrEditTask({GroupTask? existing}) async {
     // Отваряме ТОЧНО СЪЩИЯ редактор като таб „Задачи" (TaskEditorBridge), но
     // запазваме във Firestore (GroupTask), не в Hive.
@@ -340,6 +406,8 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
       // Групите не поддържат повторение → скриваме секцията и записваме null.
       hideRecurrence: true,
       onSave: (task) async {
+        final uid = AuthService().currentUser?.uid;
+        final hasReminders = task.reminders != null && task.reminders!.isNotEmpty;
         final gt = GroupTask(
           id: existing?.id ?? '',
           title: task.title,
@@ -351,6 +419,10 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
           subtasks: task.subtasks,
           notes: task.notes,
           isCompleted: existing?.isCompleted ?? false,
+          template: existing?.template,
+          // Напомнянето звъни локално само на този, който го е задал (точка 3).
+          reminderSetBy: hasReminders ? uid : null,
+          remindAll: existing?.remindAll ?? false,
         );
         try {
           if (existing == null) {
@@ -439,6 +511,63 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
     );
   }
 
+  /// Long-press меню на споделена shopping карта (тя не се разгъва) — дава
+  /// достъп до триене на автора/собственика. Показва се само когато викащият
+  /// вече е преценил, че потребителят има право (canDelete).
+  void _showShoppingCardActions(GroupTask gt) {
+    final t = AppText.of(context);
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.delete_outline, color: Colors.red),
+              title: Text(t.delete, style: const TextStyle(color: Colors.red)),
+              onTap: () {
+                Navigator.pop(ctx);
+                _confirmAndDeleteTask(gt);
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Потвърждение + tombstone триене на групова задача. Текстът подчертава, че
+  /// изтриването важи за ВСИЧКИ членове (точка 2, 1.0.72). Правото (автор или
+  /// собственик) се проверява от викащия.
+  Future<void> _confirmAndDeleteTask(GroupTask gt) async {
+    final t = AppText.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(t.deletion),
+        content: Text(t.deleteGroupTaskConfirm(_group.name)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(t.cancel)),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+              child: Text(t.delete)),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await _service.deleteTask(_group.id, gt.id);
+    } on GroupException catch (e) {
+      await _showError(e);
+    } catch (_) {
+      await _showError(GroupException('generic'));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppText.of(context);
@@ -498,7 +627,7 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
             ],
           ),
           floatingActionButton: FloatingActionButton(
-            onPressed: () => _addOrEditTask(),
+            onPressed: _chooseAndAdd,
             child: const Icon(Icons.add),
           ),
           body: StreamBuilder<List<GroupTask>>(
@@ -522,26 +651,23 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                   ),
                 );
               }
-              return ListView.builder(
-                padding: const EdgeInsets.fromLTRB(4, 8, 4, 96),
-                itemCount: tasks.length,
-                itemBuilder: (context, i) {
-                  final gt = tasks[i];
+              final active = tasks.where((x) => !x.isCompleted).toList();
+              final done = tasks.where((x) => x.isCompleted).toList();
+              Widget buildRow(GroupTask gt) {
                   final isOverdue = !gt.isCompleted &&
                       gt.dueDate.isBefore(DateTime.now());
                   final completer = gt.completedBy != null
                       ? _group.memberFor(gt.completedBy!).displayName
                       : null;
-                  // Само авторът може да завършва/редактира/трие задачата.
+                  // Само авторът може да завършва/редактира задачата.
                   // (Стари задачи без автор → достъпни за всички, за съвместимост.)
                   final isAuthor = gt.createdBy == null || gt.createdBy == uid;
+                  // Триене: авторът ИЛИ собственикът на групата (точка 3, 1.0.72).
+                  final canDelete = isAuthor || _group.isOwner(uid);
                   void notAuthor() => ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(t.onlyAuthorCanManage)));
 
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      TaskCardView(
+                  final cardView = TaskCardView(
                         task: gt.toDisplayTask(),
                         isOverdue: isOverdue,
                         isCompleted: gt.isCompleted,
@@ -551,13 +677,22 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                         priorityText: _priorityLabel(gt.priority, t),
                         dateTimeStr: _dateStr(gt.dueDate),
                         categoryName: _categoryDisplay(gt, t),
-                        onToggleExpand: () => setState(() {
-                          if (_expanded.contains(gt.id)) {
-                            _expanded.remove(gt.id);
-                          } else {
-                            _expanded.add(gt.id);
+                        onToggleExpand: () {
+                          // Shopping списък → отваря специалния екран (като при
+                          // личните задачи), вместо да разгъва картата.
+                          if (gt.isShopping) {
+                            GroupShoppingListScreen.show(
+                                context, _group, gt.id);
+                            return;
                           }
-                        }),
+                          setState(() {
+                            if (_expanded.contains(gt.id)) {
+                              _expanded.remove(gt.id);
+                            } else {
+                              _expanded.add(gt.id);
+                            }
+                          });
+                        },
                         onToggleComplete: () {
                           if (!isAuthor) {
                             notAuthor();
@@ -571,12 +706,33 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                         },
                         onBreakdown: () => _breakdown(gt),
                         onToggleSubtask: (index) => _toggleSubtask(gt, index),
-                        onEdit: () =>
-                            isAuthor ? _addOrEditTask(existing: gt) : notAuthor(),
-                        onDelete: () => isAuthor
-                            ? _service.deleteTask(_group.id, gt.id)
+                        onEdit: () {
+                          if (gt.isShopping) {
+                            GroupShoppingListScreen.show(
+                                context, _group, gt.id);
+                            return;
+                          }
+                          isAuthor ? _addOrEditTask(existing: gt) : notAuthor();
+                        },
+                        onDelete: () => canDelete
+                            ? _confirmAndDeleteTask(gt)
                             : notAuthor(),
-                      ),
+                      );
+
+                  // Shopping картите не се разгъват (тапът отваря екрана), затова
+                  // Edit/Delete бутоните на картата са недостъпни → long-press
+                  // меню за триене на автора/собственика (точка 2/3, 1.0.72).
+                  final Widget wrapped = (gt.isShopping && canDelete)
+                      ? GestureDetector(
+                          onLongPress: () => _showShoppingCardActions(gt),
+                          child: cardView,
+                        )
+                      : cardView;
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      wrapped,
                       if (gt.isCompleted && completer != null)
                         Padding(
                           padding:
@@ -599,7 +755,37 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                         ),
                     ],
                   );
-                },
+              }
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(4, 8, 4, 96),
+                children: [
+                  ...active.map(buildRow),
+                  if (done.isNotEmpty)
+                    InkWell(
+                      onTap: () =>
+                          setState(() => _showCompleted = !_showCompleted),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                        child: Row(
+                          children: [
+                            Icon(
+                                _showCompleted
+                                    ? Icons.expand_less_rounded
+                                    : Icons.expand_more_rounded,
+                                size: 20,
+                                color: theme.colorScheme.onSurfaceVariant),
+                            const SizedBox(width: 6),
+                            Text('${t.completed} (${done.length})',
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  if (done.isNotEmpty && _showCompleted)
+                    ...done.map(buildRow),
+                ],
               );
             },
           ),

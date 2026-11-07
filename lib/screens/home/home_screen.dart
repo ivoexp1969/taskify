@@ -12,6 +12,7 @@ import '../../widgets/banner_ad_widget.dart';
 import '../../widgets/gift_cta.dart';
 import '../../widgets/whats_new_dialog.dart';
 import '../../services/pro_service.dart';
+import '../../services/group_reminder_scheduler.dart';
 import '../../services/name_days_service.dart';
 import '../../services/update_prompt_service.dart';
 import '../../services/holidays_service.dart';
@@ -200,6 +201,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         await _proService.initialize();
       } catch (_) {}
     }
+    // Групови напомняния (v1.0.72): локално планиране на reminders за груповите
+    // задачи, които ме засягат. Идемпотентно; преслушва при вход/изход.
+    GroupReminderScheduler().start();
     if (!mounted) return;
     await _runStartupFlow();
   }

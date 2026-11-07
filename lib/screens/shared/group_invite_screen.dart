@@ -87,12 +87,22 @@ class GroupInviteScreen extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SelectableText(
-                        code,
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 4,
-                          color: theme.colorScheme.onPrimaryContainer,
+                      // Flexible + FittedBox: дълъг код (8 знака + letter-spacing)
+                      // се свива да се побере на един ред, вместо да прелива
+                      // контейнера (RenderFlex overflow на тесни екрани).
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: SelectableText(
+                            code,
+                            maxLines: 1,
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 4,
+                              color: theme.colorScheme.onPrimaryContainer,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 10),

@@ -53,4 +53,19 @@ class NotificationService {
   Future<void> cancelNotification(int id) async {
     // No-op на web
   }
+
+  Future<List<int>> scheduleGroupReminders({
+    required int idBase,
+    required String title,
+    required String body,
+    required DateTime dueDate,
+    required List<String> reminders,
+  }) async {
+    // No-op на web
+    return const <int>[];
+  }
+
+  Future<void> cancelIds(List<int> ids) async {
+    // No-op на web
+  }
 }

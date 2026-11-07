@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'task.dart';
+import '../utils/subtask_format.dart';
 
 /// Минимална информация за член на група (за екрана „Членове").
 /// Пазим само онова, което Auth ни дава и е нужно за показване — без излишни лични данни.
@@ -97,6 +98,53 @@ class Group {
   }
 }
 
+/// Един продукт в споделен „Списък за пазаруване" (точка 1, v1.0.72).
+///
+/// ★Пази се като MAP по id върху документа на задачата (`items.<id>`), НЕ в
+/// масив★ — за да може Firestore field-path update (`items.<id>.checked`) да
+/// merge-ва едновременни отметки на РАЗЛИЧНИ продукти от различни членове без
+/// overwrite. Масив би изисквал презапис на целия списък → загуба на отметки.
+class ShoppingItem {
+  final String id;
+  final String text;
+  final bool checked;
+  final String? checkedBy; // uid на отметналия — за „Купено от X"
+  final DateTime? checkedAt;
+  final int qty;
+  final int order; // map не пази ред → подреждаме по това поле
+
+  const ShoppingItem({
+    required this.id,
+    required this.text,
+    this.checked = false,
+    this.checkedBy,
+    this.checkedAt,
+    this.qty = 1,
+    this.order = 0,
+  });
+
+  factory ShoppingItem.fromMap(String id, Map<String, dynamic> m) {
+    return ShoppingItem(
+      id: id,
+      text: m['text'] as String? ?? '',
+      checked: m['checked'] as bool? ?? false,
+      checkedBy: m['checkedBy'] as String?,
+      checkedAt: GroupTask._ts(m['checkedAt']),
+      qty: (m['qty'] as num?)?.toInt() ?? 1,
+      order: (m['order'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toMap() => {
+        'text': text,
+        'checked': checked,
+        'checkedBy': checkedBy,
+        'checkedAt': checkedAt?.toIso8601String(),
+        'qty': qty,
+        'order': order,
+      };
+}
+
 /// Една задача в споделена група. Живее само във Firestore (без Hive).
 /// Категорията се пази като ТЕКСТ (`categoryName`) — категориите са лични за
 /// всеки потребител, затова без реф. и без цветова гаранция между членовете.
@@ -118,6 +166,21 @@ class GroupTask {
   final bool deleted;
   final DateTime? deletedAt;
 
+  /// Вид на задачата: null = нормална; 'shopping' = списък за пазаруване
+  /// (продуктите са в [items], а не в [subtasks]).
+  final String? template;
+
+  /// Продуктите на shopping списък (map по id). null за нормална задача.
+  /// Подреден по `order` в [fromDoc].
+  final List<ShoppingItem>? items;
+
+  /// Кой е ЗАДАЛ напомнянията (uid). Напомнянето звъни ЛОКАЛНО само на неговото
+  /// устройство (точка 3, v1.0.72), освен ако [remindAll] е true.
+  final String? reminderSetBy;
+
+  /// true = напомнянето да звъни на ВСИЧКИ членове (опция на задачата).
+  final bool remindAll;
+
   const GroupTask({
     required this.id,
     required this.title,
@@ -135,12 +198,39 @@ class GroupTask {
     this.updatedAt,
     this.deleted = false,
     this.deletedAt,
+    this.template,
+    this.items,
+    this.reminderSetBy,
+    this.remindAll = false,
   });
+
+  bool get isShopping => template == 'shopping';
+
+  /// Има ли реален map с продукти (стари shopping задачи без `items` → false
+  /// → показваме ги като нормална карта, не празен списък — изискване 1.0.72).
+  bool get hasItems => items != null && items!.isNotEmpty;
 
   static DateTime? _ts(dynamic v) {
     if (v is Timestamp) return v.toDate();
     if (v is String) return DateTime.tryParse(v);
     return null;
+  }
+
+  static List<ShoppingItem>? _parseItems(dynamic raw) {
+    if (raw is! Map) return null;
+    final list = <ShoppingItem>[];
+    raw.forEach((key, value) {
+      if (value is Map) {
+        list.add(ShoppingItem.fromMap(
+            key.toString(), Map<String, dynamic>.from(value)));
+      }
+    });
+    // Подреждаме по order, после по текст — map не гарантира ред.
+    list.sort((a, b) {
+      final c = a.order.compareTo(b.order);
+      return c != 0 ? c : a.text.toLowerCase().compareTo(b.text.toLowerCase());
+    });
+    return list;
   }
 
   factory GroupTask.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -162,14 +252,30 @@ class GroupTask {
       updatedAt: _ts(data['updatedAt']),
       deleted: data['deleted'] as bool? ?? false,
       deletedAt: _ts(data['deletedAt']),
+      template: data['template'] as String?,
+      items: _parseItems(data['items']),
+      reminderSetBy: data['reminderSetBy'] as String?,
+      remindAll: data['remindAll'] as bool? ?? false,
     );
   }
+
+  int get checkedItemsCount =>
+      items?.where((i) => i.checked).length ?? 0;
+  int get totalItemsCount => items?.length ?? 0;
 
   /// Транзитен [Task] обект само за визуализация през `TaskCardView`
   /// (преизползва съществуващите карти, вкл. „Билети" темата). НЕ се пази в Hive.
   /// `categoryId` нарочно е неутрален ('shared') — да не задейства shopping
   /// bottom-sheet поведението на личните карти.
   Task toDisplayTask() {
+    // За shopping задача с продукти показваме прогреса на продуктите в картата
+    // (прогрес-лента „отметнати/общо") чрез subtasks на транзитния Task.
+    final displaySubtasks = hasItems
+        ? items!
+            .map((i) => SubtaskCodec.format(
+                done: i.checked, qty: i.qty, text: i.text))
+            .toList()
+        : subtasks;
     final t = Task(
       title: title,
       dueDate: dueDate,
@@ -177,7 +283,7 @@ class GroupTask {
       priority: priority,
       recurrence: recurrence,
       reminders: reminders,
-      subtasks: subtasks,
+      subtasks: displaySubtasks,
       notes: notes,
       id: id,
       updatedAt: updatedAt,

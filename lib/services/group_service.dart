@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/group.dart';
+import '../utils/uuid.dart';
 import 'auth_service.dart';
 
 /// Кодове за грешки → UI ги локализира (виж AppText.groupError...).
@@ -99,6 +100,23 @@ class GroupService {
         return a.dueDate.compareTo(b.dueDate);
       });
       return list;
+    });
+  }
+
+  /// Проверка за реална връзка със сървъра (за преместване — точка 2: личната
+  /// задача се трие САМО след сървърно потвърждение). `Source.server` хвърля
+  /// `unavailable` при офлайн (за разлика от обикновен `.get()`, който връща кеш).
+  Future<void> pingServerForGroup(String groupId) async {
+    await _groups.doc(groupId).get(const GetOptions(source: Source.server));
+  }
+
+  /// Една задача на живо (за груповия „Списък за пазаруване" екран). Връща null,
+  /// ако документът е изтрит или tombstone-нат (друг член го е махнал).
+  Stream<GroupTask?> watchTask(String groupId, String taskId) {
+    return _tasksRef(groupId).doc(taskId).snapshots().map((doc) {
+      if (!doc.exists) return null;
+      final t = GroupTask.fromDoc(doc);
+      return t.deleted ? null : t;
     });
   }
 
@@ -256,10 +274,28 @@ class GroupService {
         'subtasks': t.subtasks,
         'notes': t.notes,
         'isCompleted': t.isCompleted,
+        'template': t.template,
+        'reminderSetBy': t.reminderSetBy,
+        'remindAll': t.remindAll,
       };
 
-  /// Добавя нова задача към групата. Лимит: макс. активни задачи.
-  Future<void> addTask(String groupId, GroupTask t) async {
+  /// Сериализира продуктите към map по id (за shopping задачи при създаване).
+  Map<String, dynamic> _itemsToMap(List<ShoppingItem> items) {
+    final m = <String, dynamic>{};
+    for (final it in items) {
+      m[it.id] = it.toMap();
+    }
+    return m;
+  }
+
+  /// Добавя нова задача към групата. Лимит: макс. активни задачи. Ако задачата е
+  /// shopping с продукти ([GroupTask.items]), записва и map-а `items`.
+  ///
+  /// ВАЖНО (точка 2, преместване): Firestore write Future-ите се resolve-ват чак
+  /// при СЪРВЪРНО потвърждение (офлайн увисват) → викащият може да `await` този
+  /// метод и чак при успех да трие личната задача. Викащият подсигурява онлайн
+  /// чрез пред-проверка + timeout.
+  Future<String> addTask(String groupId, GroupTask t) async {
     final uid = _uid;
     if (uid == null) throw GroupException('not-signed-in');
 
@@ -271,8 +307,9 @@ class GroupService {
       throw GroupException('task-limit');
     }
 
-    await _tasksRef(groupId).add({
+    final ref = await _tasksRef(groupId).add({
       ..._taskToMap(t),
+      if (t.items != null) 'items': _itemsToMap(t.items!),
       'createdBy': uid,
       'completedBy': null,
       'completedAt': null,
@@ -280,14 +317,72 @@ class GroupService {
       'deletedAt': null,
       'updatedAt': FieldValue.serverTimestamp(),
     });
+    return ref.id;
   }
 
-  /// Редакция на съществуваща задача. НЕ пипа `deleted` (delete бие edit).
+  /// Редакция на съществуваща задача. НЕ пипа `deleted` (delete бие edit) и НЕ
+  /// пипа `items` (те се менажират през item-операциите по-долу → редакция на
+  /// заглавие/дата/напомняне не трие продуктите).
   Future<void> updateTask(String groupId, String taskId, GroupTask t) async {
     await _tasksRef(groupId).doc(taskId).update({
       ..._taskToMap(t),
       'updatedAt': FieldValue.serverTimestamp(),
     });
+  }
+
+  // ───────────────── SHOPPING ПРОДУКТИ (map по id, field-path) ───────────────
+  // Всяка операция пипа САМО своето вложено поле (`items.<id>...`) → едновременни
+  // отметки на различни продукти от различни членове се merge-ват без overwrite.
+
+  /// Отмята/размаркира продукт. Пази КОЙ го е отметнал (за „Купено от X").
+  Future<void> toggleItem(
+      String groupId, String taskId, String itemId, bool checked) async {
+    final uid = _uid;
+    await _tasksRef(groupId).doc(taskId).update({
+      'items.$itemId.checked': checked,
+      'items.$itemId.checkedBy': checked ? uid : null,
+      'items.$itemId.checkedAt':
+          checked ? FieldValue.serverTimestamp() : null,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  /// Добавя нов продукт. Връща новото id. `order` = текущо време (край на списъка).
+  Future<String> addItem(String groupId, String taskId, String text,
+      {int qty = 1}) async {
+    final id = Uuid.v4();
+    await _tasksRef(groupId).doc(taskId).update({
+      'items.$id.text': text.trim(),
+      'items.$id.checked': false,
+      'items.$id.checkedBy': null,
+      'items.$id.checkedAt': null,
+      'items.$id.qty': qty,
+      'items.$id.order': DateTime.now().millisecondsSinceEpoch,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+    return id;
+  }
+
+  /// Трие продукт (цялото вложено поле `items.<id>`).
+  Future<void> removeItem(
+      String groupId, String taskId, String itemId) async {
+    await _tasksRef(groupId).doc(taskId).update({
+      'items.$itemId': FieldValue.delete(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  /// Трие всички отметнати продукти наведнъж (едно update с няколко delete-а).
+  Future<void> clearCheckedItems(
+      String groupId, String taskId, List<String> checkedIds) async {
+    if (checkedIds.isEmpty) return;
+    final patch = <String, dynamic>{
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+    for (final id in checkedIds) {
+      patch['items.$id'] = FieldValue.delete();
+    }
+    await _tasksRef(groupId).doc(taskId).update(patch);
   }
 
   /// Маркира/размаркира завършена. Пази КОЙ я е завършил (за индикатора).

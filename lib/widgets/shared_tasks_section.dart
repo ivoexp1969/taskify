@@ -12,6 +12,7 @@ import '../utils/subtask_format.dart';
 import '../utils/category_colors.dart';
 import '../widgets/task_card_styles.dart';
 import '../screens/shared/group_tasks_screen.dart';
+import '../screens/shared/group_shopping_list_screen.dart';
 
 /// Обособена секция „Споделени" в основния списък със задачи (таб Задачи).
 ///
@@ -230,6 +231,15 @@ class _SharedTasksSectionState extends State<SharedTasksSection> {
     );
   }
 
+  void _open(Group g, GroupTask gt) {
+    // Shopping списък → директно екрана му; иначе целия групов екран.
+    if (gt.isShopping) {
+      GroupShoppingListScreen.show(context, g, gt.id);
+    } else {
+      _openGroup(g);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppText.of(context);
@@ -337,19 +347,25 @@ class _SharedTasksSectionState extends State<SharedTasksSection> {
           priorityText: _priorityLabel(gt.priority, t),
           dateTimeStr: _dateStr(gt.dueDate),
           categoryName: _categoryDisplay(gt, t),
-          onToggleExpand: () => setState(() {
-            if (_expanded.contains(gt.id)) {
-              _expanded.remove(gt.id);
-            } else {
-              _expanded.add(gt.id);
+          onToggleExpand: () {
+            if (gt.isShopping) {
+              _open(g, gt);
+              return;
             }
-          }),
+            setState(() {
+              if (_expanded.contains(gt.id)) {
+                _expanded.remove(gt.id);
+              } else {
+                _expanded.add(gt.id);
+              }
+            });
+          },
           onToggleComplete: () => isAuthor
               ? _service.toggleComplete(g.id, gt.id, !gt.isCompleted)
               : _notAuthor(t),
           // Отваряне/редакция → пълния контекст на груповата задача (НЕ личния
-          // редактор), както изисква спецификацията.
-          onEdit: () => _openGroup(g),
+          // редактор), както изисква спецификацията. Shopping → екрана на списъка.
+          onEdit: () => _open(g, gt),
           onBreakdown: () => _openGroup(g),
           onToggleSubtask: (index) =>
               isAuthor ? _toggleSubtask(g, gt, index) : _notAuthor(t),
