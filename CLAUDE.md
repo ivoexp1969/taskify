@@ -50,6 +50,21 @@ flutter build appbundle --release
 без този диалог новите функции остават неоткрити.
 
 ## Current Version
+**v1.0.71+82 (2026-11-08) — ★Android ЖИВА в Google Play Production 100% (vc82)★.** Обединен релийз „споделено
+пазаруване + съвместна работа по групови задачи". Качен директно на Production чрез
+`tools/play_upload.py --track production --status completed` (vc82; Play API потвърди production=1.0.71/vc82/
+completed, заменя 1.0.70/vc80). Съдържа: (1) **групов списък за пазаруване** (map по id, real-time, „Купено от
+X", авто-complete); (2) **„Премести в група"** от личните задачи навсякъде (карта/редактор/long-press/shopping
+екран; ВИНАГИ видимо + login диалог) — ★ПЕРИОДИЧНА лична задача при споделяне КОПИРА само текущата инстанция и
+личната ОСТАВА да се повтаря★; (3) **всеки член може да завършва/редактира** груповите задачи (триене остава за
+автор/собственик); (4) **групови напомняния** (локални, НЯМА FCM); (5) ново **празно състояние** за първа
+задача + **анонимна статистика** (opt-out) + **NLP абсолютни дати**. whats_new `_build`=82 (7 точки ×13 ез.),
+`release_notes/1.0.71.md`. **PC (11-08):** `flutter clean`→AAB 60.4MB (merged manifest: USE_FULL_SCREEN_INTENT
++ targetSdk 36 потвърдени); ⚠️ първи ъплоуд гръмна с транзиентна 503 (edit не commit-нат), повторен → ОК. Play
+notes BG(409)/EN(354). Клон `release/1.0.71` (commits до `7a1e163`, НЕ merge-нат в main). Debug APK тестван на
+Note 9 без краш. **Чист cross-platform Dart.** ⏳ОСТАВА за Mac: **iOS 1.0.71+82 билд** (`git checkout
+release/1.0.71`→`pull`→`pub get`→`pod install`→`build ipa`; attach build 82; виж release_notes/1.0.71.md +
+Recent Work). ПРЕДИШНО:
 **v1.0.69+79 (2026-10-28) — ★Android ЖИВА в Google Play Production 100% (vc79)★.** Качен internal→промотиран
 Production 100% (`play_promote.py --version-code 79 --track production --status completed`, edit 00641173366831547045;
 потвърдено през Play API: production=1.0.69/vc79/completed/100%). Production release notes BG+EN (имен-ден). ⚠️ vc79
