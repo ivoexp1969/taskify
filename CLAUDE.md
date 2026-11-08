@@ -232,6 +232,24 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **★v1.0.71+82 — Production 100% (Android) + App Store (iOS) + merge в main (PC, 2026-11-08)★:** продължение на
+  обединения 1.0.71. Тази сесия добави 2 поведенчески промени към „Премести в група" + качи на Production.
+  **(1) ПЕРИОДИЧНА лична задача при споделяне** (`widgets/move_to_group_sheet.dart` `_confirmAndMove`, commit
+  `dcff429`): вместо „премести" (което триеше повторението) → **копира само текущата инстанция** (груповото копие
+  `recurrence:null`), а **личната периодична ОСТАВА** да се повтаря. Еднократните = старото преместване+tombstone.
+  Нови loc `shareRecurringInstanceConfirm`/`copiedToGroup`; махнат `moveToGroupRecurringWarn`. **(2) ВСЕКИ член
+  редактира** (`group_tasks_screen.dart` + `shared_tasks_section.dart`, commit `f9fdec7`): махнат author-гейтът за
+  завършване/редактиране/подзадачи; **триенето остава за автор ИЛИ собственик** (shared_tasks_section изравнен към
+  `isAuthor || g.isOwner(uid)`). `onlyAuthorCanManage` пренаписан за триене (13 ез.). firestore.rules НЕ пипани
+  (вече пускат всеки член). **(3) Релийз:** whats_new `_build`=81→**82** + 7-а точка „съвместно редактиране" (×13),
+  `release_notes/1.0.71.md`, bump 1.0.71+81→**+82**. `flutter clean`→AAB **60.4MB** (merged manifest:
+  USE_FULL_SCREEN_INTENT + targetSdk 36 потвърдени). Качен **Production completed 100%** (`tools/play_upload.py
+  --track production --status completed`, vc82; ⚠️ 1-ви опит = транзиентна **503** на `tracks().update`, AAB качен
+  но edit НЕ commit-нат → нищо публикувано, повторен след 15с → ОК). Play API потвърди production=1.0.71/vc82/
+  completed (заменя 1.0.70/vc80). Play notes BG(409)/EN(354) от файл. Debug APK тестван на Note 9 без краш (вход+
+  групата „Семейство" запазени чрез `-r`). **★iOS 1.0.71(82) подадена в App Store (Mac, 11-08) → в преглед.★**
+  **release/1.0.71 merge-нат в `main`** (fast-forward `8477ff0..8eba00b`), push-нат → main=release=`8eba00b`.
+  ⏳ОСТАВА: iOS одобрение (авто). Клонът `release/1.0.71` може да се трие (merge-нат), но оставен за проследимост.
 - **★v1.0.69+79 — само разширеният именник → качен на Internal testing (PC, 2026-10-28)★:** `git pull`
   (up-to-date). Поискана промяна беше „нов `bg_name_days.json` + махни Pomodoro от onboarding АКО не съществува" —
   проверих кода: **Pomodoro СЪЩЕСТВУВА** (`pomodoro_timer_sheet.dart`, истински 25-мин таймер, старт от

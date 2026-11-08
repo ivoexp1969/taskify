@@ -6,6 +6,26 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-11-08 · PC — v1.0.71+82 → Play Production 100% (Android) + iOS App Store + merge в main
+Продължение на обединения 1.0.71. Добавени 2 поведенчески промени към „Премести в група", после качен на Production.
+1. **Периодична лична задача при споделяне** (commit `dcff429`): вместо „премести" (трие повторението) → **копира
+   само текущата инстанция** в групата (`recurrence:null`), личната периодична **остава** да се повтаря. Еднократните
+   = старо преместване+tombstone. `widgets/move_to_group_sheet.dart` `_confirmAndMove` (`isRecurring` гейт); нови loc
+   `shareRecurringInstanceConfirm`/`copiedToGroup`; махнат `moveToGroupRecurringWarn`.
+2. **Всеки член редактира/завършва** груповите задачи (commit `f9fdec7`): махнат author-гейтът за complete/edit/
+   subtasks в `group_tasks_screen.dart` + `shared_tasks_section.dart`. **Триенето остава за автор ИЛИ собственик**
+   (shared_tasks_section изравнен към `isAuthor || g.isOwner(uid)`). `onlyAuthorCanManage` пренаписан за триене (13 ез.).
+   firestore.rules НЕ пипани (вече пускат всеки член — гейтът беше клиентски).
+3. **Релийз (commit `7a1e163`):** whats_new `_build`=81→**82** + 7-а точка „съвместно редактиране" (×13), `release_notes/
+   1.0.71.md`, bump +81→**+82**. `flutter clean`→AAB **60.4MB** (manifest: USE_FULL_SCREEN_INTENT + targetSdk 36 ✓).
+   Качен **Production completed 100%** (`tools/play_upload.py --track production --status completed`, vc82). ⚠️КАПАН:
+   1-ви опит = транзиентна **HTTP 503** на `tracks().update` (AAB вече качен, но edit НЕ commit-нат → нищо публикувано);
+   повторен след ~15с → ОК. Play API потвърди production=1.0.71/vc82/completed (заменя 1.0.70/vc80). Notes BG(409)/EN(354)
+   от файл (кирилица). analyze 0 нови, 136/136 теста. Debug APK на Note 9 без краш (`-r` пази вход+групата „Семейство").
+4. **★iOS 1.0.71(82) подадена в App Store (Mac, 11-08) → в преглед, авто след одобрение.★**
+5. **Merge `release/1.0.71` → `main`** (fast-forward `8477ff0..8eba00b`), push-нат. main=release=`8eba00b` → поправя
+   „Mac чете стари данни (vc79)". CLAUDE.md Current Version + Recent Work обновени. Android+iOS изравнени на 1.0.71/build 82.
+
 ## 2026-11-07 · PC — Обединен релийз 1.0.71+81 (групово пазаруване + empty-state) → клон release/1.0.71 → Play Internal
 **★РЕШЕНИЕ (Иво, 07.11): старото „1.0.71 ПРЕДИ, НЕ смесвай с 1.0.72" е ОТМЕНЕНО★** — пускаме двете
 заедно като **1.0.71+81** (заради TestFlight теста на 2 устройства). Стъпки:
