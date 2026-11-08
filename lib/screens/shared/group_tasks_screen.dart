@@ -659,7 +659,8 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                   final completer = gt.completedBy != null
                       ? _group.memberFor(gt.completedBy!).displayName
                       : null;
-                  // Само авторът може да завършва/редактира задачата.
+                  // Всеки член може да завършва/редактира задачата (споделена
+                  // работа). isAuthor се ползва само за правото на ТРИЕНЕ.
                   // (Стари задачи без автор → достъпни за всички, за съвместимост.)
                   final isAuthor = gt.createdBy == null || gt.createdBy == uid;
                   // Триене: авторът ИЛИ собственикът на групата (точка 3, 1.0.72).
@@ -694,10 +695,6 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                           });
                         },
                         onToggleComplete: () {
-                          if (!isAuthor) {
-                            notAuthor();
-                            return;
-                          }
                           final willComplete = !gt.isCompleted;
                           _service.toggleComplete(_group.id, gt.id, willComplete);
                           if (willComplete) {
@@ -712,7 +709,8 @@ class _GroupTasksScreenState extends State<GroupTasksScreen> {
                                 context, _group, gt.id);
                             return;
                           }
-                          isAuthor ? _addOrEditTask(existing: gt) : notAuthor();
+                          // Всеки член може да редактира задачата.
+                          _addOrEditTask(existing: gt);
                         },
                         onDelete: () => canDelete
                             ? _confirmAndDeleteTask(gt)

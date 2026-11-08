@@ -360,16 +360,17 @@ class _SharedTasksSectionState extends State<SharedTasksSection> {
               }
             });
           },
-          onToggleComplete: () => isAuthor
-              ? _service.toggleComplete(g.id, gt.id, !gt.isCompleted)
-              : _notAuthor(t),
+          // Всеки член може да завършва задачата (споделена работа).
+          onToggleComplete: () =>
+              _service.toggleComplete(g.id, gt.id, !gt.isCompleted),
           // Отваряне/редакция → пълния контекст на груповата задача (НЕ личния
           // редактор), както изисква спецификацията. Shopping → екрана на списъка.
           onEdit: () => _open(g, gt),
           onBreakdown: () => _openGroup(g),
-          onToggleSubtask: (index) =>
-              isAuthor ? _toggleSubtask(g, gt, index) : _notAuthor(t),
-          onDelete: () => isAuthor
+          // Всеки член може да отмята подзадачи.
+          onToggleSubtask: (index) => _toggleSubtask(g, gt, index),
+          // Триене остава за автора ИЛИ собственика на групата.
+          onDelete: () => (isAuthor || g.isOwner(uid))
               ? _service.deleteTask(g.id, gt.id)
               : _notAuthor(t),
         ),
