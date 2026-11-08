@@ -155,35 +155,25 @@ class _MoveToGroupSheetState extends State<_MoveToGroupSheet> {
     final t = AppText.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
+    // Периодична задача → КОПИРАМЕ тази инстанция в групата и ЗАПАЗВАМЕ личната
+    // периодична (продължава да се повтаря). Еднократна → преместваме (трием
+    // личната). Така повторението не се губи.
+    final isRecurring = widget.task.recurrence != null;
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(t.moveToGroup),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(t.moveToGroupConfirm(g.name)),
-            if (widget.task.recurrence != null) ...[
-              const SizedBox(height: 10),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(Icons.warning_amber_rounded,
-                      size: 18, color: Colors.orange),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(t.moveToGroupRecurringWarn)),
-                ],
-              ),
-            ],
-          ],
-        ),
+        content: Text(isRecurring
+            ? t.shareRecurringInstanceConfirm(g.name)
+            : t.moveToGroupConfirm(g.name)),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
               child: Text(t.cancel)),
           FilledButton(
-              onPressed: () => Navigator.pop(ctx, true), child: Text(t.move)),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(isRecurring ? t.shareTask : t.move)),
         ],
       ),
     );
@@ -224,15 +214,20 @@ class _MoveToGroupSheetState extends State<_MoveToGroupSheet> {
       return;
     }
 
-    // 3) Потвърдено → махни локалните нотификации и трий ЛИЧНАТА задача през
-    //    tombstone (иначе merge sync я възкресява).
-    try {
-      await NotificationService().cancelForTask(widget.task);
-      await TombstoneService().deleteTask(widget.task);
-    } catch (_) {/* груповото копие вече е записано; не блокирай */}
+    // 3) Потвърдено. Еднократна → трий ЛИЧНАТА задача (tombstone, иначе merge
+    //    sync я възкресява) + махни локалните ѝ нотификации. Периодична →
+    //    ЗАПАЗВАМЕ личната (нотификациите ѝ също), споделихме само копие.
+    if (!isRecurring) {
+      try {
+        await NotificationService().cancelForTask(widget.task);
+        await TombstoneService().deleteTask(widget.task);
+      } catch (_) {/* груповото копие вече е записано; не блокирай */}
+    }
 
     if (!mounted) return;
-    messenger.showSnackBar(SnackBar(content: Text(t.movedToGroup(g.name))));
+    messenger.showSnackBar(SnackBar(
+        content: Text(
+            isRecurring ? t.copiedToGroup(g.name) : t.movedToGroup(g.name))));
     Navigator.of(context).pop(true);
   }
 
