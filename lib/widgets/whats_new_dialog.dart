@@ -16,9 +16,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Нови инсталации НЕ го виждат (те виждат welcome диалога).
 class WhatsNewDialog {
   /// Билдът, за който са точките по-долу (= `pubspec.yaml` build number).
-  /// ★1.0.71 → versionCode 81★ — обединен релийз: групово пазаруване +
-  /// ново празно състояние + умно разпознаване на дати + анонимна статистика.
-  static const int _build = 81;
+  /// ★1.0.71 → versionCode 82★ — обединен релийз: групово пазаруване +
+  /// съвместно редактиране от всички членове + ново празно състояние +
+  /// умно разпознаване на дати + анонимна статистика.
+  static const int _build = 82;
 
   static const String _prefKey = 'whats_new_seen_build';
 
@@ -27,6 +28,7 @@ class WhatsNewDialog {
     'en': [
       '🛒 Shared shopping lists in groups — everyone sees check-offs live.',
       '👪 "Move to group" — turn a personal list or task into a shared one.',
+      '✏️ Everyone in the group can now edit and tick off shared tasks together.',
       '🔔 Reminders for group tasks.',
       '🆕 A fresh start screen helps you add your first task faster.',
       '📅 Smarter date recognition when adding a task (e.g. "12 December", "12.12").',
@@ -35,6 +37,7 @@ class WhatsNewDialog {
     'bg': [
       '🛒 Споделен списък за пазаруване в групите — всеки член вижда отметките на живо.',
       '👪 „Премести в група" — направи личен списък или задача споделена.',
+      '✏️ Вече всеки член на групата може да редактира и отмята споделените задачи.',
       '🔔 Напомняния за груповите задачи.',
       '🆕 Нов начален екран за по-бързо създаване на първата задача.',
       '📅 По-умно разпознаване на датата при добавяне (напр. „12 декември", „12.12").',
@@ -43,6 +46,7 @@ class WhatsNewDialog {
     'de': [
       '🛒 Gemeinsame Einkaufslisten in Gruppen — alle sehen Abhakungen live.',
       '👪 „In Gruppe verschieben" — mach eine persönliche Liste oder Aufgabe geteilt.',
+      '✏️ Jetzt können alle in der Gruppe gemeinsame Aufgaben bearbeiten und abhaken.',
       '🔔 Erinnerungen für Gruppenaufgaben.',
       '🆕 Neuer Startbildschirm — füge deine erste Aufgabe schneller hinzu.',
       '📅 Bessere Datumserkennung beim Hinzufügen (z. B. „12. Dezember", „12.12").',
@@ -51,6 +55,7 @@ class WhatsNewDialog {
     'fr': [
       '🛒 Listes de courses partagées dans les groupes — tout le monde voit les cases cochées en direct.',
       '👪 « Déplacer vers un groupe » — rends une liste ou une tâche personnelle partagée.',
+      '✏️ Désormais, tout le monde dans le groupe peut modifier et cocher les tâches partagées.',
       '🔔 Rappels pour les tâches de groupe.',
       '🆕 Nouvel écran d\'accueil pour ajouter ta première tâche plus vite.',
       '📅 Meilleure reconnaissance des dates à l\'ajout (ex. « 12 décembre », « 12.12 »).',
@@ -59,6 +64,7 @@ class WhatsNewDialog {
     'it': [
       '🛒 Liste della spesa condivise nei gruppi — tutti vedono le spunte in tempo reale.',
       '👪 «Sposta nel gruppo» — rendi condivisa una lista o un\'attività personale.',
+      '✏️ Ora tutti nel gruppo possono modificare e spuntare le attività condivise.',
       '🔔 Promemoria per le attività di gruppo.',
       '🆕 Nuova schermata iniziale per aggiungere la prima attività più in fretta.',
       '📅 Riconoscimento delle date migliorato (es. "12 dicembre", "12.12").',
@@ -67,6 +73,7 @@ class WhatsNewDialog {
     'el': [
       '🛒 Κοινόχρηστες λίστες για ψώνια στις ομάδες — όλοι βλέπουν τα τσεκαρίσματα ζωντανά.',
       '👪 «Μετακίνηση σε ομάδα» — κάνε μια προσωπική λίστα ή εργασία κοινόχρηστη.',
+      '✏️ Τώρα όλοι στην ομάδα μπορούν να επεξεργάζονται και να τσεκάρουν τις κοινές εργασίες.',
       '🔔 Υπενθυμίσεις για τις εργασίες ομάδας.',
       '🆕 Νέα αρχική οθόνη για να προσθέσεις πιο γρήγορα την πρώτη σου εργασία.',
       '📅 Εξυπνότερη αναγνώριση ημερομηνίας κατά την προσθήκη (π.χ. «12 Δεκεμβρίου», «12.12»).',
@@ -75,6 +82,7 @@ class WhatsNewDialog {
     'es': [
       '🛒 Listas de la compra compartidas en los grupos — todos ven las marcas en tiempo real.',
       '👪 «Mover al grupo» — convierte una lista o tarea personal en compartida.',
+      '✏️ Ahora todos en el grupo pueden editar y marcar las tareas compartidas.',
       '🔔 Recordatorios para las tareas de grupo.',
       '🆕 Nueva pantalla de inicio para añadir tu primera tarea más rápido.',
       '📅 Mejor reconocimiento de fechas al añadir (p. ej. "12 de diciembre", "12.12").',
@@ -83,6 +91,7 @@ class WhatsNewDialog {
     'pt': [
       '🛒 Listas de compras partilhadas nos grupos — todos veem as marcações em tempo real.',
       '👪 «Mover para grupo» — torna partilhada uma lista ou tarefa pessoal.',
+      '✏️ Agora todos no grupo podem editar e marcar as tarefas partilhadas.',
       '🔔 Lembretes para as tarefas de grupo.',
       '🆕 Nova tela inicial para adicionar a primeira tarefa mais rápido.',
       '📅 Reconhecimento de datas mais inteligente ao adicionar (ex.: "12 de dezembro", "12.12").',
@@ -91,6 +100,7 @@ class WhatsNewDialog {
     'ru': [
       '🛒 Общие списки покупок в группах — все видят отметки в реальном времени.',
       '👪 «Переместить в группу» — сделай личный список или задачу общими.',
+      '✏️ Теперь все в группе могут редактировать и отмечать общие задачи.',
       '🔔 Напоминания для групповых задач.',
       '🆕 Новый начальный экран — добавь первую задачу быстрее.',
       '📅 Умное распознавание даты при добавлении (напр. «12 декабря», «12.12»).',
@@ -99,6 +109,7 @@ class WhatsNewDialog {
     'tr': [
       '🛒 Gruplarda ortak alışveriş listeleri — herkes işaretlemeleri anında görür.',
       '👪 "Gruba taşı" — kişisel bir listeyi veya görevi paylaşımlı yap.',
+      '✏️ Artık gruptaki herkes paylaşılan görevleri düzenleyip işaretleyebilir.',
       '🔔 Grup görevleri için hatırlatıcılar.',
       '🆕 İlk görevini daha hızlı eklemen için yeni başlangıç ekranı.',
       '📅 Görev eklerken daha akıllı tarih tanıma (örn. "12 Aralık", "12.12").',
@@ -107,6 +118,7 @@ class WhatsNewDialog {
     'nl': [
       '🛒 Gedeelde boodschappenlijsten in groepen — iedereen ziet het afvinken live.',
       '👪 "Naar groep verplaatsen" — maak een persoonlijke lijst of taak gedeeld.',
+      '✏️ Nu kan iedereen in de groep gedeelde taken samen bewerken en afvinken.',
       '🔔 Herinneringen voor groepstaken.',
       '🆕 Nieuw startscherm om je eerste taak sneller toe te voegen.',
       '📅 Slimmere datumherkenning bij het toevoegen (bijv. "12 december", "12.12").',
@@ -115,6 +127,7 @@ class WhatsNewDialog {
     'uk': [
       '🛒 Спільні списки покупок у групах — усі бачать позначки в реальному часі.',
       '👪 «Перемістити в групу» — зроби особистий список або завдання спільними.',
+      '✏️ Тепер усі в групі можуть редагувати та позначати спільні завдання.',
       '🔔 Нагадування для групових завдань.',
       '🆕 Новий початковий екран — додай перше завдання швидше.',
       '📅 Розумніше розпізнавання дати під час додавання (напр. «12 грудня», «12.12»).',
@@ -123,6 +136,7 @@ class WhatsNewDialog {
     'ja': [
       '🛒 グループで買い物リストを共有 — チェックがリアルタイムで全員に見えます。',
       '👪 「グループに移動」— 個人のリストやタスクを共有できます。',
+      '✏️ グループの全員で共有タスクを編集・完了できるようになりました。',
       '🔔 グループタスクのリマインダー。',
       '🆕 新しいホーム画面で最初のタスクをすばやく追加できます。',
       '📅 タスク追加時の日付認識が賢くなりました（例：「12月12日」「12.12」）。',
