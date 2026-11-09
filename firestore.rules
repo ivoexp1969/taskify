@@ -45,6 +45,12 @@ service cloud.firestore {
         return request.auth != null
             && request.auth.token.firebase.sign_in_provider != 'anonymous';
       }
+      // Админ: custom claim admin=true (сетнат през Admin SDK на собственика).
+      // Дава пълен CRUD през taskify-promo-codes.html — ОТДЕЛНО от правилото за
+      // обикновения потребител по-долу (то остава непроменено).
+      function isAdmin() {
+        return request.auth != null && request.auth.token.admin == true;
+      }
 
       allow get: if true;
       allow list: if nonAnon();
@@ -64,7 +70,10 @@ service cloud.firestore {
         && resource.data.get('usedBy', []).toSet()
              .difference(request.resource.data.usedBy.toSet()).size() == 0;
 
-      allow create, delete: if false;
+      // Админ (пълен контрол от инструмента) — ОТДЕЛНО от user update-а горе
+      // (двете allow update се OR-ват: обикновеният user пак може само +1).
+      allow update: if isAdmin();
+      allow create, delete: if isAdmin();
     }
 
     // ─────────── ОФЕРТИ ЗА ПОДНОВЯВАНЕ (Идея 1 — монетизация) ──────────
