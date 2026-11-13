@@ -50,6 +50,17 @@ flutter build appbundle --release
 без този диалог новите функции остават неоткрити.
 
 ## Current Version
+**v1.0.72+83 (2026-11-13) — ★Android ЖИВА в Google Play Production 100% (vc83)★. HOTFIX: загуба на данни при sync.**
+Качен директно на Production чрез `tools/play_upload.py --track production --status completed` (vc83; Play API потвърди
+production=1.0.72/vc83/completed/100%, заменя 1.0.71/vc82). Единствена код промяна = `lib/services/sync_service.dart`
+(+`test/sync_dedup_test.dart`, commit `09f7e34`): дедупът при синхронизация вече **НЕ трие потребителски задачи** →
+нова създадена задача НЕ изчезва след sync. Клон `hotfix/1.0.72` от `7a1e163` (= пуснатата 1.0.71 vc82; проверено
+преди качването). Същият код като **iOS build 83** (тестван на iPhone с основния акаунт — новата задача остава).
+Mac вече merge-на кода в `main` (`53c29cd`); тази сесия (PC) донесе само docs + merge на `hotfix/1.0.72` → `main`.
+**PC (11-13):** `flutter test` **142 ✅**; `flutter clean`→AAB **60.4MB** (merged manifest: USE_FULL_SCREEN_INTENT +
+targetSdk 36 потвърдени; ⚠️ 1-ви AAB опит гръмна с Windows lock на `R.jar` от спрян APK билд → `gradlew --stop`
+2 демона → чист rebuild → ОК). Play notes BG/EN (dedup fix). ★Note 9 инсталация ПРОПУСНАТА по заявка (валидирано
+на iOS).★ whats_new `_build` НЕ е пипан (dedup = тих bugfix). **Чист cross-platform Dart → iOS=само Mac билд.** ПРЕДИШНО:
 **v1.0.71+82 (2026-11-08) — ★Android ЖИВА в Google Play Production 100% (vc82)★.** Обединен релийз „споделено
 пазаруване + съвместна работа по групови задачи". Качен директно на Production чрез
 `tools/play_upload.py --track production --status completed` (vc82; Play API потвърди production=1.0.71/vc82/
@@ -232,6 +243,22 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **★v1.0.72+83 — HOTFIX sync data-loss → ★ЖИВА в Play Production 100% (vc83)★ + merge в main (PC, 2026-11-13)★:**
+  Иво поиска качване на вече готовия hotfix (клон `hotfix/1.0.72` @ `9e313af`, същият код като iOS build 83, тестван
+  на iPhone с основния акаунт → новата задача остава). **(1) Верификация:** живата 1.0.71/vc82 в Play е от `7a1e163`
+  (`version 1.0.71+82`, whats_new `_build=82`; `git diff 7a1e163 origin/main -- lib android ios pubspec` = празно).
+  **(2) Fix:** единствена код промяна `lib/services/sync_service.dart` (commit `09f7e34`) — дедупът при sync вече НЕ
+  трие потребителски задачи; нов `test/sync_dedup_test.dart`. **(3) Build/upload:** `flutter test` **142 ✅**;
+  `flutter clean`→AAB **60.4MB** (merged manifest: USE_FULL_SCREEN_INTENT + targetSdk 36); качен **Production completed
+  vc83 100%** (`play_upload.py --track production --status completed`, edit 02178002746443718850; Play API потвърди
+  production=1.0.72/vc83/completed, заменя 1.0.71/vc82). Play notes BG/EN (dedup). **(4) Git:** Mac вече беше merge-нал
+  кода на 1.0.72 в `main` (`53c29cd`, с pubspec 1.0.72+83); PC-то merge-на остатъка = docs commit `7cf3a20` на
+  `hotfix/1.0.72` → `main` (конфликт само в CLAUDE.md+DEVLOG, решен: запазена пълната 1.0.71 история на main +
+  1.0.72 отгоре като Current Version). **★2 КАПАНА:** (1) 1-ви AAB опит гръмна `java.io.IOException: Couldn't delete
+  …R.jar` — Windows lock от Gradle демон (остатък от спрян APK билд) → `android/gradlew.bat --stop` (2 демона) +
+  `flutter clean` → OK; (2) `cmd //c "gradlew.bat --stop"` не тръгва (spaces) → PowerShell `& .\gradlew.bat --stop`.★
+  ★Note 9 инсталация ПРОПУСНАТА по изрична заявка (валидирано на iOS).★ whats_new `_build` НЕ е пипан (тих bugfix).
+  iOS 1.0.72(83) е на Mac (TestFlight, тестван).
 - **★v1.0.71+82 — Production 100% (Android) + App Store (iOS) + merge в main (PC, 2026-11-08)★:** продължение на
   обединения 1.0.71. Тази сесия добави 2 поведенчески промени към „Премести в група" + качи на Production.
   **(1) ПЕРИОДИЧНА лична задача при споделяне** (`widgets/move_to_group_sheet.dart` `_confirmAndMove`, commit

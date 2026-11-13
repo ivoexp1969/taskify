@@ -6,6 +6,27 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-11-13 · PC — HOTFIX 1.0.72+83 (sync data-loss) → ★Play Production 100% (vc83)★ + merge в main
+**Какво:** качен готовия hotfix за загуба на данни при синхронизация, направо на Production. Клон `hotfix/1.0.72`
+@ `9e313af` (= iOS build 83, вече тестван на iPhone с основния акаунт — новата задача остава).
+**Стъпки:**
+1. **Верификация vc82:** живата 1.0.71/vc82 в Play е от `7a1e163` (`version 1.0.71+82` + whats_new `_build=82`;
+   `git diff 7a1e163 origin/main -- lib android ios pubspec` празно).
+2. **Fix:** единствена код промяна `lib/services/sync_service.dart` (commit `09f7e34`) — дедупът при sync НЕ трие
+   потребителски задачи; нов `test/sync_dedup_test.dart`.
+3. **Test/Build:** `flutter test` **142 ✅**; `flutter clean`→AAB **60.4MB**; merged manifest потвърди
+   USE_FULL_SCREEN_INTENT + targetSdk 36.
+4. **Upload:** `tools/play_upload.py --track production --status completed` (vc83, edit 02178002746443718850) →
+   Play API потвърди **production=1.0.72/vc83/completed/100%** (заменя 1.0.71/vc82). Notes bg/en = dedup fix.
+5. **Git:** Mac вече беше merge-нал кода на 1.0.72 в `main` (`53c29cd`); PC merge-на остатъка = docs `7cf3a20`
+   (`hotfix/1.0.72` → `main`). Конфликт само в CLAUDE.md+DEVLOG — решен: пълната 1.0.71 история на main + 1.0.72 отгоре.
+**Капани:** (1) 1-ви AAB опит → `java.io.IOException: Couldn't delete …R.jar` = Windows lock от Gradle демон (остатък
+от спрян по-рано APK билд) → `android/gradlew.bat --stop` (2 демона) + `flutter clean` → OK; (2)
+`cmd //c "gradlew.bat --stop"` не тръгва (spaces) → PowerShell `& .\gradlew.bat --stop`.
+**Пропуснато по заявка:** Note 9 инсталация (валидирано на iOS). whats_new `_build` НЕ пипан. iOS 1.0.72(83) на Mac (TestFlight).
+
+---
+
 ## 2026-11-08 · PC — v1.0.71+82 → Play Production 100% (Android) + iOS App Store + merge в main
 Продължение на обединения 1.0.71. Добавени 2 поведенчески промени към „Премести в група", после качен на Production.
 1. **Периодична лична задача при споделяне** (commit `dcff429`): вместо „премести" (трие повторението) → **копира
