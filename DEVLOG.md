@@ -6,6 +6,29 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-11-13 · PC — HOTFIX 1.0.72+83 (sync data-loss) → ★Play Production 100% (vc83)★
+**Какво:** качен готовия hotfix за загуба на данни при синхронизация, направо на Production. Клон `hotfix/1.0.72`
+@ `9e313af` (= iOS build 83, вече тестван на iPhone с основния акаунт — новата задача остава).
+**Стъпки:**
+1. **Верификация vc82:** живата 1.0.71/vc82 в Play е от `7a1e163` (`version 1.0.71+82` + whats_new `_build=82`;
+   `git diff 7a1e163 origin/main -- lib android ios pubspec` празно → по-късните main commit-а = само docs/tools/stats).
+2. **Fix:** единствена код промяна `lib/services/sync_service.dart` (commit `09f7e34`) — дедупът при sync вече НЕ трие
+   потребителски задачи; нов `test/sync_dedup_test.dart`.
+3. **Test/Build:** `flutter test` **142 ✅**; `flutter clean`→AAB **60.4MB**; merged manifest потвърди
+   **USE_FULL_SCREEN_INTENT + targetSdk 36**.
+4. **Upload:** `tools/play_upload.py --track production --status completed` (vc83, edit 02178002746443718850) →
+   Play API потвърди **production=1.0.72/vc83/completed/100%** (заменя 1.0.71/vc82). Notes:
+   bg „Поправка на грешка, при която нова задача можеше да изчезне след синхронизация." / en-US „Fixed an issue where
+   a newly created task could disappear after sync."
+**Капани:** (1) 1-ви AAB опит → `java.io.IOException: Couldn't delete …R.jar` = Windows lock от Gradle демон (остатък
+от спрян по-рано APK билд) → `android/gradlew.bat --stop` (2 демона) + `flutter clean` → rebuild OK; (2)
+`cmd //c "gradlew.bat --stop"` не тръгва (spaces) → PowerShell `& .\gradlew.bat --stop`.
+**Пропуснато по заявка:** Note 9 инсталация (валидирано на iOS). whats_new `_build` НЕ пипан (тих bugfix).
+**⚠️ TODO:** `hotfix/1.0.72` още НЕ merge-нат в `main` (конфликт в Current Version/DEVLOG за решаване при merge).
+iOS 1.0.72(83) е на Mac (TestFlight).
+
+---
+
 ## 2026-11-07 · PC — Обединен релийз 1.0.71+81 (групово пазаруване + empty-state) → клон release/1.0.71 → Play Internal
 **★РЕШЕНИЕ (Иво, 07.11): старото „1.0.71 ПРЕДИ, НЕ смесвай с 1.0.72" е ОТМЕНЕНО★** — пускаме двете
 заедно като **1.0.71+81** (заради TestFlight теста на 2 устройства). Стъпки:

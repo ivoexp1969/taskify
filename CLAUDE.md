@@ -50,6 +50,22 @@ flutter build appbundle --release
 без този диалог новите функции остават неоткрити.
 
 ## Current Version
+**v1.0.72+83 (2026-11-13) — ★Android ЖИВА в Google Play Production 100% (vc83)★. HOTFIX: загуба на данни при sync.**
+Качен директно на Production чрез `tools/play_upload.py --track production --status completed` (vc83; Play API потвърди
+production=1.0.72/vc83/completed/100%, заменя 1.0.71/vc82). Единствена промяна = `lib/services/sync_service.dart`
+(+`test/sync_dedup_test.dart`, commit `09f7e34`): дедупът при синхронизация вече **НЕ трие потребителски задачи** →
+нова създадена задача НЕ изчезва след sync. Клон `hotfix/1.0.72` от `7a1e163` (= пуснатата 1.0.71 vc82; проверено
+преди качването — `version 1.0.71+82`, whats_new `_build=82`, а 4-те по-късни main commit-а са само docs/tools/stats).
+Същият код като **iOS build 83** (тестван на iPhone с основния акаунт — новата задача остава). **PC (11-13):**
+`flutter test` **142 ✅**; `flutter clean`→AAB **60.4MB** (merged manifest: USE_FULL_SCREEN_INTENT + targetSdk 36
+потвърдени; ⚠️ 1-ви AAB опит гръмна с Windows lock на `R.jar` от спрян APK билд → `gradlew --stop` 2 демона → чист
+rebuild → ОК). Play notes BG/EN (dedup fix). ★Note 9 инсталация ПРОПУСНАТА по заявка на Иво (валидирано на iOS).★
+whats_new `_build` НЕ е пипан (dedup = тих bugfix, като именника на 1.0.69). **Чист cross-platform Dart → iOS=само
+Mac билд.** ПРЕДИШНО:
+**v1.0.71+82 (2026-11-08) — Android ЖИВА в Play Production 100% (vc82) + iOS 1.0.71(82) в App Store.** Обединен
+релийз „споделено пазаруване + съвместна работа по групови задачи" (групов списък за пазаруване, „Премести в група",
+всеки член редактира, групови напомняния, ново празно състояние, анонимна статистика, NLP абсолютни дати;
+whats_new `_build`=82). Пълните детайли са в DEVLOG + CLAUDE.md на `main`. `hotfix/1.0.72` е каскада над този код. ПРЕДИШНО:
 **v1.0.69+79 (2026-10-28) — ★Android ЖИВА в Google Play Production 100% (vc79)★.** Качен internal→промотиран
 Production 100% (`play_promote.py --version-code 79 --track production --status completed`, edit 00641173366831547045;
 потвърдено през Play API: production=1.0.69/vc79/completed/100%). Production release notes BG+EN (имен-ден). ⚠️ vc79
@@ -217,6 +233,22 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **★v1.0.72+83 — HOTFIX sync data-loss → ★ЖИВА в Play Production 100% (vc83)★ (PC, 2026-11-13)★:** Иво поиска
+  качване на вече готовия hotfix (клон `hotfix/1.0.72` @ `9e313af`, същият код като iOS build 83, който е тестван на
+  iPhone с основния акаунт → новата задача остава). **(1) Верификация:** потвърдих, че живата 1.0.71/vc82 в Play е
+  от `7a1e163` (`version 1.0.71+82`, whats_new `_build=82`; `git diff 7a1e163 origin/main -- lib android ios pubspec`
+  = празно → 4-те по-късни main commit-а са само docs/tools/firestore.rules/stats). **(2) Fix:** единствена код промяна
+  = `lib/services/sync_service.dart` (commit `09f7e34`) — дедупът при sync НЕ трие потребителски задачи вече; нов
+  `test/sync_dedup_test.dart`. **(3) Build/upload:** `flutter test` **142 ✅**; `flutter clean`→AAB **60.4MB** (merged
+  manifest потвърди USE_FULL_SCREEN_INTENT + targetSdk 36); качен **Production completed vc83 100%**
+  (`play_upload.py --track production --status completed`, edit 02178002746443718850; Play API потвърди
+  production=1.0.72/vc83/completed, заменя 1.0.71/vc82). Play notes BG/EN (dedup). **★2 КАПАНА:** (1) 1-ви AAB опит
+  гръмна `java.io.IOException: Couldn't delete …R.jar` — Windows lock от Gradle демон, останал от спрян по-рано APK
+  билд → `android/gradlew.bat --stop` (2 демона) + `flutter clean` → rebuild OK; (2) `cmd //c "gradlew.bat --stop"`
+  не тръгва (spaces/път) → PowerShell `& .\gradlew.bat --stop`.★ ★Note 9 инсталация ПРОПУСНАТА по изрична заявка
+  (валидирано на iOS, без тест на Note 9).★ whats_new `_build` НЕ е пипан (тих bugfix). iOS 1.0.72(83) е на Mac
+  (TestFlight, вече тестван). ⚠️ `hotfix/1.0.72` още НЕ е merge-нат в `main` (CLAUDE.md тук е от преди 1.0.71 docs —
+  Current Version chain скача 1.0.72→1.0.71(кратко)→1.0.69; при merge в main ще има конфликт в тази секция за решаване).
 - **★v1.0.69+79 — само разширеният именник → качен на Internal testing (PC, 2026-10-28)★:** `git pull`
   (up-to-date). Поискана промяна беше „нов `bg_name_days.json` + махни Pomodoro от onboarding АКО не съществува" —
   проверих кода: **Pomodoro СЪЩЕСТВУВА** (`pomodoro_timer_sheet.dart`, истински 25-мин таймер, старт от
