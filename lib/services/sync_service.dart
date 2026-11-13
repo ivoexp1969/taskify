@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/task.dart';
 import '../models/category.dart';
@@ -211,11 +212,13 @@ class SyncService {
         evtGroups.putIfAbsent(evt, () => <String>{}).add(id);
       }
       for (final t in localById.values) {
+        if (t.isCompleted) continue; // завършените не са магнит
         addEvt(t.googleCalendarEventId, t.id!);
       }
       for (final e in cloudDocs.entries) {
         if (e.value['deleted'] == true) continue;
         if (localById.containsKey(e.key)) continue;
+        if (e.value['isCompleted'] == true) continue; // завършените не са магнит
         addEvt(e.value['googleCalendarEventId'] as String?, e.key);
       }
       for (final group in evtGroups.values) {
@@ -223,17 +226,11 @@ class SyncService {
         final ids = group.toList()..sort();
         final survivor = ids.first;
         for (final dupId in ids.skip(1)) {
-          if (cloudDocs.containsKey(dupId)) {
-            await tasksRef.doc(dupId).delete();
-            cloudDocs.remove(dupId);
-          }
-          final localDup = localById[dupId];
-          if (localDup != null) {
-            await NotificationService().cancelForTask(localDup);
-            if (localDup.isInBox) await localDup.delete();
-            localById.remove(dupId);
-            deletedLocally++;
-          }
+          final hadLocal = localById.containsKey(dupId);
+          // Tombstone (не hard delete) и САМО за imported/legacy дубликати.
+          await _tombstoneDup(tasksRef, dupId, localById[dupId],
+              cloudDocs[dupId], localById, cloudDocs, 'PRE-B0 eventId');
+          if (hadLocal && !localById.containsKey(dupId)) deletedLocally++;
         }
         if (!localById.containsKey(survivor) &&
             cloudDocs.containsKey(survivor)) {
@@ -258,11 +255,13 @@ class SyncService {
         sigGroups.putIfAbsent(sig, () => <String>{}).add(id);
       }
       for (final t in localById.values) {
+        if (t.isCompleted) continue; // завършена задача НЕ е дедуп-магнит
         addSig(_sigTask(t), t.id!);
       }
       for (final e in cloudDocs.entries) {
         if (e.value['deleted'] == true) continue;
         if (localById.containsKey(e.key)) continue; // същата задача (по id)
+        if (e.value['isCompleted'] == true) continue; // завършена → не магнит
         addSig(_sigData(e.value), e.key);
       }
       for (final group in sigGroups.values) {
@@ -270,21 +269,12 @@ class SyncService {
         final ids = group.toList()..sort();
         final survivor = ids.first;
         for (final dupId in ids.skip(1)) {
-          // ХАРД-трий облачния дубъл. Дедупликацията е детерминирана
-          // (survivor = min id из обединението) → всички устройства махат
-          // СЪЩИТЕ дубли и пазят СЪЩИЯ survivor → няма възкръсване. Без
-          // tombstone маркери → облакът остава чист (важно при хиляди дубли).
-          if (cloudDocs.containsKey(dupId)) {
-            await tasksRef.doc(dupId).delete();
-            cloudDocs.remove(dupId);
-          }
-          final localDup = localById[dupId];
-          if (localDup != null) {
-            await NotificationService().cancelForTask(localDup);
-            if (localDup.isInBox) await localDup.delete();
-            localById.remove(dupId);
-            deletedLocally++;
-          }
+          // Tombstone (възстановимо), и САМО за imported/legacy дубликати —
+          // потребителска задача НИКОГА не се трие от съдържателния дедуп.
+          final hadLocal = localById.containsKey(dupId);
+          await _tombstoneDup(tasksRef, dupId, localById[dupId],
+              cloudDocs[dupId], localById, cloudDocs, 'PRE-B signature');
+          if (hadLocal && !localById.containsKey(dupId)) deletedLocally++;
         }
         // Ако оцелелият е само в облака → свали го веднъж (запазва cloud id).
         if (!localById.containsKey(survivor) &&
@@ -497,6 +487,80 @@ class SyncService {
       '${title.trim().toLowerCase()}|${due.millisecondsSinceEpoch}|$categoryId';
 
   String _sigTask(Task t) => _sig(t.title, t.dueDate, t.categoryId);
+
+  // ── Защита на потребителски данни при дедуп ──────────────────────────────
+  // Съдържателният дедуп беше добавен (v1.0.37) САМО за legacy „огледални"
+  // документи и повторни календарни импорти. НИКОГА не бива да трие задача,
+  // която потребителят е създал на устройството си. Removable = само imported
+  // или legacy (без наш `updatedAtMillis` стамп).
+  bool _taskRemovableByDedup(Task t) =>
+      t.importedFromCalendar == true || t.updatedAt == null;
+  bool _dataRemovableByDedup(Map<String, dynamic> d) =>
+      d['importedFromCalendar'] == true || d['updatedAtMillis'] == null;
+
+  /// Чистата дедуп-решаваща логика (спецификация + тестов шев). Групира по ключ
+  /// (сигнатура ИЛИ googleCalendarEventId), като: (1) ЗАВЪРШЕНИТЕ не участват
+  /// (не са магнит); (2) survivor = min id; (3) жертва е non-survivor САМО ако
+  /// е removable (imported/legacy) — потребителските задачи никога не падат.
+  /// Двата дедуп цикъла в mergeWithCloud прилагат тези правила 1:1.
+  @visibleForTesting
+  static List<String> dedupVictimIds(
+      List<({String id, String? key, bool completed, bool removable})> entries) {
+    final groups = <String, List<({String id, bool removable})>>{};
+    for (final e in entries) {
+      if (e.completed) continue;
+      if (e.key == null || e.key!.isEmpty) continue;
+      groups.putIfAbsent(e.key!, () => []).add((id: e.id, removable: e.removable));
+    }
+    final victims = <String>[];
+    for (final g in groups.values) {
+      if (g.length < 2) continue;
+      final survivor = (g.map((x) => x.id).toList()..sort()).first;
+      for (final x in g) {
+        if (x.id != survivor && x.removable) victims.add(x.id);
+      }
+    }
+    return victims;
+  }
+
+  /// Брояч + лог на всеки дедуп-tombstone (за да броим занапред; hard delete
+  /// вече не се прави → загубите са възстановими).
+  Future<void> _logDedupTombstone(String id, String reason) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final n = (prefs.getInt('dedup_tombstone_count') ?? 0) + 1;
+      await prefs.setInt('dedup_tombstone_count', n);
+    } catch (_) {}
+    debugPrint('DEDUP tombstone id=$id reason=$reason');
+  }
+
+  /// Tombstone (НЕ hard delete) на дубликат — облак + локално — само ако е
+  /// removable (imported/legacy). Потребителските задачи се пазят.
+  Future<void> _tombstoneDup(
+      CollectionReference<Map<String, dynamic>> ref,
+      String dupId,
+      Task? localDup,
+      Map<String, dynamic>? cloudDup,
+      Map<String, Task> localById,
+      Map<String, Map<String, dynamic>> cloudDocs,
+      String reason) async {
+    final bool removable = localDup != null
+        ? _taskRemovableByDedup(localDup)
+        : (cloudDup != null ? _dataRemovableByDedup(cloudDup) : false);
+    if (!removable) return; // потребителска задача → НЕ я пипай
+    final at = DateTime.now();
+    if (cloudDocs.containsKey(dupId)) {
+      await _writeCloudTombstone(ref, dupId, at);
+      cloudDocs.remove(dupId);
+    }
+    if (localDup != null) {
+      await NotificationService().cancelForTask(localDup);
+      await _tomb.recordId(dupId, at: at);
+      if (localDup.isInBox) await localDup.delete();
+      localById.remove(dupId);
+    }
+    await _logDedupTombstone(dupId, reason);
+  }
 
   String? _sigData(Map<String, dynamic> d) {
     final title = d['title'] as String?;
