@@ -167,6 +167,9 @@ class _TaskEditorSheetState extends State<TaskEditorSheet>
   late String tempNotes;
   NlpResult? nlpSuggestion;
   bool aiLoading = false;
+  // Щом потребителят избере дата РЪЧНО (или редактира съществуваща задача), NLP в
+  // реално време спира да презаписва ДАТАТА (часът пак може да се допълни).
+  bool _dateManuallyPicked = false;
 
   @override
   void initState() {
@@ -180,6 +183,9 @@ class _TaskEditorSheetState extends State<TaskEditorSheet>
     _titleController = TextEditingController(
         text: existing?.title ?? widget.initialTitle ?? '');
     tempDueDate = existing?.dueDate ?? DateTime.now();
+    // Съществуваща задача вече има избрана дата → не я презаписвай от NLP при
+    // редакция на заглавието. Нова задача: датата е авто-поставяема.
+    _dateManuallyPicked = existing != null;
     if (existing != null &&
         (existing.dueDate.hour != 0 || existing.dueDate.minute != 0)) {
       tempTime = TimeOfDay.fromDateTime(existing.dueDate);
@@ -432,7 +438,11 @@ class _TaskEditorSheetState extends State<TaskEditorSheet>
               }
               await AiUsageService.instance.recordUse();
               setSheetState(() {
-                _titleController.text = r.title;
+                // AI може само да МАХА разпознати дата/час изрази от заглавието —
+                // никога да добавя/перифразира. Затова чистим ЛОКАЛНО, вместо да
+                // вярваме на AI-върнатото заглавие (worker-ът понякога разширява).
+                _titleController.text =
+                    NaturalLanguageParser.cleanTitle(text, langCode);
                 tempPriority = r.priority;
                 widget.onPriorityDefaultChanged(r.priority);
                 if (r.recurring != null) {
@@ -449,18 +459,15 @@ class _TaskEditorSheetState extends State<TaskEditorSheet>
                     widget.onCategoryDefaultChanged(matched.first.id);
                   }
                 }
-                // AI time fallback — само ако NLP не е хванал час
-                if (tempTime == null && r.time != null) {
-                  final parts = r.time!.split(':');
-                  if (parts.length == 2) {
-                    final h = int.tryParse(parts[0]);
-                    final m = int.tryParse(parts[1]);
-                    if (h != null && m != null && h <= 23 && m <= 59) {
-                      tempTime = TimeOfDay(hour: h, minute: m);
-                      tempDueDate = DateTime(
-                        tempDueDate.year, tempDueDate.month, tempDueDate.day, h, m,
-                      );
-                    }
+                // Час/дата за AI пътя идват от ЛОКАЛНИЯ парсер (точен за am/pm +
+                // „никога минало"), НЕ от AI-то — само ако NLP не е хванал час и
+                // датата не е избрана ръчно.
+                if (tempTime == null && !_dateManuallyPicked) {
+                  final nlp = NaturalLanguageParser.parse(text, langCode);
+                  if (nlp?.time != null) {
+                    tempTime = nlp!.time;
+                    tempDueDate = DateTime(nlp.date.year, nlp.date.month,
+                        nlp.date.day, nlp.time!.hour, nlp.time!.minute);
                   }
                 }
               });
@@ -686,7 +693,9 @@ class _TaskEditorSheetState extends State<TaskEditorSheet>
                                           nlpSuggestion = nlp;
                                           if (nlp != null) {
                                             tempDueDate = DateTime(
-                                              nlp.date.year, nlp.date.month, nlp.date.day,
+                                              _dateManuallyPicked ? tempDueDate.year : nlp.date.year,
+                                              _dateManuallyPicked ? tempDueDate.month : nlp.date.month,
+                                              _dateManuallyPicked ? tempDueDate.day : nlp.date.day,
                                               nlp.time?.hour ?? tempDueDate.hour,
                                               nlp.time?.minute ?? tempDueDate.minute,
                                             );
@@ -736,7 +745,9 @@ class _TaskEditorSheetState extends State<TaskEditorSheet>
                                 nlpSuggestion = result;
                                 if (result != null) {
                                   tempDueDate = DateTime(
-                                    result.date.year, result.date.month, result.date.day,
+                                    _dateManuallyPicked ? tempDueDate.year : result.date.year,
+                                    _dateManuallyPicked ? tempDueDate.month : result.date.month,
+                                    _dateManuallyPicked ? tempDueDate.day : result.date.day,
                                     result.time?.hour ?? tempDueDate.hour,
                                     result.time?.minute ?? tempDueDate.minute,
                                   );
@@ -1049,6 +1060,7 @@ class _TaskEditorSheetState extends State<TaskEditorSheet>
                                     final picked = await pickTaskDate(innerContext, tempDueDate);
                                     if (picked != null) {
                                       setSheetState(() {
+                                        _dateManuallyPicked = true;
                                         tempDueDate = DateTime(
                                           picked.year,
                                           picked.month,
@@ -1506,8 +1518,15 @@ class _TaskEditorSheetState extends State<TaskEditorSheet>
                       height: 54,
                       child: ElevatedButton(
                         onPressed: () async {
-                          final titleText = _titleController.text.trim();
-                          if (titleText.isEmpty) return;
+                          final rawTitle = _titleController.text.trim();
+                          if (rawTitle.isEmpty) return;
+                          // Изчисти разпознатия дата/час израз от заглавието при
+                          // запис (само ако парсерът го е разпознал) → „Среща в 5"
+                          // се записва като „Среща".
+                          final titleText =
+                              NaturalLanguageParser.parse(rawTitle, langCode) != null
+                                  ? NaturalLanguageParser.cleanTitle(rawTitle, langCode)
+                                  : rawTitle;
 
                           final dueDateToSave = DateTime(
                             tempDueDate.year,

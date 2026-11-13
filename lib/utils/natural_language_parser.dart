@@ -9,15 +9,18 @@ class NlpResult {
 }
 
 class NaturalLanguageParser {
-  static NlpResult? parse(String text, String lang) {
+  static NlpResult? parse(String text, String lang, {DateTime? now}) {
     final lower = text.toLowerCase().trim();
     if (lower.length < 3) return null;
 
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final nowDt = now ?? DateTime.now();
+    final today = DateTime(nowDt.year, nowDt.month, nowDt.day);
 
-    // ── Time detection (15:30 / 5pm / 15ч / 9h / „в 9" / „at 9") ──
-    final detectedTime = _detectTime(lower);
+    // ── Time detection (15:30 / 5pm / 15ч / 9h / „в 9" / „at 9" / „7 o'clock") ──
+    // `ambiguousHour` = гол 12-часов час без am/pm (подлежи на правилото 07:00/19:00).
+    final tm = _detectTime(lower);
+    final detectedTime = tm?.$1;
+    final ambiguousHour = tm?.$2 ?? false;
 
     // ── Keyword maps ──
 
@@ -71,6 +74,27 @@ class NaturalLanguageParser {
       return NlpResult(date: d, time: detectedTime, label: _label(d, lang));
     }
 
+    // ── Изрична дата ВИНАГИ печели пред ден от седмицата ──
+    // „Black Friday on 27.11" → 27.11, НЕ „следващия петък".
+    final abs = _detectAbsoluteDate(lower, today);
+    if (abs != null) {
+      return NlpResult(date: abs, time: detectedTime, label: _label(abs, lang));
+    }
+
+    // ── Relative: „след N дни/седмици" / „in N days/weeks" (всички езици) ──
+    final rel = _detectRelative(lower, today);
+    if (rel != null) {
+      return NlpResult(date: rel, time: detectedTime, label: _label(rel, lang));
+    }
+
+    // ── Именувани събития за пазаруване (Black Friday / Cyber Monday) ──
+    // Имената им съдържат ден от седмицата („Friday"/„Monday"), който НЕ бива да се
+    // чете като обикновен ден. Смятаме реалната дата, после сканираме текста БЕЗ името
+    // на събитието: ако потребителят е написал ИЗРИЧЕН ден → той печели (каквото е
+    // въвел); иначе → датата на събитието.
+    final ev = _detectEvent(lower, today);
+    final weekdayScan = ev?.cleaned ?? lower;
+
     // Day names → next occurrence (weekday: Mon=1 … Sun=7)
     const dayMap = <String, int>{
       // Monday
@@ -104,7 +128,7 @@ class NaturalLanguageParser {
     };
 
     for (final entry in dayMap.entries) {
-      if (lower.contains(entry.key)) {
+      if (weekdayScan.contains(entry.key)) {
         int ahead = entry.value - today.weekday;
         if (ahead <= 0) ahead += 7;
         final d = today.add(Duration(days: ahead));
@@ -112,28 +136,132 @@ class NaturalLanguageParser {
       }
     }
 
-    // ── Relative: „след N дни/седмици" / „in N days/weeks" (всички езици) ──
-    final rel = _detectRelative(lower, today);
-    if (rel != null) {
-      return NlpResult(date: rel, time: detectedTime, label: _label(rel, lang));
+    // Няма изричен ден от седмицата → използвай датата на събитието, ако има.
+    if (ev != null) {
+      return NlpResult(date: ev.date, time: detectedTime, label: _label(ev.date, lang));
     }
 
-    // ── Absolute date: „12 декември", „12 дек", „Dec 12", „12.12", „3/1" ──
-    final abs = _detectAbsoluteDate(lower, today);
-    if (abs != null) {
-      return NlpResult(date: abs, time: detectedTime, label: _label(abs, lang));
-    }
-
-    // Time only → today
+    // Time only → today. Гол 12-часов час без am/pm → виж _resolveAmbiguousHour
+    // (1–6 → следобед, 7–11 → първо предстоящо сутрин/вечер, 12 → обед). Точен час
+    // (am/pm, 15:30, 17ч) → днес, но НИКОГА в миналото → ако е минал, за утре.
     if (detectedTime != null) {
-      return NlpResult(date: today, time: detectedTime, label: _label(today, lang));
+      final DateTime d;
+      if (ambiguousHour) {
+        d = _resolveAmbiguousHour(detectedTime.hour, nowDt);
+      } else {
+        final todayAt = DateTime(today.year, today.month, today.day,
+            detectedTime.hour, detectedTime.minute);
+        d = todayAt.isAfter(nowDt) ? todayAt : todayAt.add(const Duration(days: 1));
+      }
+      final dateOnly = DateTime(d.year, d.month, d.day);
+      return NlpResult(
+        date: dateOnly,
+        time: TimeOfDay(hour: d.hour, minute: d.minute),
+        label: _label(dateOnly, lang),
+      );
     }
 
     return null;
   }
 
+  /// За гол 12-часов час (1–12) без am/pm → първия момент СТРОГО след [now]:
+  ///  • 1–6  → само следобед/вечер H+12 (13:00–18:00); днес ако не е минал, иначе утре.
+  ///  • 7–11 → първото предстоящо от сутрин H:00 и вечер (H+12):00.
+  ///  • 12   → 12:00 (на обед); днес ако не е минал, иначе утре.
+  static DateTime _resolveAmbiguousHour(int h, DateTime now) {
+    final List<int> hours;
+    if (h >= 1 && h <= 6) {
+      hours = [h + 12];
+    } else if (h >= 7 && h <= 11) {
+      hours = [h, h + 12];
+    } else if (h == 12) {
+      hours = [12];
+    } else {
+      hours = [h];
+    }
+    final midnight = DateTime(now.year, now.month, now.day);
+    final candidates = <DateTime>[];
+    for (var dayOffset = 0; dayOffset <= 1; dayOffset++) {
+      final base = midnight.add(Duration(days: dayOffset));
+      for (final hh in hours) {
+        candidates.add(DateTime(base.year, base.month, base.day, hh));
+      }
+    }
+    candidates.sort();
+    for (final c in candidates) {
+      if (c.isAfter(now)) return c;
+    }
+    return candidates.last; // не би трябвало да се стигне
+  }
+
+  // Ключови думи за ден от седмицата (ползват се за изчистване на заглавие).
+  static const List<String> _weekdayKeys = [
+    'понеделник','monday','montag','lundi','lunedì','δευτέρα','lunes','segunda','понедельник','pazartesi',
+    'вторник','tuesday','dienstag','mardi','martedì','τρίτη','martes','terça','salı',
+    'сряда','wednesday','mittwoch','mercredi','mercoledì','τετάρτη','miércoles','quarta','среда','çarşamba',
+    'четвъртък','thursday','donnerstag','jeudi','giovedì','πέμπτη','jueves','quinta','четверг','perşembe',
+    'петък','friday','freitag','vendredi','venerdì','παρασκευή','viernes','sexta','пятница','cuma',
+    'събота','saturday','samstag','samedi','sabato','σάββατο','sábado','суббота','cumartesi',
+    'неделя','sunday','sonntag','dimanche','domenica','κυριακή','domingo','воскресенье','pazar',
+  ];
+
+  /// Маха разпознатите ДАТА/ЧАС изрази (вкл. водещ предлог „в"/„at"/„on") от
+  /// заглавието и връща само чистия текст (напр. „Среща в 5 am" → „Среща").
+  /// НИКОГА не добавя и не перифразира — само премахва. Ако няма какво да махне
+  /// (или остатъкът е празен), връща оригинала (trim).
+  static String cleanTitle(String text, String lang) {
+    var s = ' ${text.trim()} ';
+    void rm(String pattern) {
+      s = s.replaceAll(RegExp(pattern, caseSensitive: false, unicode: true), ' ');
+    }
+
+    // 1) Именувани събития.
+    rm(r'black friday|черен петък|cyber monday|кибер понеделник');
+
+    // 2) Относителни фрази (вкл. водещ предлог „в"/„на"/„on").
+    const relPhrases = [
+      'day after tomorrow','pasado mañana','depois de amanhã','après-demain','послезавтра','öbür gün','übermorgen','dopodomani','μεθαύριο','вдругиден',
+      'следващата седмица','next week','nächste woche','semaine prochaine','settimana prossima','επόμενη εβδομάδα','próxima semana','semana que vem','следующей неделе','gelecek hafta',
+      'днес','today','heute',"aujourd'hui",'oggi','σήμερα','hoy','hoje','сегодня','bugün','vandaag','сьогодні',
+      'утре','tomorrow','morgen','demain','domani','αύριο','mañana','amanhã','завтра','yarın',
+      'уикенд','weekend','wochenende','week-end','fine settimana','σαββατοκύριακο','fin de semana','fim de semana','выходные','hafta sonu',
+    ];
+    for (final w in relPhrases) {
+      rm(r'(?:^|\s)(?:в|на|on)?\s*' + RegExp.escape(w) + r'(?=\s|$)');
+    }
+
+    // 3) Ден от седмицата (с опц. „следващ(ия)"/„next" + предлог „в"/„on").
+    for (final d in _weekdayKeys) {
+      rm(r'(?:^|\s)(?:следващи?я?т?\s+|next\s+|on\s+|в\s+|на\s+)?' + RegExp.escape(d) + r'(?=\s|$)');
+    }
+
+    // 4) „след N дни/седмици" / „in N days/weeks".
+    rm('$_relPrefix\\s+\\d{1,2}\\s*(?:$_dayWords|$_weekWords)');
+    rm(r'\d{1,2}\s*(?:gün|hafta)\s+sonra');
+
+    // 5) Час изрази.
+    rm(r'(?:^|\s)(?:в|на|at|à|às|um|alle|στις)\s+\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?|часа?|ч|h|uhr|saat|o.?clock|сутринта|сутрин|заранта|вечерта|вечер|следобед)?(?=\s|$|[.!?])');
+    rm(r'(?:^|\s)\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?|часа?|ч|uhr|saat|o.?clock|сутринта|сутрин|заранта|вечерта|вечер|следобед)(?=\s|$|[.!?])');
+    rm(r'(?:^|\s)\d{1,2}:\d{2}(?=\s|$)');
+    rm(r'\d{1,2}\s*月\s*(?:\d{1,2}\s*日)?');
+    rm(r'\d{1,2}\s*時');
+
+    // 6) Дати: ден+месец / месец+ден / числови.
+    final alt = _monthAlt();
+    rm(r'(?:^|\s)(?:на|on)?\s*\d{1,2}\s*\.?\s*(?:' + alt + r')(?!\p{L})');
+    rm(r'(?:^|\s)(?:' + alt + r')(?!\p{L})\.?\s+\d{1,2}');
+    rm(r'(?:^|\s)(?:на|on)?\s*\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?(?=\s|$)');
+
+    // 7) Почистване: празни интервали + един увиснал предлог в краищата.
+    s = s.replaceAll(RegExp(r'\s+'), ' ').trim();
+    s = s.replaceAll(RegExp(r'^(?:в|на|at|on)\s+|\s+(?:в|на|at|on)$', caseSensitive: false), '').trim();
+
+    return s.isEmpty ? text.trim() : s;
+  }
+
   // ── Time ─────────────────────────────────────────────────────────────────
-  static TimeOfDay? _detectTime(String lower) {
+  // Връща (час, двусмислен?) — двусмислен = гол 12ч час без am/pm.
+  static (TimeOfDay, bool)? _detectTime(String lower) {
     // 1) 12-hour am/pm: „5pm", „5:30 pm", „12am"
     final ampm = RegExp(r'\b(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)').firstMatch(lower);
     if (ampm != null) {
@@ -143,7 +271,16 @@ class NaturalLanguageParser {
       if (h >= 1 && h <= 12 && m <= 59) {
         if (pm && h != 12) h += 12;
         if (!pm && h == 12) h = 0;
-        return TimeOfDay(hour: h, minute: m);
+        return (TimeOfDay(hour: h, minute: m), false); // am/pm → еднозначен
+      }
+    }
+    // 1b) „7 o'clock" / „at 7 o'clock" (английски, без am/pm → буквален час).
+    //     `o.?clock` поема апострофа (прав ' или къдрав ') или липсата му.
+    final oclock = RegExp(r"\b(\d{1,2})\s*o.?clock\b").firstMatch(lower);
+    if (oclock != null) {
+      final h = int.tryParse(oclock.group(1)!);
+      if (h != null && h <= 23) {
+        return (TimeOfDay(hour: h, minute: 0), h >= 1 && h <= 12);
       }
     }
     // 2) 24-hour colon: „15:30"
@@ -152,7 +289,7 @@ class NaturalLanguageParser {
       final h = int.tryParse(colon.group(1)!);
       final m = int.tryParse(colon.group(2)!);
       if (h != null && m != null && h <= 23 && m <= 59) {
-        return TimeOfDay(hour: h, minute: m);
+        return (TimeOfDay(hour: h, minute: m), false); // colon 24ч → еднозначен
       }
     }
     // 3) hour + unit suffix: „17ч", „9 часа", „9h", „9 uhr", „9時".
@@ -160,7 +297,22 @@ class NaturalLanguageParser {
     final short = RegExp(r'\b(\d{1,2})\s*(?:часа?|ч|uhr|h|saat|時)(?!\p{L})', unicode: true).firstMatch(lower);
     if (short != null) {
       final h = int.tryParse(short.group(1)!);
-      if (h != null && h <= 23) return TimeOfDay(hour: h, minute: 0);
+      if (h != null && h <= 23) return (TimeOfDay(hour: h, minute: 0), false);
+    }
+    // 3b) „5 сутринта" / „5 вечерта" / „5 следобед" (bg част от деня → am/pm, точно).
+    final partOfDay = RegExp(
+      r'\b(\d{1,2})\s*(сутринта|сутрин|заранта|вечерта|вечер|следобед|подиробед)(?!\p{L})',
+      unicode: true,
+    ).firstMatch(lower);
+    if (partOfDay != null) {
+      var h = int.tryParse(partOfDay.group(1)!);
+      final word = partOfDay.group(2)!;
+      if (h != null && h >= 1 && h <= 12) {
+        final pm = word.startsWith('веч') || word.startsWith('след') || word.startsWith('поди');
+        if (pm && h != 12) h += 12;
+        if (!pm && h == 12) h = 0;
+        return (TimeOfDay(hour: h, minute: 0), false);
+      }
     }
     // 4) bare hour after preposition — ТОЛКОВА в края на текста: „…в 9", „…at 9".
     //    Иначе „в 9 клас"/„в 2 реда" биха станали часове. `\b` се избягва пред
@@ -170,7 +322,9 @@ class NaturalLanguageParser {
     ).firstMatch(lower);
     if (prep != null) {
       final h = int.tryParse(prep.group(1)!);
-      if (h != null && h <= 23) return TimeOfDay(hour: h, minute: 0);
+      if (h != null && h <= 23) {
+        return (TimeOfDay(hour: h, minute: 0), h >= 1 && h <= 12);
+      }
     }
     return null;
   }
@@ -212,6 +366,54 @@ class NaturalLanguageParser {
     return null;
   }
 
+  // ── Именувани събития (Black Friday / Cyber Monday) ────────────────────────
+  // Английското име важи за ВСИЧКИ езици (ползва се така); + локализирани варианти.
+  static const _blackFridayNames = <String>['black friday', 'черен петък'];
+  static const _cyberMondayNames = <String>['cyber monday', 'кибер понеделник'];
+
+  static _EventMatch? _detectEvent(String lower, DateTime today) {
+    for (final name in _blackFridayNames) {
+      if (lower.contains(name)) {
+        return _EventMatch(_blackFridayDate(today), lower.replaceAll(name, ' '));
+      }
+    }
+    for (final name in _cyberMondayNames) {
+      if (lower.contains(name)) {
+        return _EventMatch(_cyberMondayDate(today), lower.replaceAll(name, ' '));
+      }
+    }
+    return null;
+  }
+
+  /// Black Friday = петъкът след 4-ия четвъртък на ноември (US Thanksgiving + 1).
+  static DateTime _blackFridayOfYear(int year) {
+    var d = DateTime(year, 11, 1);
+    var thursdays = 0;
+    while (true) {
+      if (d.weekday == DateTime.thursday) {
+        thursdays++;
+        if (thursdays == 4) break;
+      }
+      d = d.add(const Duration(days: 1));
+    }
+    return d.add(const Duration(days: 1)); // петъкът след 4-ия четвъртък
+  }
+
+  static DateTime _blackFridayDate(DateTime today) {
+    var d = _blackFridayOfYear(today.year);
+    if (d.isBefore(today)) d = _blackFridayOfYear(today.year + 1);
+    return d;
+  }
+
+  /// Cyber Monday = понеделникът след Black Friday (Black Friday + 3 дни).
+  static DateTime _cyberMondayDate(DateTime today) {
+    var d = _blackFridayOfYear(today.year).add(const Duration(days: 3));
+    if (d.isBefore(today)) {
+      d = _blackFridayOfYear(today.year + 1).add(const Duration(days: 3));
+    }
+    return d;
+  }
+
   // ── Absolute date (day + month name, or numeric) ───────────────────────────
   static DateTime? _detectAbsoluteDate(String lower, DateTime today) {
     // 1) Japanese: „12月12日" / „12月"
@@ -226,10 +428,13 @@ class NaturalLanguageParser {
     }
 
     // 2) Month-name forms (both orders) for the current language set.
+    //    `(?!\p{L})` след името пази месец да НЕ съвпадне като част от по-дълга дума
+    //    („mai" в „Main St", „май" в „майка", „дек" в „декада").
     final alt = _monthAlt();
     if (alt.isNotEmpty) {
       // day + month: „12 декември", „12 дек.", „3 януари"
-      final dm = RegExp('(\\d{1,2})\\s*\\.?\\s*($alt)').firstMatch(lower);
+      final dm = RegExp('(\\d{1,2})\\s*\\.?\\s*($alt)(?!\\p{L})', unicode: true)
+          .firstMatch(lower);
       if (dm != null) {
         final day = int.tryParse(dm.group(1)!);
         final mo = _monthOf(dm.group(2)!);
@@ -239,7 +444,8 @@ class NaturalLanguageParser {
         }
       }
       // month + day: „Dec 12", „декември 12"
-      final md = RegExp('($alt)\\.?\\s+(\\d{1,2})').firstMatch(lower);
+      final md = RegExp('($alt)(?!\\p{L})\\.?\\s+(\\d{1,2})', unicode: true)
+          .firstMatch(lower);
       if (md != null) {
         final mo = _monthOf(md.group(1)!);
         final day = int.tryParse(md.group(2)!);
@@ -407,4 +613,12 @@ class NaturalLanguageParser {
     final mo = (months[lang] ?? months['en']!)[date.month - 1];
     return '$wd, ${date.day} $mo';
   }
+}
+
+/// Съвпадение на именувано събитие: реалната дата + текстът с ПРЕМАХНАТО име на
+/// събитието (за да не се чете вграденият ден от седмицата като обикновен ден).
+class _EventMatch {
+  final DateTime date;
+  final String cleaned;
+  const _EventMatch(this.date, this.cleaned);
 }
