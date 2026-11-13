@@ -50,6 +50,24 @@ flutter build appbundle --release
 без този диалог новите функции остават неоткрити.
 
 ## Current Version
+**v1.0.73+84 (2026-11-13) — ★Android ЖИВА в Google Play Production 100% (vc84)★. Парсер на дати/часове.**
+Качен директно на Production (`tools/play_upload.py --track production --status completed`, vc84; Play API потвърди
+production=1.0.73/vc84/completed/100%, заменя 1.0.72/vc83). Чист cross-platform Dart — промени само в
+`lib/utils/natural_language_parser.dart`, `lib/screens/task/editor/task_editor_sheet.dart`, тестове. Клон
+`fix/parser-dates` → merge в `main` (no-ff `746b3dc`). **Какво:** (1) ★изрична дата ВИНАГИ бие ден от седмицата★
+(коренът: денят се проверяваше на `natural_language_parser.dart:106–113` ПРЕДИ изричната дата → „Black Friday on
+27.11" даваше „следващия петък"); (2) **именувани събития** Black Friday (петък след 4-ия четвъртък на ноември) +
+Cyber Monday (понеделника след него; минала дата → догодина; изричен ден бие събитието); (3) **час без am/pm**:
+1–6→следобед (13–18ч), 7–11→първо предстоящо сутрин/вечер, 12→обед, „5 сутринта/вечерта" (bg); **am/pm точно**;
+(4) ★**никога час в миналото** → следващ ден★ (всички time-only пътища); (5) „7 o'clock"; (6) ★**изчистване на
+заглавието**★ — разпознатият дата/час израз (вкл. предлог „в"/„at") се маха при запис („Среща в 5" → „Среща"),
+нов `NaturalLanguageParser.cleanTitle`; (7) ★**AI Parse вече само МАХА, не добавя/перифразира**★ — заглавието се
+чисти ЛОКАЛНО (не ползва worker title, който разширяваше), часът идва от локалния парсер (am/pm + никога минало);
+(8) защита думи-месеци („Main St"↛„May 9"). whats_new `_build`=84 (3 точки, BG+EN; другите падат на EN),
+`release_notes/1.0.73.md`. **PC (11-13):** `flutter test` **180 ✅** (68 parser), analyze чист (парсер 0);
+`flutter clean`→AAB **60.3MB** (merged manifest: USE_FULL_SCREEN_INTENT + targetSdk 36). Play notes BG(265)/EN(157).
+Тестван на Note 9 (install -r, старт без краш; потребителят потвърди „Ресторант в 7" → „Ресторант"). **★iOS 1.0.73(84)
+ОСТАВА за Mac** (чист Dart → `git pull`→`pod install`→archive→App Store review, AFTER_APPROVAL).★ ПРЕДИШНО:
 **v1.0.72+83 (2026-11-13) — ★Android ЖИВА в Google Play Production 100% (vc83)★. HOTFIX: загуба на данни при sync.**
 Качен директно на Production чрез `tools/play_upload.py --track production --status completed` (vc83; Play API потвърди
 production=1.0.72/vc83/completed/100%, заменя 1.0.71/vc82). Единствена код промяна = `lib/services/sync_service.dart`
@@ -243,6 +261,23 @@ v1.0.46+54 — Пълен именен dataset (~769 имена) + секция 
 
 ## Recent Work
 Keep this current — it is the shared cross-machine context (see Cross-Machine Workflow). Newest first.
+- **★v1.0.73+84 — парсер на дати/часове → ★ЖИВА в Play Production 100% (vc84)★ + merge в main (PC, 2026-11-13)★:**
+  Иво докладва бъгове при NLP парсването на дати/часове в редактора (итеративно, тестван на Note 9). **Корен (намерен):**
+  в `natural_language_parser.dart` денят от седмицата се проверяваше ПРЕДИ изричната дата → „Black Friday on 27.11"
+  даваше „следващия петък". **Промени (клон `fix/parser-dates`, 2 commit-а `e77a414`+`355b6ce`):** (1) изрична дата +
+  относително „след N" преместени ПРЕДИ деня от седмицата; (2) `_detectEvent` — Black Friday/Cyber Monday (+bg имена),
+  с изрязване на името преди сканиране за ден (изричен ден бие събитието); (3) `_resolveAmbiguousHour` — 1–6→следобед,
+  7–11→първо предстоящо, 12→обед; (4) time-only никога в миналото → следващ ден; (5) „o'clock"; (6) part-of-day bg
+  „5 сутринта/вечерта/следобед"; (7) нов публичен `cleanTitle(text, lang)` маха разпознатия дата/час израз (вкл.
+  предлог) от заглавието; (8) guard `(?!\p{L})` + `unicode:true` на месеците („Main"↛„May 9"). **UI
+  (`task_editor_sheet.dart`):** Add Task чисти заглавието при запис; `runAiParse` вече НЕ ползва worker-овото заглавие
+  (чисти локално) и взема часа от локалния парсер (am/pm + никога минало). **★Произход на пренесеното „Среща" (за DEVLOG):
+  AI worker пренаписване — `AiService.parseTask` НЕ праща история и всеки редактор е нов State (`initialTitle=null`),
+  значи „Среща в ресторант в 7" идва от worker-а, който разшири `title`; поправено чрез игнориране на worker title +
+  локален `cleanTitle`.★** 68 parser / 180 общо теста ✅, analyze чист. `flutter clean`→AAB 60.3MB (manifest OK), качен
+  **Production completed vc84 100%** (edit 15149133453880974828). whats_new `_build`=84 (BG+EN, другите→EN). Note 9:
+  install -r (същ подпис като предните тестови билдове), старт без краш; Иво потвърди „Ресторант в 7"→„Ресторант".
+  ⏳ОСТАВА за Mac: iOS 1.0.73(84) → App Store review (AFTER_APPROVAL). Клон `fix/parser-dates` push-нат.
 - **★v1.0.72+83 — HOTFIX sync data-loss → ★ЖИВА в Play Production 100% (vc83)★ + merge в main (PC, 2026-11-13)★:**
   Иво поиска качване на вече готовия hotfix (клон `hotfix/1.0.72` @ `9e313af`, същият код като iOS build 83, тестван
   на iPhone с основния акаунт → новата задача остава). **(1) Верификация:** живата 1.0.71/vc82 в Play е от `7a1e163`

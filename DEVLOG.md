@@ -6,6 +6,23 @@ Pull before you start, push (incl. this file) when you finish. See `CLAUDE.md` �
 
 ---
 
+## 2026-11-13 · PC — 1.0.73+84 парсер на дати/часове → ★Play Production 100% (vc84)★ + merge в main
+**Какво:** поправки в NLP парсера на дати/часове (докладвани итеративно от Иво, тествани на Note 9). Клон
+`fix/parser-dates` (`e77a414`+`355b6ce`) → merge no-ff в `main` (`746b3dc`).
+**Промени:** (1) изрична дата бие ден от седмицата (корен: денят се проверяваше пръв); (2) Black Friday/Cyber Monday
+събития; (3) час без am/pm: 1–6→следобед, 7–11→първо предстоящо, 12→обед; (4) никога час в миналото→следващ ден;
+(5) o'clock; (6) bg „5 сутринта/вечерта"; (7) нов `cleanTitle` маха дата/час израза от заглавието (вкл. предлог);
+(8) guard на месеците („Main"↛„May 9"). UI: Add Task + `runAiParse` чистят заглавието ЛОКАЛНО (AI вече само маха,
+не добавя), часът от локалния парсер.
+**Произход на „Среща" (разследване):** AI worker пренаписване — `AiService.parseTask` не праща история, всеки
+редактор е нов State → „Среща в ресторант в 7" е от worker-ово разширяване на title (поправено: игнорираме worker
+title, чистим локално).
+**Тестове:** 68 parser / 180 общо ✅, analyze чист. AAB 60.3MB (manifest OK), качен Production completed vc84 100%
+(`play_upload.py`, edit 15149133453880974828). whats_new `_build`=84 (BG+EN). Note 9 install -r, старт без краш.
+**ОСТАВА за Mac:** iOS 1.0.73(84) → App Store review (AFTER_APPROVAL; чист Dart → `git pull`→`pod install`→archive).
+
+---
+
 ## 2026-11-13 · PC — HOTFIX 1.0.72+83 (sync data-loss) → ★Play Production 100% (vc83)★ + merge в main
 **Какво:** качен готовия hotfix за загуба на данни при синхронизация, направо на Production. Клон `hotfix/1.0.72`
 @ `9e313af` (= iOS build 83, вече тестван на iPhone с основния акаунт — новата задача остава).
