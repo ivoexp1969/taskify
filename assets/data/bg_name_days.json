@@ -4,7 +4,7 @@
   "source_url": "https://bg.wikipedia.org/wiki/Имен_ден",
   "note": "Movable feasts are offsets in days from Orthodox Easter. Attribution required under CC BY-SA when distributed.",
   "manual_additions": "Contains manual additions beyond the Wikipedia source, cross-checked against the Bulgarian Orthodox church calendar: Кирил + feast on 05-11; Михаил, Ангел on 11-08 (Архангеловден); Станислав, Станислава on 12-27 (Стефановден). Audit 2026-10-28 (vs kik-info.com + imenden.eu, cross-checked bg.wikipedia): added 14 new dates (category A) + names present in BOTH independent sources (category B), excluding spelling variants; 02-28 names (Божидар/Божидара/Дора/Дорина/Доротея/Теодорина) placed on movable Тодоровден (confirmed on kik-info Тодоровден 2027, 20.03.2027); fixed 'Връбан'->'Върбан' on Цветница. Category C/D left unchanged.",
-  "fixed_count": 134,
+  "fixed_count": 135,
   "movable_count": 6
  },
  "fixed": [
@@ -1390,6 +1390,24 @@
    "names": [
     "Матей"
    ]
+  },
+  {
+   "date": "11-23",
+   "names": [
+    "Александър",
+    "Александра",
+    "Александрина",
+    "Александрия",
+    "Алекс",
+    "Алекса",
+    "Алек",
+    "Алеко",
+    "Саша",
+    "Сашо",
+    "Сашка",
+    "Сандра"
+   ],
+   "feast": "Св. Александър Невски"
   },
   {
    "date": "11-24",
